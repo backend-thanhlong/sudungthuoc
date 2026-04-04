@@ -39,3 +39,27 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/src/generated/prisma
+
+# Database backups
+*.sql
+
+# Log files
+*.txt
+_*.txt
+*_logs*.txt
+app_logs.txt
+build-log.txt
+tunnel_logs.txt
+
+# Local deployment docs (không cần thiết trên VPS)
+FINAL_CHECK.md
+FINAL_DEBUG_REPORT.md
+FIX_CLOUDFLARE_502.md
+QUICK_FIX_502.md
+
+# Temp files
+check-app.ts
+implementation_plan.md
+task.md

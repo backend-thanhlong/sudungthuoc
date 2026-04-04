@@ -1,0 +1,139 @@
+import "dotenv/config";
+import { PrismaClient } from "./generated/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+import pg from "pg";
+import bcrypt from "bcryptjs";
+
+const pool = new pg.Pool({
+    connectionString: process.env.DATABASE_URL,
+});
+
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
+
+async function main() {
+    console.log("🌱 Seeding database...");
+
+    // Create Admin user
+    const adminPassword = await bcrypt.hash("admin123", 10);
+    const admin = await prisma.user.upsert({
+        where: { username: "admin" },
+        update: {},
+        create: {
+            username: "admin",
+            passwordHash: adminPassword,
+            role: "ADMIN",
+            facilityName: "Sở Y Tế",
+            isActive: true,
+        },
+    });
+    console.log("✅ Created admin user:", admin.username);
+
+    // Create sample facility users
+    const facilityPassword = await bcrypt.hash("123456", 10);
+
+    const facility1 = await prisma.user.upsert({
+        where: { username: "bvdktinh" },
+        update: {},
+        create: {
+            username: "bvdktinh",
+            passwordHash: facilityPassword,
+            role: "FACILITY",
+            facilityName: "Bệnh viện Đa khoa Tỉnh",
+            facilityCode: "BVDKT",
+            isActive: true,
+        },
+    });
+    console.log("✅ Created facility user:", facility1.username);
+
+    const facility2 = await prisma.user.upsert({
+        where: { username: "ttythuyen" },
+        update: {},
+        create: {
+            username: "ttythuyen",
+            passwordHash: facilityPassword,
+            role: "FACILITY",
+            facilityName: "Trung tâm Y tế Huyện A",
+            facilityCode: "TTYTHA",
+            isActive: true,
+        },
+    });
+    console.log("✅ Created facility user:", facility2.username);
+
+    // Create sample Master Drugs
+    const sampleDrugs = [
+        {
+            maChung: "MC001",
+            maBhyt: "BHYT001",
+            tenThuoc: "Paracetamol 500mg",
+            hoatChat: "Paracetamol",
+            hamLuong: "500mg",
+            soDangKy: "VD-12345-19",
+            quyCach: "Hộp 10 vỉ x 10 viên",
+            donViTinh: "Viên",
+        },
+        {
+            maChung: "MC002",
+            maBhyt: "BHYT002",
+            tenThuoc: "Amoxicillin 500mg",
+            hoatChat: "Amoxicillin",
+            hamLuong: "500mg",
+            soDangKy: "VD-23456-20",
+            quyCach: "Hộp 2 vỉ x 10 viên",
+            donViTinh: "Viên",
+        },
+        {
+            maChung: "MC003",
+            maBhyt: "BHYT003",
+            tenThuoc: "Omeprazol 20mg",
+            hoatChat: "Omeprazole",
+            hamLuong: "20mg",
+            soDangKy: "VD-34567-21",
+            quyCach: "Hộp 3 vỉ x 10 viên",
+            donViTinh: "Viên",
+        },
+        {
+            maChung: "MC004",
+            maBhyt: "BHYT004",
+            tenThuoc: "Metformin 500mg",
+            hoatChat: "Metformin",
+            hamLuong: "500mg",
+            soDangKy: "VD-45678-20",
+            quyCach: "Hộp 5 vỉ x 10 viên",
+            donViTinh: "Viên",
+        },
+        {
+            maChung: "MC005",
+            maBhyt: "BHYT005",
+            tenThuoc: "Amlodipine 5mg",
+            hoatChat: "Amlodipine",
+            hamLuong: "5mg",
+            soDangKy: "VD-56789-21",
+            quyCach: "Hộp 3 vỉ x 10 viên",
+            donViTinh: "Viên",
+        },
+    ];
+
+    for (const drug of sampleDrugs) {
+        await prisma.masterDrug.upsert({
+            where: { maChung: drug.maChung },
+            update: {},
+            create: drug,
+        });
+    }
+    console.log("✅ Created", sampleDrugs.length, "sample master drugs");
+
+    console.log("🎉 Seeding completed!");
+}
+
+main()
+    .then(async () => {
+        await prisma.$disconnect();
+        await pool.end();
+    })
+    .catch(async (e) => {
+        console.error(e);
+        await prisma.$disconnect();
+        await pool.end();
+        process.exit(1);
+    });

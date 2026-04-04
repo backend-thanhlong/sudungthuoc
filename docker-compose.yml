@@ -1,0 +1,62 @@
+
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: sudungthuoc_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: sudungthuoc_db
+    ports:
+      - "5435:5432"  # Using port 5435 to avoid conflict
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - sudungthuoc_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Next.js Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sudungthuoc_app
+    environment:
+      DATABASE_URL: "postgresql://postgres:123456@db:5432/sudungthuoc_db?schema=public"
+      AUTH_SECRET: "your-super-secret-key-change-in-production"
+      AUTH_URL: "https://khoduoc.nvdcantho.com"
+      NODE_ENV: "production"
+    ports:
+      - "3003:3000"  # Using port 3003 to avoid conflict with 3001 and 3002
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - sudungthuoc_network
+    restart: unless-stopped
+
+  # Cloudflare Tunnel
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: sudungthuoc_tunnel
+    command: tunnel --no-autoupdate run
+    environment:
+      - TUNNEL_TOKEN=${TUNNEL_TOKEN}
+    depends_on:
+      - app
+    networks:
+      - sudungthuoc_network
+    restart: unless-stopped
+
+networks:
+  sudungthuoc_network:
+    driver: bridge
+
+volumes:
+  postgres_data:

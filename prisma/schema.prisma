@@ -1,0 +1,375 @@
+// Prisma schema for Drug Management System
+generator client {
+  provider      = "prisma-client-js"
+  output        = "./generated/client"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Users: Admin (Sở Y tế) và Facility (Cơ sở)
+model User {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String   @map("password_hash")
+  role         Role     @default(FACILITY)
+  facilityName String?  @map("facility_name")
+  facilityCode String?  @unique @map("facility_code")
+  isActive     Boolean  @default(true) @map("is_active")
+  
+  // Thông tin thêm cho cơ sở
+  autonomyGroup String? @map("autonomy_group")
+  facilityType  String? @map("facility_type")
+  contactPerson String? @map("contact_person")
+  phoneNumber   String? @map("phone_number")
+  address       String? @map("address")
+
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  drugMaps FacilityDrugMap[]
+  reports  InventoryReport[]
+  keHoachLCNTs KeHoachLCNT[]
+  notifications Notification[]
+  activityLogs  ActivityLog[]
+
+  @@map("users")
+}
+
+enum Role {
+  ADMIN
+  FACILITY
+}
+
+// MasterDrugs: Danh mục dùng chung
+model MasterDrug {
+  id        String   @id @default(cuid())
+  maChung   String   @unique @map("ma_chung")
+  maBhyt    String?  @map("ma_bhyt")
+  tenThuoc  String   @map("ten_thuoc")
+  hoatChat  String?  @map("hoat_chat")
+  hamLuong             String?  @map("ham_luong")
+  dangBaoChe           String?  @map("dang_bao_che")
+  soDangKy             String?  @map("so_dang_ky")
+  quyCach              String?  @map("quy_cach")
+  donViTinh            String?  @map("don_vi_tinh")
+
+  tieuChuan            String?  @map("tieu_chuan")
+  tuoiTho              String?  @map("tuoi_tho")
+  duongDung            String?  @map("duong_dung")
+  nguonGoc             String?  @map("nguon_goc")
+  
+  congTySanXuat        String?  @map("cong_ty_san_xuat")
+  nuocSanXuat          String?  @map("nuoc_san_xuat")
+  diaChiSanXuat        String?  @map("dia_chi_san_xuat")
+  
+  congTyDangKy         String?  @map("cong_ty_dang_ky")
+  nuocDangKy           String?  @map("nuoc_dang_ky")
+  diaChiDangKy         String?  @map("dia_chi_dang_ky")
+  
+  nhomThuoc            String?  @map("nhom_thuoc")
+  isKeDon              String?  @map("is_ke_don")
+  kiemSoatDacBiet      String?  @map("kiem_soat_dac_biet")
+  isTrongNuoc          String?  @map("is_trong_nuoc")
+
+  isActive             Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  drugMaps FacilityDrugMap[]
+
+  @@map("master_drugs")
+}
+
+// FacilityDrugMap: Ánh xạ thuốc cơ sở -> danh mục chung
+model FacilityDrugMap {
+  id         String @id @default(cuid())
+  facilityId String @map("facility_id")
+  facility   User   @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+
+  maNoiBo        String  @map("ma_noi_bo")
+  tenThuocNoiBo  String  @map("ten_thuoc_noi_bo")
+  hoatChatNoiBo  String? @map("hoat_chat_noi_bo")
+  soDangKyNoiBo  String? @map("so_dang_ky_noi_bo")
+  donViTinhNoiBo String? @map("don_vi_tinh_noi_bo")
+
+  masterDrugId String?     @map("master_drug_id")
+  masterDrug   MasterDrug? @relation(fields: [masterDrugId], references: [id])
+
+  status         MappingStatus @default(PENDING_MAPPING)
+  adminNote      String?       @map("admin_note")
+  isOutOfCatalog Boolean       @default(false) @map("is_out_of_catalog")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  reports InventoryReport[]
+
+  @@unique([facilityId, maNoiBo])
+  @@map("facility_drug_maps")
+}
+
+enum MappingStatus {
+  PENDING_MAPPING
+  AUTO_MAPPED
+  WAITING_APPROVAL
+  APPROVED
+  REJECTED
+}
+
+// InventoryReport: Báo cáo tồn kho hàng tháng
+model InventoryReport {
+  id         String @id @default(cuid())
+  facilityId String @map("facility_id")
+  facility   User   @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+
+  mapId   String          @map("map_id")
+  drugMap FacilityDrugMap @relation(fields: [mapId], references: [id], onDelete: Cascade)
+
+  reportMonth String  @map("report_month") // Format: MM/YYYY
+  tonDau      Decimal @default(0) @map("ton_dau")
+  nhap        Decimal @default(0)
+  xuat        Decimal @default(0)
+  tonCuoi     Decimal @default(0) @map("ton_cuoi")
+  giaVat      Decimal @default(0) @map("gia_vat")
+  thanhTienTonCuoi Decimal @default(0) @map("thanh_tien_ton_cuoi") // Thành tiền tồn cuối
+
+  // Additional report fields
+  soQdTrungThau  String? @map("so_qd_trung_thau")   // Số QĐ trúng thầu (nếu có)
+  tenCongTy      String? @map("ten_cong_ty")        // Tên Công ty
+  ngayBatDauHd   String? @map("ngay_bat_dau_hd")    // Ngày bắt đầu HĐ (format: 20260101)
+  ngayKetThucHd  String? @map("ngay_ket_thuc_hd")   // Ngày kết thúc HĐ (format: 20260101)
+  bhyt           String? @map("bhyt")               // BHYT (Có/Không)
+  dichVu         String? @map("dich_vu")            // Dịch vụ (Có/Không)
+
+  status    ReportStatus @default(PENDING) @map("status")
+  adminNote String?      @map("admin_note")
+
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([facilityId, mapId, reportMonth])
+  @@map("inventory_reports")
+}
+
+enum ReportStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// ReportReviewLog: Lịch sử duyệt báo cáo
+model ReportReviewLog {
+  id           String       @id @default(cuid())
+  facilityId   String       @map("facility_id")
+  reportMonth  String       @map("report_month")  // Format: MM/YYYY
+  status       ReportStatus
+  adminNote    String?      @map("admin_note")
+  adminId      String       @map("admin_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([facilityId, reportMonth])
+  @@index([adminId])
+  @@map("report_review_logs")
+}
+
+// ReportPeriod: Quản lý tháng báo cáo
+model ReportPeriod {
+  id          String   @id @default(cuid())
+  month       String   @unique // Format: MM/YYYY
+  isActive    Boolean  @default(true) @map("is_active")
+  year        Int
+  periodMonth Int      @map("period_month") // to easily sort
+  deadline    DateTime? @map("deadline")           // Hạn nộp báo cáo
+  reminderSent Boolean  @default(false) @map("reminder_sent") // Đã gửi nhắc nhở chưa
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("report_periods")
+}
+
+// KeHoachLCNT: Kế hoạch lựa chọn nhà thầu
+model KeHoachLCNT {
+  id                String    @id @default(cuid())
+  facilityId        String    @map("facility_id")
+  facility          User      @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+
+  quyTrinh          Int       @map("quy_trinh") // 1 = Luật Đấu thầu, 2 = Tự quyết định
+  loaiMuaSam        String?   @map("loai_mua_sam") // "Thuốc" / "Hóa chất, vật tư, thiết bị y tế" (for quyTrinh=1)
+  maKHLCNT          String?   @map("ma_khlcnt")
+  tenKHLCNT         String?   @map("ten_khlcnt")
+  soQuyetDinh       String?   @map("so_quyet_dinh")
+  ngayPheDuyet      DateTime? @map("ngay_phe_duyet")
+  soLuongGoiThau    Int?      @map("so_luong_goi_thau")
+  trangThai         String?   @map("trang_thai") // "Chưa đăng tải" / "Đã đăng tải"
+
+  // Fields for quyTrinh=2 (Tự quyết định)
+  loaiMuaSamTuQuyet              String?   @map("loai_mua_sam_tu_quyet") // "Thuốc" / "Hóa chất, vật tư, thiết bị y tế"
+  thoiGianBatDauMuaSam           DateTime? @map("thoi_gian_bat_dau_mua_sam")
+  thoiGianBatDauThucHienHopDong  DateTime? @map("thoi_gian_bat_dau_thuc_hien_hop_dong")
+  thoiGianThucHienHopDong        String?   @map("thoi_gian_thuc_hien_hop_dong")
+  thoiGianKetThucHopDong         DateTime? @map("thoi_gian_ket_thuc_hop_dong")
+
+  goiThaus          GoiThau[]
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  @@map("ke_hoach_lcnt")
+}
+
+// GoiThau: Gói thầu
+model GoiThau {
+  id                String      @id @default(cuid())
+  keHoachId         String      @map("ke_hoach_id")
+  keHoach           KeHoachLCNT @relation(fields: [keHoachId], references: [id], onDelete: Cascade)
+
+  tenGoiThau        String      @map("ten_goi_thau")
+  giaGoiThau        Decimal?    @map("gia_goi_thau")
+  linhVuc           String?     @map("linh_vuc")          // JSON array
+  hinhThucLCNT      String?     @map("hinh_thuc_lcnt")
+  phuongThucLCNT    String?     @map("phuong_thuc_lcnt")
+  loaiHopDong       String?     @map("loai_hop_dong")     // JSON array
+  phanLoaiGoiThau   String?     @map("phan_loai_goi_thau")
+  chiTietNguonVon   String?     @map("chi_tiet_nguon_von")
+  soLuongPhanLo     Int?        @map("so_luong_phan_lo")
+  thoiGianToChuc    String?     @map("thoi_gian_to_chuc")
+  thoiGianBatDau    DateTime?   @map("thoi_gian_bat_dau")
+  thoiGianThucHien  String?     @map("thoi_gian_thuc_hien")
+  trangThai         String?     @default("Chưa hoàn thành") @map("trang_thai")
+  maThongBao        String?     @map("ma_thong_bao")
+
+  phanLos           PhanLoGoiThau[]
+  thongBaoMoiThaus  ThongBaoMoiThau[]
+  ketQuaLCNTs       KetQuaLCNT[]
+  createdAt         DateTime    @default(now()) @map("created_at")
+  updatedAt         DateTime    @updatedAt @map("updated_at")
+
+  @@map("goi_thau")
+}
+
+// ThongBaoMoiThau: Thông báo mời thầu
+model ThongBaoMoiThau {
+  id                  String    @id @default(cuid())
+  goiThauId           String    @map("goi_thau_id")
+  goiThau             GoiThau   @relation(fields: [goiThauId], references: [id], onDelete: Cascade)
+  
+  maTBMT              String    @map("ma_tbmt")              // Mã TBMT
+  ngayDangTai         DateTime  @map("ngay_dang_tai")        // Ngày đăng tải TBMT
+  soQdPheDuyetHSMT    String    @map("so_qd_phe_duyet_hsmt") // Số QĐ phê duyệt HSMT
+  ngayPheDuyetHSMT    DateTime  @map("ngay_phe_duyet_hsmt")  // Ngày phê duyệt HSMT
+  ngayDongThau        DateTime  @map("ngay_dong_thau")       // Ngày đóng thầu
+  
+  ketQuaLCNTs         KetQuaLCNT[]
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+  
+  @@map("thong_bao_moi_thau")
+}
+
+// PhanLoGoiThau: Phần lô của gói thầu
+model PhanLoGoiThau {
+  id                String   @id @default(cuid())
+  goiThauId         String   @map("goi_thau_id")
+  goiThau           GoiThau  @relation(fields: [goiThauId], references: [id], onDelete: Cascade)
+
+  stt               Int
+  tenPhanLo         String   @map("ten_phan_lo")
+  donViTinh         String?  @map("don_vi_tinh")
+  soLuong           Decimal? @map("so_luong")
+  donGia            Decimal? @map("don_gia")
+  thanhTien         Decimal? @map("thanh_tien")
+  thoiGianThucHien  String?  @map("thoi_gian_thuc_hien")
+  donViTinhThoiGian String?  @map("don_vi_tinh_thoi_gian")
+
+  ketQuaPhanLos     KetQuaPhanLo[]
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  @@map("phan_lo_goi_thau")
+}
+
+// KetQuaLCNT: Kết quả lựa chọn nhà thầu
+model KetQuaLCNT {
+  id                    String    @id @default(cuid())
+  goiThauId             String    @map("goi_thau_id")
+  goiThau               GoiThau   @relation(fields: [goiThauId], references: [id], onDelete: Cascade)
+  
+  thongBaoMoiThauId     String    @map("thong_bao_moi_thau_id")
+  thongBaoMoiThau       ThongBaoMoiThau @relation(fields: [thongBaoMoiThauId], references: [id], onDelete: Cascade)
+  
+  soQdPheDuyetKQLCNT    String    @map("so_qd_phe_duyet_kqlcnt")
+  ngayPheDuyetKQLCNT    DateTime  @map("ngay_phe_duyet_kqlcnt")
+  soMatHangMoiThau      Int       @map("so_mat_hang_moi_thau")
+  soMatHangTrungThau    Int       @map("so_mat_hang_trung_thau")
+  tongGiaTriTrungThau   Decimal   @map("tong_gia_tri_trung_thau")
+  
+  ketQuaPhanLos         KetQuaPhanLo[]
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+  
+  @@map("ket_qua_lcnt")
+}
+
+// KetQuaPhanLo: Kết quả từng phần lô
+model KetQuaPhanLo {
+  id                String       @id @default(cuid())
+  ketQuaLCNTId      String       @map("ket_qua_lcnt_id")
+  ketQuaLCNT        KetQuaLCNT   @relation(fields: [ketQuaLCNTId], references: [id], onDelete: Cascade)
+  
+  phanLoGoiThauId   String       @map("phan_lo_goi_thau_id")
+  phanLoGoiThau     PhanLoGoiThau @relation(fields: [phanLoGoiThauId], references: [id], onDelete: Cascade)
+  
+  ketQua            String       @map("ket_qua") // "Trúng thầu" / "Không trúng thầu"
+  donGiaTrungThau   Decimal?     @map("don_gia_trung_thau")
+  nhaThauTrungThau  String?      @map("nha_thau_trung_thau")
+  
+  createdAt         DateTime     @default(now()) @map("created_at")
+  updatedAt         DateTime     @updatedAt @map("updated_at")
+  
+  @@map("ket_qua_phan_lo")
+}
+
+// Notification: Thông báo cho người dùng
+model Notification {
+  id          String   @id @default(cuid())
+  userId      String   @map("user_id")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type        String   // MAPPING_SUBMITTED, REPORT_SUBMITTED, LCNT_CREATED, PERIOD_OPENED...
+  title       String
+  message     String
+  entityType  String?  @map("entity_type")  // "report", "mapping", "lcnt"...
+  entityId    String?  @map("entity_id")
+  entityUrl   String?  @map("entity_url")   // Direct link to the entity
+  isRead      Boolean  @default(false) @map("is_read")
+
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([userId, isRead])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+// ActivityLog: Nhật ký hoạt động
+model ActivityLog {
+  id          String   @id @default(cuid())
+  userId      String   @map("user_id")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  action      String   // LOGIN, CREATE, UPDATE, DELETE, APPROVE, REJECT, EXPORT
+  entityType  String   @map("entity_type")  // "user", "report", "mapping", "master_drug", "lcnt"
+  entityId    String?  @map("entity_id")
+  details     String?  // JSON string with additional details
+
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([entityType])
+  @@map("activity_logs")
+}
