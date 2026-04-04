@@ -11,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, CheckCircle2, XCircle, Clock, Trash2 } from "lucide-react";
 
+const DETAIL_PAGE_SIZE = 50;
+
 export default function AdminReportsPage() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [reports, setReports] = useState<any[]>([]);
@@ -41,7 +43,11 @@ export default function AdminReportsPage() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [reviewLog, setReviewLog] = useState<any[]>([]);
     const [isDetailLoading, setIsDetailLoading] = useState(false);
+    const [isReviewLogLoading, setIsReviewLogLoading] = useState(false);
     const [isDetailOpen, setIsDetailOpen] = useState(false);
+    const [detailPage, setDetailPage] = useState(1);
+    const [detailTotal, setDetailTotal] = useState(0);
+    const [detailTotalPages, setDetailTotalPages] = useState(1);
 
     // Bulk reject note dialog
     const [bulkAction, setBulkAction] = useState<"APPROVED" | "REJECTED" | null>(null);
@@ -99,7 +105,6 @@ export default function AdminReportsPage() {
 
     useEffect(() => {
         fetchReports(selectedMonth !== "all" ? selectedMonth : undefined);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedMonth]);
 
     useEffect(() => {
@@ -244,24 +249,67 @@ export default function AdminReportsPage() {
     };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const handleViewDetails = async (report: any) => {
-        setSelectedReport(report);
-        setIsDetailOpen(true);
+    const fetchDetailPage = async (report: any, page: number) => {
         setIsDetailLoading(true);
-        setDetailData([]);
-        setReviewLog([]);
         try {
-            const [detailRes, logRes] = await Promise.all([
-                fetch(`/api/admin/reports/detail?facilityId=${report.facilityId}&month=${encodeURIComponent(report.month)}`),
-                fetch(`/api/admin/reports/review-log?facilityId=${report.facilityId}&month=${encodeURIComponent(report.month)}`),
-            ]);
-            if (detailRes.ok) setDetailData(await detailRes.json());
-            if (logRes.ok) setReviewLog(await logRes.json());
+            const params = new URLSearchParams({
+                facilityId: report.facilityId,
+                month: report.month,
+                page: page.toString(),
+                limit: DETAIL_PAGE_SIZE.toString(),
+            });
+            const res = await fetch(`/api/admin/reports/detail?${params.toString()}`);
+            if (!res.ok) {
+                toast.error("Không thể tải dữ liệu chi tiết");
+                return;
+            }
+
+            const data = await res.json();
+            setDetailData(data.items || []);
+            setDetailPage(data.pagination?.page || page);
+            setDetailTotal(data.pagination?.total || 0);
+            setDetailTotalPages(data.pagination?.totalPages || 1);
         } catch {
             toast.error("Lỗi kết nối");
         } finally {
             setIsDetailLoading(false);
         }
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const fetchReviewLog = async (report: any) => {
+        setIsReviewLogLoading(true);
+        try {
+            const res = await fetch(`/api/admin/reports/review-log?facilityId=${report.facilityId}&month=${encodeURIComponent(report.month)}`);
+            if (!res.ok) {
+                toast.error("Không thể tải lịch sử duyệt");
+                return;
+            }
+
+            setReviewLog(await res.json());
+        } catch {
+            toast.error("Lỗi kết nối");
+        } finally {
+            setIsReviewLogLoading(false);
+        }
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handleViewDetails = (report: any) => {
+        setSelectedReport(report);
+        setIsDetailOpen(true);
+        setDetailData([]);
+        setReviewLog([]);
+        setDetailPage(1);
+        setDetailTotal(0);
+        setDetailTotalPages(1);
+        void fetchDetailPage(report, 1);
+        void fetchReviewLog(report);
+    };
+
+    const handleDetailPageChange = (page: number) => {
+        if (!selectedReport || page < 1 || page > detailTotalPages || page === detailPage) return;
+        void fetchDetailPage(selectedReport, page);
     };
 
     const getStatusBadge = (status: string) => {
@@ -291,6 +339,9 @@ export default function AdminReportsPage() {
             setSelectedIds(new Set(filteredReports.map(r => r.id)));
         }
     };
+
+    const detailRangeStart = detailTotal === 0 ? 0 : (detailPage - 1) * DETAIL_PAGE_SIZE + 1;
+    const detailRangeEnd = detailTotal === 0 ? 0 : Math.min(detailTotal, (detailPage - 1) * DETAIL_PAGE_SIZE + detailData.length);
 
     return (
         <div className="space-y-6">
@@ -540,7 +591,22 @@ export default function AdminReportsPage() {
             </Dialog>
 
             {/* Detail Dialog */}
-            <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
+            <Dialog
+                open={isDetailOpen}
+                onOpenChange={(open) => {
+                    setIsDetailOpen(open);
+                    if (!open) {
+                        setSelectedReport(null);
+                        setDetailData([]);
+                        setReviewLog([]);
+                        setIsDetailLoading(false);
+                        setIsReviewLogLoading(false);
+                        setDetailPage(1);
+                        setDetailTotal(0);
+                        setDetailTotalPages(1);
+                    }
+                }}
+            >
                 <DialogContent className="max-w-[90vw] sm:max-w-[90vw] w-[90vw] h-[90vh] flex flex-col p-0">
                     <DialogHeader className="p-6 pb-2">
                         <DialogTitle>Chi tiết báo cáo - {selectedReport?.facilityName}</DialogTitle>
@@ -560,99 +626,145 @@ export default function AdminReportsPage() {
                         <TabsContent value="detail" className="flex-1 overflow-hidden mt-0">
                             {isDetailLoading ? (
                                 <div className="flex items-center justify-center h-48"><Loader2 className="w-8 h-8 animate-spin text-gray-400" /></div>
+                            ) : detailData.length === 0 ? (
+                                <div className="flex items-center justify-center h-48 text-gray-500">
+                                    Không có dữ liệu chi tiết
+                                </div>
                             ) : (
-                                <div className="overflow-auto h-full">
-                                    <table className="text-xs border-collapse w-max min-w-full">
-                                        <thead className="sticky top-0 bg-white z-10">
-                                            <tr className="border-b border-gray-200">
-                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-8 whitespace-nowrap">STT</th>
-                                                {/* Thuốc nội bộ */}
-                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[90px] whitespace-nowrap bg-orange-50">Mã nội bộ</th>
-                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[160px] bg-orange-50">Tên thuốc (nội bộ)</th>
-                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[130px] bg-orange-50">Hoạt chất (nội bộ)</th>
-                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[100px] whitespace-nowrap bg-orange-50">SĐK nội bộ</th>
-                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[70px] whitespace-nowrap bg-orange-50">ĐVT NB</th>
-                                                {/* Danh mục chung */}
-                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[80px] whitespace-nowrap bg-blue-50">Mã chung</th>
-                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[80px] whitespace-nowrap bg-blue-50">Mã BHYT</th>
-                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[160px] bg-blue-50">Tên thuốc (DM)</th>
-                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[130px] bg-blue-50">Hoạt chất</th>
-                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[100px] bg-blue-50">Hàm lượng</th>
-                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[110px] bg-blue-50">Dạng bào chế</th>
-                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[100px] bg-blue-50">Số đăng ký</th>
-                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[65px] whitespace-nowrap bg-blue-50">ĐVT</th>
-                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[90px] bg-blue-50">Quy cách</th>
-                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[80px] bg-blue-50">Đường dùng</th>
-                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[130px] bg-blue-50">Công ty SX</th>
-                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[75px] bg-blue-50">Nước SX</th>
-                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[130px] bg-blue-50">Công ty ĐK</th>
-                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[100px] bg-blue-50">Nhóm thuốc</th>
-                                                {/* Số liệu báo cáo */}
-                                                <th className="px-2 py-2 text-right font-medium text-gray-500 w-[70px] whitespace-nowrap bg-emerald-50">Tồn đầu</th>
-                                                <th className="px-2 py-2 text-right font-medium text-gray-500 w-[65px] whitespace-nowrap bg-emerald-50">Nhập</th>
-                                                <th className="px-2 py-2 text-right font-medium text-gray-500 w-[65px] whitespace-nowrap bg-emerald-50">Xuất</th>
-                                                <th className="px-2 py-2 text-right font-semibold text-gray-700 w-[70px] whitespace-nowrap bg-emerald-50">Tồn cuối</th>
-                                                <th className="px-2 py-2 text-right font-medium text-gray-500 w-[90px] whitespace-nowrap bg-emerald-50">Giá VAT</th>
-                                                <th className="px-2 py-2 text-right font-medium text-gray-500 w-[110px] bg-emerald-50">TT tồn cuối</th>
-                                                {/* Thông tin hợp đồng */}
-                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[110px] bg-purple-50">Số QĐ TT</th>
-                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[130px] bg-purple-50">Tên công ty</th>
-                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[90px] whitespace-nowrap bg-purple-50">Ngày BĐ HĐ</th>
-                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[90px] whitespace-nowrap bg-purple-50">Ngày KT HĐ</th>
-                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[55px] whitespace-nowrap bg-purple-50">BHYT</th>
-                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[60px] whitespace-nowrap bg-purple-50">Dịch vụ</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {detailData.map((item, index) => (
-                                                <tr key={item.id} className="border-b border-gray-100 hover:bg-gray-50">
-                                                    <td className="px-2 py-1.5 text-gray-400">{index + 1}</td>
+                                <div className="flex h-full flex-col gap-3">
+                                    {detailTotalPages > 1 && (
+                                        <div className="flex items-center justify-between text-sm text-gray-600">
+                                            <span>Hiển thị {detailRangeStart}-{detailRangeEnd} / {detailTotal} dòng</span>
+                                            <span>Trang {detailPage} / {detailTotalPages}</span>
+                                        </div>
+                                    )}
+
+                                    <div className="overflow-auto flex-1">
+                                        <table className="text-xs border-collapse w-max min-w-full">
+                                            <thead className="sticky top-0 bg-white z-10">
+                                                <tr className="border-b border-gray-200">
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-500 w-8 whitespace-nowrap">STT</th>
                                                     {/* Thuốc nội bộ */}
-                                                    <td className="px-2 py-1.5 break-all">{item.maNoiBo}</td>
-                                                    <td className="px-2 py-1.5 break-words">{item.tenThuocNoiBo}</td>
-                                                    <td className="px-2 py-1.5 text-gray-500 break-words">{item.hoatChatNoiBo || <span className="text-gray-300">—</span>}</td>
-                                                    <td className="px-2 py-1.5 break-all">{item.soDangKyNoiBo || <span className="text-gray-300">—</span>}</td>
-                                                    <td className="px-2 py-1.5">{item.donViTinhNoiBo || <span className="text-gray-300">—</span>}</td>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-500 w-[90px] whitespace-nowrap bg-orange-50">Mã nội bộ</th>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-500 w-[160px] bg-orange-50">Tên thuốc (nội bộ)</th>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-500 w-[130px] bg-orange-50">Hoạt chất (nội bộ)</th>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-500 w-[100px] whitespace-nowrap bg-orange-50">SĐK nội bộ</th>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-500 w-[70px] whitespace-nowrap bg-orange-50">ĐVT NB</th>
                                                     {/* Danh mục chung */}
-                                                    <td className="px-2 py-1.5 font-medium text-blue-700 break-all">{item.maChung || <span className="text-gray-300">—</span>}</td>
-                                                    <td className="px-2 py-1.5 break-all">{item.maBhyt || <span className="text-gray-300">—</span>}</td>
-                                                    <td className="px-2 py-1.5 font-medium break-words">{item.tenThuoc || <span className="text-gray-300">—</span>}</td>
-                                                    <td className="px-2 py-1.5 text-gray-500 break-words">{item.hoatChat || <span className="text-gray-300">—</span>}</td>
-                                                    <td className="px-2 py-1.5 break-words">{item.hamLuong || <span className="text-gray-300">—</span>}</td>
-                                                    <td className="px-2 py-1.5 break-words">{item.dangBaoChe || <span className="text-gray-300">—</span>}</td>
-                                                    <td className="px-2 py-1.5 break-all">{item.soDangKy || <span className="text-gray-300">—</span>}</td>
-                                                    <td className="px-2 py-1.5">{item.donViTinh || <span className="text-gray-300">—</span>}</td>
-                                                    <td className="px-2 py-1.5 break-words">{item.quyCach || <span className="text-gray-300">—</span>}</td>
-                                                    <td className="px-2 py-1.5 break-words">{item.duongDung || <span className="text-gray-300">—</span>}</td>
-                                                    <td className="px-2 py-1.5 break-words">{item.congTySanXuat || <span className="text-gray-300">—</span>}</td>
-                                                    <td className="px-2 py-1.5 break-words">{item.nuocSanXuat || <span className="text-gray-300">—</span>}</td>
-                                                    <td className="px-2 py-1.5 break-words">{item.congTyDangKy || <span className="text-gray-300">—</span>}</td>
-                                                    <td className="px-2 py-1.5 break-words">{item.nhomThuoc || <span className="text-gray-300">—</span>}</td>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-500 w-[80px] whitespace-nowrap bg-blue-50">Mã chung</th>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-500 w-[80px] whitespace-nowrap bg-blue-50">Mã BHYT</th>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-500 w-[160px] bg-blue-50">Tên thuốc (DM)</th>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-500 w-[130px] bg-blue-50">Hoạt chất</th>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-500 w-[100px] bg-blue-50">Hàm lượng</th>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-500 w-[110px] bg-blue-50">Dạng bào chế</th>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-500 w-[100px] bg-blue-50">Số đăng ký</th>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-500 w-[65px] whitespace-nowrap bg-blue-50">ĐVT</th>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-500 w-[90px] bg-blue-50">Quy cách</th>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-500 w-[80px] bg-blue-50">Đường dùng</th>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-500 w-[130px] bg-blue-50">Công ty SX</th>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-500 w-[75px] bg-blue-50">Nước SX</th>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-500 w-[130px] bg-blue-50">Công ty ĐK</th>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-500 w-[100px] bg-blue-50">Nhóm thuốc</th>
                                                     {/* Số liệu báo cáo */}
-                                                    <td className="px-2 py-1.5 text-right tabular-nums">{new Intl.NumberFormat("vi-VN").format(Number(item.tonDau))}</td>
-                                                    <td className="px-2 py-1.5 text-right text-blue-600 tabular-nums">{new Intl.NumberFormat("vi-VN").format(Number(item.nhap))}</td>
-                                                    <td className="px-2 py-1.5 text-right text-red-600 tabular-nums">{new Intl.NumberFormat("vi-VN").format(Number(item.xuat))}</td>
-                                                    <td className="px-2 py-1.5 text-right font-bold tabular-nums">{new Intl.NumberFormat("vi-VN").format(Number(item.tonCuoi))}</td>
-                                                    <td className="px-2 py-1.5 text-right tabular-nums">{new Intl.NumberFormat("vi-VN").format(Number(item.giaVat))}</td>
-                                                    <td className="px-2 py-1.5 text-right font-medium text-emerald-700 tabular-nums">{new Intl.NumberFormat("vi-VN").format(Number(item.thanhTienTonCuoi))}</td>
+                                                    <th className="px-2 py-2 text-right font-medium text-gray-500 w-[70px] whitespace-nowrap bg-emerald-50">Tồn đầu</th>
+                                                    <th className="px-2 py-2 text-right font-medium text-gray-500 w-[65px] whitespace-nowrap bg-emerald-50">Nhập</th>
+                                                    <th className="px-2 py-2 text-right font-medium text-gray-500 w-[65px] whitespace-nowrap bg-emerald-50">Xuất</th>
+                                                    <th className="px-2 py-2 text-right font-semibold text-gray-700 w-[70px] whitespace-nowrap bg-emerald-50">Tồn cuối</th>
+                                                    <th className="px-2 py-2 text-right font-medium text-gray-500 w-[90px] whitespace-nowrap bg-emerald-50">Giá VAT</th>
+                                                    <th className="px-2 py-2 text-right font-medium text-gray-500 w-[110px] bg-emerald-50">TT tồn cuối</th>
                                                     {/* Thông tin hợp đồng */}
-                                                    <td className="px-2 py-1.5 break-all">{item.soQdTrungThau || <span className="text-gray-300">—</span>}</td>
-                                                    <td className="px-2 py-1.5 break-words">{item.tenCongTy || <span className="text-gray-300">—</span>}</td>
-                                                    <td className="px-2 py-1.5 whitespace-nowrap">{item.ngayBatDauHd || <span className="text-gray-300">—</span>}</td>
-                                                    <td className="px-2 py-1.5 whitespace-nowrap">{item.ngayKetThucHd || <span className="text-gray-300">—</span>}</td>
-                                                    <td className="px-2 py-1.5">{item.bhyt || <span className="text-gray-300">—</span>}</td>
-                                                    <td className="px-2 py-1.5">{item.dichVu || <span className="text-gray-300">—</span>}</td>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-500 w-[110px] bg-purple-50">Số QĐ TT</th>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-500 w-[130px] bg-purple-50">Tên công ty</th>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-500 w-[90px] whitespace-nowrap bg-purple-50">Ngày BĐ HĐ</th>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-500 w-[90px] whitespace-nowrap bg-purple-50">Ngày KT HĐ</th>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-500 w-[55px] whitespace-nowrap bg-purple-50">BHYT</th>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-500 w-[60px] whitespace-nowrap bg-purple-50">Dịch vụ</th>
                                                 </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
+                                            </thead>
+                                            <tbody>
+                                                {detailData.map((item, index) => (
+                                                    <tr key={item.id} className="border-b border-gray-100 hover:bg-gray-50">
+                                                        <td className="px-2 py-1.5 text-gray-400">{(detailPage - 1) * DETAIL_PAGE_SIZE + index + 1}</td>
+                                                        {/* Thuốc nội bộ */}
+                                                        <td className="px-2 py-1.5 break-all">{item.maNoiBo}</td>
+                                                        <td className="px-2 py-1.5 break-words">{item.tenThuocNoiBo}</td>
+                                                        <td className="px-2 py-1.5 text-gray-500 break-words">{item.hoatChatNoiBo || <span className="text-gray-300">—</span>}</td>
+                                                        <td className="px-2 py-1.5 break-all">{item.soDangKyNoiBo || <span className="text-gray-300">—</span>}</td>
+                                                        <td className="px-2 py-1.5">{item.donViTinhNoiBo || <span className="text-gray-300">—</span>}</td>
+                                                        {/* Danh mục chung */}
+                                                        <td className="px-2 py-1.5 font-medium text-blue-700 break-all">{item.maChung || <span className="text-gray-300">—</span>}</td>
+                                                        <td className="px-2 py-1.5 break-all">{item.maBhyt || <span className="text-gray-300">—</span>}</td>
+                                                        <td className="px-2 py-1.5 font-medium break-words">{item.tenThuoc || <span className="text-gray-300">—</span>}</td>
+                                                        <td className="px-2 py-1.5 text-gray-500 break-words">{item.hoatChat || <span className="text-gray-300">—</span>}</td>
+                                                        <td className="px-2 py-1.5 break-words">{item.hamLuong || <span className="text-gray-300">—</span>}</td>
+                                                        <td className="px-2 py-1.5 break-words">{item.dangBaoChe || <span className="text-gray-300">—</span>}</td>
+                                                        <td className="px-2 py-1.5 break-all">{item.soDangKy || <span className="text-gray-300">—</span>}</td>
+                                                        <td className="px-2 py-1.5">{item.donViTinh || <span className="text-gray-300">—</span>}</td>
+                                                        <td className="px-2 py-1.5 break-words">{item.quyCach || <span className="text-gray-300">—</span>}</td>
+                                                        <td className="px-2 py-1.5 break-words">{item.duongDung || <span className="text-gray-300">—</span>}</td>
+                                                        <td className="px-2 py-1.5 break-words">{item.congTySanXuat || <span className="text-gray-300">—</span>}</td>
+                                                        <td className="px-2 py-1.5 break-words">{item.nuocSanXuat || <span className="text-gray-300">—</span>}</td>
+                                                        <td className="px-2 py-1.5 break-words">{item.congTyDangKy || <span className="text-gray-300">—</span>}</td>
+                                                        <td className="px-2 py-1.5 break-words">{item.nhomThuoc || <span className="text-gray-300">—</span>}</td>
+                                                        {/* Số liệu báo cáo */}
+                                                        <td className="px-2 py-1.5 text-right tabular-nums">{new Intl.NumberFormat("vi-VN").format(Number(item.tonDau))}</td>
+                                                        <td className="px-2 py-1.5 text-right text-blue-600 tabular-nums">{new Intl.NumberFormat("vi-VN").format(Number(item.nhap))}</td>
+                                                        <td className="px-2 py-1.5 text-right text-red-600 tabular-nums">{new Intl.NumberFormat("vi-VN").format(Number(item.xuat))}</td>
+                                                        <td className="px-2 py-1.5 text-right font-bold tabular-nums">{new Intl.NumberFormat("vi-VN").format(Number(item.tonCuoi))}</td>
+                                                        <td className="px-2 py-1.5 text-right tabular-nums">{new Intl.NumberFormat("vi-VN").format(Number(item.giaVat))}</td>
+                                                        <td className="px-2 py-1.5 text-right font-medium text-emerald-700 tabular-nums">{new Intl.NumberFormat("vi-VN").format(Number(item.thanhTienTonCuoi))}</td>
+                                                        {/* Thông tin hợp đồng */}
+                                                        <td className="px-2 py-1.5 break-all">{item.soQdTrungThau || <span className="text-gray-300">—</span>}</td>
+                                                        <td className="px-2 py-1.5 break-words">{item.tenCongTy || <span className="text-gray-300">—</span>}</td>
+                                                        <td className="px-2 py-1.5 whitespace-nowrap">{item.ngayBatDauHd || <span className="text-gray-300">—</span>}</td>
+                                                        <td className="px-2 py-1.5 whitespace-nowrap">{item.ngayKetThucHd || <span className="text-gray-300">—</span>}</td>
+                                                        <td className="px-2 py-1.5">{item.bhyt || <span className="text-gray-300">—</span>}</td>
+                                                        <td className="px-2 py-1.5">{item.dichVu || <span className="text-gray-300">—</span>}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    {detailTotalPages > 1 && (
+                                        <div className="flex items-center justify-between border-t pt-3">
+                                            <p className="text-sm text-gray-600">
+                                                Hiển thị {detailRangeStart}-{detailRangeEnd} / {detailTotal} dòng
+                                            </p>
+                                            <div className="flex gap-2">
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => handleDetailPageChange(detailPage - 1)}
+                                                    disabled={isDetailLoading || detailPage <= 1}
+                                                >
+                                                    Trước
+                                                </Button>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    disabled
+                                                >
+                                                    Trang {detailPage} / {detailTotalPages}
+                                                </Button>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => handleDetailPageChange(detailPage + 1)}
+                                                    disabled={isDetailLoading || detailPage >= detailTotalPages}
+                                                >
+                                                    Sau
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </TabsContent>
 
 
                         <TabsContent value="log" className="flex-1 overflow-auto mt-0">
-                            {isDetailLoading ? (
+                            {isReviewLogLoading ? (
                                 <div className="flex items-center justify-center h-48"><Loader2 className="w-8 h-8 animate-spin text-gray-400" /></div>
                             ) : reviewLog.length === 0 ? (
                                 <div className="text-center py-16 text-gray-400">

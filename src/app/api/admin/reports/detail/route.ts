@@ -13,16 +13,25 @@ export async function GET(request: Request) {
         const { searchParams } = new URL(request.url);
         const facilityId = searchParams.get("facilityId");
         const month = searchParams.get("month");
+        const pageParam = Number.parseInt(searchParams.get("page") || "1", 10);
+        const limitParam = Number.parseInt(searchParams.get("limit") || "50", 10);
+        const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
+        const limit = Number.isFinite(limitParam) && limitParam > 0 ? limitParam : 50;
 
         if (!facilityId || !month) {
             return NextResponse.json({ message: "Missing required params" }, { status: 400 });
         }
 
+        const where = {
+            facilityId,
+            reportMonth: month,
+        };
+
+        const total = await prisma.inventoryReport.count({ where });
+        const totalPages = total > 0 ? Math.ceil(total / limit) : 1;
+        const safePage = Math.min(page, totalPages);
         const reports = await prisma.inventoryReport.findMany({
-            where: {
-                facilityId: facilityId,
-                reportMonth: month
-            },
+            where,
             include: {
                 drugMap: {
                     include: {
@@ -32,9 +41,11 @@ export async function GET(request: Request) {
             },
             orderBy: {
                 drugMap: {
-                    tenThuocNoiBo: 'asc'
+                    tenThuocNoiBo: "asc"
                 }
-            }
+            },
+            skip: (safePage - 1) * limit,
+            take: limit,
         });
 
         const detailData = reports.map(r => ({
@@ -76,7 +87,15 @@ export async function GET(request: Request) {
             dichVu: r.dichVu || '',
         }));
 
-        return NextResponse.json(detailData);
+        return NextResponse.json({
+            items: detailData,
+            pagination: {
+                page: safePage,
+                limit,
+                total,
+                totalPages,
+            },
+        });
 
     } catch (error) {
         console.error("Error fetching report detail:", error);
