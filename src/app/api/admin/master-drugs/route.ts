@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import type { Prisma } from "@/../prisma/generated/client";
 import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
 
@@ -18,7 +19,8 @@ export async function GET(request: Request) {
 
         const skip = (page - 1) * limit;
 
-        const where: any = {};
+        const where: Prisma.MasterDrugWhereInput = {};
+        const searchableFields = ["tenThuoc", "soDangKy", "hoatChat", "maChung", "maBhyt"] as const;
         if (search) {
             if (searchField === "ALL") {
                 // Search across all fields
@@ -29,9 +31,10 @@ export async function GET(request: Request) {
                     { soDangKy: { contains: search, mode: "insensitive" } },
                     { maBhyt: { contains: search, mode: "insensitive" } },
                 ];
-            } else {
+            } else if (searchableFields.includes(searchField as (typeof searchableFields)[number])) {
                 // Search in specific field
-                where[searchField] = { contains: search, mode: "insensitive" };
+                const field = searchField as (typeof searchableFields)[number];
+                where[field] = { contains: search, mode: "insensitive" };
             }
         }
 
@@ -107,6 +110,7 @@ export async function POST(request: Request) {
                 diaChiDangKy: body.diaChiDangKy || null,
 
                 nhomThuoc: body.nhomThuoc || null,
+                nhomDieuTri: body.nhomDieuTri || null,
                 isKeDon: body.isKeDon || null,
                 kiemSoatDacBiet: body.kiemSoatDacBiet || null,
                 isTrongNuoc: body.isTrongNuoc || null,
@@ -121,7 +125,7 @@ export async function POST(request: Request) {
 }
 
 // DELETE all master drugs
-export async function DELETE(request: Request) {
+export async function DELETE() {
     try {
         const session = await auth();
         if (!session || session.user.role !== "ADMIN") {

@@ -63,6 +63,7 @@ export async function POST(request: Request) {
                         diaChiDangKy: drug.diaChiDangKy ? String(drug.diaChiDangKy) : null,
 
                         nhomThuoc: drug.nhomThuoc ? String(drug.nhomThuoc) : null,
+                        nhomDieuTri: drug.nhomDieuTri ? String(drug.nhomDieuTri) : null,
                         isKeDon: drug.isKeDon ? String(drug.isKeDon) : null,
                         kiemSoatDacBiet: drug.kiemSoatDacBiet ? String(drug.kiemSoatDacBiet) : null,
                         isTrongNuoc: drug.isTrongNuoc ? String(drug.isTrongNuoc) : null,

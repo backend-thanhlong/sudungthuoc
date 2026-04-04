@@ -3722,6 +3722,7 @@ export namespace Prisma {
     nuocDangKy: string | null
     diaChiDangKy: string | null
     nhomThuoc: string | null
+    nhomDieuTri: string | null
     isKeDon: string | null
     kiemSoatDacBiet: string | null
     isTrongNuoc: string | null
@@ -3752,6 +3753,7 @@ export namespace Prisma {
     nuocDangKy: string | null
     diaChiDangKy: string | null
     nhomThuoc: string | null
+    nhomDieuTri: string | null
     isKeDon: string | null
     kiemSoatDacBiet: string | null
     isTrongNuoc: string | null
@@ -3782,6 +3784,7 @@ export namespace Prisma {
     nuocDangKy: number
     diaChiDangKy: number
     nhomThuoc: number
+    nhomDieuTri: number
     isKeDon: number
     kiemSoatDacBiet: number
     isTrongNuoc: number
@@ -3814,6 +3817,7 @@ export namespace Prisma {
     nuocDangKy?: true
     diaChiDangKy?: true
     nhomThuoc?: true
+    nhomDieuTri?: true
     isKeDon?: true
     kiemSoatDacBiet?: true
     isTrongNuoc?: true
@@ -3844,6 +3848,7 @@ export namespace Prisma {
     nuocDangKy?: true
     diaChiDangKy?: true
     nhomThuoc?: true
+    nhomDieuTri?: true
     isKeDon?: true
     kiemSoatDacBiet?: true
     isTrongNuoc?: true
@@ -3874,6 +3879,7 @@ export namespace Prisma {
     nuocDangKy?: true
     diaChiDangKy?: true
     nhomThuoc?: true
+    nhomDieuTri?: true
     isKeDon?: true
     kiemSoatDacBiet?: true
     isTrongNuoc?: true
@@ -3977,6 +3983,7 @@ export namespace Prisma {
     nuocDangKy: string | null
     diaChiDangKy: string | null
     nhomThuoc: string | null
+    nhomDieuTri: string | null
     isKeDon: string | null
     kiemSoatDacBiet: string | null
     isTrongNuoc: string | null
@@ -4024,6 +4031,7 @@ export namespace Prisma {
     nuocDangKy?: boolean
     diaChiDangKy?: boolean
     nhomThuoc?: boolean
+    nhomDieuTri?: boolean
     isKeDon?: boolean
     kiemSoatDacBiet?: boolean
     isTrongNuoc?: boolean
@@ -4056,6 +4064,7 @@ export namespace Prisma {
     nuocDangKy?: boolean
     diaChiDangKy?: boolean
     nhomThuoc?: boolean
+    nhomDieuTri?: boolean
     isKeDon?: boolean
     kiemSoatDacBiet?: boolean
     isTrongNuoc?: boolean
@@ -4086,6 +4095,7 @@ export namespace Prisma {
     nuocDangKy?: boolean
     diaChiDangKy?: boolean
     nhomThuoc?: boolean
+    nhomDieuTri?: boolean
     isKeDon?: boolean
     kiemSoatDacBiet?: boolean
     isTrongNuoc?: boolean
@@ -4116,6 +4126,7 @@ export namespace Prisma {
     nuocDangKy?: boolean
     diaChiDangKy?: boolean
     nhomThuoc?: boolean
+    nhomDieuTri?: boolean
     isKeDon?: boolean
     kiemSoatDacBiet?: boolean
     isTrongNuoc?: boolean
@@ -4124,7 +4135,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type MasterDrugOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "maChung" | "maBhyt" | "tenThuoc" | "hoatChat" | "hamLuong" | "dangBaoChe" | "soDangKy" | "quyCach" | "donViTinh" | "tieuChuan" | "tuoiTho" | "duongDung" | "nguonGoc" | "congTySanXuat" | "nuocSanXuat" | "diaChiSanXuat" | "congTyDangKy" | "nuocDangKy" | "diaChiDangKy" | "nhomThuoc" | "isKeDon" | "kiemSoatDacBiet" | "isTrongNuoc" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["masterDrug"]>
+  export type MasterDrugOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "maChung" | "maBhyt" | "tenThuoc" | "hoatChat" | "hamLuong" | "dangBaoChe" | "soDangKy" | "quyCach" | "donViTinh" | "tieuChuan" | "tuoiTho" | "duongDung" | "nguonGoc" | "congTySanXuat" | "nuocSanXuat" | "diaChiSanXuat" | "congTyDangKy" | "nuocDangKy" | "diaChiDangKy" | "nhomThuoc" | "nhomDieuTri" | "isKeDon" | "kiemSoatDacBiet" | "isTrongNuoc" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["masterDrug"]>
   export type MasterDrugInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     drugMaps?: boolean | MasterDrug$drugMapsArgs<ExtArgs>
     _count?: boolean | MasterDrugCountOutputTypeDefaultArgs<ExtArgs>
@@ -4159,6 +4170,7 @@ export namespace Prisma {
       nuocDangKy: string | null
       diaChiDangKy: string | null
       nhomThuoc: string | null
+      nhomDieuTri: string | null
       isKeDon: string | null
       kiemSoatDacBiet: string | null
       isTrongNuoc: string | null
@@ -4610,6 +4622,7 @@ export namespace Prisma {
     readonly nuocDangKy: FieldRef<"MasterDrug", 'String'>
     readonly diaChiDangKy: FieldRef<"MasterDrug", 'String'>
     readonly nhomThuoc: FieldRef<"MasterDrug", 'String'>
+    readonly nhomDieuTri: FieldRef<"MasterDrug", 'String'>
     readonly isKeDon: FieldRef<"MasterDrug", 'String'>
     readonly kiemSoatDacBiet: FieldRef<"MasterDrug", 'String'>
     readonly isTrongNuoc: FieldRef<"MasterDrug", 'String'>
@@ -19289,6 +19302,7 @@ export namespace Prisma {
     nuocDangKy: 'nuocDangKy',
     diaChiDangKy: 'diaChiDangKy',
     nhomThuoc: 'nhomThuoc',
+    nhomDieuTri: 'nhomDieuTri',
     isKeDon: 'isKeDon',
     kiemSoatDacBiet: 'kiemSoatDacBiet',
     isTrongNuoc: 'isTrongNuoc',
@@ -19800,6 +19814,7 @@ export namespace Prisma {
     nuocDangKy?: StringNullableFilter<"MasterDrug"> | string | null
     diaChiDangKy?: StringNullableFilter<"MasterDrug"> | string | null
     nhomThuoc?: StringNullableFilter<"MasterDrug"> | string | null
+    nhomDieuTri?: StringNullableFilter<"MasterDrug"> | string | null
     isKeDon?: StringNullableFilter<"MasterDrug"> | string | null
     kiemSoatDacBiet?: StringNullableFilter<"MasterDrug"> | string | null
     isTrongNuoc?: StringNullableFilter<"MasterDrug"> | string | null
@@ -19831,6 +19846,7 @@ export namespace Prisma {
     nuocDangKy?: SortOrderInput | SortOrder
     diaChiDangKy?: SortOrderInput | SortOrder
     nhomThuoc?: SortOrderInput | SortOrder
+    nhomDieuTri?: SortOrderInput | SortOrder
     isKeDon?: SortOrderInput | SortOrder
     kiemSoatDacBiet?: SortOrderInput | SortOrder
     isTrongNuoc?: SortOrderInput | SortOrder
@@ -19865,6 +19881,7 @@ export namespace Prisma {
     nuocDangKy?: StringNullableFilter<"MasterDrug"> | string | null
     diaChiDangKy?: StringNullableFilter<"MasterDrug"> | string | null
     nhomThuoc?: StringNullableFilter<"MasterDrug"> | string | null
+    nhomDieuTri?: StringNullableFilter<"MasterDrug"> | string | null
     isKeDon?: StringNullableFilter<"MasterDrug"> | string | null
     kiemSoatDacBiet?: StringNullableFilter<"MasterDrug"> | string | null
     isTrongNuoc?: StringNullableFilter<"MasterDrug"> | string | null
@@ -19896,6 +19913,7 @@ export namespace Prisma {
     nuocDangKy?: SortOrderInput | SortOrder
     diaChiDangKy?: SortOrderInput | SortOrder
     nhomThuoc?: SortOrderInput | SortOrder
+    nhomDieuTri?: SortOrderInput | SortOrder
     isKeDon?: SortOrderInput | SortOrder
     kiemSoatDacBiet?: SortOrderInput | SortOrder
     isTrongNuoc?: SortOrderInput | SortOrder
@@ -19932,6 +19950,7 @@ export namespace Prisma {
     nuocDangKy?: StringNullableWithAggregatesFilter<"MasterDrug"> | string | null
     diaChiDangKy?: StringNullableWithAggregatesFilter<"MasterDrug"> | string | null
     nhomThuoc?: StringNullableWithAggregatesFilter<"MasterDrug"> | string | null
+    nhomDieuTri?: StringNullableWithAggregatesFilter<"MasterDrug"> | string | null
     isKeDon?: StringNullableWithAggregatesFilter<"MasterDrug"> | string | null
     kiemSoatDacBiet?: StringNullableWithAggregatesFilter<"MasterDrug"> | string | null
     isTrongNuoc?: StringNullableWithAggregatesFilter<"MasterDrug"> | string | null
@@ -21207,6 +21226,7 @@ export namespace Prisma {
     nuocDangKy?: string | null
     diaChiDangKy?: string | null
     nhomThuoc?: string | null
+    nhomDieuTri?: string | null
     isKeDon?: string | null
     kiemSoatDacBiet?: string | null
     isTrongNuoc?: string | null
@@ -21238,6 +21258,7 @@ export namespace Prisma {
     nuocDangKy?: string | null
     diaChiDangKy?: string | null
     nhomThuoc?: string | null
+    nhomDieuTri?: string | null
     isKeDon?: string | null
     kiemSoatDacBiet?: string | null
     isTrongNuoc?: string | null
@@ -21269,6 +21290,7 @@ export namespace Prisma {
     nuocDangKy?: NullableStringFieldUpdateOperationsInput | string | null
     diaChiDangKy?: NullableStringFieldUpdateOperationsInput | string | null
     nhomThuoc?: NullableStringFieldUpdateOperationsInput | string | null
+    nhomDieuTri?: NullableStringFieldUpdateOperationsInput | string | null
     isKeDon?: NullableStringFieldUpdateOperationsInput | string | null
     kiemSoatDacBiet?: NullableStringFieldUpdateOperationsInput | string | null
     isTrongNuoc?: NullableStringFieldUpdateOperationsInput | string | null
@@ -21300,6 +21322,7 @@ export namespace Prisma {
     nuocDangKy?: NullableStringFieldUpdateOperationsInput | string | null
     diaChiDangKy?: NullableStringFieldUpdateOperationsInput | string | null
     nhomThuoc?: NullableStringFieldUpdateOperationsInput | string | null
+    nhomDieuTri?: NullableStringFieldUpdateOperationsInput | string | null
     isKeDon?: NullableStringFieldUpdateOperationsInput | string | null
     kiemSoatDacBiet?: NullableStringFieldUpdateOperationsInput | string | null
     isTrongNuoc?: NullableStringFieldUpdateOperationsInput | string | null
@@ -21331,6 +21354,7 @@ export namespace Prisma {
     nuocDangKy?: string | null
     diaChiDangKy?: string | null
     nhomThuoc?: string | null
+    nhomDieuTri?: string | null
     isKeDon?: string | null
     kiemSoatDacBiet?: string | null
     isTrongNuoc?: string | null
@@ -21361,6 +21385,7 @@ export namespace Prisma {
     nuocDangKy?: NullableStringFieldUpdateOperationsInput | string | null
     diaChiDangKy?: NullableStringFieldUpdateOperationsInput | string | null
     nhomThuoc?: NullableStringFieldUpdateOperationsInput | string | null
+    nhomDieuTri?: NullableStringFieldUpdateOperationsInput | string | null
     isKeDon?: NullableStringFieldUpdateOperationsInput | string | null
     kiemSoatDacBiet?: NullableStringFieldUpdateOperationsInput | string | null
     isTrongNuoc?: NullableStringFieldUpdateOperationsInput | string | null
@@ -21391,6 +21416,7 @@ export namespace Prisma {
     nuocDangKy?: NullableStringFieldUpdateOperationsInput | string | null
     diaChiDangKy?: NullableStringFieldUpdateOperationsInput | string | null
     nhomThuoc?: NullableStringFieldUpdateOperationsInput | string | null
+    nhomDieuTri?: NullableStringFieldUpdateOperationsInput | string | null
     isKeDon?: NullableStringFieldUpdateOperationsInput | string | null
     kiemSoatDacBiet?: NullableStringFieldUpdateOperationsInput | string | null
     isTrongNuoc?: NullableStringFieldUpdateOperationsInput | string | null
@@ -22898,6 +22924,7 @@ export namespace Prisma {
     nuocDangKy?: SortOrder
     diaChiDangKy?: SortOrder
     nhomThuoc?: SortOrder
+    nhomDieuTri?: SortOrder
     isKeDon?: SortOrder
     kiemSoatDacBiet?: SortOrder
     isTrongNuoc?: SortOrder
@@ -22928,6 +22955,7 @@ export namespace Prisma {
     nuocDangKy?: SortOrder
     diaChiDangKy?: SortOrder
     nhomThuoc?: SortOrder
+    nhomDieuTri?: SortOrder
     isKeDon?: SortOrder
     kiemSoatDacBiet?: SortOrder
     isTrongNuoc?: SortOrder
@@ -22958,6 +22986,7 @@ export namespace Prisma {
     nuocDangKy?: SortOrder
     diaChiDangKy?: SortOrder
     nhomThuoc?: SortOrder
+    nhomDieuTri?: SortOrder
     isKeDon?: SortOrder
     kiemSoatDacBiet?: SortOrder
     isTrongNuoc?: SortOrder
@@ -25512,6 +25541,7 @@ export namespace Prisma {
     nuocDangKy?: string | null
     diaChiDangKy?: string | null
     nhomThuoc?: string | null
+    nhomDieuTri?: string | null
     isKeDon?: string | null
     kiemSoatDacBiet?: string | null
     isTrongNuoc?: string | null
@@ -25542,6 +25572,7 @@ export namespace Prisma {
     nuocDangKy?: string | null
     diaChiDangKy?: string | null
     nhomThuoc?: string | null
+    nhomDieuTri?: string | null
     isKeDon?: string | null
     kiemSoatDacBiet?: string | null
     isTrongNuoc?: string | null
@@ -25695,6 +25726,7 @@ export namespace Prisma {
     nuocDangKy?: NullableStringFieldUpdateOperationsInput | string | null
     diaChiDangKy?: NullableStringFieldUpdateOperationsInput | string | null
     nhomThuoc?: NullableStringFieldUpdateOperationsInput | string | null
+    nhomDieuTri?: NullableStringFieldUpdateOperationsInput | string | null
     isKeDon?: NullableStringFieldUpdateOperationsInput | string | null
     kiemSoatDacBiet?: NullableStringFieldUpdateOperationsInput | string | null
     isTrongNuoc?: NullableStringFieldUpdateOperationsInput | string | null
@@ -25725,6 +25757,7 @@ export namespace Prisma {
     nuocDangKy?: NullableStringFieldUpdateOperationsInput | string | null
     diaChiDangKy?: NullableStringFieldUpdateOperationsInput | string | null
     nhomThuoc?: NullableStringFieldUpdateOperationsInput | string | null
+    nhomDieuTri?: NullableStringFieldUpdateOperationsInput | string | null
     isKeDon?: NullableStringFieldUpdateOperationsInput | string | null
     kiemSoatDacBiet?: NullableStringFieldUpdateOperationsInput | string | null
     isTrongNuoc?: NullableStringFieldUpdateOperationsInput | string | null

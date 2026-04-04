@@ -159,6 +159,7 @@ exports.Prisma.MasterDrugScalarFieldEnum = {
   nuocDangKy: 'nuocDangKy',
   diaChiDangKy: 'diaChiDangKy',
   nhomThuoc: 'nhomThuoc',
+  nhomDieuTri: 'nhomDieuTri',
   isKeDon: 'isKeDon',
   kiemSoatDacBiet: 'kiemSoatDacBiet',
   isTrongNuoc: 'isTrongNuoc',

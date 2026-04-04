@@ -24,10 +24,6 @@ import {
     Dialog,
     DialogPortal,
     DialogOverlay,
-    DialogHeader,
-    DialogTitle,
-    DialogDescription,
-    DialogFooter,
     DialogTrigger,
 } from "@/components/ui/dialog";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
@@ -47,7 +43,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { readExcel, exportExcel } from "@/lib/excel";
 import { Settings2, Pencil, Trash2, Trash, Search } from "lucide-react";
@@ -88,6 +83,7 @@ interface MasterDrug {
     diaChiDangKy: string | null;
 
     nhomThuoc: string | null;
+    nhomDieuTri: string | null;
     isKeDon: string | null;
     kiemSoatDacBiet: string | null;
     isTrongNuoc: string | null;
@@ -105,6 +101,37 @@ const COLUMN_CONFIG = [
     { id: "duongDung", label: "Đường dùng" },
     { id: "donViTinh", label: "Đơn vị tính" },
 ];
+
+const INITIAL_FORM_DATA = {
+    maChung: "",
+    maBhyt: "",
+    tenThuoc: "",
+    hoatChat: "",
+    hamLuong: "",
+    dangBaoChe: "",
+    soDangKy: "",
+    quyCach: "",
+    donViTinh: "",
+
+    tieuChuan: "",
+    tuoiTho: "",
+    duongDung: "",
+    nguonGoc: "",
+
+    congTySanXuat: "",
+    nuocSanXuat: "",
+    diaChiSanXuat: "",
+
+    congTyDangKy: "",
+    nuocDangKy: "",
+    diaChiDangKy: "",
+
+    nhomThuoc: "",
+    nhomDieuTri: "",
+    isKeDon: "",
+    kiemSoatDacBiet: "",
+    isTrongNuoc: "",
+};
 
 export default function MasterDrugsPage() {
     const { data: session } = useSession();
@@ -124,35 +151,7 @@ export default function MasterDrugsPage() {
 
     const [editingId, setEditingId] = useState<string | null>(null);
 
-    const [formData, setFormData] = useState({
-        maChung: "",
-        maBhyt: "",
-        tenThuoc: "",
-        hoatChat: "",
-        hamLuong: "",
-        dangBaoChe: "",
-        soDangKy: "",
-        quyCach: "",
-        donViTinh: "",
-
-        tieuChuan: "",
-        tuoiTho: "",
-        duongDung: "",
-        nguonGoc: "",
-
-        congTySanXuat: "",
-        nuocSanXuat: "",
-        diaChiSanXuat: "",
-
-        congTyDangKy: "",
-        nuocDangKy: "",
-        diaChiDangKy: "",
-
-        nhomThuoc: "",
-        isKeDon: "",
-        kiemSoatDacBiet: "",
-        isTrongNuoc: "",
-    });
+    const [formData, setFormData] = useState(INITIAL_FORM_DATA);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isImporting, setIsImporting] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
@@ -215,16 +214,9 @@ export default function MasterDrugsPage() {
         setIsSubmitting(true);
 
         const previousDrugs = [...drugs]; // Backup
-        let optimisticDrug: MasterDrug | null = null;
 
         // Optimistic Update
         if (editingId) {
-            const updatedDrug = {
-                ...drugs.find(d => d.id === editingId),
-                ...formData,
-                isActive: true, // Default or preserve? Assuming true for now or preserve found
-            } as MasterDrug;
-
             // Preserve existing fields that are not in formData but required in MasterDrug
             // Actually, best to just merge what we have. 
             // We need to be careful with nulls vs empty strings if types mismatch, 
@@ -257,35 +249,7 @@ export default function MasterDrugsPage() {
                     // But for edit, we already did optimistic.
                     setIsDialogOpen(false);
                     setEditingId(null);
-                    setFormData({
-                        maChung: "",
-                        maBhyt: "",
-                        tenThuoc: "",
-                        hoatChat: "",
-                        hamLuong: "",
-                        dangBaoChe: "",
-                        soDangKy: "",
-                        quyCach: "",
-                        donViTinh: "",
-
-                        tieuChuan: "",
-                        tuoiTho: "",
-                        duongDung: "",
-                        nguonGoc: "",
-
-                        congTySanXuat: "",
-                        nuocSanXuat: "",
-                        diaChiSanXuat: "",
-
-                        congTyDangKy: "",
-                        nuocDangKy: "",
-                        diaChiDangKy: "",
-
-                        nhomThuoc: "",
-                        isKeDon: "",
-                        kiemSoatDacBiet: "",
-                        isTrongNuoc: "",
-                    });
+                    setFormData({ ...INITIAL_FORM_DATA });
                 }
                 fetchDrugs(page, searchTerm); // Sync with server eventually
             } else {
@@ -342,6 +306,7 @@ export default function MasterDrugsPage() {
                 diaChiDangKy: row['Địa chỉ đăng ký'] || row['diaChiDangKy'],
 
                 nhomThuoc: row['Nhóm thuốc'] || row['nhomThuoc'],
+                nhomDieuTri: row['Nhóm điều trị'] || row['nhomDieuTri'],
                 isKeDon: row['Thuốc kê đơn'] || row['thuocKeDon'],
                 kiemSoatDacBiet: row['Thuốc kiểm soát đặc biệt'] || row['kiemSoatDacBiet'],
                 isTrongNuoc: row['Thuốc trong nước'] || row['thuocTrongNuoc'],
@@ -400,6 +365,7 @@ export default function MasterDrugsPage() {
                 "Nước đăng ký": "Việt Nam",
                 "Địa chỉ đăng ký": "Hồ Chí Minh",
                 "Nhóm thuốc": "Nhóm 1",
+                "Nhóm điều trị": "Giảm đau, hạ sốt",
                 "Thuốc kê đơn": "Không",
                 "Thuốc kiểm soát đặc biệt": "",
                 "Thuốc trong nước": "Có"
@@ -425,6 +391,7 @@ export default function MasterDrugsPage() {
                 "Nước đăng ký": "",
                 "Địa chỉ đăng ký": "",
                 "Nhóm thuốc": "",
+                "Nhóm điều trị": "",
                 "Thuốc kê đơn": "",
                 "Thuốc kiểm soát đặc biệt": "",
                 "Thuốc trong nước": ""
@@ -502,6 +469,7 @@ export default function MasterDrugsPage() {
             diaChiDangKy: drug.diaChiDangKy || "",
 
             nhomThuoc: drug.nhomThuoc || "",
+            nhomDieuTri: drug.nhomDieuTri || "",
             isKeDon: drug.isKeDon || "",
             kiemSoatDacBiet: drug.kiemSoatDacBiet || "",
             isTrongNuoc: drug.isTrongNuoc || "",
@@ -664,35 +632,7 @@ export default function MasterDrugsPage() {
                                 setIsDialogOpen(open);
                                 if (!open) {
                                     setEditingId(null);
-                                    setFormData({
-                                        maChung: "",
-                                        maBhyt: "",
-                                        tenThuoc: "",
-                                        hoatChat: "",
-                                        hamLuong: "",
-                                        dangBaoChe: "",
-                                        soDangKy: "",
-                                        quyCach: "",
-                                        donViTinh: "",
-
-                                        tieuChuan: "",
-                                        tuoiTho: "",
-                                        duongDung: "",
-                                        nguonGoc: "",
-
-                                        congTySanXuat: "",
-                                        nuocSanXuat: "",
-                                        diaChiSanXuat: "",
-
-                                        congTyDangKy: "",
-                                        nuocDangKy: "",
-                                        diaChiDangKy: "",
-
-                                        nhomThuoc: "",
-                                        isKeDon: "",
-                                        kiemSoatDacBiet: "",
-                                        isTrongNuoc: "",
-                                    });
+                                    setFormData({ ...INITIAL_FORM_DATA });
                                 }
                             }}>
                                 <DialogTrigger asChild>
@@ -917,11 +857,19 @@ export default function MasterDrugsPage() {
                                                         <div className="pt-3 border-t border-gray-100">
                                                             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Phân loại thuốc</p>
                                                             <div className="space-y-3">
-                                                                <div className="space-y-1.5">
-                                                                    <Label htmlFor="nhomThuoc" className="text-xs font-semibold text-gray-600">Nhóm thuốc</Label>
-                                                                    <Input id="nhomThuoc" value={formData.nhomThuoc}
-                                                                        onChange={(e) => setFormData({ ...formData, nhomThuoc: e.target.value })}
-                                                                        placeholder="vd: Nhóm 1" className="h-9" />
+                                                                <div className="grid grid-cols-2 gap-3">
+                                                                    <div className="space-y-1.5">
+                                                                        <Label htmlFor="nhomThuoc" className="text-xs font-semibold text-gray-600">Nhóm thuốc</Label>
+                                                                        <Input id="nhomThuoc" value={formData.nhomThuoc}
+                                                                            onChange={(e) => setFormData({ ...formData, nhomThuoc: e.target.value })}
+                                                                            placeholder="vd: Nhóm 1" className="h-9" />
+                                                                    </div>
+                                                                    <div className="space-y-1.5">
+                                                                        <Label htmlFor="nhomDieuTri" className="text-xs font-semibold text-gray-600">Nhóm điều trị</Label>
+                                                                        <Input id="nhomDieuTri" value={formData.nhomDieuTri}
+                                                                            onChange={(e) => setFormData({ ...formData, nhomDieuTri: e.target.value })}
+                                                                            placeholder="vd: Giảm đau, hạ sốt" className="h-9" />
+                                                                    </div>
                                                                 </div>
                                                                 <div className="grid grid-cols-3 gap-3">
                                                                     <div className="space-y-1.5">
@@ -1083,6 +1031,7 @@ export default function MasterDrugsPage() {
                                         <TableHead className="text-white font-bold">Quy cách</TableHead>
                                         <TableHead className="text-white font-bold">Đường dùng</TableHead>
                                         <TableHead className="text-white font-bold">Đơn vị tính</TableHead>
+                                        <TableHead className="text-white font-bold">Nhóm điều trị</TableHead>
                                         <TableHead className="text-right text-white font-bold">Thao tác</TableHead>
                                     </TableRow>
                                 </TableHeader>
@@ -1115,6 +1064,9 @@ export default function MasterDrugsPage() {
                                             </TableCell>
                                             <TableCell className={wrappedColumns.donViTinh ? "" : "whitespace-nowrap"}>
                                                 {drug.donViTinh || "-"}
+                                            </TableCell>
+                                            <TableCell className="max-w-xs truncate">
+                                                {drug.nhomDieuTri || "-"}
                                             </TableCell>
                                             <TableCell className="text-right whitespace-nowrap">
                                                 {isAdmin && (
@@ -1151,7 +1103,7 @@ export default function MasterDrugsPage() {
                                     ))}
                                     {drugs.length === 0 && (
                                         <TableRow>
-                                            <TableCell colSpan={10} className="text-center text-gray-500 py-8">
+                                            <TableCell colSpan={11} className="text-center text-gray-500 py-8">
                                                 {searchTerm ? "Không tìm thấy thuốc phù hợp" : "Chưa có thuốc trong danh mục"}
                                             </TableCell>
                                         </TableRow>

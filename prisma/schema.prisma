@@ -70,6 +70,7 @@ model MasterDrug {
   diaChiDangKy         String?  @map("dia_chi_dang_ky")
   
   nhomThuoc            String?  @map("nhom_thuoc")
+  nhomDieuTri          String?  @map("nhom_dieu_tri")
   isKeDon              String?  @map("is_ke_don")
   kiemSoatDacBiet      String?  @map("kiem_soat_dac_biet")
   isTrongNuoc          String?  @map("is_trong_nuoc")
