@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { searchInventoryByDrug } from "@/lib/inventory-search/server";
+import { searchDrugOptions } from "@/lib/inventory-search/server";
 import { NextRequest, NextResponse } from "next/server";
 
 const parsePositiveInt = (value: string | null, fallback: number) => {
@@ -17,18 +17,16 @@ export async function GET(req: NextRequest) {
 
         const { searchParams } = new URL(req.url);
         const query = searchParams.get("q") || "";
-        const page = parsePositiveInt(searchParams.get("page"), 1);
-        const limit = Math.min(parsePositiveInt(searchParams.get("limit"), 20), 100);
-        const data = await searchInventoryByDrug({
+        const limit = Math.min(parsePositiveInt(searchParams.get("limit"), 10), 20);
+
+        const results = await searchDrugOptions({
             query,
-            page,
             limit,
-            sort: "drugNameAsc",
         });
 
-        return NextResponse.json(data);
+        return NextResponse.json({ results });
     } catch (error) {
-        console.error("Error searching inventory:", error);
+        console.error("Drug options search error:", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 }
