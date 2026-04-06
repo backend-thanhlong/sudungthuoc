@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -102,6 +102,8 @@ const COLUMN_CONFIG = [
     { id: "donViTinh", label: "Đơn vị tính" },
 ];
 
+const PAGE_SIZE_OPTIONS = [20, 50, 100] as const;
+
 const INITIAL_FORM_DATA = {
     maChung: "",
     maBhyt: "",
@@ -143,11 +145,12 @@ export default function MasterDrugsPage() {
     const [searchTerm, setSearchTerm] = useState("");
     const [activeSearchTerm, setActiveSearchTerm] = useState(""); // The actual search query being used
     const [searchField, setSearchField] = useState("ALL");
+    const [mappingStatus, setMappingStatus] = useState("all");
     const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
     const [page, setPage] = useState(1);
+    const [limit, setLimit] = useState<number>(20);
     const [totalPages, setTotalPages] = useState(1);
     const [totalRecords, setTotalRecords] = useState(0);
-    const limit = 20;
 
     const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -167,14 +170,21 @@ export default function MasterDrugsPage() {
     });
     const [isDeleteAllOpen, setIsDeleteAllOpen] = useState(false);
 
-    const fetchDrugs = async (currentPage: number, search: string, field: string = "ALL") => {
+    const fetchDrugs = useCallback(async (
+        currentPage: number,
+        search: string,
+        field: string = "ALL",
+        currentMappingStatus: string = "all",
+        currentLimit: number = limit
+    ) => {
         setIsLoading(true);
         try {
             const params = new URLSearchParams({
                 page: currentPage.toString(),
-                limit: limit.toString(),
+                limit: currentLimit.toString(),
                 search: search,
                 searchField: field,
+                mappingStatus: currentMappingStatus,
             });
             const res = await fetch(`/api/admin/master-drugs?${params.toString()}`);
             if (res.ok) {
@@ -189,17 +199,27 @@ export default function MasterDrugsPage() {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [limit]);
 
     // Only fetch when page changes or when activeSearchTerm changes (from button/Enter)
     useEffect(() => {
-        fetchDrugs(page, activeSearchTerm, searchField);
-    }, [page, activeSearchTerm, searchField]);
+        fetchDrugs(page, activeSearchTerm, searchField, mappingStatus, limit);
+    }, [fetchDrugs, page, activeSearchTerm, searchField, mappingStatus, limit]);
 
     // Handle search execution
     const handleSearch = () => {
         setActiveSearchTerm(searchTerm);
         setPage(1); // Reset to first page on new search
+    };
+
+    const handleMappingStatusChange = (value: string) => {
+        setPage(1);
+        setMappingStatus(value);
+    };
+
+    const handlePageSizeChange = (value: string) => {
+        setPage(1);
+        setLimit(Number(value));
     };
 
     // Handle Enter key press
@@ -251,7 +271,7 @@ export default function MasterDrugsPage() {
                     setEditingId(null);
                     setFormData({ ...INITIAL_FORM_DATA });
                 }
-                fetchDrugs(page, searchTerm); // Sync with server eventually
+                fetchDrugs(page, searchTerm, searchField, mappingStatus); // Sync with server eventually
             } else {
                 if (editingId) {
                     setDrugs(previousDrugs); // Revert optimistic update
@@ -328,7 +348,7 @@ export default function MasterDrugsPage() {
             if (res.ok) {
                 const data = await res.json();
                 toast.success(`Nhập thành công: ${data.stats.success}, Bỏ qua: ${data.stats.skipped}, Lỗi: ${data.stats.error}`, { id: toastId });
-                fetchDrugs(page, searchTerm);
+                fetchDrugs(page, searchTerm, searchField, mappingStatus);
             } else {
                 toast.error("Lỗi khi nhập dữ liệu", { id: toastId });
             }
@@ -435,7 +455,7 @@ export default function MasterDrugsPage() {
 
             if (res.ok) {
                 toast.success(currentStatus ? "Đã ẩn thuốc" : "Đã hiện thuốc");
-                fetchDrugs(page, searchTerm);
+                fetchDrugs(page, searchTerm, searchField, mappingStatus);
             }
         } catch {
             toast.error("Đã xảy ra lỗi");
@@ -496,7 +516,7 @@ export default function MasterDrugsPage() {
                 // But better to sync in background or just leave it
                 // If we don't fetch, pagination might be slightly off until next nav, but that's fine for "instant" feel
                 // Let's just re-fetch to be safe but the UI is already updated
-                fetchDrugs(page, searchTerm);
+                fetchDrugs(page, searchTerm, searchField, mappingStatus);
             } else {
                 // Revert
                 setDrugs(previousDrugs);
@@ -925,13 +945,30 @@ export default function MasterDrugsPage() {
                     <div className="flex items-center justify-between">
                         <div>
                             <CardTitle>Danh sách thuốc</CardTitle>
-                            <CardDescription>Tổng cộng {totalRecords} thuốc trong danh mục</CardDescription>
+                            <CardDescription>
+                                {mappingStatus === "mapped"
+                                    ? `Hiển thị ${totalRecords} thuốc đã được ánh xạ`
+                                    : mappingStatus === "unmapped"
+                                        ? `Hiển thị ${totalRecords} thuốc chưa được ánh xạ`
+                                        : `Tổng cộng ${totalRecords} thuốc trong danh mục`}
+                            </CardDescription>
                         </div>
                     </div>
 
                     {/* Search Box */}
                     <div className="mt-4 space-y-2">
                         <div className="flex gap-2">
+                            <Select value={mappingStatus} onValueChange={handleMappingStatusChange}>
+                                <SelectTrigger className="w-[220px] bg-white">
+                                    <SelectValue placeholder="Trạng thái ánh xạ" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">Tất cả trạng thái</SelectItem>
+                                    <SelectItem value="mapped">Đã được ánh xạ</SelectItem>
+                                    <SelectItem value="unmapped">Chưa được ánh xạ</SelectItem>
+                                </SelectContent>
+                            </Select>
+
                             <Select value={searchField} onValueChange={setSearchField}>
                                 <SelectTrigger className="w-[160px] bg-white">
                                     <SelectValue placeholder="Tất cả" />
@@ -1112,8 +1149,25 @@ export default function MasterDrugsPage() {
                             </Table>
                             {/* Pagination Controls */}
                             <div className="flex items-center justify-between mt-4">
-                                <div className="text-sm text-gray-500">
-                                    Trang {page} / {totalPages}
+                                <div className="flex items-center gap-4">
+                                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                                        <span>Hiển thị</span>
+                                        <Select value={limit.toString()} onValueChange={handlePageSizeChange}>
+                                            <SelectTrigger className="w-[120px] bg-white">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {PAGE_SIZE_OPTIONS.map((pageSize) => (
+                                                    <SelectItem key={pageSize} value={pageSize.toString()}>
+                                                        {pageSize} dòng
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="text-sm text-gray-500">
+                                        Trang {page} / {totalPages}
+                                    </div>
                                 </div>
                                 <div className="flex gap-2">
                                     <Button
