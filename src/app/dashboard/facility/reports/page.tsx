@@ -36,12 +36,21 @@ import {
 } from "@/components/ui/table";
 import { toast } from "sonner";
 import { Eye, Loader2, CheckCircle, XCircle, AlertCircle } from "lucide-react";
-import { validateReportRow, parseRawRow, ValidationWarning } from "@/lib/report-validation";
+import {
+    findDuplicateRowTokens,
+    parseRawRow,
+    REPORT_VALIDATION_CODES,
+    REPORT_ROW_TOKEN_COLUMN,
+    validateReportRow,
+    ValidationWarning,
+} from "@/lib/report-validation";
 
 interface PreviewRow {
     stt: number;
+    excelRowNumber: number;
     maNoiBo?: string;
     maThuoc?: string;
+    rowToken?: string | null;
     drugName: string;
     tonDau: number;
     nhap: number;
@@ -54,6 +63,13 @@ interface PreviewRow {
     warnings: ValidationWarning[];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     rawRow: any;
+}
+
+interface ServerValidationError {
+    rowNumber: number;
+    field: string;
+    code: string;
+    message: string;
 }
 
 const DETAIL_PAGE_SIZE = 50;
@@ -127,6 +143,9 @@ export default function FacilityReportsPage() {
     const [previewRows, setPreviewRows] = useState<PreviewRow[]>([]);
     const [isPreviewing, setIsPreviewing] = useState(false);
     const [isParsingFile, setIsParsingFile] = useState(false);
+    const [serverValidationErrors, setServerValidationErrors] = useState<ServerValidationError[]>([]);
+    const [isServerValidating, setIsServerValidating] = useState(false);
+    const [hasServerValidatedSuccess, setHasServerValidatedSuccess] = useState(false);
 
     // Detail modal state
     const [detailData, setDetailData] = useState<DetailReportRow[]>([]);
@@ -203,12 +222,49 @@ export default function FacilityReportsPage() {
     const isRejected = currentMonthReport?.status === "REJECTED";
     const isPending = currentMonthReport?.status === "PENDING";
 
+    const resetUploadValidationState = () => {
+        setPreviewRows([]);
+        setIsPreviewing(false);
+        setServerValidationErrors([]);
+        setIsServerValidating(false);
+        setHasServerValidatedSuccess(false);
+    };
+
+    const validateReportPayload = async (rawData: unknown[], month: string) => {
+        setIsServerValidating(true);
+        setServerValidationErrors([]);
+        setHasServerValidatedSuccess(false);
+
+        try {
+            const res = await fetch("/api/facility/reports/validate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ month, data: rawData }),
+            });
+
+            if (res.ok) {
+                setHasServerValidatedSuccess(true);
+                return true;
+            }
+
+            const errorData = await res.json().catch(() => null);
+            setServerValidationErrors(errorData?.errors || []);
+            toast.error(errorData?.message || "Không thể kiểm tra dữ liệu với máy chủ");
+            return false;
+        } catch (error) {
+            console.error(error);
+            toast.error("Không thể kiểm tra dữ liệu với máy chủ");
+            return false;
+        } finally {
+            setIsServerValidating(false);
+        }
+    };
+
     const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files.length > 0) {
             const file = e.target.files[0];
             setSelectedFile(file);
-            setIsPreviewing(false);
-            setPreviewRows([]);
+            resetUploadValidationState();
 
             if (!selectedMonth) {
                 toast.warning("Vui lòng chọn tháng báo cáo trước khi chọn file");
@@ -224,14 +280,28 @@ export default function FacilityReportsPage() {
                     toast.error("File không có dữ liệu");
                     return;
                 }
+                const parsedRows = rawData
+                    .map((row) => parseRawRow(row))
+                    .filter((row): row is NonNullable<ReturnType<typeof parseRawRow>> => Boolean(row));
+                const duplicateTokens = findDuplicateRowTokens(parsedRows);
                 const rows: PreviewRow[] = rawData.map((row, idx) => {
                     const parsed = parseRawRow(row);
                     if (!parsed) return null;
                     const warnings = validateReportRow(parsed);
+                    if (parsed.rowToken && duplicateTokens.has(parsed.rowToken.trim())) {
+                        warnings.push({
+                            drug: parsed.drugName,
+                            field: REPORT_ROW_TOKEN_COLUMN,
+                            code: REPORT_VALIDATION_CODES.duplicateRowToken,
+                            message: `${parsed.drugName}: Mã định danh dòng bị trùng trong file.`,
+                        });
+                    }
                     return {
                         stt: idx + 1,
+                        excelRowNumber: idx + 2,
                         maNoiBo: parsed.maNoiBo,
                         maThuoc: parsed.maThuoc,
+                        rowToken: parsed.rowToken,
                         drugName: parsed.drugName,
                         tonDau: parsed.tonDau,
                         nhap: parsed.nhap,
@@ -247,6 +317,12 @@ export default function FacilityReportsPage() {
                 }).filter(Boolean) as PreviewRow[];
                 setPreviewRows(rows);
                 setIsPreviewing(true);
+
+                const localErrorCount = rows.reduce((acc, row) => acc + row.warnings.length, 0);
+                if (rows.length > 0 && localErrorCount === 0) {
+                    setIsParsingFile(false);
+                    await validateReportPayload(rawData, selectedMonth);
+                }
             } catch (err) {
                 console.error(err);
                 toast.error("Không thể đọc file Excel");
@@ -256,16 +332,59 @@ export default function FacilityReportsPage() {
         }
     };
 
-    const totalErrors = previewRows.reduce((acc, r) => acc + r.warnings.length, 0);
-    const validRows = previewRows.filter(r => r.warnings.length === 0).length;
+    const serverErrorsByRow = serverValidationErrors.reduce((map, error) => {
+        const rowErrors = map.get(error.rowNumber) || [];
+        rowErrors.push(error);
+        map.set(error.rowNumber, rowErrors);
+        return map;
+    }, new Map<number, ServerValidationError[]>());
+
+    const previewRowsWithErrors = previewRows.map((row) => {
+        const serverErrors = serverErrorsByRow.get(row.excelRowNumber) || [];
+        const combinedErrors: ValidationWarning[] = [
+            ...row.warnings,
+            ...serverErrors.map((error) => ({
+                drug: row.drugName,
+                field: error.field,
+                code: error.code as ValidationWarning["code"],
+                message: error.message,
+            })),
+        ];
+        return {
+            ...row,
+            combinedErrors,
+        };
+    });
+
+    const localErrorCount = previewRows.reduce((acc, row) => acc + row.warnings.length, 0);
+    const serverErrorCount = serverValidationErrors.length;
+    const totalErrors = localErrorCount + serverErrorCount;
+    const validRows = previewRowsWithErrors.filter((row) => row.combinedErrors.length === 0).length;
+    const canSubmit = Boolean(
+        selectedFile
+        && selectedMonth
+        && !isUploading
+        && !isServerValidating
+        && isPreviewing
+        && totalErrors === 0
+        && hasServerValidatedSuccess
+    );
 
     const handleUploadReport = async () => {
         if (!selectedFile || !selectedMonth) {
             toast.error("Vui lòng chọn tháng và file báo cáo");
             return;
         }
+        if (isServerValidating) {
+            toast.error("Dữ liệu đang được kiểm tra với máy chủ. Vui lòng đợi hoàn tất.");
+            return;
+        }
         if (totalErrors > 0) {
             toast.error(`Còn ${totalErrors} lỗi trong file. Vui lòng sửa trước khi nộp.`);
+            return;
+        }
+        if (!hasServerValidatedSuccess) {
+            toast.error("File chưa được xác thực với máy chủ. Vui lòng chọn lại file để kiểm tra.");
             return;
         }
 
@@ -287,17 +406,15 @@ export default function FacilityReportsPage() {
             if (res.ok) {
                 toast.success("Nộp báo cáo thành công");
                 setSelectedFile(null);
-                setPreviewRows([]);
-                setIsPreviewing(false);
+                resetUploadValidationState();
                 if (fileInputRef.current) fileInputRef.current.value = "";
                 fetchReports();
             } else {
                 const errorData = await res.json();
-                if (errorData.warnings && errorData.warnings.length > 0) {
-                    toast.error(`Báo cáo không được lưu: ${errorData.warnings.length} lỗi tính toán`, { duration: 8000 });
-                    errorData.warnings.slice(0, 5).forEach((w: { message: string }) => {
-                        toast.error(w.message, { duration: 12000 });
-                    });
+                if (errorData.errors && errorData.errors.length > 0) {
+                    setServerValidationErrors(errorData.errors);
+                    setHasServerValidatedSuccess(false);
+                    toast.error(errorData.message || `Báo cáo không được lưu: ${errorData.errors.length} lỗi`);
                 } else {
                     toast.error(errorData.error || errorData.message || "Lỗi khi nộp báo cáo");
                 }
@@ -451,8 +568,7 @@ export default function FacilityReportsPage() {
                             </label>
                             <Select value={selectedMonth} onValueChange={(v) => {
                                 setSelectedMonth(v);
-                                setPreviewRows([]);
-                                setIsPreviewing(false);
+                                resetUploadValidationState();
                                 setSelectedFile(null);
                                 if (fileInputRef.current) fileInputRef.current.value = "";
                             }}>
@@ -587,10 +703,16 @@ export default function FacilityReportsPage() {
 
                                 {/* Preview summary */}
                                 {isPreviewing && previewRows.length > 0 && (
-                                    <div className={`p-3 rounded-lg text-sm ${totalErrors > 0 ? "bg-red-50 border border-red-200" : "bg-emerald-50 border border-emerald-200"}`}>
+                                    <div className={`p-3 rounded-lg text-sm ${totalErrors > 0
+                                        ? "bg-red-50 border border-red-200"
+                                        : hasServerValidatedSuccess
+                                            ? "bg-emerald-50 border border-emerald-200"
+                                            : "bg-blue-50 border border-blue-200"}`}>
                                         <div className="flex items-center gap-2 font-medium mb-1">
                                             {totalErrors > 0 ? (
                                                 <><XCircle className="w-4 h-4 text-red-600" /><span className="text-red-700">{totalErrors} lỗi cần sửa trước khi nộp</span></>
+                                            ) : isServerValidating ? (
+                                                <><Loader2 className="w-4 h-4 text-blue-600 animate-spin" /><span className="text-blue-700">Đang kiểm tra dữ liệu với máy chủ</span></>
                                             ) : (
                                                 <><CheckCircle className="w-4 h-4 text-emerald-600" /><span className="text-emerald-700">Tất cả {validRows} dòng hợp lệ – sẵn sàng nộp</span></>
                                             )}
@@ -598,16 +720,26 @@ export default function FacilityReportsPage() {
                                         {totalErrors > 0 && (
                                             <p className="text-red-600 text-xs">Xem chi tiết lỗi trong bảng preview bên dưới</p>
                                         )}
+                                        {!totalErrors && isServerValidating && (
+                                            <p className="text-blue-600 text-xs">Máy chủ đang đối chiếu token dòng, dữ liệu mẫu và tồn cuối tháng trước.</p>
+                                        )}
+                                        {!totalErrors && !isServerValidating && !hasServerValidatedSuccess && (
+                                            <p className="text-blue-600 text-xs">Chưa hoàn tất xác thực với máy chủ. Nút nộp sẽ mở khi kiểm tra xong.</p>
+                                        )}
                                     </div>
                                 )}
 
                                 <Button
                                     variant="default"
                                     className="w-full bg-emerald-600 hover:bg-emerald-700"
-                                    disabled={!selectedFile || !selectedMonth || isUploading || totalErrors > 0 || !isPreviewing}
+                                    disabled={!canSubmit}
                                     onClick={handleUploadReport}
                                 >
-                                    {isUploading ? "Đang xử lý..." : (isRejected ? "Nộp lại báo cáo" : "Xác nhận nộp báo cáo")}
+                                    {isUploading
+                                        ? "Đang xử lý..."
+                                        : isServerValidating
+                                            ? "Đang xác thực dữ liệu..."
+                                            : (isRejected ? "Nộp lại báo cáo" : "Xác nhận nộp báo cáo")}
                                 </Button>
                             </>
                         )}
@@ -629,6 +761,10 @@ export default function FacilityReportsPage() {
                             Preview dữ liệu
                             {totalErrors > 0 ? (
                                 <Badge className="bg-red-100 text-red-700 border-0">{totalErrors} lỗi</Badge>
+                            ) : isServerValidating ? (
+                                <Badge className="bg-blue-100 text-blue-700 border-0">Đang kiểm tra</Badge>
+                            ) : !hasServerValidatedSuccess ? (
+                                <Badge className="bg-blue-100 text-blue-700 border-0">Chờ xác thực</Badge>
                             ) : (
                                 <Badge className="bg-emerald-100 text-emerald-700 border-0">Hợp lệ</Badge>
                             )}
@@ -655,19 +791,19 @@ export default function FacilityReportsPage() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {previewRows.map((row) => (
-                                    <tr key={row.stt} className={`border-b ${row.warnings.length > 0 ? "bg-red-50" : "bg-white hover:bg-gray-50"}`}>
+                                {previewRowsWithErrors.map((row) => (
+                                    <tr key={`${row.stt}-${row.excelRowNumber}`} className={`border-b ${row.combinedErrors.length > 0 ? "bg-red-50" : "bg-white hover:bg-gray-50"}`}>
                                         <td className="px-3 py-2 text-gray-500">{row.stt}</td>
                                         <td className="px-3 py-2 text-xs text-gray-500">{row.maNoiBo}</td>
                                         <td className="px-3 py-2 font-medium text-gray-800">{row.drugName}</td>
                                         <td className="px-3 py-2 text-right">{row.tonDau.toLocaleString("vi-VN")}</td>
                                         <td className="px-3 py-2 text-right text-blue-600">{row.nhap.toLocaleString("vi-VN")}</td>
                                         <td className="px-3 py-2 text-right text-orange-600">{row.xuat.toLocaleString("vi-VN")}</td>
-                                        <td className={`px-3 py-2 text-right font-semibold ${row.warnings.some(w => w.message.includes("Tồn cuối")) ? "text-red-600" : "text-gray-800"}`}>
+                                        <td className={`px-3 py-2 text-right font-semibold ${row.combinedErrors.some((warning) => warning.field === "Tồn cuối") ? "text-red-600" : "text-gray-800"}`}>
                                             {row.tonCuoi.toLocaleString("vi-VN")}
                                         </td>
                                         <td className="px-3 py-2 text-right">{row.giaVat.toLocaleString("vi-VN")}</td>
-                                        <td className={`px-3 py-2 text-right ${row.warnings.some(w => w.message.includes("Thành tiền")) ? "text-red-600 font-semibold" : ""}`}>
+                                        <td className={`px-3 py-2 text-right ${row.combinedErrors.some((warning) => warning.field === "Thành tiền tồn cuối") ? "text-red-600 font-semibold" : ""}`}>
                                             {row.thanhTienTonCuoi.toLocaleString("vi-VN")}
                                         </td>
                                         <td className="px-3 py-2 text-center text-xs">
@@ -677,11 +813,11 @@ export default function FacilityReportsPage() {
                                             {!row.bhyt?.trim() && !row.dichVu?.trim() && <span className="text-red-500">—</span>}
                                         </td>
                                         <td className="px-3 py-2">
-                                            {row.warnings.length === 0 ? (
+                                            {row.combinedErrors.length === 0 ? (
                                                 <CheckCircle className="w-4 h-4 text-emerald-500" />
                                             ) : (
                                                 <div className="space-y-1">
-                                                    {row.warnings.map((w, i) => (
+                                                    {row.combinedErrors.map((w, i) => (
                                                         <p key={i} className="text-xs text-red-600">{w.message}</p>
                                                     ))}
                                                 </div>

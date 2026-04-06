@@ -29,8 +29,9 @@ services:
     container_name: sudungthuoc_app
     environment:
       DATABASE_URL: "postgresql://postgres:123456@db:5432/sudungthuoc_db?schema=public"
-      AUTH_SECRET: "your-super-secret-key-change-in-production"
+      AUTH_SECRET: "${AUTH_SECRET}"
       AUTH_URL: "https://khoduoc.nvdcantho.com"
+      REPORT_UPLOAD_SIGNING_SECRET: "${REPORT_UPLOAD_SIGNING_SECRET}"
       NODE_ENV: "production"
     ports:
       - "3003:3000"  # Using port 3003 to avoid conflict with 3001 and 3002
