@@ -25,6 +25,7 @@ import {
     DialogTitle,
     DialogDescription,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import {
     Table,
     TableBody,
@@ -55,6 +56,63 @@ interface PreviewRow {
     rawRow: any;
 }
 
+const DETAIL_PAGE_SIZE = 50;
+const DETAIL_SEARCH_FIELDS = [
+    { value: "all", label: "Tất cả trường" },
+    { value: "maNoiBo", label: "Mã nội bộ" },
+    { value: "tenThuocNoiBo", label: "Tên thuốc (nội bộ)" },
+    { value: "hoatChatNoiBo", label: "Hoạt chất (nội bộ)" },
+    { value: "soDangKyNoiBo", label: "SĐK nội bộ" },
+    { value: "maChung", label: "Mã chung" },
+    { value: "maBhyt", label: "Mã BHYT" },
+    { value: "tenThuoc", label: "Tên thuốc (DM)" },
+    { value: "hoatChat", label: "Hoạt chất" },
+    { value: "soDangKy", label: "Số đăng ký" },
+    { value: "soQdTrungThau", label: "Số QĐ TT" },
+    { value: "tenCongTy", label: "Tên công ty" },
+] as const;
+
+type DetailSearchField = (typeof DETAIL_SEARCH_FIELDS)[number]["value"];
+
+const DETAIL_SEARCH_FIELD_LABELS = Object.fromEntries(
+    DETAIL_SEARCH_FIELDS.map((field) => [field.value, field.label])
+) as Record<DetailSearchField, string>;
+
+interface DetailReportRow {
+    id: string;
+    maNoiBo: string;
+    tenThuocNoiBo: string;
+    hoatChatNoiBo: string;
+    soDangKyNoiBo: string;
+    donViTinhNoiBo: string;
+    maChung: string;
+    maBhyt: string;
+    tenThuoc: string;
+    hoatChat: string;
+    hamLuong: string;
+    dangBaoChe: string;
+    soDangKy: string;
+    donViTinh: string;
+    quyCach: string;
+    duongDung: string;
+    congTySanXuat: string;
+    nuocSanXuat: string;
+    congTyDangKy: string;
+    nhomThuoc: string;
+    tonDau: number;
+    nhap: number;
+    xuat: number;
+    tonCuoi: number;
+    giaVat: number;
+    thanhTienTonCuoi: number;
+    soQdTrungThau: string;
+    tenCongTy: string;
+    ngayBatDauHd: string;
+    ngayKetThucHd: string;
+    bhyt: string;
+    dichVu: string;
+}
+
 export default function FacilityReportsPage() {
     const [selectedMonth, setSelectedMonth] = useState("");
     const [isDownloading, setIsDownloading] = useState(false);
@@ -71,11 +129,17 @@ export default function FacilityReportsPage() {
     const [isParsingFile, setIsParsingFile] = useState(false);
 
     // Detail modal state
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [detailData, setDetailData] = useState<any[]>([]);
+    const [detailData, setDetailData] = useState<DetailReportRow[]>([]);
     const [detailMonth, setDetailMonth] = useState<string>("");
     const [isDetailOpen, setIsDetailOpen] = useState(false);
     const [isDetailLoading, setIsDetailLoading] = useState(false);
+    const [detailPage, setDetailPage] = useState(1);
+    const [detailTotal, setDetailTotal] = useState(0);
+    const [detailTotalPages, setDetailTotalPages] = useState(1);
+    const [detailSearchField, setDetailSearchField] = useState<DetailSearchField>("all");
+    const [detailAppliedSearchField, setDetailAppliedSearchField] = useState<DetailSearchField>("all");
+    const [detailSearchInput, setDetailSearchInput] = useState("");
+    const [detailSearchTerm, setDetailSearchTerm] = useState("");
 
     const fetchReports = async () => {
         try {
@@ -246,18 +310,48 @@ export default function FacilityReportsPage() {
         }
     };
 
-    const handleViewDetail = async (month: string) => {
-        setDetailMonth(month);
-        setIsDetailOpen(true);
+    const resetDetailState = () => {
+        setDetailMonth("");
+        setDetailData([]);
+        setIsDetailLoading(false);
+        setDetailPage(1);
+        setDetailTotal(0);
+        setDetailTotalPages(1);
+        setDetailSearchField("all");
+        setDetailAppliedSearchField("all");
+        setDetailSearchInput("");
+        setDetailSearchTerm("");
+    };
+
+    const fetchDetailPage = async (
+        month: string,
+        page: number,
+        search = {
+            field: detailAppliedSearchField,
+            term: detailSearchTerm,
+        }
+    ) => {
         setIsDetailLoading(true);
         try {
-            const res = await fetch(`/api/facility/reports/detail?month=${encodeURIComponent(month)}`);
-            if (res.ok) {
-                const data = await res.json();
-                setDetailData(data);
-            } else {
+            const params = new URLSearchParams({
+                month,
+                page: page.toString(),
+                limit: DETAIL_PAGE_SIZE.toString(),
+                searchField: search.field,
+            });
+            if (search.term) params.set("searchTerm", search.term);
+
+            const res = await fetch(`/api/facility/reports/detail?${params.toString()}`);
+            if (!res.ok) {
                 toast.error("Không thể tải chi tiết báo cáo");
+                return;
             }
+
+            const data = await res.json();
+            setDetailData(data.items || []);
+            setDetailPage(data.pagination?.page || page);
+            setDetailTotal(data.pagination?.total || 0);
+            setDetailTotalPages(data.pagination?.totalPages || 1);
         } catch {
             toast.error("Lỗi kết nối");
         } finally {
@@ -265,8 +359,69 @@ export default function FacilityReportsPage() {
         }
     };
 
+    const handleViewDetail = (month: string) => {
+        setDetailMonth(month);
+        setIsDetailOpen(true);
+        setDetailData([]);
+        setDetailPage(1);
+        setDetailTotal(0);
+        setDetailTotalPages(1);
+        setDetailSearchField("all");
+        setDetailAppliedSearchField("all");
+        setDetailSearchInput("");
+        setDetailSearchTerm("");
+        void fetchDetailPage(month, 1, { field: "all", term: "" });
+    };
+
+    const handleDetailPageChange = (page: number) => {
+        if (!detailMonth || page < 1 || page > detailTotalPages || page === detailPage) return;
+        void fetchDetailPage(detailMonth, page, {
+            field: detailAppliedSearchField,
+            term: detailSearchTerm,
+        });
+    };
+
+    const handleDetailSearch = () => {
+        if (!detailMonth) return;
+        const nextSearchTerm = detailSearchInput.trim();
+        setDetailSearchInput(nextSearchTerm);
+        setDetailAppliedSearchField(detailSearchField);
+        setDetailSearchTerm(nextSearchTerm);
+        setDetailPage(1);
+        void fetchDetailPage(detailMonth, 1, {
+            field: detailSearchField,
+            term: nextSearchTerm,
+        });
+    };
+
+    const handleResetDetailSearch = () => {
+        if (!detailMonth) return;
+        setDetailSearchField("all");
+        setDetailAppliedSearchField("all");
+        setDetailSearchInput("");
+        setDetailSearchTerm("");
+        setDetailPage(1);
+        void fetchDetailPage(detailMonth, 1, {
+            field: "all",
+            term: "",
+        });
+    };
+
     const selectedPeriod = periods.find(p => p.value === selectedMonth);
     const deadline = selectedPeriod?.deadline;
+    const detailRangeStart = detailTotal === 0 ? 0 : (detailPage - 1) * DETAIL_PAGE_SIZE + 1;
+    const detailRangeEnd = detailTotal === 0 ? 0 : Math.min(detailTotal, (detailPage - 1) * DETAIL_PAGE_SIZE + detailData.length);
+    const hasActiveDetailSearch = detailSearchTerm.length > 0;
+    const detailSearchFieldLabel = DETAIL_SEARCH_FIELD_LABELS[detailAppliedSearchField];
+    const canResetDetailSearch = detailSearchField !== "all"
+        || detailAppliedSearchField !== "all"
+        || detailSearchInput.length > 0
+        || detailSearchTerm.length > 0;
+    const formatDetailNumber = (value: number | string | null | undefined) => new Intl.NumberFormat("vi-VN").format(Number(value || 0));
+    const renderDetailText = (value: string | null | undefined) => {
+        if (!value?.trim()) return <span className="text-gray-300">—</span>;
+        return value;
+    };
 
     return (
         <div className="space-y-6">
@@ -611,59 +766,199 @@ export default function FacilityReportsPage() {
             </Card>
 
             {/* Detail Modal */}
-            <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
-                <DialogContent className="max-w-[95vw] w-[95vw] h-[90vh] flex flex-col p-0">
+            <Dialog
+                open={isDetailOpen}
+                onOpenChange={(open) => {
+                    setIsDetailOpen(open);
+                    if (!open) resetDetailState();
+                }}
+            >
+                <DialogContent className="max-w-[95vw] sm:max-w-[95vw] w-[95vw] h-[90vh] flex flex-col p-0">
                     <DialogHeader className="p-6 pb-2">
                         <DialogTitle>Chi tiết báo cáo tháng {detailMonth}</DialogTitle>
                         <DialogDescription>
-                            {detailData.length} mặt hàng đã báo cáo
+                            Tổng số mặt hàng: {formatDetailNumber(detailTotal)}
                         </DialogDescription>
                     </DialogHeader>
-                    <div className="flex-1 overflow-auto px-6 pb-6">
+
+                    <div className="flex flex-1 flex-col overflow-hidden px-6 pb-6">
+                        <form
+                            className="flex flex-wrap items-center gap-2 pb-3"
+                            onSubmit={(event) => {
+                                event.preventDefault();
+                                handleDetailSearch();
+                            }}
+                        >
+                            <Select value={detailSearchField} onValueChange={(value) => setDetailSearchField(value as DetailSearchField)}>
+                                <SelectTrigger className="w-[220px] bg-white">
+                                    <SelectValue placeholder="Chọn trường tìm kiếm" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {DETAIL_SEARCH_FIELDS.map((field) => (
+                                        <SelectItem key={field.value} value={field.value}>{field.label}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+
+                            <Input
+                                value={detailSearchInput}
+                                onChange={(event) => setDetailSearchInput(event.target.value)}
+                                placeholder="Nhập từ khóa tìm kiếm..."
+                                className="min-w-[260px] flex-1 bg-white"
+                            />
+
+                            <Button type="submit" disabled={isDetailLoading}>
+                                Tìm kiếm
+                            </Button>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={handleResetDetailSearch}
+                                disabled={isDetailLoading || !canResetDetailSearch}
+                            >
+                                Đặt lại
+                            </Button>
+                        </form>
+
+                        {hasActiveDetailSearch && (
+                            <div className="pb-3 text-sm text-gray-600">
+                                Kết quả tìm kiếm cho <span className="font-medium">&quot;{detailSearchTerm}&quot;</span> trong trường{" "}
+                                <span className="font-medium">{detailSearchFieldLabel}</span>
+                            </div>
+                        )}
+
                         {isDetailLoading ? (
-                            <div className="flex items-center justify-center h-full">
+                            <div className="flex flex-1 items-center justify-center">
                                 <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
                             </div>
+                        ) : detailData.length === 0 ? (
+                            <div className="flex flex-1 items-center justify-center text-gray-500">
+                                <div className="text-center">
+                                    <p className="text-base font-medium text-gray-600">
+                                        {hasActiveDetailSearch ? "Không tìm thấy dữ liệu phù hợp" : "Không có dữ liệu chi tiết"}
+                                    </p>
+                                    {hasActiveDetailSearch && (
+                                        <p className="text-sm text-gray-400 mt-1">
+                                            Thử đổi trường tìm kiếm hoặc từ khóa khác.
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
                         ) : (
-                            <Table>
-                                <TableHeader className="sticky top-0 bg-white z-10">
-                                    <TableRow>
-                                        <TableHead>STT</TableHead>
-                                        <TableHead>Mã NB</TableHead>
-                                        <TableHead className="min-w-[200px]">Tên thuốc</TableHead>
-                                        <TableHead>Hoạt chất</TableHead>
-                                        <TableHead>ĐVT</TableHead>
-                                        <TableHead className="text-right">Tồn đầu</TableHead>
-                                        <TableHead className="text-right">Nhập</TableHead>
-                                        <TableHead className="text-right">Xuất</TableHead>
-                                        <TableHead className="text-right">Tồn cuối</TableHead>
-                                        <TableHead className="text-right">Giá VAT</TableHead>
-                                        <TableHead className="text-right">Thành tiền</TableHead>
-                                        <TableHead>BHYT/DV</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {detailData.map((item) => (
-                                        <TableRow key={item.id}>
-                                            <TableCell>{item.stt}</TableCell>
-                                            <TableCell className="text-xs text-gray-500">{item.maNoiBo}</TableCell>
-                                            <TableCell className="font-medium">{item.drugName}</TableCell>
-                                            <TableCell className="text-xs text-gray-500">{item.hoatChat}</TableCell>
-                                            <TableCell>{item.donViTinh}</TableCell>
-                                            <TableCell className="text-right">{Number(item.tonDau).toLocaleString("vi-VN")}</TableCell>
-                                            <TableCell className="text-right text-blue-600">{Number(item.nhap).toLocaleString("vi-VN")}</TableCell>
-                                            <TableCell className="text-right text-orange-600">{Number(item.xuat).toLocaleString("vi-VN")}</TableCell>
-                                            <TableCell className="text-right font-bold">{Number(item.tonCuoi).toLocaleString("vi-VN")}</TableCell>
-                                            <TableCell className="text-right">{Number(item.giaVat).toLocaleString("vi-VN")}</TableCell>
-                                            <TableCell className="text-right">{Number(item.thanhTienTonCuoi).toLocaleString("vi-VN")}</TableCell>
-                                            <TableCell>
-                                                {item.bhyt?.trim().toLowerCase() === "x" && <span className="text-xs font-semibold text-emerald-600">BH</span>}
-                                                {item.dichVu?.trim().toLowerCase() === "x" && <span className="text-xs font-semibold text-blue-600 ml-1">DV</span>}
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
+                            <>
+                                <div className="flex items-center justify-between pb-3 text-sm text-gray-600">
+                                    <span>Hiển thị {detailRangeStart}-{detailRangeEnd} / {formatDetailNumber(detailTotal)} dòng</span>
+                                    <span>Trang {detailPage} / {detailTotalPages}</span>
+                                </div>
+
+                                <div className="overflow-auto flex-1">
+                                    <table className="text-xs border-collapse w-max min-w-full">
+                                        <thead className="sticky top-0 bg-white z-10">
+                                            <tr className="border-b border-gray-200">
+                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-8 whitespace-nowrap">STT</th>
+                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[90px] whitespace-nowrap bg-orange-50">Mã nội bộ</th>
+                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[160px] bg-orange-50">Tên thuốc (nội bộ)</th>
+                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[130px] bg-orange-50">Hoạt chất (nội bộ)</th>
+                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[100px] whitespace-nowrap bg-orange-50">SĐK nội bộ</th>
+                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[70px] whitespace-nowrap bg-orange-50">ĐVT NB</th>
+                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[80px] whitespace-nowrap bg-blue-50">Mã chung</th>
+                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[80px] whitespace-nowrap bg-blue-50">Mã BHYT</th>
+                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[160px] bg-blue-50">Tên thuốc (DM)</th>
+                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[130px] bg-blue-50">Hoạt chất</th>
+                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[100px] bg-blue-50">Hàm lượng</th>
+                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[110px] bg-blue-50">Dạng bào chế</th>
+                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[100px] bg-blue-50">Số đăng ký</th>
+                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[65px] whitespace-nowrap bg-blue-50">ĐVT</th>
+                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[90px] bg-blue-50">Quy cách</th>
+                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[80px] bg-blue-50">Đường dùng</th>
+                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[130px] bg-blue-50">Công ty SX</th>
+                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[75px] bg-blue-50">Nước SX</th>
+                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[130px] bg-blue-50">Công ty ĐK</th>
+                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[100px] bg-blue-50">Nhóm thuốc</th>
+                                                <th className="px-2 py-2 text-right font-medium text-gray-500 w-[70px] whitespace-nowrap bg-emerald-50">Tồn đầu</th>
+                                                <th className="px-2 py-2 text-right font-medium text-gray-500 w-[65px] whitespace-nowrap bg-emerald-50">Nhập</th>
+                                                <th className="px-2 py-2 text-right font-medium text-gray-500 w-[65px] whitespace-nowrap bg-emerald-50">Xuất</th>
+                                                <th className="px-2 py-2 text-right font-semibold text-gray-700 w-[70px] whitespace-nowrap bg-emerald-50">Tồn cuối</th>
+                                                <th className="px-2 py-2 text-right font-medium text-gray-500 w-[90px] whitespace-nowrap bg-emerald-50">Giá VAT</th>
+                                                <th className="px-2 py-2 text-right font-medium text-gray-500 w-[110px] bg-emerald-50">TT tồn cuối</th>
+                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[110px] bg-purple-50">Số QĐ TT</th>
+                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[130px] bg-purple-50">Tên công ty</th>
+                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[90px] whitespace-nowrap bg-purple-50">Ngày BĐ HĐ</th>
+                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[90px] whitespace-nowrap bg-purple-50">Ngày KT HĐ</th>
+                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[55px] whitespace-nowrap bg-purple-50">BHYT</th>
+                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[60px] whitespace-nowrap bg-purple-50">Dịch vụ</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {detailData.map((item, index) => (
+                                                <tr key={item.id} className="border-b border-gray-100 hover:bg-gray-50">
+                                                    <td className="px-2 py-1.5 text-gray-400">{(detailPage - 1) * DETAIL_PAGE_SIZE + index + 1}</td>
+                                                    <td className="px-2 py-1.5 break-all">{renderDetailText(item.maNoiBo)}</td>
+                                                    <td className="px-2 py-1.5 break-words">{renderDetailText(item.tenThuocNoiBo)}</td>
+                                                    <td className="px-2 py-1.5 text-gray-500 break-words">{renderDetailText(item.hoatChatNoiBo)}</td>
+                                                    <td className="px-2 py-1.5 break-all">{renderDetailText(item.soDangKyNoiBo)}</td>
+                                                    <td className="px-2 py-1.5">{renderDetailText(item.donViTinhNoiBo)}</td>
+                                                    <td className="px-2 py-1.5 font-medium text-blue-700 break-all">{renderDetailText(item.maChung)}</td>
+                                                    <td className="px-2 py-1.5 break-all">{renderDetailText(item.maBhyt)}</td>
+                                                    <td className="px-2 py-1.5 font-medium break-words">{renderDetailText(item.tenThuoc)}</td>
+                                                    <td className="px-2 py-1.5 text-gray-500 break-words">{renderDetailText(item.hoatChat)}</td>
+                                                    <td className="px-2 py-1.5 break-words">{renderDetailText(item.hamLuong)}</td>
+                                                    <td className="px-2 py-1.5 break-words">{renderDetailText(item.dangBaoChe)}</td>
+                                                    <td className="px-2 py-1.5 break-all">{renderDetailText(item.soDangKy)}</td>
+                                                    <td className="px-2 py-1.5">{renderDetailText(item.donViTinh)}</td>
+                                                    <td className="px-2 py-1.5 break-words">{renderDetailText(item.quyCach)}</td>
+                                                    <td className="px-2 py-1.5 break-words">{renderDetailText(item.duongDung)}</td>
+                                                    <td className="px-2 py-1.5 break-words">{renderDetailText(item.congTySanXuat)}</td>
+                                                    <td className="px-2 py-1.5 break-words">{renderDetailText(item.nuocSanXuat)}</td>
+                                                    <td className="px-2 py-1.5 break-words">{renderDetailText(item.congTyDangKy)}</td>
+                                                    <td className="px-2 py-1.5 break-words">{renderDetailText(item.nhomThuoc)}</td>
+                                                    <td className="px-2 py-1.5 text-right tabular-nums">{formatDetailNumber(item.tonDau)}</td>
+                                                    <td className="px-2 py-1.5 text-right text-blue-600 tabular-nums">{formatDetailNumber(item.nhap)}</td>
+                                                    <td className="px-2 py-1.5 text-right text-red-600 tabular-nums">{formatDetailNumber(item.xuat)}</td>
+                                                    <td className="px-2 py-1.5 text-right font-bold tabular-nums">{formatDetailNumber(item.tonCuoi)}</td>
+                                                    <td className="px-2 py-1.5 text-right tabular-nums">{formatDetailNumber(item.giaVat)}</td>
+                                                    <td className="px-2 py-1.5 text-right font-medium text-emerald-700 tabular-nums">{formatDetailNumber(item.thanhTienTonCuoi)}</td>
+                                                    <td className="px-2 py-1.5 break-all">{renderDetailText(item.soQdTrungThau)}</td>
+                                                    <td className="px-2 py-1.5 break-words">{renderDetailText(item.tenCongTy)}</td>
+                                                    <td className="px-2 py-1.5 whitespace-nowrap">{renderDetailText(item.ngayBatDauHd)}</td>
+                                                    <td className="px-2 py-1.5 whitespace-nowrap">{renderDetailText(item.ngayKetThucHd)}</td>
+                                                    <td className="px-2 py-1.5">{renderDetailText(item.bhyt)}</td>
+                                                    <td className="px-2 py-1.5">{renderDetailText(item.dichVu)}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                {detailTotalPages > 1 && (
+                                    <div className="flex items-center justify-between border-t pt-3">
+                                        <p className="text-sm text-gray-600">
+                                            Hiển thị {detailRangeStart}-{detailRangeEnd} / {formatDetailNumber(detailTotal)} dòng
+                                        </p>
+                                        <div className="flex gap-2">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => handleDetailPageChange(detailPage - 1)}
+                                                disabled={isDetailLoading || detailPage <= 1}
+                                            >
+                                                Trước
+                                            </Button>
+                                            <Button variant="outline" size="sm" disabled>
+                                                Trang {detailPage} / {detailTotalPages}
+                                            </Button>
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => handleDetailPageChange(detailPage + 1)}
+                                                disabled={isDetailLoading || detailPage >= detailTotalPages}
+                                            >
+                                                Sau
+                                            </Button>
+                                        </div>
+                                    </div>
+                                )}
+                            </>
                         )}
                     </div>
                 </DialogContent>
