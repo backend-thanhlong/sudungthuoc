@@ -2,80 +2,174 @@
 
 ## Context
 
-Trang `/dashboard/admin/users` hiện dùng để quản lý tài khoản cơ sở y tế. Page gọi `GET /api/admin/users` để tải toàn bộ danh sách cơ sở về client rồi render bảng, đồng thời hỗ trợ các thao tác thêm, sửa, vô hiệu hóa, đặt lại mật khẩu và xóa.
+Trang `/dashboard/admin/users` dùng để quản lý tài khoản cơ sở y tế và hiện đã có các thao tác thêm, sửa, vô hiệu hóa, đặt lại mật khẩu và xóa. Route `GET /api/admin/users` hiện trả toàn bộ danh sách cơ sở, còn page render bảng hoàn toàn ở client.
 
-Hiện trang chưa có chức năng tìm kiếm, nên khi danh sách cơ sở tăng lên người dùng phải dò thủ công trong bảng. Vì page đang tải toàn bộ dữ liệu sẵn và chưa có phân trang, nhu cầu phù hợp nhất lúc này là lọc ngay trên client trong lúc nhập.
+Nhu cầu mới đã được chốt là:
+
+- tìm kiếm theo trường chọn trước
+- tìm ngay khi gõ
+- xử lý ở server
+- có phân trang
+- có dropdown đổi số dòng mỗi trang
+
+Thiết kế này thay thế phương án client-side trước đó.
 
 ## Goal
 
-Thêm chức năng tìm kiếm cho trang `/dashboard/admin/users`, cho phép người dùng:
+Thêm chức năng tìm kiếm server-side cho trang `/dashboard/admin/users`, đồng thời bổ sung pagination và page size selector, để người dùng:
 
 - chọn trường tìm kiếm từ dropdown
-- nhập từ khóa và thấy kết quả lọc ngay khi gõ
-- xóa bộ lọc để quay lại toàn bộ danh sách
-- giữ nguyên các thao tác quản trị hiện có trên bảng
+- nhập từ khóa và thấy kết quả cập nhật ngay khi gõ
+- đổi số dòng mỗi trang
+- chuyển qua lại giữa các trang kết quả
+- tiếp tục dùng các thao tác quản trị hiện có mà không mất ngữ cảnh tìm kiếm
 
 ## Scope
 
 Bao gồm:
 
-- thêm UI tìm kiếm ở đầu bảng danh sách cơ sở
-- lọc client-side trên danh sách `users` đã tải sẵn
-- hiển thị số bản ghi đang hiển thị so với tổng số
-- thêm empty state phù hợp khi không có kết quả
+- mở rộng `GET /api/admin/users` để hỗ trợ tìm kiếm và phân trang
+- cập nhật page `/dashboard/admin/users` sang fetch dữ liệu có query params
+- thêm UI pagination và dropdown page size
+- xử lý race condition khi người dùng gõ nhanh
 
 Không bao gồm:
 
-- thay đổi API `/api/admin/users`
+- thay đổi `POST /api/admin/users`
+- thay đổi các route `PATCH`, `DELETE`, `reset-password`
 - thêm debounce
-- thêm phân trang
-- thêm bộ lọc trạng thái hoặc nhiều điều kiện nâng cao
+- chuyển page sang server component
+- thêm bộ lọc trạng thái ngoài tìm kiếm theo trường
 
 ## Approach Options
 
-### Option 1: Lọc client-side ngay trên danh sách đã tải
+### Option 1: Mở rộng route collection hiện tại
 
-Giữ nguyên API hiện tại, thêm state `searchField` và `searchTerm`, sau đó tạo `filteredUsers` từ `users` để render ra bảng.
-
-Ưu điểm:
-
-- thay đổi gọn, chỉ cần sửa page hiện có
-- phản hồi tức thì, đúng yêu cầu lọc ngay
-- không sinh thêm request khi người dùng gõ
-
-Nhược điểm:
-
-- nếu số lượng cơ sở tăng rất lớn thì hiệu năng sẽ kém hơn server-side
-
-### Option 2: Mở rộng API để tìm kiếm server-side
-
-Thêm query params tìm kiếm cho `GET /api/admin/users`, rồi gọi lại API mỗi khi người dùng thay đổi từ khóa hoặc trường tìm.
+Mở rộng `GET /api/admin/users` để nhận `page`, `limit`, `searchField`, `searchTerm`, và trả về cả dữ liệu lẫn metadata phân trang.
 
 Ưu điểm:
 
-- phù hợp hơn khi dữ liệu lớn
+- ít thay đổi cấu trúc nhất
+- bám pattern hiện có của `master-drugs`
+- không nhân đôi logic select và where
 
 Nhược điểm:
 
-- phức tạp hơn nhu cầu hiện tại
-- sinh nhiều request
-- chưa đồng bộ với việc page hiện không có phân trang
+- route collection phải trả response dạng metadata thay vì mảng thuần
 
-### Option 3: Hybrid, giữ UI hiện tại nhưng tạo contract sẵn cho server-side
+### Option 2: Tạo route search riêng
 
-Thiết kế state theo hướng dễ nâng cấp lên server-side sau, nhưng vẫn render từ dữ liệu client ở giai đoạn này.
+Tạo route mới chỉ phục vụ tìm kiếm và phân trang, ví dụ `/api/admin/users/search`.
 
 Ưu điểm:
 
-- tạo đường nâng cấp sau này
+- tách CRUD khỏi search
 
 Nhược điểm:
 
-- tăng độ phức tạp không cần thiết cho một thay đổi nhỏ
+- lặp logic query
+- tăng số endpoint phải bảo trì
+
+### Option 3: Chuyển page sang URL-driven SSR
+
+Dùng search params trên page và để server component xử lý việc đọc query.
+
+Ưu điểm:
+
+- URL chia sẻ được
+- SSR tự nhiên hơn
+
+Nhược điểm:
+
+- thay đổi kiến trúc lớn hơn nhu cầu hiện tại
+- đụng rộng vào page đang là client component
 
 ### Recommendation
 
-Chọn Option 1. Đây là cách khớp nhất với kiến trúc hiện tại của page: dữ liệu đã có sẵn ở client, chưa có pagination, và yêu cầu là lọc ngay khi gõ.
+Chọn Option 1. Đây là cách phù hợp nhất với cấu trúc hiện có và giữ thay đổi tập trung vào đúng route collection cùng page admin users.
+
+## API Design
+
+File tác động: `src/app/api/admin/users/route.ts`
+
+### Request params
+
+`GET /api/admin/users` nhận các query params:
+
+- `page`
+- `limit`
+- `searchField`
+- `searchTerm`
+
+Giá trị mặc định:
+
+- `page = 1`
+- `limit = 20`
+- `searchField = all`
+- `searchTerm = ""`
+
+### Supported search fields
+
+- `all`
+- `username`
+- `facilityName`
+- `facilityCode`
+- `facilityType`
+- `autonomyGroup`
+- `contactPerson`
+- `phoneNumber`
+- `address`
+
+### Search behavior
+
+Route luôn giữ filter cơ bản:
+
+- `role = FACILITY`
+
+Nếu `searchTerm.trim()` có giá trị:
+
+- `searchField = all`: tạo `OR` với `contains` + `mode: "insensitive"` trên tất cả field hỗ trợ
+- `searchField` hợp lệ: chỉ áp dụng `contains` cho field đó
+- `searchField` không hợp lệ: fallback về `all`
+
+Nếu `searchTerm.trim()` rỗng:
+
+- không thêm điều kiện tìm kiếm
+
+### Pagination behavior
+
+- `skip = (page - 1) * limit`
+- `take = limit`
+- `orderBy = { createdAt: "desc" }`
+
+Validation:
+
+- `page` không hợp lệ hoặc nhỏ hơn `1`: fallback về `1`
+- `limit` không hợp lệ hoặc không thuộc bộ cho phép: fallback về `20`
+
+### Response shape
+
+Response `GET` đổi sang:
+
+```json
+{
+  "data": [],
+  "metadata": {
+    "total": 0,
+    "page": 1,
+    "limit": 20,
+    "totalPages": 1
+  }
+}
+```
+
+Trong đó:
+
+- `data`: danh sách user của trang hiện tại
+- `total`: tổng số bản ghi sau khi đã áp dụng tìm kiếm
+- `totalPages`: số trang sau khi áp dụng `limit`
+
+`POST /api/admin/users` giữ nguyên contract hiện tại.
 
 ## UI Design
 
@@ -83,17 +177,17 @@ File tác động: `src/app/dashboard/admin/users/page.tsx`
 
 ### Search controls
 
-Thêm một hàng điều khiển ở đầu phần nội dung card, phía trên bảng danh sách, gồm:
+Giữ hàng điều khiển ở đầu card danh sách, gồm:
 
 - `Select` chọn trường tìm kiếm
 - `Input` nhập từ khóa
 - `Button` `Xóa lọc`
 
-Không thêm nút `Tìm kiếm`, vì yêu cầu đã chốt là lọc ngay khi nhập.
+Tìm kiếm chạy ngay khi gõ. Không có nút `Tìm kiếm`.
 
 ### Search field options
 
-Dropdown trường tìm kiếm dùng bộ trường theo bảng hiện tại:
+Dropdown dùng đúng bộ trường:
 
 - `all`: Tất cả
 - `username`: Tên đăng nhập
@@ -107,63 +201,87 @@ Dropdown trường tìm kiếm dùng bộ trường theo bảng hiện tại:
 
 ### Card description
 
-Đổi dòng mô tả từ `Tổng cộng {users.length} cơ sở y tế` sang dạng:
+Đổi mô tả card thành:
 
-- khi không lọc: `Tổng cộng {users.length} cơ sở y tế`
-- khi đang lọc: `Hiển thị {filteredUsers.length} / {users.length} cơ sở y tế`
+- `Hiển thị {users.length} / {totalRecords} cơ sở y tế`
 
-### Empty state
+Cách hiển thị này đúng cho cả trạng thái có tìm kiếm và không tìm kiếm.
 
-Giữ thanh tìm kiếm luôn hiển thị và phân biệt hai trường hợp:
+### Pagination controls
 
-- `users.length === 0`: hiển thị thông báo chưa có cơ sở nào
-- `users.length > 0 && filteredUsers.length === 0`: hiển thị thông báo không tìm thấy cơ sở phù hợp
+Thêm cụm phân trang dưới bảng, bám pattern của `master-drugs`, gồm:
+
+- dropdown page size
+- hiển thị `Trang X / Y`
+- nút `Trang đầu`
+- nút `Trước`
+- dãy nút số trang
+- nút `Sau`
+- nút `Trang cuối`
+
+Page size options:
+
+- `20`
+- `50`
+- `100`
+
+### Table behavior
+
+- bảng render dữ liệu của trang hiện tại từ server
+- cột STT tính theo `(page - 1) * limit + index + 1`
+- nếu không có kết quả:
+  - khi `totalRecords = 0` và đang có từ khóa: hiển thị `Không tìm thấy cơ sở phù hợp`
+  - khi `totalRecords = 0` và không có từ khóa: hiển thị `Chưa có cơ sở nào được đăng ký`
 
 ## State And Data Flow
 
-### New state
+### Page state
 
-Thêm hai state:
+Page dùng các state:
 
-- `searchField`, mặc định `all`
-- `searchTerm`, mặc định chuỗi rỗng
+- `users`
+- `isLoading`
+- `searchField`
+- `searchTerm`
+- `page`
+- `limit`
+- `totalPages`
+- `totalRecords`
 
-### Derived data
+### Fetch behavior
 
-Tạo `filteredUsers` từ `users` theo các quy tắc:
+Mỗi khi một trong các state sau thay đổi, page gọi lại `GET /api/admin/users`:
 
-- chuẩn hóa `searchTerm` bằng `trim()`
-- nếu từ khóa rỗng thì trả về toàn bộ `users`
-- nếu `searchField === "all"` thì so khớp trên toàn bộ field hỗ trợ
-- nếu chọn field cụ thể thì chỉ so khớp field đó
+- `searchField`
+- `searchTerm`
+- `page`
+- `limit`
 
-So khớp dùng:
+Query gửi lên gồm:
 
-- `toLowerCase()`
-- `includes(...)`
+- `page`
+- `limit`
+- `searchField`
+- `searchTerm`
 
-Mục tiêu là không phân biệt hoa thường và hỗ trợ tìm theo chuỗi con.
+### Reset rules
 
-### Field normalization
+- đổi `searchField`: reset `page = 1`
+- gõ vào `searchTerm`: reset `page = 1`
+- đổi `limit`: reset `page = 1`
+- bấm `Xóa lọc`: reset `searchField = all`, `searchTerm = ""`, `page = 1`
 
-Mọi field nullable đều phải fallback về chuỗi rỗng trước khi so khớp, ví dụ:
+### Request race handling
 
-- `facilityName ?? ""`
-- `contactPerson ?? ""`
-- `phoneNumber ?? ""`
-- `address ?? ""`
+Vì tìm kiếm chạy ngay khi gõ, page cần tránh việc response cũ ghi đè response mới. Cách xử lý:
 
-Điều này tránh lỗi runtime khi filter trên các cột có thể để trống.
-
-### Interaction behavior
-
-- nhập vào ô tìm kiếm: cập nhật `searchTerm` và lọc lại bảng ngay
-- đổi `searchField`: giữ nguyên `searchTerm` hiện có và lọc lại ngay trên field mới
-- bấm `Xóa lọc`: reset `searchField = "all"` và `searchTerm = ""`
+- dùng `AbortController` trong `useEffect`
+- mỗi lần effect chạy lại, hủy request trước đó
+- nếu request bị abort, không hiện toast lỗi
 
 ## Integration With Existing Actions
 
-Các thao tác hiện có tiếp tục giữ nguyên flow:
+Các action hiện có vẫn giữ nguyên:
 
 - thêm cơ sở
 - sửa thông tin
@@ -171,38 +289,44 @@ Các thao tác hiện có tiếp tục giữ nguyên flow:
 - đặt lại mật khẩu
 - xóa tài khoản
 
-Sau các thao tác có reload dữ liệu bằng `fetchUsers()`, page vẫn giữ nguyên `searchField` và `searchTerm`. Khi `users` được cập nhật, `filteredUsers` sẽ tự tính lại theo state đang có.
+Sau mỗi action có thay đổi dữ liệu, page gọi lại `fetchUsers()` với đúng `page`, `limit`, `searchField`, `searchTerm` hiện tại.
 
-Điều này giúp người dùng không mất ngữ cảnh tìm kiếm sau khi thao tác trên một dòng trong bảng.
+Nếu thao tác làm tổng số trang giảm và `page` hiện tại không còn hợp lệ:
+
+- page tự điều chỉnh về trang hợp lệ cuối cùng
+- sau đó gọi lại dữ liệu cho trang đó
 
 ## Error Handling
 
-- không thay đổi xử lý lỗi tải danh sách hiện tại
-- không phát sinh request mới trong lúc gõ, nên không có trạng thái lỗi mới cho tìm kiếm
-- từ khóa chỉ gồm khoảng trắng được coi như không lọc
-- nếu người dùng tìm trên field có giá trị trống ở nhiều dòng, hệ thống chỉ trả kết quả rỗng chứ không lỗi
+- nếu API trả lỗi khi tải danh sách, giữ toast lỗi hiện tại
+- request bị hủy do gõ nhanh không hiện toast
+- `searchField` không hợp lệ ở server sẽ fallback về `all`
+- `page` hoặc `limit` không hợp lệ sẽ fallback về giá trị mặc định
+- từ khóa chỉ gồm khoảng trắng được coi là không lọc
 
 ## Testing Plan
 
 Kiểm tra thủ công:
 
-1. Mở trang và xác nhận thanh tìm kiếm hiển thị phía trên bảng.
-2. Chọn `Tất cả`, nhập một phần tên cơ sở và xác nhận bảng lọc ngay khi gõ.
-3. Chọn `Mã cơ sở`, nhập mã và xác nhận chỉ các dòng khớp mã cơ sở được giữ lại.
-4. Chọn `SĐT` hoặc `Người liên hệ`, nhập từ khóa trong khi một số dòng để trống field đó, xác nhận không lỗi runtime.
-5. Bấm `Xóa lọc`, xác nhận dropdown về `Tất cả`, input rỗng và bảng hiện lại toàn bộ dữ liệu.
-6. Đang lọc rồi sửa một cơ sở, xác nhận dữ liệu reload xong vẫn áp dụng filter hiện tại.
-7. Đang lọc rồi vô hiệu hóa hoặc kích hoạt một cơ sở, xác nhận bảng không mất trạng thái lọc.
-8. Tìm với từ khóa không có kết quả, xác nhận empty state hiển thị đúng thông điệp.
+1. Mở trang mặc định, xác nhận tải trang `1` với page size mặc định và hiển thị đúng tổng số bản ghi.
+2. Gõ vào ô tìm kiếm, xác nhận request chạy ngay và bảng cập nhật theo dữ liệu từ server.
+3. Đổi `searchField`, xác nhận page reset về `1` và kết quả lọc đúng.
+4. Đổi page size từ `20` sang `50` hoặc `100`, xác nhận page reset về `1` và STT tính lại đúng.
+5. Chuyển qua lại giữa các trang, xác nhận `Trang X / Y` và dữ liệu khớp.
+6. Tìm với từ khóa không có kết quả, xác nhận hiển thị `Không tìm thấy cơ sở phù hợp`.
+7. Đang ở trang lớn hơn `1`, đổi từ khóa, xác nhận tự về trang `1`.
+8. Đang có filter, thực hiện `Sửa`, `Vô hiệu hóa`, hoặc `Xóa`, xác nhận bảng reload đúng theo filter và trang hiện tại hoặc tự điều chỉnh về trang hợp lệ.
+9. Gõ nhanh liên tục, xác nhận UI không bị trả về dữ liệu cũ sau khi request mới hơn đã hoàn tất.
 
 ## Risks
 
-- nếu logic filter viết trực tiếp nhiều điều kiện trong JSX, file page vốn đã dài sẽ khó bảo trì hơn
-- nếu không chuẩn hóa `null` sang chuỗi rỗng, filter trên các cột tùy chọn có thể gây lỗi
-- nếu sau này số lượng cơ sở tăng mạnh, client-side filtering có thể cần được thay bằng server-side search kết hợp pagination
+- nếu không xử lý request race, UI có thể nháy về dữ liệu cũ khi người dùng gõ nhanh
+- nếu không đồng bộ `page` với `totalPages` sau khi xóa hoặc thay đổi filter, người dùng có thể rơi vào trang rỗng
+- vì contract `GET /api/admin/users` đổi từ mảng thuần sang object có metadata, page phải được cập nhật đồng thời với route
 
 ## Implementation Notes
 
-- giữ thay đổi tập trung trong một file page hiện có
-- ưu tiên tạo helper nhỏ hoặc mapping field rõ ràng để tránh lặp lại logic chuẩn hóa chuỗi
-- không đổi contract API để tránh ảnh hưởng phần tạo, sửa và các thao tác khác đang dùng cùng route
+- giữ thay đổi tập trung chủ yếu trong 2 file hiện có
+- dùng một hằng số chung cho page size options ở page để tránh magic numbers
+- logic tạo `where` cho Prisma nên tách rõ danh sách field hợp lệ để tránh nhận tùy ý từ query string
+- sau khi chuyển sang server-side, logic lọc client-side trước đó cần được loại bỏ hoàn toàn để tránh hai tầng filter chồng nhau
