@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
 import { logActivity, ACTIONS, ENTITY_TYPES } from "@/lib/activity-log";
+import { listReportMonthSummaries, listSubmittedFacilityIdsForMonth } from "@/lib/report-submissions";
 
 /**
  * GET /api/admin/reports
@@ -18,12 +19,9 @@ export async function GET(request: Request) {
         const { searchParams } = new URL(request.url);
         const filterMonth = searchParams.get("month");
 
-        const reportGroups = await prisma.inventoryReport.groupBy({
-            by: ['facilityId', 'reportMonth'],
-            _count: { mapId: true },
-            _max: { updatedAt: true },
-            orderBy: { reportMonth: 'desc' }
-        });
+        const reportSummaries = await listReportMonthSummaries(
+            filterMonth ? { month: filterMonth } : {}
+        );
 
         const facilities = await prisma.user.findMany({
             where: { role: 'FACILITY' },
@@ -32,49 +30,18 @@ export async function GET(request: Request) {
         const facilityMap = new Map<string, string>();
         facilities.forEach(f => facilityMap.set(f.id, f.facilityName || f.username));
 
-        // Fetch all rows needed to compute monetary values (nhap*giaVat, xuat*giaVat)
-        const allRows = await prisma.inventoryReport.findMany({
-            where: reportGroups.length > 0
-                ? { OR: reportGroups.map(g => ({ facilityId: g.facilityId, reportMonth: g.reportMonth })) }
-                : { id: 'none' },
-            select: { facilityId: true, reportMonth: true, nhap: true, xuat: true, giaVat: true, status: true, adminNote: true },
-        });
-
-        // Group rows by facilityId+reportMonth key
-        type GroupAcc = { totalImportValue: number; totalExportValue: number; status: string; adminNote: string | null };
-        const groupMap = new Map<string, GroupAcc>();
-        for (const row of allRows) {
-            const key = `${row.facilityId}-${row.reportMonth}`;
-            const nhap = Number(row.nhap) || 0;
-            const xuat = Number(row.xuat) || 0;
-            const giaVat = Number(row.giaVat) || 0;
-            if (!groupMap.has(key)) {
-                groupMap.set(key, { totalImportValue: 0, totalExportValue: 0, status: row.status, adminNote: row.adminNote ?? null });
-            }
-            const acc = groupMap.get(key)!;
-            acc.totalImportValue += nhap * giaVat;
-            acc.totalExportValue += xuat * giaVat;
-            // Keep last non-PENDING status as representative
-            if (row.status !== 'PENDING') acc.status = row.status;
-            if (row.adminNote) acc.adminNote = row.adminNote;
-        }
-
-        const consolidatedReports = reportGroups.map(group => {
-            const key = `${group.facilityId}-${group.reportMonth}`;
-            const acc = groupMap.get(key);
-            return {
-                id: key,
-                facilityId: group.facilityId,
-                facilityName: facilityMap.get(group.facilityId) || 'Unknown Facility',
-                month: group.reportMonth,
-                drugCount: group._count.mapId,
-                totalImport: acc?.totalImportValue ?? 0,
-                totalExport: acc?.totalExportValue ?? 0,
-                lastUpdated: group._max.updatedAt,
-                status: acc?.status || 'PENDING',
-                adminNote: acc?.adminNote,
-            };
-        });
+        const consolidatedReports = reportSummaries.map((summary) => ({
+            id: summary.id,
+            facilityId: summary.facilityId,
+            facilityName: facilityMap.get(summary.facilityId) || 'Unknown Facility',
+            month: summary.month,
+            drugCount: summary.drugCount,
+            totalImport: summary.totalImport,
+            totalExport: summary.totalExport,
+            lastUpdated: summary.lastUpdated,
+            status: summary.status,
+            skippedRowCount: summary.skippedRowCount,
+        }));
 
         const summary = {
             totalReports: consolidatedReports.length,
@@ -85,7 +52,7 @@ export async function GET(request: Request) {
 
         let notSubmitted: { id: string; facilityName: string }[] = [];
         if (filterMonth) {
-            const submittedIds = new Set(consolidatedReports.filter(r => r.month === filterMonth).map(r => r.facilityId));
+            const submittedIds = await listSubmittedFacilityIdsForMonth(filterMonth);
             notSubmitted = facilities.filter(f => !submittedIds.has(f.id)).map(f => ({ id: f.id, facilityName: f.facilityName || f.username }));
         }
 
@@ -127,17 +94,25 @@ export async function DELETE(request: Request) {
         let totalDeleted = 0;
 
         for (const { facilityId, month } of items) {
-            const result = await prisma.inventoryReport.deleteMany({
-                where: { facilityId, reportMonth: month },
-            });
-            totalDeleted += result.count;
+            const [reportDeleteResult] = await prisma.$transaction([
+                prisma.inventoryReport.deleteMany({
+                    where: { facilityId, reportMonth: month },
+                }),
+                prisma.facilityReportSubmission.deleteMany({
+                    where: { facilityId, reportMonth: month },
+                }),
+                (prisma as any).reportReviewLog.deleteMany({
+                    where: { facilityId, reportMonth: month },
+                }),
+            ]);
+            totalDeleted += reportDeleteResult.count;
 
             logActivity({
                 userId: session.user.id,
                 action: ACTIONS.DELETE,
                 entityType: ENTITY_TYPES.REPORT,
                 entityId: facilityId,
-                details: { month, deletedRows: result.count },
+                details: { month, deletedRows: reportDeleteResult.count },
             });
         }
 

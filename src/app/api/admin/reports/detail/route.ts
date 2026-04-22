@@ -3,6 +3,52 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
 
+const DETAIL_SEARCH_FIELDS = [
+    "all",
+    "maNoiBo",
+    "tenThuocNoiBo",
+    "hoatChatNoiBo",
+    "soDangKyNoiBo",
+    "maChung",
+    "maBhyt",
+    "tenThuoc",
+    "hoatChat",
+    "soDangKy",
+    "soQdTrungThau",
+    "tenCongTy",
+] as const;
+
+type DetailSearchField = (typeof DETAIL_SEARCH_FIELDS)[number];
+
+const buildContainsFilter = (term: string) => ({
+    contains: term,
+    mode: "insensitive" as const,
+});
+
+const getDetailSearchClause = (searchField: DetailSearchField, searchTerm: string) => {
+    const fieldFilters = {
+        maNoiBo: { drugMap: { maNoiBo: buildContainsFilter(searchTerm) } },
+        tenThuocNoiBo: { drugMap: { tenThuocNoiBo: buildContainsFilter(searchTerm) } },
+        hoatChatNoiBo: { drugMap: { hoatChatNoiBo: buildContainsFilter(searchTerm) } },
+        soDangKyNoiBo: { drugMap: { soDangKyNoiBo: buildContainsFilter(searchTerm) } },
+        maChung: { drugMap: { masterDrug: { maChung: buildContainsFilter(searchTerm) } } },
+        maBhyt: { drugMap: { masterDrug: { maBhyt: buildContainsFilter(searchTerm) } } },
+        tenThuoc: { drugMap: { masterDrug: { tenThuoc: buildContainsFilter(searchTerm) } } },
+        hoatChat: { drugMap: { masterDrug: { hoatChat: buildContainsFilter(searchTerm) } } },
+        soDangKy: { drugMap: { masterDrug: { soDangKy: buildContainsFilter(searchTerm) } } },
+        soQdTrungThau: { soQdTrungThau: buildContainsFilter(searchTerm) },
+        tenCongTy: { tenCongTy: buildContainsFilter(searchTerm) },
+    } as const;
+
+    if (searchField === "all") {
+        return {
+            OR: Object.values(fieldFilters),
+        };
+    }
+
+    return fieldFilters[searchField];
+};
+
 export async function GET(request: Request) {
     try {
         const session = await auth();
@@ -15,8 +61,13 @@ export async function GET(request: Request) {
         const month = searchParams.get("month");
         const pageParam = Number.parseInt(searchParams.get("page") || "1", 10);
         const limitParam = Number.parseInt(searchParams.get("limit") || "50", 10);
+        const rawSearchField = searchParams.get("searchField") || "all";
+        const searchTerm = (searchParams.get("searchTerm") || "").trim();
         const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
         const limit = Number.isFinite(limitParam) && limitParam > 0 ? limitParam : 50;
+        const searchField = DETAIL_SEARCH_FIELDS.includes(rawSearchField as DetailSearchField)
+            ? rawSearchField as DetailSearchField
+            : "all";
 
         if (!facilityId || !month) {
             return NextResponse.json({ message: "Missing required params" }, { status: 400 });
@@ -25,6 +76,7 @@ export async function GET(request: Request) {
         const where = {
             facilityId,
             reportMonth: month,
+            ...(searchTerm ? getDetailSearchClause(searchField, searchTerm) : {}),
         };
 
         const total = await prisma.inventoryReport.count({ where });

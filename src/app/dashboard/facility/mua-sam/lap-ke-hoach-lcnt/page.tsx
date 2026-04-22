@@ -59,6 +59,11 @@ interface GoiThau {
     trangThai: string;
     maThongBao: string;
     phanLos: PhanLo[];
+    thongBaoMoiThaus?: Array<{
+        id: string;
+        maTBMT?: string;
+    }>;
+    ketQuaLCNTs?: Array<{ id: string }>;
 }
 
 interface KeHoachLCNT {
@@ -81,11 +86,15 @@ interface KeHoachLCNT {
     goiThaus?: GoiThau[];
 }
 
+type ProcurementTypeFilter = "all" | "Thuốc" | "Hóa chất, vật tư, thiết bị y tế";
+
 // ===================== CONSTANTS =====================
 const HINH_THUC_OPTIONS = [
     "Đấu thầu rộng rãi",
     "Chào hàng cạnh tranh",
     "Mua sắm trực tiếp",
+    "Chỉ định thầu",
+    "Chào giá trực tuyến",
 ];
 
 const PHUONG_THUC_OPTIONS = [
@@ -105,11 +114,21 @@ const PHAN_LOAI_OPTIONS = [
     "Gói thầu thuốc dược liệu, thuốc có kết hợp dược chất với các dược liệu, thuốc cổ truyền",
     "Gói thầu dược liệu",
     "Gói thầu vị thuốc cổ truyền",
+    "Gói thầu mua sắm hóa chất, vật tư, thiết bị y tế",
 ];
 
 const LINH_VUC_OPTIONS = [
     "Mua sắm thuốc",
     "Mua sắm Hóa chất, vật tư",
+];
+
+const PROCUREMENT_TYPE_FILTER_OPTIONS: Array<{
+    value: ProcurementTypeFilter;
+    label: string;
+}> = [
+    { value: "all", label: "Tất cả" },
+    { value: "Thuốc", label: "Thuốc" },
+    { value: "Hóa chất, vật tư, thiết bị y tế", label: "Hóa chất, vật tư, thiết bị y tế" },
 ];
 
 const EMPTY_KE_HOACH: KeHoachLCNT = {
@@ -146,6 +165,151 @@ const EMPTY_GOI_THAU: GoiThau = {
     phanLos: [],
 };
 
+const parseNullableNumber = (value: unknown): number | null => {
+    if (value === null || value === undefined) {
+        return null;
+    }
+
+    if (typeof value === "string") {
+        const trimmed = value.trim();
+        if (trimmed === "") {
+            return null;
+        }
+
+        const parsed = Number(trimmed);
+        return Number.isNaN(parsed) ? null : parsed;
+    }
+
+    const parsed = Number(value);
+    return Number.isNaN(parsed) ? null : parsed;
+};
+
+const normalizeImportText = (value: unknown) =>
+    typeof value === "string" ? value.trim() : "";
+
+const normalizeDurationImportValue = (value: unknown) => {
+    if (typeof value === "string") {
+        return value.trim();
+    }
+
+    if (typeof value === "number" && Number.isFinite(value)) {
+        return String(value);
+    }
+
+    return "";
+};
+
+const isImportedPhanLoBlank = (row: PhanLo) =>
+    row.tenPhanLo === ""
+    && row.donViTinh === ""
+    && row.soLuong === null
+    && row.donGia === null
+    && row.thanhTien === null
+    && row.thoiGianThucHien === ""
+    && row.donViTinhThoiGian === "";
+
+const formatDisplayText = (value: string | null | undefined) => {
+    if (typeof value !== "string") {
+        return "—";
+    }
+
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : "—";
+};
+
+const formatDisplayCombinedText = (...values: Array<string | null | undefined>) => {
+    const combined = values
+        .map((value) => (typeof value === "string" ? value.trim() : ""))
+        .filter(Boolean)
+        .join(" ");
+
+    return combined || "—";
+};
+
+const hasDisplayNumber = (value: number | null | undefined): value is number =>
+    value !== null && value !== undefined;
+
+const calculateGiaGoiThauFromPhanLos = (currentPhanLos: PhanLo[]): number | null => {
+    let hasThanhTien = false;
+
+    const total = currentPhanLos.reduce((sum, phanLo) => {
+        const thanhTien = parseNullableNumber(phanLo.thanhTien);
+
+        if (thanhTien === null) {
+            return sum;
+        }
+
+        hasThanhTien = true;
+        return sum + thanhTien;
+    }, 0);
+
+    return hasThanhTien ? total : null;
+};
+
+const mapPhanLoFromApi = (phanLo: any): PhanLo => ({
+    stt: Number(phanLo.stt) || 0,
+    tenPhanLo: phanLo.tenPhanLo || "",
+    donViTinh: phanLo.donViTinh || "",
+    soLuong: parseNullableNumber(phanLo.soLuong),
+    donGia: parseNullableNumber(phanLo.donGia),
+    thanhTien: parseNullableNumber(phanLo.thanhTien),
+    thoiGianThucHien: phanLo.thoiGianThucHien?.toString() || "",
+    donViTinhThoiGian: phanLo.donViTinhThoiGian?.toString() || "",
+});
+
+const sortPhanLosByStt = (items: PhanLo[]) =>
+    [...items].sort((left, right) => left.stt - right.stt);
+
+const mapGoiThauFromApi = (goiThau: any): GoiThau => ({
+    id: goiThau.id,
+    tenGoiThau: goiThau.tenGoiThau,
+    giaGoiThau: parseNullableNumber(goiThau.giaGoiThau),
+    linhVuc: goiThau.linhVuc ? JSON.parse(goiThau.linhVuc) : [],
+    hinhThucLCNT: goiThau.hinhThucLCNT || "",
+    phuongThucLCNT: goiThau.phuongThucLCNT || "",
+    loaiHopDong: goiThau.loaiHopDong ? JSON.parse(goiThau.loaiHopDong) : [],
+    phanLoaiGoiThau: goiThau.phanLoaiGoiThau || "",
+    chiTietNguonVon: goiThau.chiTietNguonVon || "",
+    soLuongPhanLo: goiThau.soLuongPhanLo,
+    thoiGianToChuc: goiThau.thoiGianToChuc || "",
+    thoiGianBatDau: typeof goiThau.thoiGianBatDau === "string" ? goiThau.thoiGianBatDau : "",
+    thoiGianThucHien: goiThau.thoiGianThucHien || "",
+    trangThai: goiThau.trangThai || "",
+    maThongBao: goiThau.maThongBao || "",
+    phanLos: sortPhanLosByStt(goiThau.phanLos?.map(mapPhanLoFromApi) || []),
+    thongBaoMoiThaus: goiThau.thongBaoMoiThaus || [],
+    ketQuaLCNTs: goiThau.ketQuaLCNTs || [],
+});
+
+const canEditGoiThau = (goiThau: GoiThau) =>
+    Boolean(goiThau.id) &&
+    (goiThau.thongBaoMoiThaus?.length || 0) === 0 &&
+    (goiThau.ketQuaLCNTs?.length || 0) === 0;
+
+const getGoiThauDisplayStatus = (goiThau: Pick<GoiThau, "ketQuaLCNTs">) =>
+    (goiThau.ketQuaLCNTs?.length || 0) > 0 ? "Hoàn thành" : "Chưa hoàn thành";
+
+const getGoiThauStatusBadgeClassName = (status: string) =>
+    status === "Hoàn thành"
+        ? "bg-green-100 text-green-700"
+        : "bg-amber-100 text-amber-700";
+
+const getLinkedThongBaoCode = (
+    goiThau: Pick<GoiThau, "thongBaoMoiThaus" | "maThongBao">
+) => formatDisplayText(goiThau.thongBaoMoiThaus?.[0]?.maTBMT || goiThau.maThongBao);
+
+const filterPlansByProcurementType = (
+    plans: KeHoachLCNT[],
+    procurementTypeFilter: ProcurementTypeFilter,
+    getProcurementType: (plan: KeHoachLCNT) => string | undefined
+) => {
+    if (procurementTypeFilter === "all") {
+        return plans;
+    }
+
+    return plans.filter((plan) => getProcurementType(plan) === procurementTypeFilter);
+};
+
 // ===================== COMPONENT =====================
 export default function LapKeHoachLCNTPage() {
     const { data: session } = useSession();
@@ -155,12 +319,14 @@ export default function LapKeHoachLCNTPage() {
     const [editMode, setEditMode] = useState(false); // true when editing existing plan
     const [activeTab, setActiveTab] = useState("tab1");
     const [listTab, setListTab] = useState("quyTrinh1"); // Tab for list view
+    const [procurementTypeFilter, setProcurementTypeFilter] = useState<ProcurementTypeFilter>("all");
     const [loading, setLoading] = useState(false);
     const [successModalOpen, setSuccessModalOpen] = useState(false);
     const [excelModalOpen, setExcelModalOpen] = useState(false);
     const [showGoiThauForm, setShowGoiThauForm] = useState(false);
     const [viewGoiThauDialogOpen, setViewGoiThauDialogOpen] = useState(false);
     const [selectedGoiThau, setSelectedGoiThau] = useState<GoiThau | null>(null);
+    const [editingGoiThauId, setEditingGoiThauId] = useState<string | null>(null);
 
     // All plans
     const [keHoachList, setKeHoachList] = useState<KeHoachLCNT[]>([]);
@@ -172,6 +338,7 @@ export default function LapKeHoachLCNTPage() {
     const [goiThauList, setGoiThauList] = useState<GoiThau[]>([]);
     const [goiThauForm, setGoiThauForm] = useState<GoiThau>({ ...EMPTY_GOI_THAU });
     const [phanLos, setPhanLos] = useState<PhanLo[]>([]);
+    const calculatedGiaGoiThau = calculateGiaGoiThauFromPhanLos(phanLos);
 
     // ===================== DATA LOADING =====================
     const loadKeHoachList = useCallback(async () => {
@@ -204,26 +371,7 @@ export default function LapKeHoachLCNTPage() {
                             ? new Date(item.thoiGianKetThucHopDong).toISOString().split("T")[0]
                             : "",
                         createdAt: item.createdAt,
-                        goiThaus: item.goiThaus?.map((gt: any) => ({
-                            id: gt.id,
-                            tenGoiThau: gt.tenGoiThau,
-                            giaGoiThau: gt.giaGoiThau ? Number(gt.giaGoiThau) : null,
-                            linhVuc: gt.linhVuc ? JSON.parse(gt.linhVuc) : [],
-                            hinhThucLCNT: gt.hinhThucLCNT || "",
-                            phuongThucLCNT: gt.phuongThucLCNT || "",
-                            loaiHopDong: gt.loaiHopDong ? JSON.parse(gt.loaiHopDong) : [],
-                            phanLoaiGoiThau: gt.phanLoaiGoiThau || "",
-                            chiTietNguonVon: gt.chiTietNguonVon || "",
-                            soLuongPhanLo: gt.soLuongPhanLo,
-                            thoiGianToChuc: gt.thoiGianToChuc || "",
-                            thoiGianBatDau: gt.thoiGianBatDau
-                                ? new Date(gt.thoiGianBatDau).toISOString().split("T")[0]
-                                : "",
-                            thoiGianThucHien: gt.thoiGianThucHien || "",
-                            trangThai: gt.trangThai || "",
-                            maThongBao: gt.maThongBao || "",
-                            phanLos: gt.phanLos || [],
-                        })) || [],
+                        goiThaus: item.goiThaus?.map(mapGoiThauFromApi) || [],
                     }))
                 );
             }
@@ -244,8 +392,21 @@ export default function LapKeHoachLCNTPage() {
         setPhanLos([]);
         setActiveTab("tab1");
         setShowGoiThauForm(false);
+        setEditingGoiThauId(null);
         setEditMode(false);
         setViewMode("detail");
+    };
+
+    const handleProcurementTypeFilterChange = (value: string) => {
+        if (
+            value === "Thuốc"
+            || value === "Hóa chất, vật tư, thiết bị y tế"
+        ) {
+            setProcurementTypeFilter(value);
+            return;
+        }
+
+        setProcurementTypeFilter("all");
     };
 
     const handleSelectPlan = (plan: KeHoachLCNT) => {
@@ -253,6 +414,7 @@ export default function LapKeHoachLCNTPage() {
         setGoiThauList(plan.goiThaus || []);
         setActiveTab("tab1");
         setShowGoiThauForm(false);
+        setEditingGoiThauId(null);
         setEditMode(false); // view mode by default
         setViewMode("detail");
     };
@@ -262,13 +424,50 @@ export default function LapKeHoachLCNTPage() {
         setGoiThauList(plan.goiThaus || []);
         setActiveTab("tab1");
         setShowGoiThauForm(false);
+        setEditingGoiThauId(null);
         setEditMode(true); // enable edit mode
         setViewMode("detail");
     };
 
     const handleBackToList = () => {
         setViewMode("list");
+        setShowGoiThauForm(false);
+        setEditingGoiThauId(null);
         loadKeHoachList();
+    };
+
+    const handleCreateGoiThau = () => {
+        setGoiThauForm({ ...EMPTY_GOI_THAU });
+        setPhanLos([]);
+        setEditingGoiThauId(null);
+        setShowGoiThauForm(true);
+    };
+
+    const handleEditGoiThau = (goiThau: GoiThau) => {
+        if (!canEditGoiThau(goiThau)) {
+            alert("Không thể sửa gói thầu đã có dữ liệu liên kết.");
+            return;
+        }
+
+        setGoiThauForm({
+            ...EMPTY_GOI_THAU,
+            ...goiThau,
+            linhVuc: [...goiThau.linhVuc],
+            loaiHopDong: [...goiThau.loaiHopDong],
+            phanLos: goiThau.phanLos.map((phanLo) => ({ ...phanLo })),
+            thongBaoMoiThaus: goiThau.thongBaoMoiThaus || [],
+            ketQuaLCNTs: goiThau.ketQuaLCNTs || [],
+        });
+        setPhanLos(goiThau.phanLos.map((phanLo) => ({ ...phanLo })));
+        setEditingGoiThauId(goiThau.id || null);
+        setShowGoiThauForm(true);
+    };
+
+    const handleCloseGoiThauForm = () => {
+        setShowGoiThauForm(false);
+        setEditingGoiThauId(null);
+        setGoiThauForm({ ...EMPTY_GOI_THAU });
+        setPhanLos([]);
     };
 
     const handleSaveKeHoach = async () => {
@@ -340,14 +539,25 @@ export default function LapKeHoachLCNTPage() {
 
         setLoading(true);
         try {
-            const res = await fetch(`/api/facility/ke-hoach-lcnt/${keHoach.id}/goi-thau`, {
-                method: "POST",
+            const isEditingGoiThau = Boolean(editingGoiThauId);
+            const soLuongPhanLo = phanLos.length || goiThauForm.soLuongPhanLo;
+            const existingGoiThau = goiThauList.find((item) => item.id === editingGoiThauId);
+
+            const res = await fetch(
+                isEditingGoiThau
+                    ? `/api/facility/ke-hoach-lcnt/${keHoach.id}/goi-thau/${editingGoiThauId}`
+                    : `/api/facility/ke-hoach-lcnt/${keHoach.id}/goi-thau`,
+                {
+                method: isEditingGoiThau ? "PATCH" : "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     ...goiThauForm,
+                    giaGoiThau: calculatedGiaGoiThau,
+                    soLuongPhanLo,
                     phanLos: phanLos,
                 }),
-            });
+                }
+            );
 
             if (!res.ok) {
                 const errData = await res.json().catch(() => ({}));
@@ -355,17 +565,23 @@ export default function LapKeHoachLCNTPage() {
             }
 
             const data = await res.json();
-            const newGoiThau: GoiThau = {
-                ...goiThauForm,
-                id: data.id,
-                phanLos: phanLos,
-                soLuongPhanLo: phanLos.length || goiThauForm.soLuongPhanLo,
+            const savedGoiThau: GoiThau = {
+                ...mapGoiThauFromApi(data),
+                thongBaoMoiThaus: existingGoiThau?.thongBaoMoiThaus || data.thongBaoMoiThaus || [],
+                ketQuaLCNTs: existingGoiThau?.ketQuaLCNTs || data.ketQuaLCNTs || [],
             };
-            setGoiThauList([...goiThauList, newGoiThau]);
-            setGoiThauForm({ ...EMPTY_GOI_THAU });
-            setPhanLos([]);
-            setShowGoiThauForm(false);
-            alert("Đã lưu gói thầu thành công!");
+            const updatedGoiThauList = isEditingGoiThau
+                ? goiThauList.map((item) => (item.id === editingGoiThauId ? savedGoiThau : item))
+                : [...goiThauList, savedGoiThau];
+
+            setGoiThauList(updatedGoiThauList);
+            setKeHoach((prev) => ({
+                ...prev,
+                goiThaus: updatedGoiThauList,
+            }));
+            handleCloseGoiThauForm();
+            loadKeHoachList();
+            alert(isEditingGoiThau ? "Cập nhật gói thầu thành công!" : "Đã lưu gói thầu thành công!");
         } catch (error: any) {
             console.error("Error saving goi thau:", error);
             alert(`Lỗi khi lưu gói thầu: ${error.message}`);
@@ -405,21 +621,44 @@ export default function LapKeHoachLCNTPage() {
                 const workbook = XLSX.read(data, { type: "array" });
                 const sheetName = workbook.SheetNames[0];
                 const sheet = workbook.Sheets[sheetName];
-                const jsonData = XLSX.utils.sheet_to_json(sheet);
+                const jsonData = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, {
+                    defval: "",
+                });
 
-                const parsed: PhanLo[] = jsonData.map((row: any, idx: number) => ({
-                    stt: row["STT"] || idx + 1,
-                    tenPhanLo: row["Tên phần lô"] || "",
-                    donViTinh: row["Đơn vị tính"] || "",
-                    soLuong: row["Số lượng"] ? Number(row["Số lượng"]) : null,
-                    donGia: row["Đơn giá"] ? Number(row["Đơn giá"]) : null,
-                    thanhTien: row["Thành tiền"] ? Number(row["Thành tiền"]) : null,
-                    thoiGianThucHien: row["Thời gian thực hiện gói thầu"]?.toString() || "",
-                    donViTinhThoiGian: row["Đơn vị tính TGTHHGT"] || "",
+                const parsed = jsonData.map((row, idx): { rowNumber: number; value: PhanLo } => ({
+                    rowNumber: idx + 2,
+                    value: {
+                    stt: parseNullableNumber(row["STT"]) ?? idx + 1,
+                    tenPhanLo: normalizeImportText(row["Tên phần lô"]),
+                    donViTinh: normalizeImportText(row["Đơn vị tính"]),
+                    soLuong: parseNullableNumber(row["Số lượng"]),
+                    donGia: parseNullableNumber(row["Đơn giá"]),
+                    thanhTien: parseNullableNumber(row["Thành tiền"]),
+                    thoiGianThucHien: normalizeDurationImportValue(row["Thời gian thực hiện gói thầu"]),
+                    donViTinhThoiGian: normalizeImportText(row["Đơn vị tính TGTHHGT"]),
+                    },
                 }));
+                const meaningfulRows = parsed.filter((item) => !isImportedPhanLoBlank(item.value));
 
-                setPhanLos(parsed);
-                setGoiThauForm({ ...goiThauForm, soLuongPhanLo: parsed.length });
+                if (meaningfulRows.length === 0) {
+                    alert("File Excel không có dòng phần lô hợp lệ để nhập.");
+                    return;
+                }
+
+                const rowsMissingTenPhanLo = meaningfulRows
+                    .filter((item) => item.value.tenPhanLo === "")
+                    .map((item) => item.rowNumber);
+
+                if (rowsMissingTenPhanLo.length > 0) {
+                    alert(
+                        `File Excel có dòng thiếu Tên phần lô: ${rowsMissingTenPhanLo.join(", ")}. Vui lòng kiểm tra lại file trước khi nhập.`
+                    );
+                    return;
+                }
+
+                const importedPhanLos = meaningfulRows.map((item) => item.value);
+                setPhanLos(importedPhanLos);
+                setGoiThauForm((prev) => ({ ...prev, soLuongPhanLo: importedPhanLos.length }));
                 setExcelModalOpen(false);
             } catch (err) {
                 console.error("Error reading Excel:", err);
@@ -427,29 +666,30 @@ export default function LapKeHoachLCNTPage() {
             }
         };
         reader.readAsArrayBuffer(file);
-    };
-
-    const handleCheckboxChange = (
-        field: "linhVuc" | "loaiHopDong",
-        value: string,
-        checked: boolean
-    ) => {
-        setGoiThauForm((prev) => {
-            const current = prev[field];
-            if (checked) {
-                return { ...prev, [field]: [...current, value] };
-            } else {
-                return { ...prev, [field]: current.filter((v) => v !== value) };
-            }
-        });
+        e.target.value = "";
     };
 
     // ===================== RENDER: LIST VIEW =====================
     if (viewMode === "list") {
-        // Filter based on selected tab
-        const filteredList = keHoachList.filter(kh =>
-            listTab === "quyTrinh1" ? kh.quyTrinh === 1 : kh.quyTrinh === 2
+        const quyTrinh1Plans = keHoachList.filter((kh) => kh.quyTrinh === 1);
+        const quyTrinh2Plans = keHoachList.filter((kh) => kh.quyTrinh === 2);
+        const filteredQuyTrinh1Plans = filterPlansByProcurementType(
+            quyTrinh1Plans,
+            procurementTypeFilter,
+            (kh) => kh.loaiMuaSam
         );
+        const filteredQuyTrinh2Plans = filterPlansByProcurementType(
+            quyTrinh2Plans,
+            procurementTypeFilter,
+            (kh) => kh.loaiMuaSamTuQuyet
+        );
+        const isProcurementTypeFilterApplied = procurementTypeFilter !== "all";
+        const visiblePlanCount = listTab === "quyTrinh1"
+            ? filteredQuyTrinh1Plans.length
+            : filteredQuyTrinh2Plans.length;
+        const totalPlanCount = listTab === "quyTrinh1"
+            ? quyTrinh1Plans.length
+            : quyTrinh2Plans.length;
 
         return (
             <div className="space-y-6">
@@ -493,6 +733,36 @@ export default function LapKeHoachLCNTPage() {
                         </TabsTrigger>
                     </TabsList>
 
+                    <div className="mt-4 flex flex-col gap-4 rounded-xl border border-slate-200 bg-slate-50/80 p-4 md:flex-row md:items-end md:justify-between">
+                        <div className="space-y-1">
+                            <p className="text-sm font-semibold text-slate-700">Bộ lọc danh sách</p>
+                            <p className="text-sm text-slate-500">
+                                Áp dụng cho cả hai tab theo loại mua sắm tương ứng.
+                            </p>
+                        </div>
+                        <div className="w-full space-y-2 md:max-w-sm">
+                            <Label className="text-sm text-slate-600">Loại mua sắm</Label>
+                            <Select
+                                value={procurementTypeFilter}
+                                onValueChange={handleProcurementTypeFilterChange}
+                            >
+                                <SelectTrigger className="bg-white">
+                                    <SelectValue placeholder="Chọn loại mua sắm" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {PROCUREMENT_TYPE_FILTER_OPTIONS.map((option) => (
+                                        <SelectItem key={option.value} value={option.value}>
+                                            {option.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <p className="text-xs text-slate-500">
+                                Đang hiển thị {visiblePlanCount}/{totalPlanCount} kế hoạch
+                            </p>
+                        </div>
+                    </div>
+
                     <TabsContent value="quyTrinh1" className="mt-6">
                         <Card className="border-0 shadow-lg">
                             <CardContent className="p-0">
@@ -510,24 +780,32 @@ export default function LapKeHoachLCNTPage() {
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
-                                            {filteredList.length === 0 ? (
+                                            {filteredQuyTrinh1Plans.length === 0 ? (
                                                 <TableRow>
                                                     <TableCell colSpan={7} className="text-center py-12 text-gray-400">
                                                         <div className="flex flex-col items-center gap-3">
                                                             <svg className="w-12 h-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                                             </svg>
-                                                            <p>Chưa có kế hoạch theo Luật Đấu thầu.</p>
-                                                            <p className="text-sm">Nhấn &quot;Tạo Kế hoạch&quot; để bắt đầu.</p>
+                                                            <p>
+                                                                {isProcurementTypeFilterApplied
+                                                                    ? "Không có kế hoạch phù hợp với loại mua sắm đã chọn."
+                                                                    : "Chưa có kế hoạch theo Luật Đấu thầu."}
+                                                            </p>
+                                                            <p className="text-sm">
+                                                                {isProcurementTypeFilterApplied
+                                                                    ? "Thử chọn \"Tất cả\" hoặc đổi sang loại mua sắm khác."
+                                                                    : "Nhấn \"Tạo Kế hoạch\" để bắt đầu."}
+                                                            </p>
                                                         </div>
                                                     </TableCell>
                                                 </TableRow>
                                             ) : (
-                                                filteredList.map((kh, idx) => (
+                                                filteredQuyTrinh1Plans.map((kh, idx) => (
                                                     <TableRow key={kh.id} className="hover:bg-blue-50/50">
                                                         <TableCell className="font-medium">{idx + 1}</TableCell>
                                                         <TableCell>{kh.maKHLCNT || "—"}</TableCell>
-                                                        <TableCell className="max-w-xs truncate">{kh.tenKHLCNT || "—"}</TableCell>
+                                                        <TableCell className="max-w-xs whitespace-normal break-words">{kh.tenKHLCNT || "—"}</TableCell>
                                                         <TableCell>{kh.goiThaus?.length || 0}</TableCell>
                                                         <TableCell>
                                                             <span className={`px-2 py-1 rounded-full text-xs font-medium ${kh.trangThai === "Đã đăng tải"
@@ -597,20 +875,28 @@ export default function LapKeHoachLCNTPage() {
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
-                                            {filteredList.length === 0 ? (
+                                            {filteredQuyTrinh2Plans.length === 0 ? (
                                                 <TableRow>
                                                     <TableCell colSpan={8} className="text-center py-12 text-gray-400">
                                                         <div className="flex flex-col items-center gap-3">
                                                             <svg className="w-12 h-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
                                                             </svg>
-                                                            <p>Chưa có kế hoạch Tự quyết định.</p>
-                                                            <p className="text-sm">Nhấn &quot;Tạo Kế hoạch&quot; để bắt đầu.</p>
+                                                            <p>
+                                                                {isProcurementTypeFilterApplied
+                                                                    ? "Không có kế hoạch phù hợp với loại mua sắm đã chọn."
+                                                                    : "Chưa có kế hoạch Tự quyết định."}
+                                                            </p>
+                                                            <p className="text-sm">
+                                                                {isProcurementTypeFilterApplied
+                                                                    ? "Thử chọn \"Tất cả\" hoặc đổi sang loại mua sắm khác."
+                                                                    : "Nhấn \"Tạo Kế hoạch\" để bắt đầu."}
+                                                            </p>
                                                         </div>
                                                     </TableCell>
                                                 </TableRow>
                                             ) : (
-                                                filteredList.map((kh, idx) => (
+                                                filteredQuyTrinh2Plans.map((kh, idx) => (
                                                     <TableRow key={kh.id} className="hover:bg-emerald-50/50">
                                                         <TableCell className="font-medium">{idx + 1}</TableCell>
                                                         <TableCell>
@@ -1052,13 +1338,13 @@ export default function LapKeHoachLCNTPage() {
                                                             {phanLos.map((pl) => (
                                                                 <TableRow key={pl.stt}>
                                                                     <TableCell>{pl.stt}</TableCell>
-                                                                    <TableCell>{pl.tenPhanLo}</TableCell>
-                                                                    <TableCell>{pl.donViTinh}</TableCell>
+                                                                    <TableCell>{formatDisplayText(pl.tenPhanLo)}</TableCell>
+                                                                    <TableCell>{formatDisplayText(pl.donViTinh)}</TableCell>
                                                                     <TableCell>{pl.soLuong?.toLocaleString("vi-VN") ?? "—"}</TableCell>
                                                                     <TableCell>{pl.donGia?.toLocaleString("vi-VN") ?? "—"}</TableCell>
                                                                     <TableCell>{pl.thanhTien?.toLocaleString("vi-VN") ?? "—"}</TableCell>
-                                                                    <TableCell>{pl.thoiGianThucHien}</TableCell>
-                                                                    <TableCell>{pl.donViTinhThoiGian}</TableCell>
+                                                                    <TableCell>{formatDisplayText(pl.thoiGianThucHien)}</TableCell>
+                                                                    <TableCell>{formatDisplayText(pl.donViTinhThoiGian)}</TableCell>
                                                                 </TableRow>
                                                             ))}
                                                         </TableBody>
@@ -1130,7 +1416,7 @@ export default function LapKeHoachLCNTPage() {
                                     Danh sách gói thầu
                                 </CardTitle>
                                 <Button
-                                    onClick={() => setShowGoiThauForm(true)}
+                                    onClick={handleCreateGoiThau}
                                     className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white rounded-xl shadow-md"
                                 >
                                     <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1150,7 +1436,7 @@ export default function LapKeHoachLCNTPage() {
                                                 <TableHead className="text-white font-bold">Số lượng phần lô</TableHead>
                                                 <TableHead className="text-white font-bold">Trạng thái</TableHead>
                                                 <TableHead className="text-white font-bold">Mã thông báo liên kết</TableHead>
-                                                <TableHead className="text-white font-bold">Chọn</TableHead>
+                                                <TableHead className="text-white font-bold">Chọn thao tác</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
@@ -1161,42 +1447,62 @@ export default function LapKeHoachLCNTPage() {
                                                     </TableCell>
                                                 </TableRow>
                                             ) : (
-                                                goiThauList.map((gt, idx) => (
-                                                    <TableRow key={gt.id || idx} className="hover:bg-blue-50/50">
-                                                        <TableCell className="font-medium">{idx + 1}</TableCell>
-                                                        <TableCell>{gt.tenGoiThau}</TableCell>
-                                                        <TableCell>
-                                                            {gt.giaGoiThau ? Number(gt.giaGoiThau).toLocaleString("vi-VN") : "—"}
-                                                        </TableCell>
-                                                        <TableCell>{gt.soLuongPhanLo ?? "—"}</TableCell>
-                                                        <TableCell>
-                                                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${gt.trangThai === "Hoàn thành"
-                                                                ? "bg-green-100 text-green-700"
-                                                                : "bg-amber-100 text-amber-700"
-                                                                }`}>
-                                                                {gt.trangThai || "Chưa hoàn thành"}
-                                                            </span>
-                                                        </TableCell>
-                                                        <TableCell>{gt.maThongBao || "—"}</TableCell>
-                                                        <TableCell>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                className="text-blue-600 hover:text-blue-800 hover:bg-blue-100"
-                                                                onClick={() => {
-                                                                    setSelectedGoiThau(gt);
-                                                                    setViewGoiThauDialogOpen(true);
-                                                                }}
-                                                            >
-                                                                <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                                </svg>
-                                                                Xem
-                                                            </Button>
-                                                        </TableCell>
-                                                    </TableRow>
-                                                ))
+                                                goiThauList.map((gt, idx) => {
+                                                    const displayStatus = getGoiThauDisplayStatus(gt);
+
+                                                    return (
+                                                        <TableRow key={gt.id || idx} className="hover:bg-blue-50/50">
+                                                            <TableCell className="font-medium">{idx + 1}</TableCell>
+                                                            <TableCell>{gt.tenGoiThau}</TableCell>
+                                                            <TableCell>
+                                                                {hasDisplayNumber(gt.giaGoiThau) ? Number(gt.giaGoiThau).toLocaleString("vi-VN") : "—"}
+                                                            </TableCell>
+                                                            <TableCell>{gt.soLuongPhanLo ?? "—"}</TableCell>
+                                                            <TableCell>
+                                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getGoiThauStatusBadgeClassName(displayStatus)}`}>
+                                                                    {displayStatus}
+                                                                </span>
+                                                            </TableCell>
+                                                            <TableCell>{getLinkedThongBaoCode(gt)}</TableCell>
+                                                            <TableCell>
+                                                                <div className="flex gap-2">
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="sm"
+                                                                        className="text-blue-600 hover:text-blue-800 hover:bg-blue-100"
+                                                                        onClick={() => {
+                                                                            setSelectedGoiThau(gt);
+                                                                            setViewGoiThauDialogOpen(true);
+                                                                        }}
+                                                                    >
+                                                                        <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                                        </svg>
+                                                                        Xem
+                                                                    </Button>
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="sm"
+                                                                        onClick={() => handleEditGoiThau(gt)}
+                                                                        disabled={!canEditGoiThau(gt)}
+                                                                        title={
+                                                                            canEditGoiThau(gt)
+                                                                                ? "Sửa thông tin gói thầu"
+                                                                                : "Không thể sửa gói thầu đã có dữ liệu liên kết"
+                                                                        }
+                                                                        className="text-emerald-600 hover:text-emerald-800 hover:bg-emerald-100 disabled:text-gray-400 disabled:hover:bg-transparent"
+                                                                    >
+                                                                        <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                                        </svg>
+                                                                        Sửa
+                                                                    </Button>
+                                                                </div>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    );
+                                                })
                                             )}
                                         </TableBody>
                                     </Table>
@@ -1209,7 +1515,7 @@ export default function LapKeHoachLCNTPage() {
                             <Card className="border-0 shadow-lg">
                                 <CardHeader>
                                     <CardTitle className="text-lg text-blue-800">
-                                        Thông tin chi tiết gói thầu
+                                        {editingGoiThauId ? "Sửa thông tin gói thầu" : "Thông tin chi tiết gói thầu"}
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-6">
@@ -1228,32 +1534,40 @@ export default function LapKeHoachLCNTPage() {
                                             <Input
                                                 id="giaGoiThau"
                                                 type="number"
-                                                value={goiThauForm.giaGoiThau ?? ""}
-                                                onChange={(e) => setGoiThauForm({
-                                                    ...goiThauForm,
-                                                    giaGoiThau: e.target.value ? parseFloat(e.target.value) : null,
-                                                })}
-                                                placeholder="Nhập giá gói thầu"
+                                                value={calculatedGiaGoiThau ?? ""}
+                                                readOnly
+                                                placeholder="Được tính tự động từ phần lô"
+                                                className="bg-gray-50"
                                             />
+                                            <p className="text-xs text-gray-500">
+                                                Hệ thống tự động lấy tổng cột Thành tiền của các phần lô.
+                                            </p>
                                         </div>
                                     </div>
 
                                     {/* Lĩnh vực */}
                                     <div className="space-y-2">
                                         <Label className="font-semibold">Lĩnh vực</Label>
-                                        <div className="flex flex-wrap gap-4">
-                                            {LINH_VUC_OPTIONS.map((opt) => (
-                                                <label key={opt} className="flex items-center gap-2 cursor-pointer">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={goiThauForm.linhVuc.includes(opt)}
-                                                        onChange={(e) => handleCheckboxChange("linhVuc", opt, e.target.checked)}
-                                                        className="w-4 h-4 text-blue-600 rounded"
-                                                    />
-                                                    <span className="text-sm text-gray-700">{opt}</span>
-                                                </label>
-                                            ))}
-                                        </div>
+                                        <Select
+                                            value={goiThauForm.linhVuc[0] || ""}
+                                            onValueChange={(val) =>
+                                                setGoiThauForm((prev) => ({
+                                                    ...prev,
+                                                    linhVuc: val ? [val] : [],
+                                                }))
+                                            }
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Chọn lĩnh vực" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {LINH_VUC_OPTIONS.map((opt) => (
+                                                    <SelectItem key={opt} value={opt}>
+                                                        {opt}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                     </div>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1280,19 +1594,26 @@ export default function LapKeHoachLCNTPage() {
                                     {/* Loại hợp đồng */}
                                     <div className="space-y-2">
                                         <Label className="font-semibold">Loại hợp đồng</Label>
-                                        <div className="flex flex-wrap gap-4">
-                                            {LOAI_HOP_DONG_OPTIONS.map((opt) => (
-                                                <label key={opt} className="flex items-center gap-2 cursor-pointer">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={goiThauForm.loaiHopDong.includes(opt)}
-                                                        onChange={(e) => handleCheckboxChange("loaiHopDong", opt, e.target.checked)}
-                                                        className="w-4 h-4 text-blue-600 rounded"
-                                                    />
-                                                    <span className="text-sm text-gray-700">{opt}</span>
-                                                </label>
-                                            ))}
-                                        </div>
+                                        <Select
+                                            value={goiThauForm.loaiHopDong[0] || ""}
+                                            onValueChange={(val) =>
+                                                setGoiThauForm((prev) => ({
+                                                    ...prev,
+                                                    loaiHopDong: val ? [val] : [],
+                                                }))
+                                            }
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Chọn loại hợp đồng" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {LOAI_HOP_DONG_OPTIONS.map((opt) => (
+                                                    <SelectItem key={opt} value={opt}>
+                                                        {opt}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                     </div>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1319,7 +1640,13 @@ export default function LapKeHoachLCNTPage() {
                                         </div>
                                         <div className="space-y-2">
                                             <Label htmlFor="thoiGianBatDau">Thời gian bắt đầu tổ chức LCNT</Label>
-                                            <Input id="thoiGianBatDau" type="date" value={goiThauForm.thoiGianBatDau} onChange={(e) => setGoiThauForm({ ...goiThauForm, thoiGianBatDau: e.target.value })} />
+                                            <Input
+                                                id="thoiGianBatDau"
+                                                type="text"
+                                                value={goiThauForm.thoiGianBatDau}
+                                                onChange={(e) => setGoiThauForm({ ...goiThauForm, thoiGianBatDau: e.target.value })}
+                                                placeholder="VD: Quý III/2026 hoặc sau khi phê duyệt"
+                                            />
                                         </div>
                                         <div className="space-y-2">
                                             <Label htmlFor="thoiGianThucHien">Thời gian thực hiện gói thầu</Label>
@@ -1361,13 +1688,13 @@ export default function LapKeHoachLCNTPage() {
                                                         {phanLos.map((pl) => (
                                                             <TableRow key={pl.stt}>
                                                                 <TableCell>{pl.stt}</TableCell>
-                                                                <TableCell>{pl.tenPhanLo}</TableCell>
-                                                                <TableCell>{pl.donViTinh}</TableCell>
+                                                                <TableCell>{formatDisplayText(pl.tenPhanLo)}</TableCell>
+                                                                <TableCell>{formatDisplayText(pl.donViTinh)}</TableCell>
                                                                 <TableCell>{pl.soLuong?.toLocaleString("vi-VN") ?? "—"}</TableCell>
                                                                 <TableCell>{pl.donGia?.toLocaleString("vi-VN") ?? "—"}</TableCell>
                                                                 <TableCell>{pl.thanhTien?.toLocaleString("vi-VN") ?? "—"}</TableCell>
-                                                                <TableCell>{pl.thoiGianThucHien}</TableCell>
-                                                                <TableCell>{pl.donViTinhThoiGian}</TableCell>
+                                                                <TableCell>{formatDisplayText(pl.thoiGianThucHien)}</TableCell>
+                                                                <TableCell>{formatDisplayText(pl.donViTinhThoiGian)}</TableCell>
                                                             </TableRow>
                                                         ))}
                                                     </TableBody>
@@ -1378,7 +1705,7 @@ export default function LapKeHoachLCNTPage() {
 
                                     {/* Save button */}
                                     <div className="flex justify-end gap-3 pt-4">
-                                        <Button variant="outline" onClick={() => setShowGoiThauForm(false)} className="rounded-xl">
+                                        <Button variant="outline" onClick={handleCloseGoiThauForm} className="rounded-xl">
                                             Hủy
                                         </Button>
                                         <Button
@@ -1386,7 +1713,11 @@ export default function LapKeHoachLCNTPage() {
                                             disabled={loading}
                                             className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-2.5 rounded-xl shadow-lg hover:shadow-xl transition-all"
                                         >
-                                            {loading ? "Đang lưu..." : "LƯU GÓI THẦU"}
+                                            {loading
+                                                ? "Đang lưu..."
+                                                : editingGoiThauId
+                                                    ? "CẬP NHẬT GÓI THẦU"
+                                                    : "LƯU GÓI THẦU"}
                                         </Button>
                                     </div>
                                 </CardContent>
@@ -1433,148 +1764,150 @@ export default function LapKeHoachLCNTPage() {
 
             {/* =================== VIEW GOI THAU DIALOG =================== */}
             <Dialog open={viewGoiThauDialogOpen} onOpenChange={setViewGoiThauDialogOpen}>
-                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                    <DialogHeader>
+                <DialogContent className="flex h-[95vh] w-[95vw] max-w-[95vw] flex-col gap-0 overflow-hidden p-0 sm:max-w-[95vw]">
+                    <DialogHeader className="shrink-0 border-b px-6 py-4">
                         <DialogTitle className="text-xl text-blue-800">Chi tiết Gói thầu</DialogTitle>
                     </DialogHeader>
-                    {selectedGoiThau && (
-                        <div className="space-y-6">
-                            {/* Basic Information */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label className="text-sm text-gray-500">Tên gói thầu</Label>
-                                    <p className="font-medium text-gray-800">{selectedGoiThau.tenGoiThau}</p>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="text-sm text-gray-500">Giá gói thầu</Label>
-                                    <p className="font-medium text-gray-800">
-                                        {selectedGoiThau.giaGoiThau ? Number(selectedGoiThau.giaGoiThau).toLocaleString("vi-VN") + " VNĐ" : "—"}
-                                    </p>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="text-sm text-gray-500">Hình thức LCNT</Label>
-                                    <p className="font-medium text-gray-800">{selectedGoiThau.hinhThucLCNT || "—"}</p>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="text-sm text-gray-500">Phương thức LCNT</Label>
-                                    <p className="font-medium text-gray-800">{selectedGoiThau.phuongThucLCNT || "—"}</p>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="text-sm text-gray-500">Phân loại gói thầu</Label>
-                                    <p className="font-medium text-gray-800">{selectedGoiThau.phanLoaiGoiThau || "—"}</p>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="text-sm text-gray-500">Trạng thái</Label>
-                                    <p className="font-medium text-gray-800">{selectedGoiThau.trangThai || "—"}</p>
-                                </div>
-                            </div>
-
-                            {/* Linh vuc */}
-                            <div className="space-y-2">
-                                <Label className="text-sm text-gray-500">Lĩnh vực</Label>
-                                <div className="flex flex-wrap gap-2">
-                                    {selectedGoiThau.linhVuc && selectedGoiThau.linhVuc.length > 0 ? (
-                                        selectedGoiThau.linhVuc.map((lv, idx) => (
-                                            <span key={idx} className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
-                                                {lv}
-                                            </span>
-                                        ))
-                                    ) : (
-                                        <span className="text-gray-500">Chưa có</span>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Loai hop dong */}
-                            <div className="space-y-2">
-                                <Label className="text-sm text-gray-500">Loại hợp đồng</Label>
-                                <div className="flex flex-wrap gap-2">
-                                    {selectedGoiThau.loaiHopDong && selectedGoiThau.loaiHopDong.length > 0 ? (
-                                        selectedGoiThau.loaiHopDong.map((lhd, idx) => (
-                                            <span key={idx} className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-sm">
-                                                {lhd}
-                                            </span>
-                                        ))
-                                    ) : (
-                                        <span className="text-gray-500">Chưa có</span>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Additional details */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label className="text-sm text-gray-500">Chi tiết nguồn vốn</Label>
-                                    <p className="font-medium text-gray-800">{selectedGoiThau.chiTietNguonVon || "—"}</p>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="text-sm text-gray-500">Số lượng phần lô</Label>
-                                    <p className="font-medium text-gray-800">{selectedGoiThau.soLuongPhanLo ?? "—"}</p>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="text-sm text-gray-500">Thời gian tổ chức</Label>
-                                    <p className="font-medium text-gray-800">{selectedGoiThau.thoiGianToChuc || "—"}</p>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="text-sm text-gray-500">Thời gian bắt đầu</Label>
-                                    <p className="font-medium text-gray-800">{selectedGoiThau.thoiGianBatDau || "—"}</p>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="text-sm text-gray-500">Thời gian thực hiện</Label>
-                                    <p className="font-medium text-gray-800">{selectedGoiThau.thoiGianThucHien || "—"}</p>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="text-sm text-gray-500">Mã thông báo</Label>
-                                    <p className="font-medium text-gray-800">{selectedGoiThau.maThongBao || "—"}</p>
-                                </div>
-                            </div>
-
-                            {/* Phan lo table */}
-                            {selectedGoiThau.phanLos && selectedGoiThau.phanLos.length > 0 && (
-                                <div className="space-y-2">
-                                    <Label className="text-sm text-gray-500">Danh sách phần lô</Label>
-                                    <div className="border rounded-lg overflow-hidden">
-                                        <Table>
-                                            <TableHeader>
-                                                <TableRow className="bg-gray-100">
-                                                    <TableHead>STT</TableHead>
-                                                    <TableHead>Tên phần lô</TableHead>
-                                                    <TableHead>Đơn vị tính</TableHead>
-                                                    <TableHead>Số lượng</TableHead>
-                                                    <TableHead>Đơn giá</TableHead>
-                                                    <TableHead>Thành tiền</TableHead>
-                                                    <TableHead>TG thực hiện</TableHead>
-                                                </TableRow>
-                                            </TableHeader>
-                                            <TableBody>
-                                                {selectedGoiThau.phanLos.map((pl, idx) => (
-                                                    <TableRow key={idx}>
-                                                        <TableCell>{pl.stt}</TableCell>
-                                                        <TableCell>{pl.tenPhanLo}</TableCell>
-                                                        <TableCell>{pl.donViTinh}</TableCell>
-                                                        <TableCell>{pl.soLuong?.toLocaleString("vi-VN") ?? "—"}</TableCell>
-                                                        <TableCell>{pl.donGia?.toLocaleString("vi-VN") ?? "—"}</TableCell>
-                                                        <TableCell>{pl.thanhTien?.toLocaleString("vi-VN") ?? "—"}</TableCell>
-                                                        <TableCell>{pl.thoiGianThucHien} {pl.donViTinhThoiGian}</TableCell>
-                                                    </TableRow>
-                                                ))}
-                                            </TableBody>
-                                        </Table>
+                    <div className="flex-1 overflow-y-auto px-6 py-5">
+                        {selectedGoiThau ? (
+                            <div className="space-y-6">
+                                {/* Basic Information */}
+                                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                                    <div className="space-y-2">
+                                        <Label className="text-sm text-gray-500">Tên gói thầu</Label>
+                                        <p className="font-medium text-gray-800">{formatDisplayText(selectedGoiThau.tenGoiThau)}</p>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-sm text-gray-500">Giá gói thầu</Label>
+                                        <p className="font-medium text-gray-800">
+                                            {hasDisplayNumber(selectedGoiThau.giaGoiThau) ? Number(selectedGoiThau.giaGoiThau).toLocaleString("vi-VN") + " VNĐ" : "—"}
+                                        </p>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-sm text-gray-500">Hình thức LCNT</Label>
+                                        <p className="font-medium text-gray-800">{formatDisplayText(selectedGoiThau.hinhThucLCNT)}</p>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-sm text-gray-500">Phương thức LCNT</Label>
+                                        <p className="font-medium text-gray-800">{formatDisplayText(selectedGoiThau.phuongThucLCNT)}</p>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-sm text-gray-500">Phân loại gói thầu</Label>
+                                        <p className="font-medium text-gray-800">{formatDisplayText(selectedGoiThau.phanLoaiGoiThau)}</p>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-sm text-gray-500">Trạng thái</Label>
+                                        <p className="font-medium text-gray-800">{getGoiThauDisplayStatus(selectedGoiThau)}</p>
                                     </div>
                                 </div>
-                            )}
 
-                            {/* Close button */}
-                            <div className="flex justify-end pt-4">
-                                <Button
-                                    onClick={() => setViewGoiThauDialogOpen(false)}
-                                    className="bg-gray-500 hover:bg-gray-600 text-white rounded-xl"
-                                >
-                                    Đóng
-                                </Button>
+                                {/* Linh vuc */}
+                                <div className="space-y-2">
+                                    <Label className="text-sm text-gray-500">Lĩnh vực</Label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {selectedGoiThau.linhVuc && selectedGoiThau.linhVuc.length > 0 ? (
+                                            selectedGoiThau.linhVuc.map((lv, idx) => (
+                                                <span key={idx} className="rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-700">
+                                                    {lv}
+                                                </span>
+                                            ))
+                                        ) : (
+                                            <span className="text-gray-500">Chưa có</span>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Loai hop dong */}
+                                <div className="space-y-2">
+                                    <Label className="text-sm text-gray-500">Loại hợp đồng</Label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {selectedGoiThau.loaiHopDong && selectedGoiThau.loaiHopDong.length > 0 ? (
+                                            selectedGoiThau.loaiHopDong.map((lhd, idx) => (
+                                                <span key={idx} className="rounded-full bg-emerald-100 px-3 py-1 text-sm text-emerald-700">
+                                                    {lhd}
+                                                </span>
+                                            ))
+                                        ) : (
+                                            <span className="text-gray-500">Chưa có</span>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Additional details */}
+                                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                                    <div className="space-y-2">
+                                        <Label className="text-sm text-gray-500">Chi tiết nguồn vốn</Label>
+                                        <p className="font-medium text-gray-800">{formatDisplayText(selectedGoiThau.chiTietNguonVon)}</p>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-sm text-gray-500">Số lượng phần lô</Label>
+                                        <p className="font-medium text-gray-800">{selectedGoiThau.soLuongPhanLo ?? "—"}</p>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-sm text-gray-500">Thời gian tổ chức</Label>
+                                        <p className="font-medium text-gray-800">{formatDisplayText(selectedGoiThau.thoiGianToChuc)}</p>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-sm text-gray-500">Thời gian bắt đầu</Label>
+                                        <p className="font-medium text-gray-800">{formatDisplayText(selectedGoiThau.thoiGianBatDau)}</p>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-sm text-gray-500">Thời gian thực hiện</Label>
+                                        <p className="font-medium text-gray-800">{formatDisplayText(selectedGoiThau.thoiGianThucHien)}</p>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-sm text-gray-500">Mã thông báo</Label>
+                                        <p className="font-medium text-gray-800">{getLinkedThongBaoCode(selectedGoiThau)}</p>
+                                    </div>
+                                </div>
+
+                                {/* Phan lo table */}
+                                {selectedGoiThau.phanLos && selectedGoiThau.phanLos.length > 0 && (
+                                    <div className="space-y-2">
+                                        <Label className="text-sm text-gray-500">Danh sách phần lô</Label>
+                                        <div className="overflow-x-auto rounded-lg border">
+                                            <Table>
+                                                <TableHeader>
+                                                    <TableRow className="bg-gray-100">
+                                                        <TableHead>STT</TableHead>
+                                                        <TableHead>Tên phần lô</TableHead>
+                                                        <TableHead>Đơn vị tính</TableHead>
+                                                        <TableHead>Số lượng</TableHead>
+                                                        <TableHead>Đơn giá</TableHead>
+                                                        <TableHead>Thành tiền</TableHead>
+                                                        <TableHead>TG thực hiện</TableHead>
+                                                    </TableRow>
+                                                </TableHeader>
+                                                <TableBody>
+                                                    {selectedGoiThau.phanLos.map((pl, idx) => (
+                                                        <TableRow key={idx}>
+                                                            <TableCell>{pl.stt}</TableCell>
+                                                            <TableCell>{formatDisplayText(pl.tenPhanLo)}</TableCell>
+                                                            <TableCell>{formatDisplayText(pl.donViTinh)}</TableCell>
+                                                            <TableCell>{pl.soLuong?.toLocaleString("vi-VN") ?? "—"}</TableCell>
+                                                            <TableCell>{pl.donGia?.toLocaleString("vi-VN") ?? "—"}</TableCell>
+                                                            <TableCell>{pl.thanhTien?.toLocaleString("vi-VN") ?? "—"}</TableCell>
+                                                            <TableCell>{formatDisplayCombinedText(pl.thoiGianThucHien, pl.donViTinhThoiGian)}</TableCell>
+                                                        </TableRow>
+                                                    ))}
+                                                </TableBody>
+                                            </Table>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
-                        </div>
-                    )}
+                        ) : (
+                            <div className="py-12 text-center text-gray-400">Không có dữ liệu gói thầu</div>
+                        )}
+                    </div>
+                    <div className="flex shrink-0 justify-end border-t px-6 py-4">
+                        <Button
+                            onClick={() => setViewGoiThauDialogOpen(false)}
+                            className="bg-gray-500 text-white hover:bg-gray-600 rounded-xl"
+                        >
+                            Đóng
+                        </Button>
+                    </div>
                 </DialogContent>
             </Dialog>
 

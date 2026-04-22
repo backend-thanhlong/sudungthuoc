@@ -44,10 +44,10 @@ export default function ChartWithFilters({ chartData, facilities, reportPeriods 
                     </label>
                     <Select value={selectedMonth} onValueChange={setSelectedMonth}>
                         <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Tất cả các tháng" />
+                            <SelectValue placeholder="Tất cả các kỳ" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="all">Tất cả các tháng</SelectItem>
+                            <SelectItem value="all">Tất cả các kỳ</SelectItem>
                             {reportPeriods.map(month => (
                                 <SelectItem key={month} value={month}>
                                     {month}

@@ -24,6 +24,13 @@ export async function GET() {
                     }
                 }
             },
+            include: {
+                therapeuticGroup: {
+                    select: {
+                        name: true,
+                    },
+                },
+            },
             orderBy: {
                 tenThuoc: 'asc'
             }
@@ -51,7 +58,7 @@ export async function GET() {
             "Nước đăng ký": drug.nuocDangKy || "",
             "Địa chỉ đăng ký": drug.diaChiDangKy || "",
             "Nhóm thuốc": drug.nhomThuoc || "",
-            "Nhóm điều trị": drug.nhomDieuTri || "",
+            "Nhóm điều trị": drug.therapeuticGroup?.name || "",
             "Thuốc kê đơn": drug.isKeDon || "",
             "Thuốc kiểm soát đặc biệt": drug.kiemSoatDacBiet || "",
             "Thuốc trong nước": drug.isTrongNuoc || "",

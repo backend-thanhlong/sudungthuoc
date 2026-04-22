@@ -19,6 +19,7 @@ export interface InventorySnapshotRow {
     drugName: string;
     activeIngredient: string;
     dosage: string;
+    soDangKy: string;
     unit: string;
     currentStock: number;
     priceVAT: number;
@@ -41,6 +42,7 @@ export interface DrugSearchItem {
     drugName: string;
     activeIngredient: string;
     dosage: string;
+    soDangKy: string;
     unit: string;
     facilities: DrugFacilityStock[];
     totalStock: number;
@@ -60,6 +62,7 @@ export interface FacilityInventoryItem {
     drugName: string;
     activeIngredient: string;
     dosage: string;
+    soDangKy: string;
     unit: string;
     currentStock: number;
     priceVAT: number;

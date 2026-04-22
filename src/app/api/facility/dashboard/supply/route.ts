@@ -1,6 +1,14 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
+import {
+    buildSnapshotMetrics,
+    buildSupplyDashboardDataFromMetrics,
+    normalizeDemandWindow,
+    normalizeSupplyReportRow,
+    resolveEffectiveReportMonth,
+} from "@/lib/dashboard/supply-risk";
+import { buildSupplyInsights } from "@/lib/dashboard/supply-insights";
 
 export async function GET(request: Request) {
     const session = await auth();
@@ -12,31 +20,38 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const reportMonth = searchParams.get("reportMonth") || undefined;
     const hoatChat = searchParams.get("hoatChat") || undefined;
+    const demandWindow = normalizeDemandWindow(searchParams.get("demandWindow"));
 
     try {
-        const reportWhere: any = { facilityId };
-        if (reportMonth) {
-            reportWhere.reportMonth = reportMonth;
-        }
+        const selectedReportMonth = reportMonth && reportMonth !== "all" ? reportMonth : undefined;
+        const reportWhere = { facilityId };
 
         const allReports = await prisma.inventoryReport.findMany({
             where: reportWhere,
             select: {
                 facilityId: true,
+                mapId: true,
                 tonCuoi: true,
                 xuat: true,
-                nhap: true,
                 giaVat: true,
+                thanhTienTonCuoi: true,
+                soQdTrungThau: true,
+                tenCongTy: true,
+                ngayBatDauHd: true,
+                ngayKetThucHd: true,
+                bhyt: true,
+                dichVu: true,
                 reportMonth: true,
                 drugMap: {
                     select: {
                         tenThuocNoiBo: true,
+                        hoatChatNoiBo: true,
                         masterDrug: {
                             select: {
                                 tenThuoc: true,
                                 hoatChat: true,
                                 hamLuong: true,
-                                donViTinh: true,
+                                isTrongNuoc: true,
                             },
                         },
                     },
@@ -49,83 +64,35 @@ export async function GET(request: Request) {
             },
         });
 
-        // 1. Stockout Risk: tonCuoi = 0 but xuat > 0
-        const stockoutRisk = allReports
-            .filter(r => Number(r.tonCuoi) === 0 && Number(r.xuat) > 0)
-            .map(r => ({
-                facility: r.facility?.facilityName || "Unknown",
-                drugName: r.drugMap?.masterDrug?.tenThuoc || r.drugMap?.tenThuocNoiBo || "N/A",
-                hoatChat: r.drugMap?.masterDrug?.hoatChat || "N/A",
-                hamLuong: r.drugMap?.masterDrug?.hamLuong || "",
-                xuat: Number(r.xuat),
-                tonCuoi: 0,
-            }))
-            .sort((a, b) => b.xuat - a.xuat)
-            .slice(0, 100);
-
-        // 2. Scatter plot data: tonCuoi vs xuat
-        const scatterData = allReports
-            .filter(r => Number(r.tonCuoi) > 0 || Number(r.xuat) > 0)
-            .map(r => ({
-                drugName: r.drugMap?.masterDrug?.tenThuoc || r.drugMap?.tenThuocNoiBo || "N/A",
-                facility: r.facility?.facilityName || "Unknown",
-                xuat: Number(r.xuat),
-                tonCuoi: Number(r.tonCuoi),
-            }))
-            .slice(0, 500);
-
-        // 3. Transfer suggestions for a given hoatChat
-        let transferData = null;
-        if (hoatChat) {
-            const hoatChatReports = allReports.filter(
-                r => r.drugMap?.masterDrug?.hoatChat?.toLowerCase().includes(hoatChat.toLowerCase())
-            );
-
-            const facilityUsage = new Map<string, { tonCuoi: number; xuat: number; facilityName: string }>();
-            hoatChatReports.forEach(r => {
-                const fName = r.facility?.facilityName || "Unknown";
-                const existing = facilityUsage.get(fName) || { tonCuoi: 0, xuat: 0, facilityName: fName };
-                existing.tonCuoi += Number(r.tonCuoi);
-                existing.xuat += Number(r.xuat);
-                facilityUsage.set(fName, existing);
-            });
-
-            const surplus = Array.from(facilityUsage.values())
-                .filter(f => f.xuat > 0 && f.tonCuoi > 3 * f.xuat)
-                .map(f => ({
-                    facility: f.facilityName,
-                    tonCuoi: f.tonCuoi,
-                    xuat: f.xuat,
-                    monthsOfStock: Math.round((f.tonCuoi / f.xuat) * 10) / 10,
-                }))
-                .sort((a, b) => b.monthsOfStock - a.monthsOfStock);
-
-            const shortage = Array.from(facilityUsage.values())
-                .filter(f => f.tonCuoi === 0)
-                .map(f => ({
-                    facility: f.facilityName,
-                    tonCuoi: 0,
-                    xuat: f.xuat,
-                }))
-                .sort((a, b) => b.xuat - a.xuat);
-
-            transferData = { surplus, shortage };
-        }
+        const normalizedReports = allReports.map(normalizeSupplyReportRow);
+        const effectiveReportMonth = resolveEffectiveReportMonth(normalizedReports, selectedReportMonth);
+        const metrics = buildSnapshotMetrics(normalizedReports, effectiveReportMonth, demandWindow);
+        const supplyData = buildSupplyDashboardDataFromMetrics({
+            metrics,
+            effectiveReportMonth,
+            demandWindow,
+            hoatChat,
+        });
+        const supplyInsights = buildSupplyInsights({
+            metrics,
+            scope: "facility",
+        });
 
         // 4. Get available hoatChat list
         const hoatChatList = await prisma.masterDrug.findMany({
             where: { isActive: true, hoatChat: { not: null } },
             select: { hoatChat: true },
-            distinct: ['hoatChat'],
-            orderBy: { hoatChat: 'asc' },
+            distinct: ["hoatChat"],
+            orderBy: { hoatChat: "asc" },
             take: 200,
         });
 
         return NextResponse.json({
-            stockoutRisk,
-            scatterData,
-            transferData,
-            hoatChatList: hoatChatList.map(h => h.hoatChat).filter(Boolean),
+            ...supplyData,
+            ...supplyInsights,
+            hoatChatList: hoatChatList
+                .map(item => item.hoatChat)
+                .filter((value): value is string => Boolean(value)),
         });
     } catch (error) {
         console.error("Facility dashboard supply error:", error);

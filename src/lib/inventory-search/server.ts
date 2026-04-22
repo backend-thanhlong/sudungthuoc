@@ -187,6 +187,7 @@ export async function getInventorySnapshot(params?: {
             drugName: mapping.masterDrug?.tenThuoc || mapping.tenThuocNoiBo,
             activeIngredient: mapping.masterDrug?.hoatChat || mapping.hoatChatNoiBo || "",
             dosage: mapping.masterDrug?.hamLuong || "",
+            soDangKy: mapping.masterDrug?.soDangKy || mapping.soDangKyNoiBo || "",
             unit: mapping.masterDrug?.donViTinh || mapping.donViTinhNoiBo || "",
             currentStock: Number(report.ton_cuoi),
             priceVAT: Number(report.gia_vat),
@@ -216,6 +217,7 @@ export async function searchInventoryByDrug(params: {
                 drugName: row.drugName,
                 activeIngredient: row.activeIngredient,
                 dosage: row.dosage,
+                soDangKy: row.soDangKy,
                 unit: row.unit,
                 facilities: [{
                     facilityId: row.facilityId,
@@ -233,6 +235,9 @@ export async function searchInventoryByDrug(params: {
         }
 
         existing.totalStock += row.currentStock;
+        if (!existing.soDangKy && row.soDangKy) {
+            existing.soDangKy = row.soDangKy;
+        }
 
         const existingFacility = existing.facilities.find((facility) => facility.facilityId === row.facilityId);
         if (!existingFacility) {
@@ -315,6 +320,7 @@ export async function searchInventoryByFacility(params: {
                 drugName: row.drugName,
                 activeIngredient: row.activeIngredient,
                 dosage: row.dosage,
+                soDangKy: row.soDangKy,
                 unit: row.unit,
                 currentStock: row.currentStock,
                 priceVAT: row.priceVAT,
@@ -324,6 +330,9 @@ export async function searchInventoryByFacility(params: {
         }
 
         existing.currentStock += row.currentStock;
+        if (!existing.soDangKy && row.soDangKy) {
+            existing.soDangKy = row.soDangKy;
+        }
         if (getReportMonthSortValue(row.reportMonth) >= getReportMonthSortValue(existing.reportMonth)) {
             existing.reportMonth = row.reportMonth;
             existing.priceVAT = row.priceVAT;

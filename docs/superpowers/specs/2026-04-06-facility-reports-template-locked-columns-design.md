@@ -134,8 +134,10 @@ Sheet `BaoCao` sẽ được protect sau khi gán trạng thái locked/unlocked 
 
 Nguyên tắc:
 
-- chỉ cho chọn các ô được phép nhập
-- không cho format cell, insert/delete row, sort, filter nếu không cần thiết
+- cho chọn cả ô khóa và ô nhập liệu để copy hoặc xem dữ liệu
+- không cho sửa ô khóa
+- cho dùng filter ở hàng tiêu đề trên sheet đang protect
+- không cho format cell, insert row, sort nếu không cần thiết
 - cột `__ROW_TOKEN` tiếp tục hidden và locked
 
 Password protect sheet chỉ là lớp UX, không phải lớp bảo mật. Không dùng lại `REPORT_UPLOAD_SIGNING_SECRET` cho mục đích này.
@@ -148,7 +150,7 @@ Password protect sheet chỉ là lớp UX, không phải lớp bảo mật. Khô
 - các cột nhập liệu giữ nền trắng hoặc vàng nhạt
 - hàng tiêu đề nên nhấn mạnh nhóm “chỉ đọc” và “được nhập”
 - sheet `Hướng dẫn` bổ sung câu rõ ràng:
-  - “Các cột STT, Mã nội bộ, Mã thuốc, Tên thuốc, Hoạt chất, Đơn vị tính đã bị khóa. Không cần và không được chỉnh sửa.”
+  - “Các cột STT, Mã nội bộ, Mã thuốc, Tên thuốc, Hoạt chất, Đơn vị tính đã bị khóa. Có thể chọn để copy hoặc lọc, nhưng không được chỉnh sửa.”
 
 ### Data integrity model
 

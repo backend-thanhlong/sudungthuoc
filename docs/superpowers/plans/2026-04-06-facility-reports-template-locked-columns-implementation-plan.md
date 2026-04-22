@@ -126,16 +126,19 @@ Khóa đúng các cột chỉ đọc và mở đúng các cột nhập liệu.
 3. Gán `protection.locked = true/false` cho từng ô dữ liệu theo cột
 4. Protect sheet `BaoCao` sau khi đã gán trạng thái lock
 5. Thiết lập sheet protection theo hướng:
-   - cho chọn ô unlocked
+   - cho chọn cả ô locked và unlocked để copy/xem dữ liệu
    - không cho format cell
-   - không cho insert/delete row
-   - không cho sort/filter nếu không cần
+   - không cho insert row
+   - cho delete row và dùng filter trên hàng tiêu đề
+   - không cho sort nếu không cần
 6. Không reuse `REPORT_UPLOAD_SIGNING_SECRET` làm password protect sheet
 
 ### Acceptance Criteria
 
 - Mở file bằng Excel thông thường không sửa được các cột locked
+- Vẫn chọn/copy được các ô locked
 - Vẫn nhập bình thường được các cột unlocked
+- Filter ở hàng tiêu đề vẫn dùng được khi sheet đang protect
 - Hidden token vẫn không lộ ra trong thao tác thường
 
 ## Phase 4: Restore Data Validation And Visual Cues

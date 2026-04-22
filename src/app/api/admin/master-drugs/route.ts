@@ -1,7 +1,102 @@
 import { NextResponse } from "next/server";
-import type { Prisma } from "@/../prisma/generated/client";
+import { MappingStatus, type Prisma } from "@/../prisma/generated/client";
 import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
+import { RouteError } from "@/lib/server-authz";
+
+const MASTER_DRUG_OPTIONAL_STRING_FIELDS = [
+    "maBhyt",
+    "hoatChat",
+    "hamLuong",
+    "dangBaoChe",
+    "soDangKy",
+    "quyCach",
+    "donViTinh",
+    "tieuChuan",
+    "tuoiTho",
+    "duongDung",
+    "nguonGoc",
+    "congTySanXuat",
+    "nuocSanXuat",
+    "diaChiSanXuat",
+    "congTyDangKy",
+    "nuocDangKy",
+    "diaChiDangKy",
+    "nhomThuoc",
+    "isKeDon",
+    "kiemSoatDacBiet",
+    "isTrongNuoc",
+] as const;
+
+const MASTER_DRUG_SEARCHABLE_FIELDS = [
+    "tenThuoc",
+    "soDangKy",
+    "hoatChat",
+    "maChung",
+    "maBhyt",
+] as const;
+
+const MASTER_DRUG_TEXT_FILTER_FIELDS = [
+    "maBhyt",
+    "tenThuoc",
+    "hoatChat",
+    "hamLuong",
+    "soDangKy",
+    "dangBaoChe",
+    "quyCach",
+    "duongDung",
+    "donViTinh",
+] as const;
+
+function getTrimmedParam(searchParams: URLSearchParams, key: string) {
+    return searchParams.get(key)?.trim() ?? "";
+}
+
+async function resolveTherapeuticGroupId(value: unknown) {
+    if (typeof value !== "string" || !value.trim()) {
+        return null;
+    }
+
+    const therapeuticGroup = await prisma.therapeuticGroup.findUnique({
+        where: { id: value },
+        select: { id: true },
+    });
+
+    if (!therapeuticGroup) {
+        throw new RouteError(400, "Nhóm điều trị không hợp lệ");
+    }
+
+    return therapeuticGroup.id;
+}
+
+async function buildMasterDrugCreateData(body: Record<string, unknown>): Promise<Prisma.MasterDrugCreateInput> {
+    const maChung = typeof body.maChung === "string" ? body.maChung.trim() : "";
+    const tenThuoc = typeof body.tenThuoc === "string" ? body.tenThuoc.trim() : "";
+
+    if (!maChung || !tenThuoc) {
+        throw new RouteError(400, "Missing required fields");
+    }
+
+    const data: Prisma.MasterDrugCreateInput = {
+        maChung,
+        tenThuoc,
+        isActive: true,
+    };
+
+    for (const field of MASTER_DRUG_OPTIONAL_STRING_FIELDS) {
+        const rawValue = body[field];
+        data[field] = typeof rawValue === "string" && rawValue.trim() ? rawValue.trim() : null;
+    }
+
+    const therapeuticGroupId = await resolveTherapeuticGroupId(body.therapeuticGroupId);
+    if (therapeuticGroupId) {
+        data.therapeuticGroup = {
+            connect: { id: therapeuticGroupId },
+        };
+    }
+
+    return data;
+}
 
 // GET all master drugs with pagination and search
 export async function GET(request: Request) {
@@ -14,33 +109,100 @@ export async function GET(request: Request) {
         const { searchParams } = new URL(request.url);
         const page = parseInt(searchParams.get("page") || "1");
         const limit = parseInt(searchParams.get("limit") || "20");
-        const search = searchParams.get("search") || "";
+        const search = getTrimmedParam(searchParams, "search");
         const searchField = searchParams.get("searchField") || "ALL";
+        const mappingStatus = searchParams.get("mappingStatus") || "all";
 
         const skip = (page - 1) * limit;
+        const mappedStatuses: MappingStatus[] = [MappingStatus.APPROVED, MappingStatus.AUTO_MAPPED];
 
-        const where: Prisma.MasterDrugWhereInput = {};
-        const searchableFields = ["tenThuoc", "soDangKy", "hoatChat", "maChung", "maBhyt"] as const;
+        const whereClauses: Prisma.MasterDrugWhereInput[] = [];
+
         if (search) {
             if (searchField === "ALL") {
-                // Search across all fields
-                where.OR = [
+                whereClauses.push({
+                    OR: [
                     { tenThuoc: { contains: search, mode: "insensitive" } },
                     { maChung: { contains: search, mode: "insensitive" } },
                     { hoatChat: { contains: search, mode: "insensitive" } },
                     { soDangKy: { contains: search, mode: "insensitive" } },
                     { maBhyt: { contains: search, mode: "insensitive" } },
-                ];
-            } else if (searchableFields.includes(searchField as (typeof searchableFields)[number])) {
-                // Search in specific field
-                const field = searchField as (typeof searchableFields)[number];
-                where[field] = { contains: search, mode: "insensitive" };
+                    ],
+                });
+            } else if (MASTER_DRUG_SEARCHABLE_FIELDS.includes(searchField as (typeof MASTER_DRUG_SEARCHABLE_FIELDS)[number])) {
+                const field = searchField as (typeof MASTER_DRUG_SEARCHABLE_FIELDS)[number];
+                whereClauses.push({
+                    [field]: { contains: search, mode: "insensitive" },
+                });
             }
         }
+
+        if (mappingStatus === "mapped") {
+            whereClauses.push({
+                drugMaps: {
+                    some: {
+                        status: {
+                            in: mappedStatuses,
+                        },
+                    },
+                },
+            });
+        } else if (mappingStatus === "unmapped") {
+            whereClauses.push({
+                drugMaps: {
+                    none: {
+                        status: {
+                            in: mappedStatuses,
+                        },
+                    },
+                },
+            });
+        }
+
+        for (const field of MASTER_DRUG_TEXT_FILTER_FIELDS) {
+            const value = getTrimmedParam(searchParams, field);
+            if (!value) {
+                continue;
+            }
+
+            whereClauses.push({
+                [field]: {
+                    contains: value,
+                    mode: "insensitive",
+                },
+            });
+        }
+
+        const nhomThuoc = getTrimmedParam(searchParams, "nhomThuoc");
+        if (nhomThuoc) {
+            whereClauses.push({
+                nhomThuoc,
+            });
+        }
+
+        const therapeuticGroupId = getTrimmedParam(searchParams, "therapeuticGroupId");
+        if (therapeuticGroupId) {
+            whereClauses.push({
+                therapeuticGroupId,
+            });
+        }
+
+        const where: Prisma.MasterDrugWhereInput = whereClauses.length > 0
+            ? { AND: whereClauses }
+            : {};
 
         const [drugs, total] = await Promise.all([
             prisma.masterDrug.findMany({
                 where,
+                include: {
+                    therapeuticGroup: {
+                        select: {
+                            id: true,
+                            name: true,
+                            isActive: true,
+                        },
+                    },
+                },
                 orderBy: { tenThuoc: "asc" },
                 skip,
                 take: limit,
@@ -72,53 +234,24 @@ export async function POST(request: Request) {
         }
 
         const body = await request.json();
-        const { maChung, maBhyt, tenThuoc, hoatChat, hamLuong, soDangKy, quyCach, donViTinh } = body;
-
-        if (!maChung || !tenThuoc) {
-            return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
-        }
+        const data = await buildMasterDrugCreateData(body);
 
         // Check if maChung already exists
-        const existingDrug = await prisma.masterDrug.findUnique({ where: { maChung } });
+        const existingDrug = await prisma.masterDrug.findUnique({ where: { maChung: data.maChung } });
         if (existingDrug) {
             return NextResponse.json({ message: "Mã chung đã tồn tại" }, { status: 400 });
         }
 
         const drug = await prisma.masterDrug.create({
-            data: {
-                maChung,
-                maBhyt: maBhyt || null,
-                tenThuoc,
-                hoatChat: hoatChat || null,
-                hamLuong: hamLuong || null,
-                dangBaoChe: body.dangBaoChe || null,
-                soDangKy: soDangKy || null,
-                quyCach: quyCach || null,
-                donViTinh: donViTinh || null,
-
-                tieuChuan: body.tieuChuan || null,
-                tuoiTho: body.tuoiTho || null,
-                duongDung: body.duongDung || null,
-                nguonGoc: body.nguonGoc || null,
-
-                congTySanXuat: body.congTySanXuat || null,
-                nuocSanXuat: body.nuocSanXuat || null,
-                diaChiSanXuat: body.diaChiSanXuat || null,
-
-                congTyDangKy: body.congTyDangKy || null,
-                nuocDangKy: body.nuocDangKy || null,
-                diaChiDangKy: body.diaChiDangKy || null,
-
-                nhomThuoc: body.nhomThuoc || null,
-                nhomDieuTri: body.nhomDieuTri || null,
-                isKeDon: body.isKeDon || null,
-                kiemSoatDacBiet: body.kiemSoatDacBiet || null,
-                isTrongNuoc: body.isTrongNuoc || null,
-            },
+            data,
         });
 
         return NextResponse.json(drug, { status: 201 });
     } catch (error) {
+        if (error instanceof RouteError) {
+            return NextResponse.json({ message: error.message }, { status: error.status });
+        }
+
         console.error("Error creating drug:", error);
         return NextResponse.json({ message: "Internal server error" }, { status: 500 });
     }

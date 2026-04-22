@@ -1,25 +1,40 @@
-
-
 services:
   # PostgreSQL Database
   db:
     image: postgres:15-alpine
     container_name: sudungthuoc_db
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 123456
-      POSTGRES_DB: sudungthuoc_db
-    ports:
-      - "5435:5432"  # Using port 5435 to avoid conflict
+      POSTGRES_USER: ${POSTGRES_SUPERUSER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_SUPERUSER_PASSWORD:?POSTGRES_SUPERUSER_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DB:-sudungthuoc_db}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - sudungthuoc_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_SUPERUSER:-postgres} -d ${POSTGRES_DB:-sudungthuoc_db}"]
       interval: 10s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
+
+  db-bootstrap:
+    image: postgres:15-alpine
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-sudungthuoc_db}
+      POSTGRES_SUPERUSER: ${POSTGRES_SUPERUSER:-postgres}
+      POSTGRES_SUPERUSER_PASSWORD: ${POSTGRES_SUPERUSER_PASSWORD:?POSTGRES_SUPERUSER_PASSWORD is required}
+      APP_DB_USER: ${APP_DB_USER:?APP_DB_USER is required}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD:?APP_DB_PASSWORD is required}
+    volumes:
+      - ./scripts/docker:/scripts:ro
+    entrypoint: ["/bin/sh", "/scripts/bootstrap-app-db-role.sh"]
+    networks:
+      - sudungthuoc_network
+    restart: "no"
 
   # Next.js Application
   app:
@@ -28,19 +43,45 @@ services:
       dockerfile: Dockerfile
     container_name: sudungthuoc_app
     environment:
-      DATABASE_URL: "postgresql://postgres:123456@db:5432/sudungthuoc_db?schema=public"
-      AUTH_SECRET: "${AUTH_SECRET}"
-      AUTH_URL: "https://khoduoc.nvdcantho.com"
-      REPORT_UPLOAD_SIGNING_SECRET: "${REPORT_UPLOAD_SIGNING_SECRET}"
+      DATABASE_URL: ${APP_DATABASE_URL:?APP_DATABASE_URL is required}
+      AUTH_SECRET: ${AUTH_SECRET:?AUTH_SECRET is required}
+      AUTH_URL: ${AUTH_URL:-https://khoduoc.nvdcantho.com}
+      REPORT_UPLOAD_SIGNING_SECRET: ${REPORT_UPLOAD_SIGNING_SECRET:?REPORT_UPLOAD_SIGNING_SECRET is required}
       NODE_ENV: "production"
-    ports:
-      - "3003:3000"  # Using port 3003 to avoid conflict with 3001 and 3002
+      ALLOW_PRODUCTION_SEED: ${ALLOW_PRODUCTION_SEED:-false}
+      SEED_ADMIN_USERNAME: ${SEED_ADMIN_USERNAME:-admin}
     depends_on:
       db:
         condition: service_healthy
+      db-bootstrap:
+        condition: service_completed_successfully
     networks:
       - sudungthuoc_network
     restart: unless-stopped
+
+  app-admin:
+    profiles: ["admin"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    environment:
+      DATABASE_URL: ${DATABASE_ADMIN_URL:?DATABASE_ADMIN_URL is required}
+      AUTH_SECRET: ${AUTH_SECRET:?AUTH_SECRET is required}
+      AUTH_URL: ${AUTH_URL:-https://khoduoc.nvdcantho.com}
+      REPORT_UPLOAD_SIGNING_SECRET: ${REPORT_UPLOAD_SIGNING_SECRET:?REPORT_UPLOAD_SIGNING_SECRET is required}
+      NODE_ENV: "production"
+      ALLOW_PRODUCTION_SEED: ${ALLOW_PRODUCTION_SEED:-false}
+      SEED_ADMIN_USERNAME: ${SEED_ADMIN_USERNAME:-admin}
+    depends_on:
+      db:
+        condition: service_healthy
+      db-bootstrap:
+        condition: service_completed_successfully
+    command: ["tail", "-f", "/dev/null"]
+    networks:
+      - sudungthuoc_network
+    restart: "no"
 
   # Cloudflare Tunnel
   tunnel:

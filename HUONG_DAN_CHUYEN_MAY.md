@@ -49,9 +49,10 @@ Nếu bạn copy file `.env` từ máy cũ sang, hãy mở nó ra và kiểm tra
 
 Ví dụ:
 ```env
-DATABASE_URL="postgresql://postgres:MAT_KHAU_CUA_BAN@localhost:5432/TEN_DB?schema=public"
+DATABASE_URL="postgresql://TEN_USER_DB:MAT_KHAU_CUA_BAN@localhost:5432/TEN_DB?schema=public"
 ```
-*   Đảm bảo `MAT_KHAU_CUA_BAN` đúng với mật khẩu Postgres bạn cài ở máy mới.
+*   Nên dùng tài khoản ứng dụng riêng thay vì superuser `postgres`.
+*   Đảm bảo `MAT_KHAU_CUA_BAN` đúng với mật khẩu user DB bạn tạo ở máy mới.
 *   Đảm bảo `TEN_DB` (ví dụ `sudungthuoc`) là tên database bạn muốn dùng.
 
 ### Bước 3.3: Cài đặt Cơ sở dữ liệu (Database)

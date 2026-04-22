@@ -2,6 +2,50 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
 
+const safeParseNumber = (val: unknown) => {
+    if (val === null || val === undefined || val === "") {
+        return null;
+    }
+
+    const parsed = parseFloat(String(val));
+    return Number.isNaN(parsed) ? null : parsed;
+};
+
+const safeParseInt = (val: unknown) => {
+    if (val === null || val === undefined || val === "") {
+        return null;
+    }
+
+    const parsed = parseInt(String(val), 10);
+    return Number.isNaN(parsed) ? null : parsed;
+};
+
+const normalizeOptionalString = (val: unknown) => {
+    if (typeof val !== "string") {
+        return null;
+    }
+
+    const trimmed = val.trim();
+    return trimmed === "" ? null : trimmed;
+};
+
+const calculateGiaGoiThauFromPhanLos = (phanLos: unknown[]) => {
+    let hasThanhTien = false;
+
+    const total = phanLos.reduce((sum: number, pl) => {
+        const thanhTien = safeParseNumber((pl as { thanhTien?: unknown } | null)?.thanhTien);
+
+        if (thanhTien === null) {
+            return sum;
+        }
+
+        hasThanhTien = true;
+        return sum + thanhTien;
+    }, 0);
+
+    return hasThanhTien ? total : null;
+};
+
 // GET - list gói thầu for a KHLCNT
 export async function GET(
     request: Request,
@@ -58,20 +102,14 @@ export async function POST(
         }
 
         const body = await request.json();
-
-        const safeParseNumber = (val: any) => val !== null && val !== undefined && val !== "" && !isNaN(parseFloat(val)) ? parseFloat(val) : null;
-        const safeParseInt = (val: any) => val !== null && val !== undefined && val !== "" && !isNaN(parseInt(val, 10)) ? parseInt(val, 10) : null;
-        const safeParseDate = (val: any) => {
-            if (!val || typeof val !== 'string' || val.trim() === '') return null;
-            const d = new Date(val);
-            return isNaN(d.getTime()) ? null : d;
-        };
+        const phanLos = Array.isArray(body.phanLos) ? body.phanLos : [];
+        const giaGoiThau = calculateGiaGoiThauFromPhanLos(phanLos);
 
         const goiThau = await prisma.goiThau.create({
             data: {
                 keHoachId: id,
                 tenGoiThau: body.tenGoiThau,
-                giaGoiThau: safeParseNumber(body.giaGoiThau),
+                giaGoiThau,
                 linhVuc: body.linhVuc ? JSON.stringify(body.linhVuc) : null,
                 hinhThucLCNT: body.hinhThucLCNT || null,
                 phuongThucLCNT: body.phuongThucLCNT || null,
@@ -80,17 +118,17 @@ export async function POST(
                 chiTietNguonVon: body.chiTietNguonVon || null,
                 soLuongPhanLo: safeParseInt(body.soLuongPhanLo),
                 thoiGianToChuc: body.thoiGianToChuc || null,
-                thoiGianBatDau: safeParseDate(body.thoiGianBatDau),
+                thoiGianBatDau: normalizeOptionalString(body.thoiGianBatDau),
                 thoiGianThucHien: body.thoiGianThucHien || null,
-                phanLos: body.phanLos && body.phanLos.length > 0
+                phanLos: phanLos.length > 0
                     ? {
-                        create: body.phanLos.map((pl: any, index: number) => ({
-                            stt: pl.stt ? (parseInt(pl.stt, 10) || index + 1) : index + 1,
+                        create: phanLos.map((pl: any, index: number) => ({
+                            stt: safeParseInt(pl.stt) ?? index + 1,
                             tenPhanLo: pl.tenPhanLo || "",
                             donViTinh: pl.donViTinh || null,
-                            soLuong: pl.soLuong ? (!isNaN(parseFloat(pl.soLuong)) ? parseFloat(pl.soLuong) : null) : null,
-                            donGia: pl.donGia ? (!isNaN(parseFloat(pl.donGia)) ? parseFloat(pl.donGia) : null) : null,
-                            thanhTien: pl.thanhTien ? (!isNaN(parseFloat(pl.thanhTien)) ? parseFloat(pl.thanhTien) : null) : null,
+                            soLuong: safeParseNumber(pl.soLuong),
+                            donGia: safeParseNumber(pl.donGia),
+                            thanhTien: safeParseNumber(pl.thanhTien),
                             thoiGianThucHien: pl.thoiGianThucHien?.toString() || null,
                             donViTinhThoiGian: pl.donViTinhThoiGian?.toString() || null,
                         })),

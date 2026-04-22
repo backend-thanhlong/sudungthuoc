@@ -20,6 +20,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import { getDownloadFileName, triggerBlobDownload } from "@/lib/browser-download";
 import * as XLSX from "xlsx";
 
 interface PhanLoResult {
@@ -27,9 +28,9 @@ interface PhanLoResult {
     stt: number;
     tenPhanLo: string;
     donViTinh: string;
-    soLuong: number;
-    donGia: number;
-    thanhTien: number;
+    soLuong: number | null;
+    donGia: number | null;
+    thanhTien: number | null;
     thoiGianThucHien: string;
     donViTinhThoiGian: string;
     ketQua: string;
@@ -44,6 +45,45 @@ interface KetQuaLCNTForm {
     soMatHangTrungThau: number | null;
     tongGiaTriTrungThau: number | null;
 }
+
+const parseNullableNumber = (value: unknown): number | null => {
+    if (value === null || value === undefined) {
+        return null;
+    }
+
+    if (typeof value === "string") {
+        const trimmed = value.trim();
+        if (trimmed === "") {
+            return null;
+        }
+
+        const parsed = Number(trimmed);
+        return Number.isNaN(parsed) ? null : parsed;
+    }
+
+    const parsed = Number(value);
+    return Number.isNaN(parsed) ? null : parsed;
+};
+
+const formatDisplayText = (value: string | null | undefined) => {
+    if (typeof value !== "string") {
+        return "—";
+    }
+
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : "—";
+};
+
+const formatDisplayNumber = (value: number | null | undefined) =>
+    typeof value === "number" && Number.isFinite(value)
+        ? value.toLocaleString("vi-VN")
+        : "—";
+
+const normalizeImportText = (value: unknown) =>
+    typeof value === "string" ? value.trim() : "";
+
+const getImportedPhanLoId = (row: Record<string, unknown>) =>
+    normalizeImportText(row["ID phần lô (không sửa)"] ?? row["_phanLoId"]);
 
 export default function KetQuaLCNTDetailPage({ params }: { params: Promise<{ tbmtId: string }> }) {
     const router = useRouter();
@@ -91,13 +131,13 @@ export default function KetQuaLCNTDetailPage({ params }: { params: Promise<{ tbm
                             stt: kqpl.phanLoGoiThau.stt,
                             tenPhanLo: kqpl.phanLoGoiThau.tenPhanLo,
                             donViTinh: kqpl.phanLoGoiThau.donViTinh || "",
-                            soLuong: Number(kqpl.phanLoGoiThau.soLuong || 0),
-                            donGia: Number(kqpl.phanLoGoiThau.donGia || 0),
-                            thanhTien: Number(kqpl.phanLoGoiThau.thanhTien || 0),
+                            soLuong: parseNullableNumber(kqpl.phanLoGoiThau.soLuong),
+                            donGia: parseNullableNumber(kqpl.phanLoGoiThau.donGia),
+                            thanhTien: parseNullableNumber(kqpl.phanLoGoiThau.thanhTien),
                             thoiGianThucHien: kqpl.phanLoGoiThau.thoiGianThucHien || "",
                             donViTinhThoiGian: kqpl.phanLoGoiThau.donViTinhThoiGian || "",
                             ketQua: kqpl.ketQua,
-                            donGiaTrungThau: kqpl.donGiaTrungThau ? Number(kqpl.donGiaTrungThau) : null,
+                            donGiaTrungThau: parseNullableNumber(kqpl.donGiaTrungThau),
                             nhaThauTrungThau: kqpl.nhaThauTrungThau || "",
                         }));
                         setPhanLoResults(lotResults);
@@ -122,16 +162,14 @@ export default function KetQuaLCNTDetailPage({ params }: { params: Promise<{ tbm
             const res = await fetch(`/api/facility/ket-qua-lcnt/${tbmtId}/template`);
             if (res.ok) {
                 const blob = await res.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = `Ket_Qua_LCNT_${tbmtId}.xlsx`;
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(a);
+                const fileName = getDownloadFileName(
+                    res.headers.get("content-disposition"),
+                    `Ket_Qua_LCNT_${tbmtId}.xlsx`
+                );
+                triggerBlobDownload(blob, fileName);
             } else {
-                alert("Lỗi khi tải file mẫu");
+                const errorData = await res.json().catch(() => null);
+                alert(errorData?.message || "Lỗi khi tải file mẫu");
             }
         } catch (error) {
             console.error("Error downloading template:", error);
@@ -151,22 +189,39 @@ export default function KetQuaLCNTDetailPage({ params }: { params: Promise<{ tbm
                 const workbook = XLSX.read(data, { type: "array" });
                 const sheetName = workbook.SheetNames[0];
                 const sheet = workbook.Sheets[sheetName];
-                const jsonData = XLSX.utils.sheet_to_json(sheet);
+                const jsonData = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, {
+                    defval: "",
+                });
 
-                const parsed: PhanLoResult[] = jsonData.map((row: any) => ({
-                    phanLoGoiThauId: row["_phanLoId"] || "",
-                    stt: row["STT"] || 0,
-                    tenPhanLo: row["Tên phần lô"] || "",
-                    donViTinh: row["Đơn vị tính"] || "",
-                    soLuong: row["Số lượng"] ? Number(row["Số lượng"]) : 0,
-                    donGia: row["Đơn giá"] ? Number(row["Đơn giá"]) : 0,
-                    thanhTien: row["Thành tiền"] ? Number(row["Thành tiền"]) : 0,
-                    thoiGianThucHien: row["Thời gian thực hiện gói thầu"]?.toString() || "",
-                    donViTinhThoiGian: row["Đơn vị tính TGTHHGT"] || "",
-                    ketQua: row["Kết quả"] || "",
-                    donGiaTrungThau: row["Đơn giá trúng thầu"] ? Number(row["Đơn giá trúng thầu"]) : null,
-                    nhaThauTrungThau: row["Nhà thầu trúng thầu"] || "",
+                if (jsonData.length === 0) {
+                    alert("File Excel không có dữ liệu phần lô để nhập.");
+                    return;
+                }
+
+                const parsed: PhanLoResult[] = jsonData.map((row) => ({
+                    phanLoGoiThauId: getImportedPhanLoId(row),
+                    stt: parseNullableNumber(row["STT"]) ?? 0,
+                    tenPhanLo: normalizeImportText(row["Tên phần lô"]),
+                    donViTinh: normalizeImportText(row["Đơn vị tính"]),
+                    soLuong: parseNullableNumber(row["Số lượng"]),
+                    donGia: parseNullableNumber(row["Đơn giá"]),
+                    thanhTien: parseNullableNumber(row["Thành tiền"]),
+                    thoiGianThucHien: normalizeImportText(row["Thời gian thực hiện gói thầu"]),
+                    donViTinhThoiGian: normalizeImportText(row["Đơn vị tính TGTHHGT"]),
+                    ketQua: normalizeImportText(row["Kết quả"]),
+                    donGiaTrungThau: parseNullableNumber(row["Đơn giá trúng thầu"]),
+                    nhaThauTrungThau: normalizeImportText(row["Nhà thầu trúng thầu"]),
                 }));
+                const rowsMissingPhanLoId = parsed
+                    .map((row, index) => (row.phanLoGoiThauId ? null : index + 2))
+                    .filter((rowNumber): rowNumber is number => rowNumber !== null);
+
+                if (rowsMissingPhanLoId.length > 0) {
+                    alert(
+                        `File Excel không hợp lệ: thiếu cột ID phần lô ở dòng ${rowsMissingPhanLoId.join(", ")}. Hãy tải lại file mẫu mới và không sửa/xóa cột "ID phần lô (không sửa)".`
+                    );
+                    return;
+                }
 
                 setPhanLoResults(parsed);
                 setExcelModalOpen(false);
@@ -190,6 +245,11 @@ export default function KetQuaLCNTDetailPage({ params }: { params: Promise<{ tbm
 
         if (phanLoResults.length === 0) {
             alert("Vui lòng nhập dữ liệu phần lô từ file Excel!");
+            return;
+        }
+
+        if (phanLoResults.some((item) => !item.phanLoGoiThauId)) {
+            alert("File Excel không hợp lệ: thiếu ID phần lô. Hãy tải lại file mẫu mới.");
             return;
         }
 
@@ -381,22 +441,22 @@ export default function KetQuaLCNTDetailPage({ params }: { params: Promise<{ tbm
                                     {phanLoResults.map((item, idx) => (
                                         <TableRow key={idx}>
                                             <TableCell>{item.stt}</TableCell>
-                                            <TableCell className="max-w-xs truncate">{item.tenPhanLo}</TableCell>
-                                            <TableCell>{item.donViTinh}</TableCell>
-                                            <TableCell>{item.soLuong}</TableCell>
-                                            <TableCell>{item.donGia.toLocaleString("vi-VN")}</TableCell>
+                                            <TableCell className="max-w-xs truncate">{formatDisplayText(item.tenPhanLo)}</TableCell>
+                                            <TableCell>{formatDisplayText(item.donViTinh)}</TableCell>
+                                            <TableCell>{formatDisplayNumber(item.soLuong)}</TableCell>
+                                            <TableCell>{formatDisplayNumber(item.donGia)}</TableCell>
                                             <TableCell>
                                                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${item.ketQua === "Trúng thầu"
                                                     ? "bg-green-100 text-green-700"
                                                     : "bg-gray-100 text-gray-700"
                                                     }`}>
-                                                    {item.ketQua || "—"}
+                                                    {formatDisplayText(item.ketQua)}
                                                 </span>
                                             </TableCell>
                                             <TableCell>
-                                                {item.donGiaTrungThau ? item.donGiaTrungThau.toLocaleString("vi-VN") : "—"}
+                                                {formatDisplayNumber(item.donGiaTrungThau)}
                                             </TableCell>
-                                            <TableCell className="max-w-xs truncate">{item.nhaThauTrungThau || "—"}</TableCell>
+                                            <TableCell className="max-w-xs truncate">{formatDisplayText(item.nhaThauTrungThau)}</TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
@@ -456,6 +516,7 @@ export default function KetQuaLCNTDetailPage({ params }: { params: Promise<{ tbm
                             <ol className="list-decimal list-inside space-y-1 mt-2">
                                 <li>Tải file mẫu Excel</li>
                                 <li>Điền thông tin kết quả vào các cột bổ sung</li>
+                                <li>Không sửa hoặc xóa cột "ID phần lô (không sửa)"</li>
                                 <li>Lưu file và chọn file để tải lên</li>
                             </ol>
                         </div>

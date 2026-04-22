@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from "react";
 import {
-    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
-    ResponsiveContainer, Cell, Treemap,
+    Tooltip, ResponsiveContainer, Treemap,
 } from "recharts";
 
 interface Tab3Props {
@@ -83,7 +82,7 @@ export default function Tab3Tender({ reportMonth, facilityId, apiPrefix = "/api/
             }
         };
         fetchData();
-    }, [reportMonth, facilityId]);
+    }, [reportMonth, facilityId, apiPrefix]);
 
     if (loading) {
         return (

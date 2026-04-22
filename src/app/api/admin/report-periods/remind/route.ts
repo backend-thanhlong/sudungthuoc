@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
 import { createNotificationForFacility } from "@/lib/notifications";
+import { listSubmittedFacilityIdsForMonth } from "@/lib/report-submissions";
 
 /**
  * POST /api/admin/report-periods/remind
@@ -28,12 +29,7 @@ export async function POST(req: NextRequest) {
         });
 
         // Get facilities that have already submitted for this month
-        const submitted = await prisma.inventoryReport.findMany({
-            where: { reportMonth: month },
-            select: { facilityId: true },
-            distinct: ["facilityId"],
-        });
-        const submittedIds = new Set(submitted.map((r) => r.facilityId));
+        const submittedIds = await listSubmittedFacilityIdsForMonth(month);
 
         // Facilities that have NOT submitted yet
         const pending = allFacilities.filter((f) => !submittedIds.has(f.id));
@@ -43,7 +39,6 @@ export async function POST(req: NextRequest) {
         }
 
         // Get deadline of this period (if any)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const period = await (prisma.reportPeriod as any).findUnique({ where: { month } });
         const deadlineText = period?.deadline
             ? ` Hạn nộp: ${new Date(period.deadline).toLocaleDateString("vi-VN")}.`
@@ -66,7 +61,6 @@ export async function POST(req: NextRequest) {
 
         // Mark period as reminderSent
         if (period) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             await (prisma.reportPeriod as any).update({
                 where: { month },
                 data: { reminderSent: true },

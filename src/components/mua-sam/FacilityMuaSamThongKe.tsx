@@ -1,6 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import PackageStatusChartCard from "@/components/mua-sam/PackageStatusChartCard";
+import {
+    type PackageStatusBreakdown,
+    type PackageStatusChartItem,
+    type PackageStatusSummary,
+} from "@/lib/mua-sam-package-status";
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     PieChart, Pie, Cell, Legend,
@@ -18,8 +24,48 @@ const formatCurrency = (value: number) =>
 const formatCompact = (value: number) =>
     new Intl.NumberFormat('vi-VN', { notation: "compact", compactDisplay: "short" }).format(value);
 
+interface SummaryKpis {
+    keHoachCount: number;
+    totalGoiThau: number;
+    totalGiaTriGoiThau: number;
+    tbmtCount: number;
+    ketQuaCount: number;
+    totalGiaTriTrungThau: number;
+    tyLeTrungThau: number;
+}
+
+interface ValueItem {
+    name: string;
+    value: number;
+}
+
+interface BidItem {
+    name: string;
+    moiThau: number;
+    trungThau: number;
+}
+
+interface TimelineItem {
+    name: string;
+    date: string;
+    quyTrinh: string;
+    trangThai: string;
+}
+
+interface FacilityThongKeResponse {
+    kpis: SummaryKpis;
+    pieHinhThuc: ValueItem[];
+    valueByKeHoach: ValueItem[];
+    statusData: PackageStatusChartItem[];
+    statusBreakdown: PackageStatusBreakdown;
+    statusSummary: PackageStatusSummary;
+    bidData: BidItem[];
+    pieQuyTrinh: ValueItem[];
+    timeline: TimelineItem[];
+}
+
 export default function FacilityMuaSamThongKe() {
-    const [data, setData] = useState<any>(null);
+    const [data, setData] = useState<FacilityThongKeResponse | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -27,10 +73,14 @@ export default function FacilityMuaSamThongKe() {
             setLoading(true);
             try {
                 const res = await fetch("/api/facility/mua-sam/thong-ke");
-                const json = await res.json();
+                if (!res.ok) {
+                    throw new Error("Không thể tải thống kê mua sắm");
+                }
+                const json: FacilityThongKeResponse = await res.json();
                 setData(json);
             } catch (e) {
                 console.error(e);
+                setData(null);
             } finally {
                 setLoading(false);
             }
@@ -51,7 +101,17 @@ export default function FacilityMuaSamThongKe() {
 
     if (!data) return <p className="text-center text-red-500 py-8">Không thể tải dữ liệu</p>;
 
-    const { kpis, pieHinhThuc, valueByKeHoach, statusData, bidData, pieQuyTrinh, timeline } = data;
+    const {
+        kpis,
+        pieHinhThuc,
+        valueByKeHoach,
+        statusData,
+        statusBreakdown,
+        statusSummary,
+        bidData,
+        pieQuyTrinh,
+        timeline,
+    } = data;
 
     return (
         <div className="space-y-6">
@@ -225,32 +285,11 @@ export default function FacilityMuaSamThongKe() {
                     </div>
                 </div>
 
-                {/* Bar: Trạng thái */}
-                <div className="bg-white rounded-xl shadow-lg p-5 border border-gray-100">
-                    <h3 className="font-semibold text-gray-800 mb-1">Trạng thái gói thầu</h3>
-                    <p className="text-xs text-gray-500 mb-4">Phân bổ theo trạng thái tiến trình</p>
-                    <div className="h-[380px]">
-                        {statusData && statusData.length > 0 ? (
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={statusData} margin={{ top: 10, right: 20, left: 10, bottom: 20 }}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                                    <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#64748b" }} />
-                                    <YAxis tick={{ fontSize: 11, fill: "#64748b" }} allowDecimals={false} />
-                                    <Tooltip
-                                        contentStyle={{ backgroundColor: "white", borderRadius: "10px", border: "1px solid #e2e8f0" }}
-                                    />
-                                    <Bar dataKey="value" radius={[6, 6, 0, 0]}>
-                                        {statusData.map((_: any, i: number) => (
-                                            <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                                        ))}
-                                    </Bar>
-                                </BarChart>
-                            </ResponsiveContainer>
-                        ) : (
-                            <div className="flex items-center justify-center h-full text-gray-400">Chưa có dữ liệu</div>
-                        )}
-                    </div>
-                </div>
+                <PackageStatusChartCard
+                    statusData={statusData}
+                    statusBreakdown={statusBreakdown}
+                    statusSummary={statusSummary}
+                />
             </div>
 
             {/* Tỷ lệ trúng thầu */}

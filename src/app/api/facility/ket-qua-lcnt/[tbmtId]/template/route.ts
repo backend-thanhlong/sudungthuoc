@@ -1,7 +1,43 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { auth } from "@/auth";
 import * as XLSX from "xlsx";
+import {
+    getFacilityOwnedThongBaoMoiThauById,
+    isRouteError,
+    requireActiveSessionUser,
+} from "@/lib/server-authz";
+
+const buildAttachmentDisposition = (fileName: string) => {
+    const asciiFallback = fileName
+        .normalize("NFKD")
+        .replace(/[^\x20-\x7E]/g, "")
+        .replace(/[/\\?%*:|"<>]/g, "_")
+        .replace(/\s+/g, "_")
+        .replace(/_+/g, "_")
+        .trim() || "Ket_Qua_LCNT.xlsx";
+
+    return `attachment; filename="${asciiFallback}"; filename*=UTF-8''${encodeURIComponent(fileName)}`;
+};
+
+const handleRouteError = (error: unknown, context: string) => {
+    if (isRouteError(error)) {
+        return NextResponse.json({ message: error.message }, { status: error.status });
+    }
+
+    console.error(context, error);
+    return NextResponse.json(
+        { message: "Internal server error" },
+        { status: 500 }
+    );
+};
+
+const serializeExcelNumber = (value: { toString(): string } | number | null | undefined) => {
+    if (value === null || value === undefined) {
+        return "";
+    }
+
+    return Number(value);
+};
 
 // GET /api/facility/ket-qua-lcnt/[tbmtId]/template
 // Generate Excel template with existing PhanLo data
@@ -10,20 +46,15 @@ export async function GET(
     { params }: { params: Promise<{ tbmtId: string }> }
 ) {
     try {
-        const session = await auth();
-        if (!session) {
-            return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-        }
-
-        if (session.user.role !== "FACILITY") {
-            return NextResponse.json({ message: "Forbidden" }, { status: 403 });
-        }
+        void req;
+        const { user } = await requireActiveSessionUser("FACILITY");
 
         const { tbmtId } = await params;
+        const ownedTbmt = await getFacilityOwnedThongBaoMoiThauById(tbmtId, user.id);
 
         // Get TBMT and related package and lots
         const tbmt = await prisma.thongBaoMoiThau.findUnique({
-            where: { id: tbmtId },
+            where: { id: ownedTbmt.id },
             include: {
                 goiThau: {
                     include: {
@@ -49,29 +80,26 @@ export async function GET(
             STT: phanLo.stt,
             "Tên phần lô": phanLo.tenPhanLo,
             "Đơn vị tính": phanLo.donViTinh || "",
-            "Số lượng": phanLo.soLuong ? Number(phanLo.soLuong) : 0,
-            "Đơn giá": phanLo.donGia ? Number(phanLo.donGia) : 0,
-            "Thành tiền": phanLo.thanhTien ? Number(phanLo.thanhTien) : 0,
+            "Số lượng": serializeExcelNumber(phanLo.soLuong),
+            "Đơn giá": serializeExcelNumber(phanLo.donGia),
+            "Thành tiền": serializeExcelNumber(phanLo.thanhTien),
             "Thời gian thực hiện gói thầu": phanLo.thoiGianThucHien || "",
             "Đơn vị tính TGTHHGT": phanLo.donViTinhThoiGian || "",
             "Kết quả": "", // Empty for user to fill
             "Đơn giá trúng thầu": "", // Empty for user to fill
             "Nhà thầu trúng thầu": "", // Empty for user to fill
-            "_phanLoId": phanLo.id, // Hidden field for reference
+            "ID phần lô (không sửa)": phanLo.id,
         }));
 
         // Generate Excel file
         const ws = XLSX.utils.json_to_sheet(excelData);
-
-        // Hide the _phanLoId column
-        if (!ws["!cols"]) ws["!cols"] = [];
-        ws["!cols"][11] = { hidden: true };
 
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Kết quả LCNT");
 
         // Write to buffer
         const buffer = XLSX.write(wb, { type: "buffer", bookType: "xlsx" });
+        const fileName = `Ket_Qua_LCNT_${tbmt.maTBMT}.xlsx`;
 
         // Return as file download
         return new NextResponse(buffer, {
@@ -79,14 +107,10 @@ export async function GET(
             headers: {
                 "Content-Type":
                     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                "Content-Disposition": `attachment; filename="Ket_Qua_LCNT_${tbmt.maTBMT}.xlsx"`,
+                "Content-Disposition": buildAttachmentDisposition(fileName),
             },
         });
-    } catch (error) {
-        console.error("Error generating template:", error);
-        return NextResponse.json(
-            { message: "Internal server error" },
-            { status: 500 }
-        );
+    } catch (error: unknown) {
+        return handleRouteError(error, "Error generating template:");
     }
 }

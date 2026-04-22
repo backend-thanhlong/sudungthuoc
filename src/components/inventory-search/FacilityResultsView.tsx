@@ -92,6 +92,7 @@ export default function FacilityResultsView({
                                     <TableHead>Tên thuốc</TableHead>
                                     <TableHead>Hoạt chất</TableHead>
                                     <TableHead>Hàm lượng</TableHead>
+                                    <TableHead>Số đăng ký</TableHead>
                                     <TableHead>ĐVT</TableHead>
                                     <TableHead className="text-right">Tồn kho</TableHead>
                                     <TableHead className="text-right">Giá VAT</TableHead>
@@ -109,6 +110,9 @@ export default function FacilityResultsView({
                                         </TableCell>
                                         <TableCell className="whitespace-normal break-words">
                                             {drug.dosage}
+                                        </TableCell>
+                                        <TableCell className="whitespace-normal break-words text-slate-600">
+                                            {drug.soDangKy || "-"}
                                         </TableCell>
                                         <TableCell>{drug.unit}</TableCell>
                                         <TableCell className="text-right font-semibold text-emerald-700">

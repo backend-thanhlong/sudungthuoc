@@ -31,6 +31,7 @@ model User {
 
   drugMaps FacilityDrugMap[]
   reports  InventoryReport[]
+  reportSubmissions FacilityReportSubmission[]
   keHoachLCNTs KeHoachLCNT[]
   notifications Notification[]
   activityLogs  ActivityLog[]
@@ -41,6 +42,19 @@ model User {
 enum Role {
   ADMIN
   FACILITY
+}
+
+model TherapeuticGroup {
+  id             String       @id @default(cuid())
+  name           String       @map("name")
+  normalizedName String       @unique @map("normalized_name")
+  isActive       Boolean      @default(true) @map("is_active")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+
+  masterDrugs    MasterDrug[]
+
+  @@map("therapeutic_groups")
 }
 
 // MasterDrugs: Danh mục dùng chung
@@ -70,7 +84,8 @@ model MasterDrug {
   diaChiDangKy         String?  @map("dia_chi_dang_ky")
   
   nhomThuoc            String?  @map("nhom_thuoc")
-  nhomDieuTri          String?  @map("nhom_dieu_tri")
+  therapeuticGroupId   String?  @map("therapeutic_group_id")
+  therapeuticGroup     TherapeuticGroup? @relation(fields: [therapeuticGroupId], references: [id], onDelete: SetNull)
   isKeDon              String?  @map("is_ke_don")
   kiemSoatDacBiet      String?  @map("kiem_soat_dac_biet")
   isTrongNuoc          String?  @map("is_trong_nuoc")
@@ -109,6 +124,9 @@ model FacilityDrugMap {
   reports InventoryReport[]
 
   @@unique([facilityId, maNoiBo])
+  @@index([facilityId, updatedAt])
+  @@index([status, facilityId, createdAt])
+  @@index([facilityId, status, updatedAt])
   @@map("facility_drug_maps")
 }
 
@@ -154,6 +172,22 @@ model InventoryReport {
 
   @@unique([facilityId, mapId, reportMonth])
   @@map("inventory_reports")
+}
+
+model FacilityReportSubmission {
+  id              String   @id @default(cuid())
+  facilityId       String   @map("facility_id")
+  facility         User     @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+  reportMonth      String   @map("report_month")
+  submittedAt      DateTime @default(now()) @map("submitted_at")
+  reportedRowCount Int      @default(0) @map("reported_row_count")
+  skippedRowCount  Int      @default(0) @map("skipped_row_count")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  @@unique([facilityId, reportMonth])
+  @@index([reportMonth])
+  @@map("facility_report_submissions")
 }
 
 enum ReportStatus {
@@ -239,7 +273,7 @@ model GoiThau {
   chiTietNguonVon   String?     @map("chi_tiet_nguon_von")
   soLuongPhanLo     Int?        @map("so_luong_phan_lo")
   thoiGianToChuc    String?     @map("thoi_gian_to_chuc")
-  thoiGianBatDau    DateTime?   @map("thoi_gian_bat_dau")
+  thoiGianBatDau    String?     @map("thoi_gian_bat_dau")
   thoiGianThucHien  String?     @map("thoi_gian_thuc_hien")
   trangThai         String?     @default("Chưa hoàn thành") @map("trang_thai")
   maThongBao        String?     @map("ma_thong_bao")

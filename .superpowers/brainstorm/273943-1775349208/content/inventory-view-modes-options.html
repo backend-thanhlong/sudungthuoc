@@ -1,0 +1,220 @@
+<style>
+  .inventory-toolbar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+  .inventory-chip {
+    border: 1px solid #cbd5e1;
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 12px;
+    background: #fff;
+    color: #334155;
+  }
+  .inventory-segment {
+    display: inline-flex;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fff;
+  }
+  .inventory-segment span {
+    padding: 8px 12px;
+    font-size: 12px;
+    border-right: 1px solid #e2e8f0;
+  }
+  .inventory-segment span:last-child {
+    border-right: 0;
+  }
+  .inventory-segment .active {
+    background: #0f766e;
+    color: #fff;
+    font-weight: 600;
+  }
+  .mock-grid {
+    display: grid;
+    gap: 10px;
+  }
+  .mock-box {
+    border: 1px solid #dbe4ee;
+    border-radius: 12px;
+    background: #fff;
+    padding: 10px;
+  }
+  .mock-title {
+    font-size: 11px;
+    color: #64748b;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .mock-row {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr 1fr;
+    gap: 8px;
+  }
+  .mock-cell {
+    min-height: 34px;
+    border-radius: 10px;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    padding: 8px;
+    font-size: 11px;
+    color: #1e3a8a;
+  }
+  .mock-cell.alt {
+    background: #f8fafc;
+    border-color: #dbe4ee;
+    color: #334155;
+  }
+  .mock-cell.em {
+    background: #ecfeff;
+    border-color: #99f6e4;
+    color: #115e59;
+  }
+  .matrix {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr 1fr 1fr;
+    gap: 6px;
+  }
+  .matrix div {
+    border-radius: 8px;
+    padding: 7px 8px;
+    font-size: 10px;
+    border: 1px solid #dbe4ee;
+    background: #fff;
+    color: #334155;
+  }
+  .matrix .head {
+    background: #f1f5f9;
+    font-weight: 600;
+  }
+</style>
+
+<h2>3 hướng phát triển `Chế độ xem` cho `/dashboard/inventory-search`</h2>
+<p class="subtitle">Nền tảng đã chốt: một trang duy nhất, người dùng ưu tiên tìm theo thuốc, nhưng vẫn cần xem theo cơ sở và so sánh nhiều cơ sở cho một thuốc.</p>
+
+<div class="cards">
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup">
+        <div class="mockup-header">A. Chuyển chế độ gọn, cùng bộ lọc</div>
+        <div class="mockup-body">
+          <div class="inventory-toolbar">
+            <div class="inventory-chip">Ô tìm kiếm thuốc</div>
+            <div class="inventory-chip">Bộ lọc cơ sở</div>
+            <div class="inventory-chip">Sắp xếp</div>
+          </div>
+          <div class="inventory-segment">
+            <span class="active">Theo thuốc</span>
+            <span>Theo cơ sở</span>
+            <span>So sánh cơ sở</span>
+          </div>
+          <div class="mock-grid" style="margin-top: 12px;">
+            <div class="mock-box">
+              <div class="mock-title">Kết quả chính</div>
+              <div class="mock-row">
+                <div class="mock-cell em">Paracetamol 500mg</div>
+                <div class="mock-cell alt">12 cơ sở</div>
+                <div class="mock-cell alt">Tổng tồn 18.400</div>
+              </div>
+              <div class="mock-row" style="margin-top: 8px;">
+                <div class="mock-cell alt">Danh sách cơ sở bung ra</div>
+                <div class="mock-cell alt">Giá VAT</div>
+                <div class="mock-cell alt">Kỳ báo cáo</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Một toolbar, đổi cách nhìn</h3>
+      <p>Dễ hiểu nhất với người dùng hiện tại. Giữ ô tìm kiếm làm trung tâm, đổi phần kết quả theo từng mode.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup">
+        <div class="mockup-header">B. Hai tầng: tra cứu + workspace phân tích</div>
+        <div class="mockup-body">
+          <div class="inventory-toolbar">
+            <div class="inventory-chip">Ô tìm kiếm thuốc</div>
+            <div class="inventory-chip">Bộ lọc nâng cao</div>
+          </div>
+          <div class="mock-row">
+            <div class="mock-cell em" style="min-height: 100px;">Danh sách thuốc</div>
+            <div class="mock-cell alt" style="min-height: 100px;">Panel chi tiết cơ sở</div>
+            <div class="mock-cell alt" style="min-height: 100px;">Panel so sánh đã ghim</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Tra cứu bên trái, phân tích bên phải</h3>
+      <p>Mạnh cho người dùng làm việc lâu trên dữ liệu, nhưng phức tạp hơn và nặng hơn so với trang hiện tại.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup">
+        <div class="mockup-header">C. Chế độ so sánh là trung tâm</div>
+        <div class="mockup-body">
+          <div class="inventory-toolbar">
+            <div class="inventory-chip">Ô chọn 1 thuốc</div>
+            <div class="inventory-chip">Chọn nhiều cơ sở</div>
+            <div class="inventory-chip">Chỉ số cần so sánh</div>
+          </div>
+          <div class="mock-box">
+            <div class="mock-title">Ma trận so sánh</div>
+            <div class="matrix">
+              <div class="head">Chỉ số</div>
+              <div class="head">BV A</div>
+              <div class="head">TTYT B</div>
+              <div class="head">BV C</div>
+              <div>Tồn kho</div>
+              <div>4.200</div>
+              <div>1.000</div>
+              <div>0</div>
+              <div>Giá VAT</div>
+              <div>820</div>
+              <div>780</div>
+              <div>850</div>
+              <div>Kỳ báo cáo</div>
+              <div>2026-03</div>
+              <div>2026-03</div>
+              <div>2026-02</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Ưu tiên quyết định điều phối</h3>
+      <p>Rất mạnh cho bài toán điều phối thiếu thuốc giữa cơ sở, nhưng nếu dùng làm mặc định sẽ làm lệch trọng tâm khỏi tra cứu theo thuốc.</p>
+    </div>
+  </div>
+</div>
+
+<div class="pros-cons" style="margin-top: 22px;">
+  <div class="pros">
+    <h4>Khuyến nghị</h4>
+    <ul>
+      <li>Chọn A làm khung chính.</li>
+      <li>Nhúng tư duy của C vào mode `So sánh cơ sở` thay vì biến toàn trang thành ma trận.</li>
+      <li>Chỉ mượn một phần của B sau này nếu cần panel ghim để phân tích sâu.</li>
+    </ul>
+  </div>
+  <div class="cons">
+    <h4>Lý do</h4>
+    <ul>
+      <li>Ít phá vỡ thói quen hiện tại nhất.</li>
+      <li>Khớp với ưu tiên `Theo thuốc` là luồng mặc định.</li>
+      <li>Dễ mở rộng thêm mode mới mà không tách route.</li>
+    </ul>
+  </div>
+</div>

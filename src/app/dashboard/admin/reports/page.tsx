@@ -1,58 +1,170 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { getDownloadFileName, triggerBlobDownload } from "@/lib/browser-download";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, CheckCircle2, XCircle, Clock, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronRight, Loader2, Trash2 } from "lucide-react";
 
 const DETAIL_PAGE_SIZE = 50;
+const DETAIL_SEARCH_FIELDS = [
+    { value: "all", label: "Tất cả trường" },
+    { value: "maNoiBo", label: "Mã nội bộ" },
+    { value: "tenThuocNoiBo", label: "Tên thuốc (nội bộ)" },
+    { value: "hoatChatNoiBo", label: "Hoạt chất (nội bộ)" },
+    { value: "soDangKyNoiBo", label: "SĐK nội bộ" },
+    { value: "maChung", label: "Mã chung" },
+    { value: "maBhyt", label: "Mã BHYT" },
+    { value: "tenThuoc", label: "Tên thuốc (DM)" },
+    { value: "hoatChat", label: "Hoạt chất" },
+    { value: "soDangKy", label: "Số đăng ký" },
+    { value: "soQdTrungThau", label: "Số QĐ TT" },
+    { value: "tenCongTy", label: "Tên công ty" },
+] as const;
+
+const DETAIL_SEARCH_FIELD_LABELS = Object.fromEntries(
+    DETAIL_SEARCH_FIELDS.map((field) => [field.value, field.label])
+) as Record<(typeof DETAIL_SEARCH_FIELDS)[number]["value"], string>;
+
+type DetailReportContext = {
+    facilityId: string;
+    facilityName: string;
+    month: string;
+    drugCount: number;
+};
+
+type ReportSummary = {
+    id: string;
+    facilityId: string;
+    facilityName: string;
+    month: string;
+    drugCount: number;
+    totalImport: number;
+    totalExport: number;
+    lastUpdated: string | null;
+    status: string;
+    skippedRowCount: number;
+};
+
+type NotSubmittedFacility = {
+    id: string;
+    facilityName: string;
+};
+
+type SummaryState = {
+    totalReports: number;
+    uniqueFacilities: number;
+    totalImport: number;
+    totalExport: number;
+};
+
+type ReportPeriod = {
+    id: string;
+    month: string;
+};
+
+type FacilityOption = {
+    id: string;
+    name: string;
+};
+
+type DetailReportItem = {
+    id: string;
+    [key: string]: string | number | null;
+};
+
+type FacilityReportGroup = {
+    facilityId: string;
+    facilityName: string;
+    reports: ReportSummary[];
+    submissionCount: number;
+    totalImport: number;
+    totalExport: number;
+    latestSubmittedAt: string | null;
+    latestReportMonth: string | null;
+    hasSkippedRows: boolean;
+};
+
+const numberFormatter = new Intl.NumberFormat("vi-VN");
+
+const formatCurrency = (value: number) => numberFormatter.format(value);
+
+const formatDate = (value: string | null) => value ? new Date(value).toLocaleDateString("vi-VN") : "—";
+
+const buildFacilityReportGroups = (items: ReportSummary[]): FacilityReportGroup[] => {
+    const groups = new Map<string, FacilityReportGroup>();
+
+    items.forEach((report) => {
+        const existing = groups.get(report.facilityId);
+        if (existing) {
+            existing.reports.push(report);
+            existing.submissionCount += 1;
+            existing.totalImport += Number(report.totalImport) || 0;
+            existing.totalExport += Number(report.totalExport) || 0;
+            existing.hasSkippedRows = existing.hasSkippedRows || report.skippedRowCount > 0;
+
+            const currentLatest = existing.latestSubmittedAt ? new Date(existing.latestSubmittedAt).getTime() : 0;
+            const nextLatest = report.lastUpdated ? new Date(report.lastUpdated).getTime() : 0;
+            if (nextLatest > currentLatest) {
+                existing.latestSubmittedAt = report.lastUpdated;
+                existing.latestReportMonth = report.month;
+            }
+
+            return;
+        }
+
+        groups.set(report.facilityId, {
+            facilityId: report.facilityId,
+            facilityName: report.facilityName,
+            reports: [report],
+            submissionCount: 1,
+            totalImport: Number(report.totalImport) || 0,
+            totalExport: Number(report.totalExport) || 0,
+            latestSubmittedAt: report.lastUpdated,
+            latestReportMonth: report.month,
+            hasSkippedRows: report.skippedRowCount > 0,
+        });
+    });
+
+    return Array.from(groups.values());
+};
 
 export default function AdminReportsPage() {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [reports, setReports] = useState<any[]>([]);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [filteredReports, setFilteredReports] = useState<any[]>([]);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [notSubmitted, setNotSubmitted] = useState<any[]>([]);
-    const [summary, setSummary] = useState({ totalReports: 0, uniqueFacilities: 0, totalImport: 0, totalExport: 0 });
+    const [reports, setReports] = useState<ReportSummary[]>([]);
+    const [filteredReports, setFilteredReports] = useState<ReportSummary[]>([]);
+    const [notSubmitted, setNotSubmitted] = useState<NotSubmittedFacility[]>([]);
+    const [summary, setSummary] = useState<SummaryState>({ totalReports: 0, uniqueFacilities: 0, totalImport: 0, totalExport: 0 });
     const [isLoading, setIsLoading] = useState(true);
     const [isExporting, setIsExporting] = useState(false);
 
     // Filters
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [periods, setPeriods] = useState<any[]>([]);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [facilities, setFacilities] = useState<any[]>([]);
+    const [periods, setPeriods] = useState<ReportPeriod[]>([]);
+    const [facilities, setFacilities] = useState<FacilityOption[]>([]);
     const [selectedMonth, setSelectedMonth] = useState<string>("all");
     const [selectedFacility, setSelectedFacility] = useState<string>("all");
 
     // Selection for bulk actions
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+    const [expandedFacilityIds, setExpandedFacilityIds] = useState<Set<string>>(new Set());
 
     // Detail/Review state
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [selectedReport, setSelectedReport] = useState<any>(null);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [detailData, setDetailData] = useState<any[]>([]);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [reviewLog, setReviewLog] = useState<any[]>([]);
+    const [selectedReport, setSelectedReport] = useState<DetailReportContext | null>(null);
+    const [detailData, setDetailData] = useState<DetailReportItem[]>([]);
     const [isDetailLoading, setIsDetailLoading] = useState(false);
-    const [isReviewLogLoading, setIsReviewLogLoading] = useState(false);
     const [isDetailOpen, setIsDetailOpen] = useState(false);
     const [detailPage, setDetailPage] = useState(1);
     const [detailTotal, setDetailTotal] = useState(0);
     const [detailTotalPages, setDetailTotalPages] = useState(1);
-
-    // Bulk reject note dialog
-    const [bulkAction, setBulkAction] = useState<"APPROVED" | "REJECTED" | null>(null);
-    const [bulkNote, setBulkNote] = useState("");
-    const [isBulkLoading, setIsBulkLoading] = useState(false);
+    const [detailSearchField, setDetailSearchField] = useState<(typeof DETAIL_SEARCH_FIELDS)[number]["value"]>("all");
+    const [detailAppliedSearchField, setDetailAppliedSearchField] = useState<(typeof DETAIL_SEARCH_FIELDS)[number]["value"]>("all");
+    const [detailSearchInput, setDetailSearchInput] = useState("");
+    const [detailSearchTerm, setDetailSearchTerm] = useState("");
 
     const fetchReports = async (month?: string) => {
         try {
@@ -60,12 +172,12 @@ export default function AdminReportsPage() {
             const res = await fetch(url);
             if (res.ok) {
                 const data = await res.json();
-                setReports(data.reports || []);
+                setReports((data.reports || []) as ReportSummary[]);
                 setSummary(data.summary || { totalReports: 0, uniqueFacilities: 0, totalImport: 0, totalExport: 0 });
-                setNotSubmitted(data.notSubmitted || []);
+                setNotSubmitted((data.notSubmitted || []) as NotSubmittedFacility[]);
 
                 const facilityMap = new Map<string, string>();
-                (data.reports || []).forEach((r: { facilityId: string; facilityName: string }) => {
+                ((data.reports || []) as ReportSummary[]).forEach((r) => {
                     if (!facilityMap.has(r.facilityId)) facilityMap.set(r.facilityId, r.facilityName);
                 });
                 setFacilities(Array.from(facilityMap.entries()).map(([id, name]) => ({ id, name })));
@@ -104,6 +216,15 @@ export default function AdminReportsPage() {
     }, [reports, selectedMonth, selectedFacility]);
 
     useEffect(() => {
+        if (selectedFacility === "all") {
+            setExpandedFacilityIds(new Set());
+            return;
+        }
+
+        setExpandedFacilityIds(new Set([selectedFacility]));
+    }, [selectedMonth, selectedFacility]);
+
+    useEffect(() => {
         fetchReports(selectedMonth !== "all" ? selectedMonth : undefined);
     }, [selectedMonth]);
 
@@ -122,20 +243,11 @@ export default function AdminReportsPage() {
             const res = await fetch(`/api/admin/reports/export?${params.toString()}`);
             if (res.ok) {
                 const blob = await res.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
                 const contentDisposition = res.headers.get("Content-Disposition");
-                let fileName = mode === "detail" ? "Bao_Cao_ChiTiet.xlsx" : "Bao_Cao_TongHop.xlsx";
-                if (contentDisposition) {
-                    const match = contentDisposition.match(/filename="?(.+?)"?$/);
-                    if (match) fileName = decodeURIComponent(match[1]);
-                }
-                a.download = fileName;
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(a);
+                const fallbackFileName = mode === "detail" ? "Bao_Cao_ChiTiet.xlsx" : "Bao_Cao_TongHop.xlsx";
+                const fileName = getDownloadFileName(contentDisposition, fallbackFileName);
+
+                triggerBlobDownload(blob, fileName);
                 toast.success(mode === "detail" ? "Đã xuất file Excel chi tiết (mỗi cơ sở 1 sheet)!" : "Đã xuất file Excel tổng hợp!");
             } else {
                 const err = await res.json().catch(() => ({}));
@@ -148,62 +260,7 @@ export default function AdminReportsPage() {
         }
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const handleReview = async (report: any, status: "APPROVED" | "REJECTED") => {
-        let note = "";
-        if (status === "REJECTED") {
-            const reason = window.prompt("Nhập lý do từ chối:");
-            if (reason === null) return;
-            note = reason;
-        }
-        try {
-            const res = await fetch("/api/admin/reports/review", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ facilityId: report.facilityId, month: report.month, status, adminNote: note }),
-            });
-            if (res.ok) {
-                toast.success(`Đã ${status === "APPROVED" ? "duyệt" : "từ chối"} báo cáo`);
-                fetchReports(selectedMonth !== "all" ? selectedMonth : undefined);
-            } else {
-                toast.error("Đã xảy ra lỗi");
-            }
-        } catch {
-            toast.error("Lỗi kết nối");
-        }
-    };
-
-    const handleBulkAction = async () => {
-        if (!bulkAction || selectedIds.size === 0) return;
-        setIsBulkLoading(true);
-        try {
-            const items = filteredReports
-                .filter(r => selectedIds.has(r.id))
-                .map(r => ({ facilityId: r.facilityId, month: r.month }));
-            const res = await fetch("/api/admin/reports/review", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ items, status: bulkAction, adminNote: bulkNote }),
-            });
-            const data = await res.json();
-            if (res.ok) {
-                toast.success(data.message);
-                setBulkAction(null);
-                setBulkNote("");
-                setSelectedIds(new Set());
-                fetchReports(selectedMonth !== "all" ? selectedMonth : undefined);
-            } else {
-                toast.error(data.message || "Đã xảy ra lỗi");
-            }
-        } catch {
-            toast.error("Lỗi kết nối");
-        } finally {
-            setIsBulkLoading(false);
-        }
-    };
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const handleDelete = async (report: any) => {
+    const handleDelete = async (report: ReportSummary) => {
         if (!confirm(`Bạn có chắc chắn muốn xóa toàn bộ dữ liệu báo cáo tháng ${report.month} của ${report.facilityName}?\nHành động này không thể hoàn tác!`)) return;
         try {
             const res = await fetch("/api/admin/reports", {
@@ -248,8 +305,14 @@ export default function AdminReportsPage() {
         }
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const fetchDetailPage = async (report: any, page: number) => {
+    const fetchDetailPage = async (
+        report: DetailReportContext,
+        page: number,
+        search = {
+            field: detailAppliedSearchField,
+            term: detailSearchTerm,
+        }
+    ) => {
         setIsDetailLoading(true);
         try {
             const params = new URLSearchParams({
@@ -257,7 +320,9 @@ export default function AdminReportsPage() {
                 month: report.month,
                 page: page.toString(),
                 limit: DETAIL_PAGE_SIZE.toString(),
+                searchField: search.field,
             });
+            if (search.term) params.set("searchTerm", search.term);
             const res = await fetch(`/api/admin/reports/detail?${params.toString()}`);
             if (!res.ok) {
                 toast.error("Không thể tải dữ liệu chi tiết");
@@ -276,48 +341,60 @@ export default function AdminReportsPage() {
         }
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const fetchReviewLog = async (report: any) => {
-        setIsReviewLogLoading(true);
-        try {
-            const res = await fetch(`/api/admin/reports/review-log?facilityId=${report.facilityId}&month=${encodeURIComponent(report.month)}`);
-            if (!res.ok) {
-                toast.error("Không thể tải lịch sử duyệt");
-                return;
-            }
-
-            setReviewLog(await res.json());
-        } catch {
-            toast.error("Lỗi kết nối");
-        } finally {
-            setIsReviewLogLoading(false);
-        }
-    };
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const handleViewDetails = (report: any) => {
+    const handleViewDetails = (report: DetailReportContext) => {
         setSelectedReport(report);
         setIsDetailOpen(true);
         setDetailData([]);
-        setReviewLog([]);
         setDetailPage(1);
         setDetailTotal(0);
         setDetailTotalPages(1);
-        void fetchDetailPage(report, 1);
-        void fetchReviewLog(report);
+        setDetailSearchField("all");
+        setDetailAppliedSearchField("all");
+        setDetailSearchInput("");
+        setDetailSearchTerm("");
+        void fetchDetailPage(report, 1, { field: "all", term: "" });
     };
 
     const handleDetailPageChange = (page: number) => {
         if (!selectedReport || page < 1 || page > detailTotalPages || page === detailPage) return;
-        void fetchDetailPage(selectedReport, page);
+        void fetchDetailPage(selectedReport, page, {
+            field: detailAppliedSearchField,
+            term: detailSearchTerm,
+        });
+    };
+
+    const handleDetailSearch = () => {
+        if (!selectedReport) return;
+        const nextSearchTerm = detailSearchInput.trim();
+        setDetailSearchInput(nextSearchTerm);
+        setDetailAppliedSearchField(detailSearchField);
+        setDetailSearchTerm(nextSearchTerm);
+        setDetailPage(1);
+        void fetchDetailPage(selectedReport, 1, {
+            field: detailSearchField,
+            term: nextSearchTerm,
+        });
+    };
+
+    const handleResetDetailSearch = () => {
+        if (!selectedReport) return;
+        setDetailSearchField("all");
+        setDetailAppliedSearchField("all");
+        setDetailSearchInput("");
+        setDetailSearchTerm("");
+        setDetailPage(1);
+        void fetchDetailPage(selectedReport, 1, {
+            field: "all",
+            term: "",
+        });
     };
 
     const getStatusBadge = (status: string) => {
-        switch (status) {
-            case "APPROVED": return <Badge className="bg-emerald-100 text-emerald-700 border-0">Đã duyệt</Badge>;
-            case "REJECTED": return <Badge className="bg-red-100 text-red-700 border-0">Từ chối</Badge>;
-            default: return <Badge className="bg-blue-100 text-blue-700 border-0">Chờ duyệt</Badge>;
+        if (status === "SUBMITTED") {
+            return <Badge className="bg-emerald-100 text-emerald-700 border-0">Đã nộp</Badge>;
         }
+
+        return <Badge variant="secondary">{status}</Badge>;
     };
 
     // Compute submission progress
@@ -339,9 +416,48 @@ export default function AdminReportsPage() {
             setSelectedIds(new Set(filteredReports.map(r => r.id)));
         }
     };
+    const groupedReports = buildFacilityReportGroups(filteredReports);
+    const allReportsSelected = filteredReports.length > 0 && selectedIds.size === filteredReports.length;
+    const headerCheckboxIndeterminate = selectedIds.size > 0 && selectedIds.size < filteredReports.length;
+
+    const toggleFacilityExpanded = (facilityId: string) => {
+        setExpandedFacilityIds((current) => {
+            const next = new Set(current);
+            if (next.has(facilityId)) {
+                next.delete(facilityId);
+            } else {
+                next.add(facilityId);
+            }
+            return next;
+        });
+    };
+
+    const toggleFacilitySelection = (group: FacilityReportGroup) => {
+        setSelectedIds((current) => {
+            const next = new Set(current);
+            const allGroupReportsSelected = group.reports.every((report) => next.has(report.id));
+
+            group.reports.forEach((report) => {
+                if (allGroupReportsSelected) {
+                    next.delete(report.id);
+                } else {
+                    next.add(report.id);
+                }
+            });
+
+            return next;
+        });
+    };
 
     const detailRangeStart = detailTotal === 0 ? 0 : (detailPage - 1) * DETAIL_PAGE_SIZE + 1;
     const detailRangeEnd = detailTotal === 0 ? 0 : Math.min(detailTotal, (detailPage - 1) * DETAIL_PAGE_SIZE + detailData.length);
+    const hasActiveDetailSearch = detailSearchTerm.length > 0;
+    const detailSearchFieldLabel = DETAIL_SEARCH_FIELD_LABELS[detailAppliedSearchField];
+    const canResetDetailSearch = detailSearchField !== "all"
+        || detailAppliedSearchField !== "all"
+        || detailSearchInput.length > 0
+        || detailSearchTerm.length > 0;
+    const selectedReportHasNoSavedRows = (selectedReport?.drugCount || 0) === 0;
 
     return (
         <div className="space-y-6">
@@ -461,14 +577,6 @@ export default function AdminReportsPage() {
                 <Card className="border-0 shadow-lg bg-blue-50 border border-blue-200">
                     <CardContent className="py-3 flex items-center gap-3 flex-wrap">
                         <span className="text-sm font-medium text-blue-800">Đã chọn {selectedIds.size} báo cáo</span>
-                        <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white"
-                            onClick={() => setBulkAction("APPROVED")}>
-                            <CheckCircle2 className="w-4 h-4 mr-1" /> Duyệt tất cả đã chọn
-                        </Button>
-                        <Button size="sm" variant="outline" className="border-red-300 text-red-600 hover:bg-red-50"
-                            onClick={() => setBulkAction("REJECTED")}>
-                            <XCircle className="w-4 h-4 mr-1" /> Từ chối tất cả đã chọn
-                        </Button>
                         <Button size="sm" variant="outline" className="border-red-500 text-red-700 hover:bg-red-50 font-semibold"
                             onClick={handleBulkDelete}>
                             <Trash2 className="w-4 h-4 mr-1" /> Xóa tất cả đã chọn
@@ -484,8 +592,8 @@ export default function AdminReportsPage() {
                     <CardTitle>Dữ liệu báo cáo</CardTitle>
                     <CardDescription>
                         {filteredReports.length === reports.length
-                            ? "Danh sách báo cáo"
-                            : `Hiển thị ${filteredReports.length} / ${reports.length} báo cáo`}
+                            ? `Danh sách ${groupedReports.length} đơn vị đã nộp báo cáo`
+                            : `Hiển thị ${groupedReports.length} đơn vị với ${filteredReports.length} / ${reports.length} báo cáo`}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -502,93 +610,155 @@ export default function AdminReportsPage() {
                                 <TableRow>
                                     <TableHead className="w-10">
                                         <input type="checkbox" className="rounded"
-                                            checked={selectedIds.size === filteredReports.length && filteredReports.length > 0}
+                                            ref={(element) => {
+                                                if (element) element.indeterminate = headerCheckboxIndeterminate;
+                                            }}
+                                            checked={allReportsSelected}
                                             onChange={toggleSelectAll} />
                                     </TableHead>
                                     <TableHead>Cơ sở Y tế</TableHead>
-                                    <TableHead>Tháng báo cáo</TableHead>
-                                    <TableHead>Số thuốc</TableHead>
-                                    <TableHead>Tiền nhập</TableHead>
-                                    <TableHead>Tiền xuất</TableHead>
-                                    <TableHead>Ngày nộp</TableHead>
+                                    <TableHead>Số lần nộp</TableHead>
+                                    <TableHead>Tổng tiền nhập</TableHead>
+                                    <TableHead>Tổng tiền xuất</TableHead>
+                                    <TableHead>Lần nộp gần nhất</TableHead>
                                     <TableHead>Trạng thái</TableHead>
                                     <TableHead className="text-right">Thao tác</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {filteredReports.map((report) => (
-                                    <TableRow key={report.id} className={selectedIds.has(report.id) ? "bg-blue-50" : ""}>
-                                        <TableCell>
-                                            <input type="checkbox" className="rounded"
-                                                checked={selectedIds.has(report.id)}
-                                                onChange={() => toggleSelect(report.id)} />
-                                        </TableCell>
-                                        <TableCell className="font-medium">{report.facilityName}</TableCell>
-                                        <TableCell>{report.month}</TableCell>
-                                        <TableCell>{report.drugCount}</TableCell>
-                                        <TableCell className="text-blue-600 font-medium">{new Intl.NumberFormat("vi-VN").format(report.totalImport)}</TableCell>
-                                        <TableCell className="text-red-600 font-medium">{new Intl.NumberFormat("vi-VN").format(report.totalExport)}</TableCell>
-                                        <TableCell className="text-gray-500 text-sm">{new Date(report.lastUpdated).toLocaleDateString("vi-VN")}</TableCell>
-                                        <TableCell>
-                                            {getStatusBadge(report.status)}
-                                            {report.adminNote && (
-                                                <p className="text-xs text-red-500 mt-1 max-w-[150px] truncate" title={report.adminNote}>
-                                                    Lý do: {report.adminNote}
-                                                </p>
+                                {groupedReports.map((group) => {
+                                    const isExpanded = expandedFacilityIds.has(group.facilityId);
+                                    const selectedCount = group.reports.filter((report) => selectedIds.has(report.id)).length;
+                                    const allGroupReportsSelected = group.reports.length > 0 && selectedCount === group.reports.length;
+                                    const groupCheckboxIndeterminate = selectedCount > 0 && selectedCount < group.reports.length;
+                                    const hasSelectedChildReports = selectedCount > 0;
+
+                                    return (
+                                        <Fragment key={group.facilityId}>
+                                            <TableRow className={hasSelectedChildReports ? "bg-blue-50/70" : ""}>
+                                                <TableCell>
+                                                    <input
+                                                        type="checkbox"
+                                                        className="rounded"
+                                                        ref={(element) => {
+                                                            if (element) element.indeterminate = groupCheckboxIndeterminate;
+                                                        }}
+                                                        checked={allGroupReportsSelected}
+                                                        onChange={() => toggleFacilitySelection(group)}
+                                                    />
+                                                </TableCell>
+                                                <TableCell className="min-w-[280px]">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => toggleFacilityExpanded(group.facilityId)}
+                                                        className="flex items-start gap-2 text-left"
+                                                        aria-expanded={isExpanded}
+                                                    >
+                                                        {isExpanded ? (
+                                                            <ChevronDown className="mt-0.5 h-4 w-4 text-slate-500" />
+                                                        ) : (
+                                                            <ChevronRight className="mt-0.5 h-4 w-4 text-slate-500" />
+                                                        )}
+                                                        <div>
+                                                            <div className="font-medium text-slate-900">{group.facilityName}</div>
+                                                            <div className="text-xs text-slate-500">
+                                                                {group.submissionCount} lần nộp
+                                                            </div>
+                                                        </div>
+                                                    </button>
+                                                </TableCell>
+                                                <TableCell className="font-medium">{group.submissionCount}</TableCell>
+                                                <TableCell className="font-medium text-blue-600">{formatCurrency(group.totalImport)}</TableCell>
+                                                <TableCell className="font-medium text-red-600">{formatCurrency(group.totalExport)}</TableCell>
+                                                <TableCell className="text-sm text-gray-500">
+                                                    <div>{formatDate(group.latestSubmittedAt)}</div>
+                                                    {group.latestReportMonth && (
+                                                        <div className="text-xs text-gray-400">Kỳ {group.latestReportMonth}</div>
+                                                    )}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {getStatusBadge(group.reports[0]?.status || "SUBMITTED")}
+                                                    {group.hasSkippedRows && (
+                                                        <p className="mt-1 text-xs text-amber-600">
+                                                            Có báo cáo chứa dòng bỏ qua
+                                                        </p>
+                                                    )}
+                                                </TableCell>
+                                                <TableCell className="text-right">
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        onClick={() => toggleFacilityExpanded(group.facilityId)}
+                                                    >
+                                                        {isExpanded ? "Thu gọn" : "Mở"}
+                                                    </Button>
+                                                </TableCell>
+                                            </TableRow>
+                                            {isExpanded && (
+                                                <TableRow className="bg-slate-50/70">
+                                                    <TableCell colSpan={8} className="p-0">
+                                                        <div className="border-t bg-slate-50/70 px-4 py-4">
+                                                            <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
+                                                                <Table>
+                                                                    <TableHeader>
+                                                                        <TableRow className="bg-slate-50">
+                                                                            <TableHead className="w-10"> </TableHead>
+                                                                            <TableHead>Tháng báo cáo</TableHead>
+                                                                            <TableHead>Số thuốc</TableHead>
+                                                                            <TableHead>Tiền nhập</TableHead>
+                                                                            <TableHead>Tiền xuất</TableHead>
+                                                                            <TableHead>Ngày nộp</TableHead>
+                                                                            <TableHead>Trạng thái</TableHead>
+                                                                            <TableHead className="text-right">Thao tác</TableHead>
+                                                                        </TableRow>
+                                                                    </TableHeader>
+                                                                    <TableBody>
+                                                                        {group.reports.map((report) => (
+                                                                            <TableRow key={report.id} className={selectedIds.has(report.id) ? "bg-blue-50" : ""}>
+                                                                                <TableCell>
+                                                                                    <input
+                                                                                        type="checkbox"
+                                                                                        className="rounded"
+                                                                                        checked={selectedIds.has(report.id)}
+                                                                                        onChange={() => toggleSelect(report.id)}
+                                                                                    />
+                                                                                </TableCell>
+                                                                                <TableCell className="font-medium">{report.month}</TableCell>
+                                                                                <TableCell>{report.drugCount}</TableCell>
+                                                                                <TableCell className="font-medium text-blue-600">{formatCurrency(Number(report.totalImport) || 0)}</TableCell>
+                                                                                <TableCell className="font-medium text-red-600">{formatCurrency(Number(report.totalExport) || 0)}</TableCell>
+                                                                                <TableCell className="text-sm text-gray-500">{formatDate(report.lastUpdated)}</TableCell>
+                                                                                <TableCell>
+                                                                                    {getStatusBadge(report.status)}
+                                                                                    {report.skippedRowCount > 0 && (
+                                                                                        <p className="mt-1 text-xs text-amber-600">
+                                                                                            {report.skippedRowCount} dòng bỏ qua
+                                                                                        </p>
+                                                                                    )}
+                                                                                </TableCell>
+                                                                                <TableCell className="text-right space-x-2">
+                                                                                    <Button size="sm" variant="outline" onClick={() => handleViewDetails(report)}>Xem</Button>
+                                                                                    <Button size="sm" variant="outline" className="border-red-200 text-red-600 hover:bg-red-50" onClick={() => handleDelete(report)}>
+                                                                                        <Trash2 className="w-3.5 h-3.5" />
+                                                                                    </Button>
+                                                                                </TableCell>
+                                                                            </TableRow>
+                                                                        ))}
+                                                                    </TableBody>
+                                                                </Table>
+                                                            </div>
+                                                        </div>
+                                                    </TableCell>
+                                                </TableRow>
                                             )}
-                                        </TableCell>
-                                        <TableCell className="text-right space-x-2">
-                                            <Button size="sm" variant="outline" onClick={() => handleViewDetails(report)}>Xem</Button>
-                                            {report.status !== "APPROVED" && (
-                                                <>
-                                                    <Button size="sm" variant="outline" className="text-emerald-600 border-emerald-200 hover:bg-emerald-50" onClick={() => handleReview(report, "APPROVED")}>Duyệt</Button>
-                                                    <Button size="sm" variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => handleReview(report, "REJECTED")}>Từ chối</Button>
-                                                </>
-                                            )}
-                                            <Button size="sm" variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => handleDelete(report)}>
-                                                <Trash2 className="w-3.5 h-3.5" />
-                                            </Button>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
+                                        </Fragment>
+                                    );
+                                })}
                             </TableBody>
                         </Table>
                     )}
                 </CardContent>
             </Card>
-
-            {/* Bulk Action Dialog */}
-            <Dialog open={bulkAction !== null} onOpenChange={() => { setBulkAction(null); setBulkNote(""); }}>
-                <DialogContent className="sm:max-w-md">
-                    <DialogHeader>
-                        <DialogTitle>{bulkAction === "APPROVED" ? "Duyệt" : "Từ chối"} {selectedIds.size} báo cáo</DialogTitle>
-                        <DialogDescription>
-                            {bulkAction === "REJECTED" ? "Nhập lý do từ chối (áp dụng cho tất cả báo cáo đã chọn)." : "Xác nhận duyệt tất cả báo cáo đã chọn?"}
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                        {bulkAction === "REJECTED" && (
-                            <textarea
-                                className="w-full border rounded-md p-3 text-sm min-h-[80px] focus:outline-none focus:ring-2 focus:ring-blue-300"
-                                placeholder="Lý do từ chối..."
-                                value={bulkNote}
-                                onChange={e => setBulkNote(e.target.value)}
-                            />
-                        )}
-                        <div className="flex gap-2 justify-end">
-                            <Button variant="ghost" onClick={() => { setBulkAction(null); setBulkNote(""); }}>Hủy</Button>
-                            <Button
-                                className={bulkAction === "APPROVED" ? "bg-emerald-600 hover:bg-emerald-700" : "bg-red-600 hover:bg-red-700"}
-                                onClick={handleBulkAction}
-                                disabled={isBulkLoading || (bulkAction === "REJECTED" && !bulkNote.trim())}
-                            >
-                                {isBulkLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                                Xác nhận
-                            </Button>
-                        </div>
-                    </div>
-                </DialogContent>
-            </Dialog>
 
             {/* Detail Dialog */}
             <Dialog
@@ -598,59 +768,118 @@ export default function AdminReportsPage() {
                     if (!open) {
                         setSelectedReport(null);
                         setDetailData([]);
-                        setReviewLog([]);
                         setIsDetailLoading(false);
-                        setIsReviewLogLoading(false);
                         setDetailPage(1);
                         setDetailTotal(0);
                         setDetailTotalPages(1);
+                        setDetailSearchField("all");
+                        setDetailAppliedSearchField("all");
+                        setDetailSearchInput("");
+                        setDetailSearchTerm("");
                     }
                 }}
             >
-                <DialogContent className="max-w-[90vw] sm:max-w-[90vw] w-[90vw] h-[90vh] flex flex-col p-0">
-                    <DialogHeader className="p-6 pb-2">
+                <DialogContent className="!top-0 !left-0 !h-[100dvh] !w-screen !max-w-none !translate-x-0 !translate-y-0 !rounded-none !border-0 !p-0 !shadow-none flex flex-col gap-0 overflow-hidden sm:!max-w-none">
+                    <DialogHeader className="shrink-0 border-b px-6 py-5 pr-16">
                         <DialogTitle>Chi tiết báo cáo - {selectedReport?.facilityName}</DialogTitle>
                         <DialogDescription>
                             Tháng báo cáo: {selectedReport?.month} | Tổng số thuốc: {selectedReport?.drugCount}
                         </DialogDescription>
                     </DialogHeader>
 
-                    <Tabs defaultValue="detail" className="flex-1 flex flex-col overflow-hidden px-6 pb-6">
-                        <TabsList className="w-fit mb-3">
-                            <TabsTrigger value="detail">Dữ liệu báo cáo</TabsTrigger>
-                            <TabsTrigger value="log">
-                                Lịch sử duyệt {reviewLog.length > 0 && <Badge className="ml-1 bg-gray-200 text-gray-700 border-0">{reviewLog.length}</Badge>}
-                            </TabsTrigger>
-                        </TabsList>
+                    <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-6 py-5">
+                        <div className="mb-3 inline-flex w-fit rounded-full bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-700">
+                            Báo cáo đã nộp và được chốt tự động
+                        </div>
 
-                        <TabsContent value="detail" className="flex-1 overflow-hidden mt-0">
+                        <div className="flex min-h-0 flex-1 flex-col gap-3">
+                            <form
+                                className="flex flex-wrap items-center gap-2"
+                                onSubmit={(event) => {
+                                    event.preventDefault();
+                                    handleDetailSearch();
+                                }}
+                            >
+                                <Select value={detailSearchField} onValueChange={(value) => setDetailSearchField(value as (typeof DETAIL_SEARCH_FIELDS)[number]["value"])}>
+                                    <SelectTrigger className="w-[220px] bg-white">
+                                        <SelectValue placeholder="Chọn trường tìm kiếm" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {DETAIL_SEARCH_FIELDS.map((field) => (
+                                            <SelectItem key={field.value} value={field.value}>{field.label}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+
+                                <Input
+                                    value={detailSearchInput}
+                                    onChange={(event) => setDetailSearchInput(event.target.value)}
+                                    placeholder="Nhập từ khóa tìm kiếm..."
+                                    className="min-w-[260px] flex-1 bg-white"
+                                />
+
+                                <Button type="submit" disabled={isDetailLoading}>
+                                    Tìm kiếm
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={handleResetDetailSearch}
+                                    disabled={isDetailLoading || !canResetDetailSearch}
+                                >
+                                    Đặt lại
+                                </Button>
+                            </form>
+
+                            {hasActiveDetailSearch && (
+                                <div className="text-sm text-gray-600">
+                                    Kết quả tìm kiếm cho <span className="font-medium">&quot;{detailSearchTerm}&quot;</span> trong trường <span className="font-medium">{detailSearchFieldLabel}</span>
+                                </div>
+                            )}
+
                             {isDetailLoading ? (
-                                <div className="flex items-center justify-center h-48"><Loader2 className="w-8 h-8 animate-spin text-gray-400" /></div>
+                                <div className="flex flex-1 items-center justify-center">
+                                    <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+                                </div>
                             ) : detailData.length === 0 ? (
-                                <div className="flex items-center justify-center h-48 text-gray-500">
-                                    Không có dữ liệu chi tiết
+                                <div className="flex flex-1 items-center justify-center text-gray-500">
+                                    <div className="text-center">
+                                        <p className="text-base font-medium text-gray-600">
+                                            {hasActiveDetailSearch
+                                                ? "Không tìm thấy dữ liệu phù hợp"
+                                                : selectedReportHasNoSavedRows
+                                                    ? "Báo cáo này không có dòng dữ liệu đã lưu"
+                                                    : "Không có dữ liệu chi tiết"}
+                                        </p>
+                                        {hasActiveDetailSearch && (
+                                            <p className="text-sm text-gray-400 mt-1">
+                                                Thử đổi trường tìm kiếm hoặc từ khóa khác.
+                                            </p>
+                                        )}
+                                        {!hasActiveDetailSearch && selectedReportHasNoSavedRows && (
+                                            <p className="text-sm text-gray-400 mt-1">
+                                                Toàn bộ dòng trong file nộp đã được đánh dấu Bỏ qua.
+                                            </p>
+                                        )}
+                                    </div>
                                 </div>
                             ) : (
-                                <div className="flex h-full flex-col gap-3">
-                                    {detailTotalPages > 1 && (
-                                        <div className="flex items-center justify-between text-sm text-gray-600">
-                                            <span>Hiển thị {detailRangeStart}-{detailRangeEnd} / {detailTotal} dòng</span>
-                                            <span>Trang {detailPage} / {detailTotalPages}</span>
-                                        </div>
-                                    )}
+                                <>
+                                    <div className="flex items-center justify-between text-sm text-gray-600">
+                                        <span>Hiển thị {detailRangeStart}-{detailRangeEnd} / {detailTotal} dòng</span>
+                                        <span>Trang {detailPage} / {detailTotalPages}</span>
+                                    </div>
 
-                                    <div className="overflow-auto flex-1">
+                                    <div className="min-h-0 flex-1 overflow-auto">
                                         <table className="text-xs border-collapse w-max min-w-full">
                                             <thead className="sticky top-0 bg-white z-10">
                                                 <tr className="border-b border-gray-200">
                                                     <th className="px-2 py-2 text-left font-medium text-gray-500 w-8 whitespace-nowrap">STT</th>
-                                                    {/* Thuốc nội bộ */}
                                                     <th className="px-2 py-2 text-left font-medium text-gray-500 w-[90px] whitespace-nowrap bg-orange-50">Mã nội bộ</th>
                                                     <th className="px-2 py-2 text-left font-medium text-gray-500 w-[160px] bg-orange-50">Tên thuốc (nội bộ)</th>
                                                     <th className="px-2 py-2 text-left font-medium text-gray-500 w-[130px] bg-orange-50">Hoạt chất (nội bộ)</th>
                                                     <th className="px-2 py-2 text-left font-medium text-gray-500 w-[100px] whitespace-nowrap bg-orange-50">SĐK nội bộ</th>
                                                     <th className="px-2 py-2 text-left font-medium text-gray-500 w-[70px] whitespace-nowrap bg-orange-50">ĐVT NB</th>
-                                                    {/* Danh mục chung */}
                                                     <th className="px-2 py-2 text-left font-medium text-gray-500 w-[80px] whitespace-nowrap bg-blue-50">Mã chung</th>
                                                     <th className="px-2 py-2 text-left font-medium text-gray-500 w-[80px] whitespace-nowrap bg-blue-50">Mã BHYT</th>
                                                     <th className="px-2 py-2 text-left font-medium text-gray-500 w-[160px] bg-blue-50">Tên thuốc (DM)</th>
@@ -665,14 +894,12 @@ export default function AdminReportsPage() {
                                                     <th className="px-2 py-2 text-left font-medium text-gray-500 w-[75px] bg-blue-50">Nước SX</th>
                                                     <th className="px-2 py-2 text-left font-medium text-gray-500 w-[130px] bg-blue-50">Công ty ĐK</th>
                                                     <th className="px-2 py-2 text-left font-medium text-gray-500 w-[100px] bg-blue-50">Nhóm thuốc</th>
-                                                    {/* Số liệu báo cáo */}
                                                     <th className="px-2 py-2 text-right font-medium text-gray-500 w-[70px] whitespace-nowrap bg-emerald-50">Tồn đầu</th>
                                                     <th className="px-2 py-2 text-right font-medium text-gray-500 w-[65px] whitespace-nowrap bg-emerald-50">Nhập</th>
                                                     <th className="px-2 py-2 text-right font-medium text-gray-500 w-[65px] whitespace-nowrap bg-emerald-50">Xuất</th>
                                                     <th className="px-2 py-2 text-right font-semibold text-gray-700 w-[70px] whitespace-nowrap bg-emerald-50">Tồn cuối</th>
                                                     <th className="px-2 py-2 text-right font-medium text-gray-500 w-[90px] whitespace-nowrap bg-emerald-50">Giá VAT</th>
                                                     <th className="px-2 py-2 text-right font-medium text-gray-500 w-[110px] bg-emerald-50">TT tồn cuối</th>
-                                                    {/* Thông tin hợp đồng */}
                                                     <th className="px-2 py-2 text-left font-medium text-gray-500 w-[110px] bg-purple-50">Số QĐ TT</th>
                                                     <th className="px-2 py-2 text-left font-medium text-gray-500 w-[130px] bg-purple-50">Tên công ty</th>
                                                     <th className="px-2 py-2 text-left font-medium text-gray-500 w-[90px] whitespace-nowrap bg-purple-50">Ngày BĐ HĐ</th>
@@ -685,13 +912,11 @@ export default function AdminReportsPage() {
                                                 {detailData.map((item, index) => (
                                                     <tr key={item.id} className="border-b border-gray-100 hover:bg-gray-50">
                                                         <td className="px-2 py-1.5 text-gray-400">{(detailPage - 1) * DETAIL_PAGE_SIZE + index + 1}</td>
-                                                        {/* Thuốc nội bộ */}
                                                         <td className="px-2 py-1.5 break-all">{item.maNoiBo}</td>
                                                         <td className="px-2 py-1.5 break-words">{item.tenThuocNoiBo}</td>
                                                         <td className="px-2 py-1.5 text-gray-500 break-words">{item.hoatChatNoiBo || <span className="text-gray-300">—</span>}</td>
                                                         <td className="px-2 py-1.5 break-all">{item.soDangKyNoiBo || <span className="text-gray-300">—</span>}</td>
                                                         <td className="px-2 py-1.5">{item.donViTinhNoiBo || <span className="text-gray-300">—</span>}</td>
-                                                        {/* Danh mục chung */}
                                                         <td className="px-2 py-1.5 font-medium text-blue-700 break-all">{item.maChung || <span className="text-gray-300">—</span>}</td>
                                                         <td className="px-2 py-1.5 break-all">{item.maBhyt || <span className="text-gray-300">—</span>}</td>
                                                         <td className="px-2 py-1.5 font-medium break-words">{item.tenThuoc || <span className="text-gray-300">—</span>}</td>
@@ -706,14 +931,12 @@ export default function AdminReportsPage() {
                                                         <td className="px-2 py-1.5 break-words">{item.nuocSanXuat || <span className="text-gray-300">—</span>}</td>
                                                         <td className="px-2 py-1.5 break-words">{item.congTyDangKy || <span className="text-gray-300">—</span>}</td>
                                                         <td className="px-2 py-1.5 break-words">{item.nhomThuoc || <span className="text-gray-300">—</span>}</td>
-                                                        {/* Số liệu báo cáo */}
                                                         <td className="px-2 py-1.5 text-right tabular-nums">{new Intl.NumberFormat("vi-VN").format(Number(item.tonDau))}</td>
                                                         <td className="px-2 py-1.5 text-right text-blue-600 tabular-nums">{new Intl.NumberFormat("vi-VN").format(Number(item.nhap))}</td>
                                                         <td className="px-2 py-1.5 text-right text-red-600 tabular-nums">{new Intl.NumberFormat("vi-VN").format(Number(item.xuat))}</td>
                                                         <td className="px-2 py-1.5 text-right font-bold tabular-nums">{new Intl.NumberFormat("vi-VN").format(Number(item.tonCuoi))}</td>
                                                         <td className="px-2 py-1.5 text-right tabular-nums">{new Intl.NumberFormat("vi-VN").format(Number(item.giaVat))}</td>
                                                         <td className="px-2 py-1.5 text-right font-medium text-emerald-700 tabular-nums">{new Intl.NumberFormat("vi-VN").format(Number(item.thanhTienTonCuoi))}</td>
-                                                        {/* Thông tin hợp đồng */}
                                                         <td className="px-2 py-1.5 break-all">{item.soQdTrungThau || <span className="text-gray-300">—</span>}</td>
                                                         <td className="px-2 py-1.5 break-words">{item.tenCongTy || <span className="text-gray-300">—</span>}</td>
                                                         <td className="px-2 py-1.5 whitespace-nowrap">{item.ngayBatDauHd || <span className="text-gray-300">—</span>}</td>
@@ -758,40 +981,10 @@ export default function AdminReportsPage() {
                                             </div>
                                         </div>
                                     )}
-                                </div>
+                                </>
                             )}
-                        </TabsContent>
-
-
-                        <TabsContent value="log" className="flex-1 overflow-auto mt-0">
-                            {isReviewLogLoading ? (
-                                <div className="flex items-center justify-center h-48"><Loader2 className="w-8 h-8 animate-spin text-gray-400" /></div>
-                            ) : reviewLog.length === 0 ? (
-                                <div className="text-center py-16 text-gray-400">
-                                    <Clock className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                                    <p>Chưa có lịch sử duyệt</p>
-                                </div>
-                            ) : (
-                                <div className="space-y-3">
-                                    {reviewLog.map((log) => (
-                                        <div key={log.id} className={`p-4 rounded-lg border ${log.status === "APPROVED" ? "bg-emerald-50 border-emerald-200" : log.status === "REJECTED" ? "bg-red-50 border-red-200" : "bg-gray-50 border-gray-200"}`}>
-                                            <div className="flex items-center justify-between mb-1">
-                                                <div className="flex items-center gap-2">
-                                                    {log.status === "APPROVED" ? <CheckCircle2 className="w-4 h-4 text-emerald-600" /> : <XCircle className="w-4 h-4 text-red-600" />}
-                                                    <span className={`font-semibold text-sm ${log.status === "APPROVED" ? "text-emerald-700" : "text-red-700"}`}>
-                                                        {log.status === "APPROVED" ? "Đã duyệt" : "Đã từ chối"}
-                                                    </span>
-                                                </div>
-                                                <span className="text-xs text-gray-400">{new Date(log.createdAt).toLocaleString("vi-VN")}</span>
-                                            </div>
-                                            <p className="text-xs text-gray-600">Người duyệt: <span className="font-medium">{log.adminName}</span></p>
-                                            {log.adminNote && <p className="text-xs text-gray-600 mt-1">Ghi chú: {log.adminNote}</p>}
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </TabsContent>
-                    </Tabs>
+                        </div>
+                    </div>
                 </DialogContent>
             </Dialog>
         </div>

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
+import { buildPackageStatusData } from "@/lib/mua-sam-package-status";
 
 // GET - Statistics for facility (own data only)
 export async function GET() {
@@ -38,11 +39,21 @@ export async function GET() {
                     tenGoiThau: true,
                     giaGoiThau: true,
                     hinhThucLCNT: true,
-                    trangThai: true,
                     createdAt: true,
                     keHoachId: true,
                     keHoach: {
-                        select: { tenKHLCNT: true, maKHLCNT: true },
+                        select: {
+                            id: true,
+                            tenKHLCNT: true,
+                            maKHLCNT: true,
+                            quyTrinh: true,
+                        },
+                    },
+                    _count: {
+                        select: {
+                            thongBaoMoiThaus: true,
+                            ketQuaLCNTs: true,
+                        },
                     },
                 },
             }),
@@ -112,16 +123,18 @@ export async function GET() {
         const valueByKeHoach = Object.values(keHoachValueMap)
             .sort((a, b) => b.value - a.value);
 
-        // Bar chart: Trạng thái gói thầu
-        const statusMap: Record<string, number> = {};
-        goiThaus.forEach((g) => {
-            const status = g.trangThai || "Không xác định";
-            statusMap[status] = (statusMap[status] || 0) + 1;
-        });
-        const statusData = Object.entries(statusMap).map(([name, value]) => ({
-            name,
-            value,
-        }));
+        const { statusData, statusBreakdown, statusSummary } = buildPackageStatusData(
+            goiThaus.map((g) => ({
+                goiThauId: g.id,
+                tenGoiThau: g.tenGoiThau,
+                keHoachId: g.keHoach.id,
+                tenKHLCNT: g.keHoach.tenKHLCNT,
+                maKHLCNT: g.keHoach.maKHLCNT,
+                quyTrinh: g.keHoach.quyTrinh,
+                tbmtCount: g._count.thongBaoMoiThaus,
+                kqlcntCount: g._count.ketQuaLCNTs,
+            }))
+        );
 
         // Bar chart: Tỷ lệ trúng thầu per kết quả
         const bidData = ketQuaLCNTs.map((k) => ({
@@ -154,6 +167,8 @@ export async function GET() {
             pieHinhThuc,
             valueByKeHoach,
             statusData,
+            statusBreakdown,
+            statusSummary,
             bidData,
             pieQuyTrinh,
             timeline,

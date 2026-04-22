@@ -44,7 +44,7 @@ export default function Tab4Analysis({ reportMonth, facilityId, apiPrefix = "/ap
             }
         };
         fetchData();
-    }, [reportMonth, facilityId]);
+    }, [reportMonth, facilityId, apiPrefix]);
 
     const fetchComparison = async () => {
         if (!compareId1 || !compareId2) return;

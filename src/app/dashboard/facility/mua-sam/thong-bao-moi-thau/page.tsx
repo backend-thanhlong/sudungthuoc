@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,7 +47,6 @@ interface TBMTForm {
 }
 
 export default function ThongBaoMoiThauPage() {
-    const { data: session } = useSession();
     const [step, setStep] = useState(1); // 1: Plan list, 2: Package list, 3: TBMT form, 4: View details
     const [viewMode, setViewMode] = useState<"view" | "edit">("edit"); // view or edit mode
     const [keHoachs, setKeHoachs] = useState<KeHoach[]>([]);

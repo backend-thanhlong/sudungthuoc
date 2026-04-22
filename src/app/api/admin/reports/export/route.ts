@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
+import { listReportMonthSummaries, type ReportMonthSummary } from "@/lib/report-submissions";
 import * as XLSX from "xlsx";
 
 const COL_WIDTHS_DETAIL = [
@@ -72,7 +73,43 @@ function applyHeaderStyle(ws: XLSX.WorkSheet, numCols: number) {
     return range;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function buildEmptySummaryRows(
+    summaries: ReportMonthSummary[],
+    facilityNames: Map<string, string>
+) {
+    return summaries.map((summary, index) => ({
+        "STT": index + 1,
+        "Cơ sở y tế": facilityNames.get(summary.facilityId) || "Unknown Facility",
+        "Tháng báo cáo": summary.month,
+        "Dòng báo cáo đã lưu": summary.reportedRowCount,
+        "Dòng bỏ qua": summary.skippedRowCount,
+        "Ngày nộp": summary.lastUpdated ? new Date(summary.lastUpdated).toLocaleString("vi-VN") : "",
+        "Ghi chú": "Không có dòng dữ liệu được lưu. Tất cả dòng trong file đã được đánh dấu Bỏ qua.",
+    }));
+}
+
+function appendEmptySummarySheet(
+    workbook: XLSX.WorkBook,
+    summaries: ReportMonthSummary[],
+    facilityNames: Map<string, string>
+) {
+    if (summaries.length === 0) return;
+
+    const rows = buildEmptySummaryRows(summaries, facilityNames);
+    const worksheet = XLSX.utils.json_to_sheet(rows);
+    worksheet["!cols"] = [
+        { wch: 5 },
+        { wch: 32 },
+        { wch: 14 },
+        { wch: 20 },
+        { wch: 14 },
+        { wch: 22 },
+        { wch: 80 },
+    ];
+    applyHeaderStyle(worksheet, Object.keys(rows[0] || {}).length);
+    XLSX.utils.book_append_sheet(workbook, worksheet, "BaoCaoTrong");
+}
+
 function buildRowFromReport(r: any, index: number, includesFacility = true) {
     const base = {
         "STT": index + 1,
@@ -114,10 +151,14 @@ export async function GET(req: NextRequest) {
         const mode = searchParams.get("mode") || "summary"; // "summary" | "detail"
 
         // Build where clause
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const where: any = {};
         if (month) where.reportMonth = month;
         if (facilityId) where.facilityId = facilityId;
+
+        const reportSummaries = await listReportMonthSummaries({
+            ...(month ? { month } : {}),
+            ...(facilityId ? { facilityId } : {}),
+        });
 
         // Fetch all inventory reports with related data
         const reports = await prisma.inventoryReport.findMany({
@@ -133,9 +174,21 @@ export async function GET(req: NextRequest) {
             ],
         });
 
-        if (reports.length === 0) {
+        if (reports.length === 0 && reportSummaries.length === 0) {
             return NextResponse.json({ message: "Không có dữ liệu để xuất" }, { status: 404 });
         }
+
+        const facilityIds = Array.from(new Set(reportSummaries.map((summary) => summary.facilityId)));
+        const facilityRows = facilityIds.length > 0
+            ? await prisma.user.findMany({
+                where: { id: { in: facilityIds } },
+                select: { id: true, facilityName: true, username: true },
+            })
+            : [];
+        const facilityNames = new Map(
+            facilityRows.map((facility) => [facility.id, facility.facilityName || facility.username || "Unknown Facility"])
+        );
+        const emptySummaries = reportSummaries.filter((summary) => summary.reportedRowCount === 0);
 
         const workbook = XLSX.utils.book_new();
 
@@ -151,11 +204,13 @@ export async function GET(req: NextRequest) {
             }
 
             // Sheet 1: Tổng hợp (summary across all)
-            const summaryData = reports.map((r, i) => buildRowFromReport(r, i, true));
-            const summaryWs = XLSX.utils.json_to_sheet(summaryData);
-            summaryWs["!cols"] = COL_WIDTHS_SUMMARY;
-            applyHeaderStyle(summaryWs, Object.keys(summaryData[0] || {}).length);
-            XLSX.utils.book_append_sheet(workbook, summaryWs, "Tổng hợp");
+            if (reports.length > 0) {
+                const summaryData = reports.map((r, i) => buildRowFromReport(r, i, true));
+                const summaryWs = XLSX.utils.json_to_sheet(summaryData);
+                summaryWs["!cols"] = COL_WIDTHS_SUMMARY;
+                applyHeaderStyle(summaryWs, Object.keys(summaryData[0] || {}).length);
+                XLSX.utils.book_append_sheet(workbook, summaryWs, "Tổng hợp");
+            }
 
             // Subsequent sheets: one per facility+month
             let sheetIndex = 0;
@@ -181,13 +236,19 @@ export async function GET(req: NextRequest) {
                 sheetIndex++;
             }
 
+            appendEmptySummarySheet(workbook, emptySummaries, facilityNames);
+
         } else {
             // === SUMMARY MODE (default): single flat sheet ===
-            const excelData = reports.map((r, i) => buildRowFromReport(r, i, true));
-            const worksheet = XLSX.utils.json_to_sheet(excelData);
-            worksheet["!cols"] = COL_WIDTHS_SUMMARY;
-            applyHeaderStyle(worksheet, Object.keys(excelData[0] || {}).length);
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Báo cáo tổng hợp");
+            if (reports.length > 0) {
+                const excelData = reports.map((r, i) => buildRowFromReport(r, i, true));
+                const worksheet = XLSX.utils.json_to_sheet(excelData);
+                worksheet["!cols"] = COL_WIDTHS_SUMMARY;
+                applyHeaderStyle(worksheet, Object.keys(excelData[0] || {}).length);
+                XLSX.utils.book_append_sheet(workbook, worksheet, "Báo cáo tổng hợp");
+            }
+
+            appendEmptySummarySheet(workbook, emptySummaries, facilityNames);
         }
 
         // Write to buffer

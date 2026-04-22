@@ -65,7 +65,7 @@ function ComparisonTab() {
                     onChange={(e) => setReportMonth(e.target.value)}
                     className="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
                 >
-                    <option value="">Tất cả tháng</option>
+                    <option value="">Tất cả các kỳ</option>
                     {months.map((m) => (
                         <option key={m} value={m}>{m}</option>
                     ))}
@@ -363,7 +363,7 @@ function AlertsTab() {
                     onChange={(e) => setReportMonth(e.target.value)}
                     className="px-3 py-2 border rounded-lg text-sm flex-1 focus:ring-2 focus:ring-blue-500"
                 >
-                    <option value="">Tháng gần nhất</option>
+                    <option value="">Tất cả các kỳ</option>
                     {months.map((m) => (
                         <option key={m} value={m}>{m}</option>
                     ))}

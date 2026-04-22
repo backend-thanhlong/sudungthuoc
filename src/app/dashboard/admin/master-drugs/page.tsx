@@ -2,6 +2,9 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
+import TherapeuticGroupPicker, {
+    type TherapeuticGroupOption,
+} from "@/components/master-drugs/TherapeuticGroupPicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,6 +35,7 @@ import {
     DropdownMenu,
     DropdownMenuCheckboxItem,
     DropdownMenuContent,
+    DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
@@ -43,6 +47,12 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { readExcel, exportExcel } from "@/lib/excel";
 import { Settings2, Pencil, Trash2, Trash, Search } from "lucide-react";
@@ -56,6 +66,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { cn } from "@/lib/utils";
 
 interface MasterDrug {
     id: string;
@@ -83,7 +94,8 @@ interface MasterDrug {
     diaChiDangKy: string | null;
 
     nhomThuoc: string | null;
-    nhomDieuTri: string | null;
+    therapeuticGroupId: string | null;
+    therapeuticGroup: TherapeuticGroupOption | null;
     isKeDon: string | null;
     kiemSoatDacBiet: string | null;
     isTrongNuoc: string | null;
@@ -91,7 +103,88 @@ interface MasterDrug {
     isActive: boolean;
 }
 
-const COLUMN_CONFIG = [
+const TABLE_COLUMNS = [
+    { id: "stt", label: "STT", required: true, defaultVisible: true },
+    { id: "maBhyt", label: "Mã BHYT", required: false, defaultVisible: true },
+    { id: "tenThuoc", label: "Tên thuốc", required: true, defaultVisible: true },
+    { id: "hoatChat", label: "Hoạt chất", required: true, defaultVisible: true },
+    { id: "hamLuong", label: "Hàm lượng", required: true, defaultVisible: true },
+    { id: "soDangKy", label: "Số đăng ký", required: true, defaultVisible: true },
+    { id: "dangBaoChe", label: "Dạng bào chế", required: true, defaultVisible: true },
+    { id: "quyCach", label: "Quy cách", required: false, defaultVisible: true },
+    { id: "duongDung", label: "Đường dùng", required: true, defaultVisible: true },
+    { id: "donViTinh", label: "Đơn vị tính", required: false, defaultVisible: true },
+    { id: "nhomThuoc", label: "Nhóm thuốc", required: false, defaultVisible: true },
+    { id: "therapeuticGroup", label: "Nhóm điều trị", required: false, defaultVisible: true },
+    { id: "actions", label: "Thao tác", required: true, defaultVisible: true },
+] as const;
+
+type TableColumnId = (typeof TABLE_COLUMNS)[number]["id"];
+
+const COLUMN_FILTER_FIELDS = [
+    "maBhyt",
+    "tenThuoc",
+    "hoatChat",
+    "hamLuong",
+    "soDangKy",
+    "dangBaoChe",
+    "quyCach",
+    "duongDung",
+    "donViTinh",
+    "nhomThuoc",
+    "therapeuticGroupId",
+] as const;
+
+type ColumnFilterKey = (typeof COLUMN_FILTER_FIELDS)[number];
+type ColumnFilters = Record<ColumnFilterKey, string>;
+
+const COLUMN_FILTER_KEY_BY_COLUMN_ID: Partial<Record<TableColumnId, ColumnFilterKey>> = {
+    maBhyt: "maBhyt",
+    tenThuoc: "tenThuoc",
+    hoatChat: "hoatChat",
+    hamLuong: "hamLuong",
+    soDangKy: "soDangKy",
+    dangBaoChe: "dangBaoChe",
+    quyCach: "quyCach",
+    duongDung: "duongDung",
+    donViTinh: "donViTinh",
+    nhomThuoc: "nhomThuoc",
+    therapeuticGroup: "therapeuticGroupId",
+};
+
+const createEmptyColumnFilters = (): ColumnFilters => ({
+    maBhyt: "",
+    tenThuoc: "",
+    hoatChat: "",
+    hamLuong: "",
+    soDangKy: "",
+    dangBaoChe: "",
+    quyCach: "",
+    duongDung: "",
+    donViTinh: "",
+    nhomThuoc: "",
+    therapeuticGroupId: "",
+});
+
+const hasAnyColumnFilters = (filters: ColumnFilters) =>
+    COLUMN_FILTER_FIELDS.some((field) => filters[field].trim() !== "");
+
+const areColumnFiltersEqual = (left: ColumnFilters, right: ColumnFilters) =>
+    COLUMN_FILTER_FIELDS.every((field) => left[field] === right[field]);
+
+const clearColumnFilterForColumn = (filters: ColumnFilters, columnId: TableColumnId) => {
+    const filterKey = COLUMN_FILTER_KEY_BY_COLUMN_ID[columnId];
+    if (!filterKey || !filters[filterKey]) {
+        return filters;
+    }
+
+    return {
+        ...filters,
+        [filterKey]: "",
+    };
+};
+
+const WRAPPABLE_COLUMN_CONFIG = [
     { id: "tenThuoc", label: "Tên thuốc" },
     { id: "hoatChat", label: "Hoạt chất" },
     { id: "hamLuong", label: "Hàm lượng" },
@@ -100,9 +193,42 @@ const COLUMN_CONFIG = [
     { id: "quyCach", label: "Quy cách" },
     { id: "duongDung", label: "Đường dùng" },
     { id: "donViTinh", label: "Đơn vị tính" },
-];
+] as const;
+
+type WrappableColumnId = (typeof WRAPPABLE_COLUMN_CONFIG)[number]["id"];
+
+const DEFAULT_VISIBLE_COLUMNS = TABLE_COLUMNS.reduce((acc, column) => {
+    acc[column.id] = column.defaultVisible;
+    return acc;
+}, {} as Record<TableColumnId, boolean>);
+
+const DEFAULT_WRAPPED_COLUMNS: Record<WrappableColumnId, boolean> = {
+    tenThuoc: false,
+    hoatChat: false,
+    hamLuong: false,
+    soDangKy: false,
+    dangBaoChe: false,
+    quyCach: false,
+    duongDung: false,
+    donViTinh: false,
+};
 
 const PAGE_SIZE_OPTIONS = [20, 50, 100] as const;
+const DRUG_GROUP_OPTIONS = [
+    "Hóa dược",
+    "Dược liệu",
+    "Vắc xin",
+    "Sinh phẩm",
+    "Nguyên liệu làm thuốc",
+] as const;
+const PRESCRIPTION_OPTIONS = [
+    "Thuốc kê đơn",
+    "Thuốc không kê đơn",
+] as const;
+const DOMESTIC_OPTIONS = [
+    "Trong nước",
+    "Nước ngoài",
+] as const;
 
 const INITIAL_FORM_DATA = {
     maChung: "",
@@ -129,11 +255,99 @@ const INITIAL_FORM_DATA = {
     diaChiDangKy: "",
 
     nhomThuoc: "",
-    nhomDieuTri: "",
+    therapeuticGroupId: "",
     isKeDon: "",
     kiemSoatDacBiet: "",
     isTrongNuoc: "",
 };
+
+const normalizePrescriptionValue = (value: string | null | undefined) => {
+    if (!value) return "";
+
+    const normalizedValue = value.trim().toLowerCase();
+
+    if (normalizedValue === "thuốc kê đơn" || normalizedValue === "thuoc ke don" || normalizedValue === "có" || normalizedValue === "co") {
+        return "Thuốc kê đơn";
+    }
+
+    if (normalizedValue === "thuốc không kê đơn" || normalizedValue === "thuoc khong ke don" || normalizedValue === "không" || normalizedValue === "khong") {
+        return "Thuốc không kê đơn";
+    }
+
+    return "";
+};
+
+const normalizeDrugGroupValue = (value: string | null | undefined) => {
+    if (!value) return "";
+
+    const trimmedValue = value.trim();
+
+    return DRUG_GROUP_OPTIONS.some((option) => option === trimmedValue)
+        ? trimmedValue
+        : "";
+};
+
+const normalizeDomesticValue = (value: string | null | undefined) => {
+    if (!value) return "";
+
+    const normalizedValue = value.trim().toLowerCase();
+
+    if (normalizedValue === "trong nước" || normalizedValue === "trong nuoc" || normalizedValue === "có" || normalizedValue === "co") {
+        return "Trong nước";
+    }
+
+    if (normalizedValue === "nước ngoài" || normalizedValue === "nuoc ngoai" || normalizedValue === "không" || normalizedValue === "khong") {
+        return "Nước ngoài";
+    }
+
+    return "";
+};
+
+const SHARED_WIDE_TEXT_COLUMN_CLASS = "w-[220px] min-w-[220px] max-w-[220px]";
+
+type DataTableTextCellProps = {
+    value: string | null | undefined;
+    wrapped?: boolean;
+    cellClassName?: string;
+    contentClassName?: string;
+    codeStyle?: boolean;
+};
+
+function DataTableTextCell({
+    value,
+    wrapped = false,
+    cellClassName,
+    contentClassName,
+    codeStyle = false,
+}: DataTableTextCellProps) {
+    const rawValue = typeof value === "string" ? value : "";
+    const hasValue = rawValue.trim().length > 0;
+    const displayValue = hasValue ? rawValue : "-";
+    const contentClasses = cn(
+        "block max-w-full",
+        wrapped ? "whitespace-normal break-words" : "truncate",
+        codeStyle && "rounded bg-gray-100 px-2 py-1 text-sm font-mono",
+        contentClassName,
+    );
+    const content = codeStyle ? (
+        <code className={contentClasses}>{displayValue}</code>
+    ) : (
+        <span className={contentClasses}>{displayValue}</span>
+    );
+
+    return (
+        <TableCell className={cellClassName}>
+            {hasValue ? (
+                <Tooltip>
+                    <TooltipTrigger asChild>{content}</TooltipTrigger>
+                    <TooltipContent align="start" className="max-w-sm whitespace-pre-wrap break-words">
+                        {rawValue}
+                    </TooltipContent>
+                </Tooltip>
+            ) : content}
+        </TableCell>
+    );
+}
 
 export default function MasterDrugsPage() {
     const { data: session } = useSession();
@@ -155,27 +369,67 @@ export default function MasterDrugsPage() {
     const [editingId, setEditingId] = useState<string | null>(null);
 
     const [formData, setFormData] = useState(INITIAL_FORM_DATA);
+    const [selectedTherapeuticGroup, setSelectedTherapeuticGroup] = useState<TherapeuticGroupOption | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isImporting, setIsImporting] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
-    const [wrappedColumns, setWrappedColumns] = useState<Record<string, boolean>>({
-        tenThuoc: true,
-        hoatChat: false,
-        hamLuong: false,
-        soDangKy: false,
-        dangBaoChe: false,
-        quyCach: false,
-        duongDung: false,
-        donViTinh: false,
-    });
+    const [visibleColumns, setVisibleColumns] = useState<Record<TableColumnId, boolean>>(DEFAULT_VISIBLE_COLUMNS);
+    const [wrappedColumns, setWrappedColumns] = useState<Record<WrappableColumnId, boolean>>(DEFAULT_WRAPPED_COLUMNS);
     const [isDeleteAllOpen, setIsDeleteAllOpen] = useState(false);
+    const [columnFiltersDraft, setColumnFiltersDraft] = useState<ColumnFilters>(() => createEmptyColumnFilters());
+    const [columnFiltersApplied, setColumnFiltersApplied] = useState<ColumnFilters>(() => createEmptyColumnFilters());
+    const [selectedTherapeuticGroupFilter, setSelectedTherapeuticGroupFilter] = useState<TherapeuticGroupOption | null>(null);
+    const [therapeuticGroupFilterResetKey, setTherapeuticGroupFilterResetKey] = useState(0);
+
+    const isColumnVisible = useCallback((columnId: TableColumnId) => {
+        const column = TABLE_COLUMNS.find((item) => item.id === columnId);
+        if (!column) {
+            return true;
+        }
+
+        return column.required || visibleColumns[columnId];
+    }, [visibleColumns]);
+
+    const visibleColumnCount = TABLE_COLUMNS.filter((column) => isColumnVisible(column.id)).length;
+
+    const handleColumnVisibilityChange = (columnId: TableColumnId, checked: boolean) => {
+        const column = TABLE_COLUMNS.find((item) => item.id === columnId);
+        if (!column || column.required) {
+            return;
+        }
+
+        setVisibleColumns((prev) => ({
+            ...prev,
+            [columnId]: checked,
+        }));
+
+        if (!checked) {
+            const nextDraftFilters = clearColumnFilterForColumn(columnFiltersDraft, columnId);
+            const nextAppliedFilters = clearColumnFilterForColumn(columnFiltersApplied, columnId);
+
+            if (!areColumnFiltersEqual(columnFiltersDraft, nextDraftFilters)) {
+                setColumnFiltersDraft(nextDraftFilters);
+            }
+
+            if (!areColumnFiltersEqual(columnFiltersApplied, nextAppliedFilters)) {
+                setColumnFiltersApplied(nextAppliedFilters);
+                setPage(1);
+            }
+
+            if (columnId === "therapeuticGroup") {
+                setSelectedTherapeuticGroupFilter(null);
+                setTherapeuticGroupFilterResetKey((prev) => prev + 1);
+            }
+        }
+    };
 
     const fetchDrugs = useCallback(async (
         currentPage: number,
         search: string,
         field: string = "ALL",
         currentMappingStatus: string = "all",
-        currentLimit: number = limit
+        currentLimit: number = limit,
+        appliedColumnFilters: ColumnFilters = createEmptyColumnFilters()
     ) => {
         setIsLoading(true);
         try {
@@ -186,6 +440,14 @@ export default function MasterDrugsPage() {
                 searchField: field,
                 mappingStatus: currentMappingStatus,
             });
+
+            for (const filterKey of COLUMN_FILTER_FIELDS) {
+                const filterValue = appliedColumnFilters[filterKey].trim();
+                if (filterValue) {
+                    params.set(filterKey, filterValue);
+                }
+            }
+
             const res = await fetch(`/api/admin/master-drugs?${params.toString()}`);
             if (res.ok) {
                 const result = await res.json();
@@ -203,8 +465,12 @@ export default function MasterDrugsPage() {
 
     // Only fetch when page changes or when activeSearchTerm changes (from button/Enter)
     useEffect(() => {
-        fetchDrugs(page, activeSearchTerm, searchField, mappingStatus, limit);
-    }, [fetchDrugs, page, activeSearchTerm, searchField, mappingStatus, limit]);
+        fetchDrugs(page, activeSearchTerm, searchField, mappingStatus, limit, columnFiltersApplied);
+    }, [fetchDrugs, page, activeSearchTerm, searchField, mappingStatus, limit, columnFiltersApplied]);
+
+    const refetchCurrentPage = useCallback(() => {
+        fetchDrugs(page, activeSearchTerm, searchField, mappingStatus, limit, columnFiltersApplied);
+    }, [fetchDrugs, page, activeSearchTerm, searchField, mappingStatus, limit, columnFiltersApplied]);
 
     // Handle search execution
     const handleSearch = () => {
@@ -222,6 +488,30 @@ export default function MasterDrugsPage() {
         setLimit(Number(value));
     };
 
+    const handleColumnFilterChange = (field: ColumnFilterKey, value: string) => {
+        setColumnFiltersDraft((prev) => ({
+            ...prev,
+            [field]: value,
+        }));
+    };
+
+    const handleApplyColumnFilters = () => {
+        setColumnFiltersApplied({ ...columnFiltersDraft });
+        setPage(1);
+    };
+
+    const handleClearColumnFilters = () => {
+        setColumnFiltersDraft(createEmptyColumnFilters());
+        setColumnFiltersApplied(createEmptyColumnFilters());
+        setSelectedTherapeuticGroupFilter(null);
+        setTherapeuticGroupFilterResetKey((prev) => prev + 1);
+        setPage(1);
+    };
+
+    const hasActiveDataFilters = Boolean(activeSearchTerm.trim())
+        || mappingStatus !== "all"
+        || hasAnyColumnFilters(columnFiltersApplied);
+
     // Handle Enter key press
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
@@ -234,18 +524,22 @@ export default function MasterDrugsPage() {
         setIsSubmitting(true);
 
         const previousDrugs = [...drugs]; // Backup
+        const payload = {
+            ...formData,
+            therapeuticGroupId: selectedTherapeuticGroup?.id || "",
+        };
 
         // Optimistic Update
         if (editingId) {
-            // Preserve existing fields that are not in formData but required in MasterDrug
-            // Actually, best to just merge what we have. 
-            // We need to be careful with nulls vs empty strings if types mismatch, 
-            // but formData uses empty strings not nulls. 
-            // Let's do a meaningful merge.
-            setDrugs(prev => prev.map(d => d.id === editingId ? { ...d, ...formData } : d));
+            setDrugs(prev => prev.map((drug) => drug.id === editingId
+                ? {
+                    ...drug,
+                    ...payload,
+                    therapeuticGroupId: selectedTherapeuticGroup?.id || null,
+                    therapeuticGroup: selectedTherapeuticGroup,
+                }
+                : drug));
             setIsDialogOpen(false); // Close immediately
-            // Reset form data and editingId later or now? 
-            // If we close dialog, we should reset.
         }
 
         try {
@@ -258,20 +552,18 @@ export default function MasterDrugsPage() {
             const res = await fetch(url, {
                 method: method,
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData),
+                body: JSON.stringify(payload),
             });
 
             if (res.ok) {
                 toast.success(editingId ? "Cập nhật thuốc thành công" : "Thêm thuốc thành công");
                 if (!editingId) {
-                    // For creating new, we can't fully optimistic update easily without an ID, 
-                    // so we just rely on fetchDrugs.
-                    // But for edit, we already did optimistic.
                     setIsDialogOpen(false);
                     setEditingId(null);
                     setFormData({ ...INITIAL_FORM_DATA });
+                    setSelectedTherapeuticGroup(null);
                 }
-                fetchDrugs(page, searchTerm, searchField, mappingStatus); // Sync with server eventually
+                refetchCurrentPage();
             } else {
                 if (editingId) {
                     setDrugs(previousDrugs); // Revert optimistic update
@@ -297,7 +589,6 @@ export default function MasterDrugsPage() {
         const toastId = toast.loading("Đang đọc file Excel...");
 
         try {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const rawData = await readExcel(file) as any[];
 
             // Map headers to data model
@@ -326,7 +617,7 @@ export default function MasterDrugsPage() {
                 diaChiDangKy: row['Địa chỉ đăng ký'] || row['diaChiDangKy'],
 
                 nhomThuoc: row['Nhóm thuốc'] || row['nhomThuoc'],
-                nhomDieuTri: row['Nhóm điều trị'] || row['nhomDieuTri'],
+                therapeuticGroupName: row['Nhóm điều trị'] || row['therapeuticGroupName'] || row['nhomDieuTri'],
                 isKeDon: row['Thuốc kê đơn'] || row['thuocKeDon'],
                 kiemSoatDacBiet: row['Thuốc kiểm soát đặc biệt'] || row['kiemSoatDacBiet'],
                 isTrongNuoc: row['Thuốc trong nước'] || row['thuocTrongNuoc'],
@@ -347,8 +638,12 @@ export default function MasterDrugsPage() {
 
             if (res.ok) {
                 const data = await res.json();
-                toast.success(`Nhập thành công: ${data.stats.success}, Bỏ qua: ${data.stats.skipped}, Lỗi: ${data.stats.error}`, { id: toastId });
-                fetchDrugs(page, searchTerm, searchField, mappingStatus);
+                const createdTherapeuticGroups = data.stats.createdTherapeuticGroups || 0;
+                const therapeuticGroupText = createdTherapeuticGroups > 0
+                    ? `, Tạo mới nhóm điều trị: ${createdTherapeuticGroups}`
+                    : "";
+                toast.success(`Nhập thành công: ${data.stats.success}, Bỏ qua: ${data.stats.skipped}, Lỗi: ${data.stats.error}${therapeuticGroupText}`, { id: toastId });
+                refetchCurrentPage();
             } else {
                 toast.error("Lỗi khi nhập dữ liệu", { id: toastId });
             }
@@ -384,7 +679,7 @@ export default function MasterDrugsPage() {
                 "Công ty đăng ký": "Công ty B",
                 "Nước đăng ký": "Việt Nam",
                 "Địa chỉ đăng ký": "Hồ Chí Minh",
-                "Nhóm thuốc": "Nhóm 1",
+                "Nhóm thuốc": "Hóa dược",
                 "Nhóm điều trị": "Giảm đau, hạ sốt",
                 "Thuốc kê đơn": "Không",
                 "Thuốc kiểm soát đặc biệt": "",
@@ -455,7 +750,7 @@ export default function MasterDrugsPage() {
 
             if (res.ok) {
                 toast.success(currentStatus ? "Đã ẩn thuốc" : "Đã hiện thuốc");
-                fetchDrugs(page, searchTerm, searchField, mappingStatus);
+                refetchCurrentPage();
             }
         } catch {
             toast.error("Đã xảy ra lỗi");
@@ -488,12 +783,13 @@ export default function MasterDrugsPage() {
             nuocDangKy: drug.nuocDangKy || "",
             diaChiDangKy: drug.diaChiDangKy || "",
 
-            nhomThuoc: drug.nhomThuoc || "",
-            nhomDieuTri: drug.nhomDieuTri || "",
-            isKeDon: drug.isKeDon || "",
+            nhomThuoc: normalizeDrugGroupValue(drug.nhomThuoc),
+            therapeuticGroupId: drug.therapeuticGroupId || "",
+            isKeDon: normalizePrescriptionValue(drug.isKeDon),
             kiemSoatDacBiet: drug.kiemSoatDacBiet || "",
-            isTrongNuoc: drug.isTrongNuoc || "",
+            isTrongNuoc: normalizeDomesticValue(drug.isTrongNuoc),
         });
+        setSelectedTherapeuticGroup(drug.therapeuticGroup || null);
         setIsDialogOpen(true);
     };
 
@@ -516,7 +812,7 @@ export default function MasterDrugsPage() {
                 // But better to sync in background or just leave it
                 // If we don't fetch, pagination might be slightly off until next nav, but that's fine for "instant" feel
                 // Let's just re-fetch to be safe but the UI is already updated
-                fetchDrugs(page, searchTerm, searchField, mappingStatus);
+                refetchCurrentPage();
             } else {
                 // Revert
                 setDrugs(previousDrugs);
@@ -571,15 +867,32 @@ export default function MasterDrugsPage() {
                                 Hiển thị
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-56">
-                            <DropdownMenuLabel>Tùy chỉnh xuống dòng</DropdownMenuLabel>
+                        <DropdownMenuContent align="end" className="w-72">
+                            <DropdownMenuLabel>Cột hiển thị</DropdownMenuLabel>
+                            <DropdownMenuItem onSelect={() => setVisibleColumns({ ...DEFAULT_VISIBLE_COLUMNS })}>
+                                Hiện tất cả
+                            </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            {COLUMN_CONFIG.map((column) => (
+                            {TABLE_COLUMNS.map((column) => (
+                                <DropdownMenuCheckboxItem
+                                    key={column.id}
+                                    checked={isColumnVisible(column.id)}
+                                    disabled={column.required}
+                                    onCheckedChange={(checked) => handleColumnVisibilityChange(column.id, Boolean(checked))}
+                                >
+                                    {column.label}
+                                    {column.required ? " (luôn hiển thị)" : ""}
+                                </DropdownMenuCheckboxItem>
+                            ))}
+                            <DropdownMenuSeparator />
+                            <DropdownMenuLabel>Xuống dòng</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            {WRAPPABLE_COLUMN_CONFIG.map((column) => (
                                 <DropdownMenuCheckboxItem
                                     key={column.id}
                                     checked={wrappedColumns[column.id]}
                                     onCheckedChange={(checked) =>
-                                        setWrappedColumns((prev) => ({ ...prev, [column.id]: checked }))
+                                        setWrappedColumns((prev) => ({ ...prev, [column.id]: Boolean(checked) }))
                                     }
                                 >
                                     {column.label}
@@ -653,6 +966,7 @@ export default function MasterDrugsPage() {
                                 if (!open) {
                                     setEditingId(null);
                                     setFormData({ ...INITIAL_FORM_DATA });
+                                    setSelectedTherapeuticGroup(null);
                                 }
                             }}>
                                 <DialogTrigger asChild>
@@ -880,23 +1194,54 @@ export default function MasterDrugsPage() {
                                                                 <div className="grid grid-cols-2 gap-3">
                                                                     <div className="space-y-1.5">
                                                                         <Label htmlFor="nhomThuoc" className="text-xs font-semibold text-gray-600">Nhóm thuốc</Label>
-                                                                        <Input id="nhomThuoc" value={formData.nhomThuoc}
-                                                                            onChange={(e) => setFormData({ ...formData, nhomThuoc: e.target.value })}
-                                                                            placeholder="vd: Nhóm 1" className="h-9" />
+                                                                        <Select
+                                                                            value={formData.nhomThuoc || undefined}
+                                                                            onValueChange={(value) => setFormData({ ...formData, nhomThuoc: value })}
+                                                                        >
+                                                                            <SelectTrigger id="nhomThuoc" className="h-9 bg-white">
+                                                                                <SelectValue placeholder="Chọn nhóm thuốc" />
+                                                                            </SelectTrigger>
+                                                                            <SelectContent>
+                                                                                {DRUG_GROUP_OPTIONS.map((option) => (
+                                                                                    <SelectItem key={option} value={option}>
+                                                                                        {option}
+                                                                                    </SelectItem>
+                                                                                ))}
+                                                                            </SelectContent>
+                                                                        </Select>
                                                                     </div>
                                                                     <div className="space-y-1.5">
-                                                                        <Label htmlFor="nhomDieuTri" className="text-xs font-semibold text-gray-600">Nhóm điều trị</Label>
-                                                                        <Input id="nhomDieuTri" value={formData.nhomDieuTri}
-                                                                            onChange={(e) => setFormData({ ...formData, nhomDieuTri: e.target.value })}
-                                                                            placeholder="vd: Giảm đau, hạ sốt" className="h-9" />
+                                                                        <Label className="text-xs font-semibold text-gray-600">Nhóm điều trị</Label>
+                                                                        <TherapeuticGroupPicker
+                                                                            value={selectedTherapeuticGroup}
+                                                                            onChange={(value) => {
+                                                                                setSelectedTherapeuticGroup(value);
+                                                                                setFormData({
+                                                                                    ...formData,
+                                                                                    therapeuticGroupId: value?.id || "",
+                                                                                });
+                                                                            }}
+                                                                        />
                                                                     </div>
                                                                 </div>
                                                                 <div className="grid grid-cols-3 gap-3">
                                                                     <div className="space-y-1.5">
                                                                         <Label htmlFor="isKeDon" className="text-xs font-semibold text-gray-600">Kê đơn</Label>
-                                                                        <Input id="isKeDon" value={formData.isKeDon}
-                                                                            onChange={(e) => setFormData({ ...formData, isKeDon: e.target.value })}
-                                                                            placeholder="Có / Không" className="h-9" />
+                                                                        <Select
+                                                                            value={formData.isKeDon || undefined}
+                                                                            onValueChange={(value) => setFormData({ ...formData, isKeDon: value })}
+                                                                        >
+                                                                            <SelectTrigger id="isKeDon" className="h-9 bg-white">
+                                                                                <SelectValue placeholder="Chọn loại kê đơn" />
+                                                                            </SelectTrigger>
+                                                                            <SelectContent>
+                                                                                {PRESCRIPTION_OPTIONS.map((option) => (
+                                                                                    <SelectItem key={option} value={option}>
+                                                                                        {option}
+                                                                                    </SelectItem>
+                                                                                ))}
+                                                                            </SelectContent>
+                                                                        </Select>
                                                                     </div>
                                                                     <div className="space-y-1.5">
                                                                         <Label htmlFor="kiemSoatDacBiet" className="text-xs font-semibold text-gray-600">KS đặc biệt</Label>
@@ -906,9 +1251,21 @@ export default function MasterDrugsPage() {
                                                                     </div>
                                                                     <div className="space-y-1.5">
                                                                         <Label htmlFor="isTrongNuoc" className="text-xs font-semibold text-gray-600">Trong nước</Label>
-                                                                        <Input id="isTrongNuoc" value={formData.isTrongNuoc}
-                                                                            onChange={(e) => setFormData({ ...formData, isTrongNuoc: e.target.value })}
-                                                                            placeholder="Có / Không" className="h-9" />
+                                                                        <Select
+                                                                            value={formData.isTrongNuoc || undefined}
+                                                                            onValueChange={(value) => setFormData({ ...formData, isTrongNuoc: value })}
+                                                                        >
+                                                                            <SelectTrigger id="isTrongNuoc" className="h-9 bg-white">
+                                                                                <SelectValue placeholder="Chọn xuất xứ" />
+                                                                            </SelectTrigger>
+                                                                            <SelectContent>
+                                                                                {DOMESTIC_OPTIONS.map((option) => (
+                                                                                    <SelectItem key={option} value={option}>
+                                                                                        {option}
+                                                                                    </SelectItem>
+                                                                                ))}
+                                                                            </SelectContent>
+                                                                        </Select>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -1056,97 +1413,345 @@ export default function MasterDrugsPage() {
                         </div>
                     ) : (
                         <div className="overflow-x-auto">
-                            <Table>
+                            <TooltipProvider delayDuration={500}>
+                                <Table>
                                 <TableHeader>
                                     <TableRow className="bg-blue-600 hover:bg-blue-600">
-                                        <TableHead className="w-[50px] text-center text-white font-bold">STT</TableHead>
-                                        <TableHead className="text-white font-bold">Tên thuốc</TableHead>
-                                        <TableHead className="text-white font-bold">Hoạt chất</TableHead>
-                                        <TableHead className="text-white font-bold">Hàm lượng</TableHead>
-                                        <TableHead className="text-white font-bold">Số đăng ký</TableHead>
-                                        <TableHead className="text-white font-bold">Dạng bào chế</TableHead>
-                                        <TableHead className="text-white font-bold">Quy cách</TableHead>
-                                        <TableHead className="text-white font-bold">Đường dùng</TableHead>
-                                        <TableHead className="text-white font-bold">Đơn vị tính</TableHead>
-                                        <TableHead className="text-white font-bold">Nhóm điều trị</TableHead>
-                                        <TableHead className="text-right text-white font-bold">Thao tác</TableHead>
+                                        {isColumnVisible("stt") && (
+                                            <TableHead className="w-[50px] text-center text-white font-bold">STT</TableHead>
+                                        )}
+                                        {isColumnVisible("maBhyt") && (
+                                            <TableHead className="text-white font-bold">Mã BHYT</TableHead>
+                                        )}
+                                        {isColumnVisible("tenThuoc") && (
+                                            <TableHead className="text-white font-bold">Tên thuốc</TableHead>
+                                        )}
+                                        {isColumnVisible("hoatChat") && (
+                                            <TableHead
+                                                className={cn(
+                                                    "sticky left-0 z-20 bg-blue-600 text-white font-bold shadow-[4px_0_6px_-4px_rgba(15,23,42,0.28)]",
+                                                    SHARED_WIDE_TEXT_COLUMN_CLASS,
+                                                )}
+                                            >
+                                                Hoạt chất
+                                            </TableHead>
+                                        )}
+                                        {isColumnVisible("hamLuong") && (
+                                            <TableHead className={cn("text-white font-bold", SHARED_WIDE_TEXT_COLUMN_CLASS)}>
+                                                Hàm lượng
+                                            </TableHead>
+                                        )}
+                                        {isColumnVisible("soDangKy") && (
+                                            <TableHead className="text-white font-bold">Số đăng ký</TableHead>
+                                        )}
+                                        {isColumnVisible("dangBaoChe") && (
+                                            <TableHead className="text-white font-bold">Dạng bào chế</TableHead>
+                                        )}
+                                        {isColumnVisible("quyCach") && (
+                                            <TableHead className="text-white font-bold">Quy cách</TableHead>
+                                        )}
+                                        {isColumnVisible("duongDung") && (
+                                            <TableHead className="text-white font-bold">Đường dùng</TableHead>
+                                        )}
+                                        {isColumnVisible("donViTinh") && (
+                                            <TableHead className="text-white font-bold">Đơn vị tính</TableHead>
+                                        )}
+                                        {isColumnVisible("nhomThuoc") && (
+                                            <TableHead className="text-white font-bold">Nhóm thuốc</TableHead>
+                                        )}
+                                        {isColumnVisible("therapeuticGroup") && (
+                                            <TableHead className="text-white font-bold">Nhóm điều trị</TableHead>
+                                        )}
+                                        {isColumnVisible("actions") && (
+                                            <TableHead className="text-right text-white font-bold">Thao tác</TableHead>
+                                        )}
+                                    </TableRow>
+                                    <TableRow className="bg-slate-50 hover:bg-slate-50">
+                                        {isColumnVisible("stt") && (
+                                            <TableHead className="w-[50px] bg-slate-50" />
+                                        )}
+                                        {isColumnVisible("maBhyt") && (
+                                            <TableHead className="bg-slate-50 py-2">
+                                                <Input
+                                                    value={columnFiltersDraft.maBhyt}
+                                                    onChange={(event) => handleColumnFilterChange("maBhyt", event.target.value)}
+                                                    placeholder="Lọc..."
+                                                    className="h-8 bg-white text-xs"
+                                                />
+                                            </TableHead>
+                                        )}
+                                        {isColumnVisible("tenThuoc") && (
+                                            <TableHead className="bg-slate-50 py-2">
+                                                <Input
+                                                    value={columnFiltersDraft.tenThuoc}
+                                                    onChange={(event) => handleColumnFilterChange("tenThuoc", event.target.value)}
+                                                    placeholder="Lọc..."
+                                                    className="h-8 bg-white text-xs"
+                                                />
+                                            </TableHead>
+                                        )}
+                                        {isColumnVisible("hoatChat") && (
+                                            <TableHead
+                                                className={cn(
+                                                    "sticky left-0 z-20 bg-slate-50 py-2 shadow-[4px_0_6px_-4px_rgba(15,23,42,0.16)]",
+                                                    SHARED_WIDE_TEXT_COLUMN_CLASS,
+                                                )}
+                                            >
+                                                <Input
+                                                    value={columnFiltersDraft.hoatChat}
+                                                    onChange={(event) => handleColumnFilterChange("hoatChat", event.target.value)}
+                                                    placeholder="Lọc..."
+                                                    className="h-8 bg-white text-xs"
+                                                />
+                                            </TableHead>
+                                        )}
+                                        {isColumnVisible("hamLuong") && (
+                                            <TableHead className={cn("bg-slate-50 py-2", SHARED_WIDE_TEXT_COLUMN_CLASS)}>
+                                                <Input
+                                                    value={columnFiltersDraft.hamLuong}
+                                                    onChange={(event) => handleColumnFilterChange("hamLuong", event.target.value)}
+                                                    placeholder="Lọc..."
+                                                    className="h-8 bg-white text-xs"
+                                                />
+                                            </TableHead>
+                                        )}
+                                        {isColumnVisible("soDangKy") && (
+                                            <TableHead className="bg-slate-50 py-2">
+                                                <Input
+                                                    value={columnFiltersDraft.soDangKy}
+                                                    onChange={(event) => handleColumnFilterChange("soDangKy", event.target.value)}
+                                                    placeholder="Lọc..."
+                                                    className="h-8 bg-white text-xs"
+                                                />
+                                            </TableHead>
+                                        )}
+                                        {isColumnVisible("dangBaoChe") && (
+                                            <TableHead className="bg-slate-50 py-2">
+                                                <Input
+                                                    value={columnFiltersDraft.dangBaoChe}
+                                                    onChange={(event) => handleColumnFilterChange("dangBaoChe", event.target.value)}
+                                                    placeholder="Lọc..."
+                                                    className="h-8 bg-white text-xs"
+                                                />
+                                            </TableHead>
+                                        )}
+                                        {isColumnVisible("quyCach") && (
+                                            <TableHead className="bg-slate-50 py-2">
+                                                <Input
+                                                    value={columnFiltersDraft.quyCach}
+                                                    onChange={(event) => handleColumnFilterChange("quyCach", event.target.value)}
+                                                    placeholder="Lọc..."
+                                                    className="h-8 bg-white text-xs"
+                                                />
+                                            </TableHead>
+                                        )}
+                                        {isColumnVisible("duongDung") && (
+                                            <TableHead className="bg-slate-50 py-2">
+                                                <Input
+                                                    value={columnFiltersDraft.duongDung}
+                                                    onChange={(event) => handleColumnFilterChange("duongDung", event.target.value)}
+                                                    placeholder="Lọc..."
+                                                    className="h-8 bg-white text-xs"
+                                                />
+                                            </TableHead>
+                                        )}
+                                        {isColumnVisible("donViTinh") && (
+                                            <TableHead className="bg-slate-50 py-2">
+                                                <Input
+                                                    value={columnFiltersDraft.donViTinh}
+                                                    onChange={(event) => handleColumnFilterChange("donViTinh", event.target.value)}
+                                                    placeholder="Lọc..."
+                                                    className="h-8 bg-white text-xs"
+                                                />
+                                            </TableHead>
+                                        )}
+                                        {isColumnVisible("nhomThuoc") && (
+                                            <TableHead className="bg-slate-50 py-2">
+                                                <Select
+                                                    value={columnFiltersDraft.nhomThuoc || "__all__"}
+                                                    onValueChange={(value) => handleColumnFilterChange("nhomThuoc", value === "__all__" ? "" : value)}
+                                                >
+                                                    <SelectTrigger className="h-8 bg-white text-xs">
+                                                        <SelectValue placeholder="Tất cả" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="__all__">Tất cả</SelectItem>
+                                                        {DRUG_GROUP_OPTIONS.map((option) => (
+                                                            <SelectItem key={option} value={option}>
+                                                                {option}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </TableHead>
+                                        )}
+                                        {isColumnVisible("therapeuticGroup") && (
+                                            <TableHead className="bg-slate-50 py-2">
+                                                <TherapeuticGroupPicker
+                                                    key={`therapeutic-group-filter-${therapeuticGroupFilterResetKey}`}
+                                                    value={selectedTherapeuticGroupFilter}
+                                                    onChange={(value) => {
+                                                        setSelectedTherapeuticGroupFilter(value);
+                                                        handleColumnFilterChange("therapeuticGroupId", value?.id || "");
+                                                    }}
+                                                    allowCreate={false}
+                                                    placeholder="Tìm và chọn"
+                                                    inputClassName="h-8 bg-white pr-16 text-xs"
+                                                />
+                                            </TableHead>
+                                        )}
+                                        {isColumnVisible("actions") && (
+                                            <TableHead className="bg-slate-50 py-2 text-right">
+                                                <div className="flex justify-end gap-2">
+                                                    <Button
+                                                        size="sm"
+                                                        className="h-8 bg-cyan-500 px-3 text-white hover:bg-cyan-600"
+                                                        onClick={handleApplyColumnFilters}
+                                                    >
+                                                        Lọc
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        className="h-8 px-3"
+                                                        onClick={handleClearColumnFilters}
+                                                    >
+                                                        Xóa lọc
+                                                    </Button>
+                                                </div>
+                                            </TableHead>
+                                        )}
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {drugs.map((drug, index) => (
-                                        <TableRow key={drug.id}>
-                                            <TableCell className="text-center">{(page - 1) * limit + index + 1}</TableCell>
-                                            <TableCell className={wrappedColumns.tenThuoc ? "font-medium" : "font-medium max-w-xs truncate"}>
-                                                {drug.tenThuoc}
-                                            </TableCell>
-                                            <TableCell className={wrappedColumns.hoatChat ? "text-gray-600" : "text-gray-600 max-w-xs truncate"}>
-                                                {drug.hoatChat || "-"}
-                                            </TableCell>
-                                            <TableCell className={wrappedColumns.hamLuong ? "" : "whitespace-nowrap"}>
-                                                {drug.hamLuong || "-"}
-                                            </TableCell>
-                                            <TableCell>
-                                                <code className={`px-2 py-1 bg-gray-100 rounded text-sm ${wrappedColumns.soDangKy ? "" : "whitespace-nowrap"}`}>
-                                                    {drug.soDangKy || "-"}
-                                                </code>
-                                            </TableCell>
-                                            <TableCell className={wrappedColumns.dangBaoChe ? "" : "whitespace-nowrap"}>
-                                                {drug.dangBaoChe || "-"}
-                                            </TableCell>
-                                            <TableCell className={wrappedColumns.quyCach ? "" : "max-w-xs truncate"}>
-                                                {drug.quyCach || "-"}
-                                            </TableCell>
-                                            <TableCell className={wrappedColumns.duongDung ? "" : "whitespace-nowrap"}>
-                                                {drug.duongDung || "-"}
-                                            </TableCell>
-                                            <TableCell className={wrappedColumns.donViTinh ? "" : "whitespace-nowrap"}>
-                                                {drug.donViTinh || "-"}
-                                            </TableCell>
-                                            <TableCell className="max-w-xs truncate">
-                                                {drug.nhomDieuTri || "-"}
-                                            </TableCell>
-                                            <TableCell className="text-right whitespace-nowrap">
-                                                {isAdmin && (
-                                                    <>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                                                            onClick={() => handleEdit(drug)}
-                                                            title="Sửa"
-                                                        >
-                                                            <Pencil className="w-4 h-4" />
-                                                        </Button>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                                            onClick={() => handleDelete(drug.id)}
-                                                            title="Xóa"
-                                                        >
-                                                            <Trash2 className="w-4 h-4" />
-                                                        </Button>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            onClick={() => toggleDrugStatus(drug.id, drug.isActive)}
-                                                        >
-                                                            {drug.isActive ? "Ẩn" : "Hiện"}
-                                                        </Button>
-                                                    </>
-                                                )}
-                                            </TableCell>
+                                        <TableRow key={drug.id} className="group">
+                                            {isColumnVisible("stt") && (
+                                                <TableCell className="text-center">{(page - 1) * limit + index + 1}</TableCell>
+                                            )}
+                                            {isColumnVisible("maBhyt") && (
+                                                <DataTableTextCell
+                                                    value={drug.maBhyt}
+                                                    contentClassName="max-w-[180px]"
+                                                    codeStyle
+                                                />
+                                            )}
+                                            {isColumnVisible("tenThuoc") && (
+                                                <DataTableTextCell
+                                                    value={drug.tenThuoc}
+                                                    wrapped={wrappedColumns.tenThuoc}
+                                                    contentClassName="max-w-xs font-medium"
+                                                />
+                                            )}
+                                            {isColumnVisible("hoatChat") && (
+                                                <DataTableTextCell
+                                                    value={drug.hoatChat}
+                                                    wrapped={wrappedColumns.hoatChat}
+                                                    cellClassName={cn(
+                                                        "sticky left-0 z-10 bg-white text-gray-600 shadow-[4px_0_6px_-4px_rgba(15,23,42,0.16)] group-hover:bg-muted/50",
+                                                        SHARED_WIDE_TEXT_COLUMN_CLASS,
+                                                    )}
+                                                    contentClassName="w-full"
+                                                />
+                                            )}
+                                            {isColumnVisible("hamLuong") && (
+                                                <DataTableTextCell
+                                                    value={drug.hamLuong}
+                                                    wrapped={wrappedColumns.hamLuong}
+                                                    cellClassName={SHARED_WIDE_TEXT_COLUMN_CLASS}
+                                                    contentClassName="w-full"
+                                                />
+                                            )}
+                                            {isColumnVisible("soDangKy") && (
+                                                <DataTableTextCell
+                                                    value={drug.soDangKy}
+                                                    wrapped={wrappedColumns.soDangKy}
+                                                    contentClassName="max-w-xs"
+                                                    codeStyle
+                                                />
+                                            )}
+                                            {isColumnVisible("dangBaoChe") && (
+                                                <DataTableTextCell
+                                                    value={drug.dangBaoChe}
+                                                    wrapped={wrappedColumns.dangBaoChe}
+                                                    contentClassName="max-w-xs"
+                                                />
+                                            )}
+                                            {isColumnVisible("quyCach") && (
+                                                <DataTableTextCell
+                                                    value={drug.quyCach}
+                                                    wrapped={wrappedColumns.quyCach}
+                                                    contentClassName="max-w-xs"
+                                                />
+                                            )}
+                                            {isColumnVisible("duongDung") && (
+                                                <DataTableTextCell
+                                                    value={drug.duongDung}
+                                                    wrapped={wrappedColumns.duongDung}
+                                                    contentClassName="max-w-[180px]"
+                                                />
+                                            )}
+                                            {isColumnVisible("donViTinh") && (
+                                                <DataTableTextCell
+                                                    value={drug.donViTinh}
+                                                    wrapped={wrappedColumns.donViTinh}
+                                                    contentClassName="max-w-[180px]"
+                                                />
+                                            )}
+                                            {isColumnVisible("nhomThuoc") && (
+                                                <DataTableTextCell value={drug.nhomThuoc} contentClassName="max-w-xs" />
+                                            )}
+                                            {isColumnVisible("therapeuticGroup") && (
+                                                <DataTableTextCell
+                                                    value={drug.therapeuticGroup?.name}
+                                                    contentClassName="max-w-xs"
+                                                />
+                                            )}
+                                            {isColumnVisible("actions") && (
+                                                <TableCell className="text-right whitespace-nowrap">
+                                                    {isAdmin && (
+                                                        <>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                                                onClick={() => handleEdit(drug)}
+                                                                title="Sửa"
+                                                            >
+                                                                <Pencil className="w-4 h-4" />
+                                                            </Button>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                                onClick={() => handleDelete(drug.id)}
+                                                                title="Xóa"
+                                                            >
+                                                                <Trash2 className="w-4 h-4" />
+                                                            </Button>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() => toggleDrugStatus(drug.id, drug.isActive)}
+                                                            >
+                                                                {drug.isActive ? "Ẩn" : "Hiện"}
+                                                            </Button>
+                                                        </>
+                                                    )}
+                                                </TableCell>
+                                            )}
                                         </TableRow>
                                     ))}
                                     {drugs.length === 0 && (
                                         <TableRow>
-                                            <TableCell colSpan={11} className="text-center text-gray-500 py-8">
-                                                {searchTerm ? "Không tìm thấy thuốc phù hợp" : "Chưa có thuốc trong danh mục"}
+                                            <TableCell colSpan={visibleColumnCount} className="text-center text-gray-500 py-8">
+                                                {hasActiveDataFilters ? "Không tìm thấy thuốc phù hợp" : "Chưa có thuốc trong danh mục"}
                                             </TableCell>
                                         </TableRow>
                                     )}
                                 </TableBody>
-                            </Table>
+                                </Table>
+                            </TooltipProvider>
                             {/* Pagination Controls */}
                             <div className="flex items-center justify-between mt-4">
                                 <div className="flex items-center gap-4">

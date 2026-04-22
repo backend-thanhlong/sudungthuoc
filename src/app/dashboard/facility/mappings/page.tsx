@@ -26,17 +26,10 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Pencil, Trash2, Settings2, Plus, Info, Download, RotateCcw, AlertCircle, CheckCircle2, Lock, FileWarning, X } from "lucide-react";
+import { Pencil, Trash2, Download, RotateCcw, AlertCircle, CheckCircle2, Lock, FileWarning } from "lucide-react";
 import { readExcel, exportMultiSheetExcelAdvanced } from "@/lib/excel";
 
 interface DrugMapping {
@@ -343,7 +336,6 @@ export default function FacilityMappingsPage() {
 
         try {
             // Read the "Mẫu nhập liệu" sheet if it exists, otherwise fallback to first sheet
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const rawData = await readExcel(file, "Mẫu nhập liệu") as any[];
 
             if (rawData.length === 0) {

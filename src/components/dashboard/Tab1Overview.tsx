@@ -12,6 +12,35 @@ interface Tab1Props {
     apiPrefix?: string;
 }
 
+interface Kpis {
+    totalInventoryValue: number;
+    domesticRatio: number;
+    distinctDrugCount: number;
+}
+
+interface StackedBarDatum {
+    facility: string;
+    [key: string]: string | number;
+}
+
+interface DonutDatum {
+    name: string;
+    value: number;
+}
+
+interface HeatmapDatum {
+    address: string;
+    value: number;
+}
+
+interface OverviewData {
+    kpis: Kpis;
+    stackedBarData: StackedBarDatum[];
+    drugGroups: string[];
+    donutData: DonutDatum[];
+    heatmapData: HeatmapDatum[];
+}
+
 const COLORS = [
     "#6366f1", "#ec4899", "#14b8a6", "#f59e0b", "#3b82f6",
     "#8b5cf6", "#ef4444", "#10b981", "#f97316", "#06b6d4",
@@ -24,8 +53,13 @@ const formatCurrency = (value: number) =>
 const formatCompact = (value: number) =>
     new Intl.NumberFormat('vi-VN', { notation: "compact", compactDisplay: "short" }).format(value);
 
+const formatPercent = (value: number) =>
+    new Intl.NumberFormat('vi-VN', { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(value);
+
+const formatTooltipCurrency = (value: number | string | undefined): [string] => [formatCurrency(Number(value ?? 0))];
+
 export default function Tab1Overview({ reportMonth, facilityId, apiPrefix = "/api/admin/dashboard" }: Tab1Props) {
-    const [data, setData] = useState<any>(null);
+    const [data, setData] = useState<OverviewData | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -36,7 +70,7 @@ export default function Tab1Overview({ reportMonth, facilityId, apiPrefix = "/ap
                 if (reportMonth && reportMonth !== "all") params.set("reportMonth", reportMonth);
                 if (facilityId) params.set("facilityId", facilityId);
                 const res = await fetch(`${apiPrefix}/overview?${params}`);
-                const json = await res.json();
+                const json: OverviewData = await res.json();
                 setData(json);
             } catch (e) {
                 console.error(e);
@@ -45,7 +79,7 @@ export default function Tab1Overview({ reportMonth, facilityId, apiPrefix = "/ap
             }
         };
         fetchData();
-    }, [reportMonth, facilityId]);
+    }, [reportMonth, facilityId, apiPrefix]);
 
     if (loading) {
         return (
@@ -62,8 +96,7 @@ export default function Tab1Overview({ reportMonth, facilityId, apiPrefix = "/ap
 
     const { kpis, stackedBarData, drugGroups, donutData, heatmapData } = data;
 
-    // Max value for heatmap color scale
-    const maxHeatmapVal = Math.max(...heatmapData.map((h: any) => h.value), 1);
+    const totalHeatmapValue = heatmapData.reduce((sum: number, item: HeatmapDatum) => sum + Number(item.value || 0), 0);
 
     return (
         <div className="space-y-6">
@@ -110,7 +143,7 @@ export default function Tab1Overview({ reportMonth, facilityId, apiPrefix = "/ap
                                 <YAxis tick={{ fontSize: 11, fill: "#64748b" }} tickFormatter={formatCompact} width={70} />
                                 <Tooltip
                                     contentStyle={{ backgroundColor: "white", borderRadius: "10px", border: "1px solid #e2e8f0", boxShadow: "0 10px 25px -5px rgb(0 0 0 / 0.1)" }}
-                                    formatter={((value: any) => [formatCurrency(Number(value))]) as any}
+                                    formatter={formatTooltipCurrency}
                                 />
                                 <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
                                 {drugGroups.map((group: string, i: number) => (
@@ -142,13 +175,15 @@ export default function Tab1Overview({ reportMonth, facilityId, apiPrefix = "/ap
                                     outerRadius={130}
                                     paddingAngle={3}
                                     dataKey="value"
-                                    label={({ name, percent }: any) => `${name}: ${((percent || 0) * 100).toFixed(1)}%`}
+                                    label={({ name, percent }: { name?: string; percent?: number }) =>
+                                        `${name || ""}: ${((percent || 0) * 100).toFixed(1)}%`
+                                    }
                                     labelLine={{ strokeWidth: 2 }}
                                 >
                                     <Cell fill="#6366f1" />
                                     <Cell fill="#f59e0b" />
                                 </Pie>
-                                <Tooltip formatter={((value: any) => [formatCurrency(Number(value))]) as any} />
+                                <Tooltip formatter={formatTooltipCurrency} />
                                 <Legend />
                             </PieChart>
                         </ResponsiveContainer>
@@ -167,13 +202,13 @@ export default function Tab1Overview({ reportMonth, facilityId, apiPrefix = "/ap
                                 <th className="text-left p-3 font-semibold rounded-tl-lg">STT</th>
                                 <th className="text-left p-3 font-semibold">Địa bàn</th>
                                 <th className="text-right p-3 font-semibold">Giá trị tồn kho</th>
-                                <th className="text-left p-3 font-semibold rounded-tr-lg w-1/3">Mức độ</th>
+                                <th className="text-left p-3 font-semibold rounded-tr-lg w-1/3">Tỷ trọng</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {heatmapData.map((item: any, i: number) => {
-                                const intensity = item.value / maxHeatmapVal;
-                                const hue = 120 - intensity * 120; // green -> red
+                            {heatmapData.map((item: HeatmapDatum, i: number) => {
+                                const share = totalHeatmapValue > 0 ? Number(item.value) / totalHeatmapValue : 0;
+                                const hue = 120 - share * 120; // green -> red
                                 return (
                                     <tr key={i} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
                                         <td className="p-3 text-gray-500">{i + 1}</td>
@@ -185,13 +220,13 @@ export default function Tab1Overview({ reportMonth, facilityId, apiPrefix = "/ap
                                                     <div
                                                         className="h-full rounded-full transition-all"
                                                         style={{
-                                                            width: `${Math.max(intensity * 100, 2)}%`,
+                                                            width: `${share * 100}%`,
                                                             backgroundColor: `hsl(${hue}, 70%, 50%)`,
                                                         }}
                                                     />
                                                 </div>
-                                                <span className="text-xs text-gray-500 w-12 text-right">
-                                                    {(intensity * 100).toFixed(0)}%
+                                                <span className="text-xs text-gray-500 w-16 text-right">
+                                                    {formatPercent(share * 100)}%
                                                 </span>
                                             </div>
                                         </td>

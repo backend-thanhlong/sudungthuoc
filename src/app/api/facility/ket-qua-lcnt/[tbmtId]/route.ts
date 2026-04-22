@@ -1,6 +1,93 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { auth } from "@/auth";
+import {
+    assertPhanLoIdsBelongToGoiThau,
+    getFacilityOwnedKetQuaLCNTByTbmtId,
+    getFacilityOwnedThongBaoMoiThauById,
+    isRouteError,
+    requireActiveSessionUser,
+    RouteError,
+} from "@/lib/server-authz";
+
+const handleRouteError = (error: unknown, context: string) => {
+    if (isRouteError(error)) {
+        return NextResponse.json({ message: error.message }, { status: error.status });
+    }
+
+    console.error(context, error);
+    return NextResponse.json(
+        { message: "Internal server error" },
+        { status: 500 }
+    );
+};
+
+const safeParseInt = (val: unknown): number | undefined => {
+    if (val === null || val === undefined || val === "") {
+        return undefined;
+    }
+
+    const parsed = parseInt(String(val), 10);
+    return Number.isNaN(parsed) ? undefined : parsed;
+};
+
+const safeParseFloat = (val: unknown): number | undefined => {
+    if (val === null || val === undefined || val === "") {
+        return undefined;
+    }
+
+    const parsed = parseFloat(String(val));
+    return Number.isNaN(parsed) ? undefined : parsed;
+};
+
+const safeParseNullableFloat = (val: unknown): number | null => {
+    const parsed = safeParseFloat(val);
+    return parsed === undefined ? null : parsed;
+};
+
+const normalizeString = (value: unknown) =>
+    typeof value === "string" ? value.trim() : "";
+
+const normalizeOptionalString = (value: unknown) => {
+    const normalized = normalizeString(value);
+    return normalized === "" ? null : normalized;
+};
+
+const requireValidKetQuaPhanLos = (ketQuaPhanLos: KetQuaPhanLoInput[] | undefined) => {
+    if (!Array.isArray(ketQuaPhanLos) || ketQuaPhanLos.length === 0) {
+        throw new RouteError(400, "Thiếu dữ liệu phần lô từ file Excel");
+    }
+
+    const validKetQuaPhanLos = ketQuaPhanLos.filter(
+        (kqpl): kqpl is KetQuaPhanLoInput & { phanLoGoiThauId: string } =>
+            typeof kqpl.phanLoGoiThauId === "string"
+            && kqpl.phanLoGoiThauId.trim().length > 0
+    );
+
+    if (validKetQuaPhanLos.length !== ketQuaPhanLos.length) {
+        throw new RouteError(
+            400,
+            "File Excel không hợp lệ: thiếu ID phần lô. Hãy tải lại file mẫu mới."
+        );
+    }
+
+    return validKetQuaPhanLos;
+};
+
+interface KetQuaPhanLoInput {
+    phanLoGoiThauId?: string;
+    ketQua?: string;
+    donGiaTrungThau?: number | string | null;
+    nhaThauTrungThau?: string | null;
+}
+
+interface KetQuaLCNTPatchBody {
+    soQdPheDuyetKQLCNT?: string;
+    ngayPheDuyetKQLCNT?: string;
+    soMatHangMoiThau?: number | string | null;
+    soMatHangTrungThau?: number | string | null;
+    tongGiaTriTrungThau?: number | string | null;
+    ketQuaPhanLos?: KetQuaPhanLoInput[];
+}
 
 // GET /api/facility/ket-qua-lcnt/[tbmtId]
 // Get existing LCNT results for a specific TBMT
@@ -9,21 +96,16 @@ export async function GET(
     { params }: { params: Promise<{ tbmtId: string }> }
 ) {
     try {
-        const session = await auth();
-        if (!session) {
-            return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-        }
-
-        if (session.user.role !== "FACILITY") {
-            return NextResponse.json({ message: "Forbidden" }, { status: 403 });
-        }
+        void req;
+        const { user } = await requireActiveSessionUser("FACILITY");
 
         const { tbmtId } = await params;
+        const ownedTbmt = await getFacilityOwnedThongBaoMoiThauById(tbmtId, user.id);
 
         // Find LCNT results by TBMT ID
         const ketQuaLCNT = await prisma.ketQuaLCNT.findFirst({
             where: {
-                thongBaoMoiThauId: tbmtId,
+                thongBaoMoiThauId: ownedTbmt.id,
             },
             include: {
                 ketQuaPhanLos: {
@@ -43,7 +125,7 @@ export async function GET(
         // If no results exist yet, fetch TBMT to get goiThauId
         if (!ketQuaLCNT) {
             const tbmt = await prisma.thongBaoMoiThau.findUnique({
-                where: { id: tbmtId },
+                where: { id: ownedTbmt.id },
                 include: {
                     goiThau: true,
                 },
@@ -65,12 +147,8 @@ export async function GET(
         }
 
         return NextResponse.json(ketQuaLCNT);
-    } catch (error) {
-        console.error("Error fetching ket qua LCNT detail:", error);
-        return NextResponse.json(
-            { message: "Internal server error" },
-            { status: 500 }
-        );
+    } catch (error: unknown) {
+        return handleRouteError(error, "Error fetching ket qua LCNT detail:");
     }
 }
 
@@ -81,17 +159,10 @@ export async function PATCH(
     { params }: { params: Promise<{ tbmtId: string }> }
 ) {
     try {
-        const session = await auth();
-        if (!session) {
-            return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-        }
-
-        if (session.user.role !== "FACILITY") {
-            return NextResponse.json({ message: "Forbidden" }, { status: 403 });
-        }
+        const { user } = await requireActiveSessionUser("FACILITY");
 
         const { tbmtId } = await params;
-        const body = await req.json();
+        const body = await req.json() as KetQuaLCNTPatchBody;
         const {
             soQdPheDuyetKQLCNT,
             ngayPheDuyetKQLCNT,
@@ -100,27 +171,18 @@ export async function PATCH(
             tongGiaTriTrungThau,
             ketQuaPhanLos,
         } = body;
+        const resolvedSoQdPheDuyetKQLCNT = normalizeString(soQdPheDuyetKQLCNT);
+        const resolvedNgayPheDuyetKQLCNT = normalizeString(ngayPheDuyetKQLCNT);
+        const ownedTbmt = await getFacilityOwnedThongBaoMoiThauById(tbmtId, user.id);
 
         // Find existing LCNT result
-        const existing = await prisma.ketQuaLCNT.findFirst({
-            where: {
-                thongBaoMoiThauId: tbmtId,
-            },
-        });
+        const existing = await getFacilityOwnedKetQuaLCNTByTbmtId(tbmtId, user.id);
 
-        if (!existing) {
-            return NextResponse.json(
-                { message: "LCNT result not found" },
-                { status: 404 }
-            );
-        }
-
-        // Helper to safely parse numbers - returns undefined (not null) for PATCH so Prisma skips non-nullable fields
-        const safeInt = (val: any): number | undefined => { const n = parseInt(val); return isNaN(n) ? undefined : n; };
-        const safeFloat = (val: any): number | undefined => { const n = parseFloat(val); return isNaN(n) ? undefined : n; };
-
-        // Filter out lot results with missing phanLoGoiThauId
-        const validKetQuaPhanLos = (ketQuaPhanLos || []).filter((kqpl: any) => kqpl.phanLoGoiThauId);
+        const validKetQuaPhanLos = requireValidKetQuaPhanLos(ketQuaPhanLos);
+        await assertPhanLoIdsBelongToGoiThau(
+            validKetQuaPhanLos.map((kqpl) => kqpl.phanLoGoiThauId),
+            ownedTbmt.goiThauId
+        );
 
         // Update in a transaction
         const result = await prisma.$transaction(async (tx) => {
@@ -137,19 +199,19 @@ export async function PATCH(
                     id: existing.id,
                 },
                 data: {
-                    soQdPheDuyetKQLCNT,
-                    ngayPheDuyetKQLCNT: new Date(ngayPheDuyetKQLCNT),
-                    soMatHangMoiThau: safeInt(soMatHangMoiThau),
-                    soMatHangTrungThau: safeInt(soMatHangTrungThau),
-                    tongGiaTriTrungThau: safeFloat(tongGiaTriTrungThau),
+                    soQdPheDuyetKQLCNT: resolvedSoQdPheDuyetKQLCNT || undefined,
+                    ngayPheDuyetKQLCNT: resolvedNgayPheDuyetKQLCNT
+                        ? new Date(resolvedNgayPheDuyetKQLCNT)
+                        : undefined,
+                    soMatHangMoiThau: safeParseInt(soMatHangMoiThau),
+                    soMatHangTrungThau: safeParseInt(soMatHangTrungThau),
+                    tongGiaTriTrungThau: safeParseFloat(tongGiaTriTrungThau),
                     ketQuaPhanLos: {
-                        create: validKetQuaPhanLos.map((kqpl: any) => ({
+                        create: validKetQuaPhanLos.map((kqpl) => ({
                             phanLoGoiThauId: kqpl.phanLoGoiThauId,
-                            ketQua: kqpl.ketQua,
-                            donGiaTrungThau: kqpl.donGiaTrungThau
-                                ? parseFloat(kqpl.donGiaTrungThau)
-                                : null,
-                            nhaThauTrungThau: kqpl.nhaThauTrungThau || null,
+                            ketQua: normalizeString(kqpl.ketQua),
+                            donGiaTrungThau: safeParseNullableFloat(kqpl.donGiaTrungThau),
+                            nhaThauTrungThau: normalizeOptionalString(kqpl.nhaThauTrungThau),
                         })),
                     },
                 },
@@ -160,11 +222,7 @@ export async function PATCH(
         });
 
         return NextResponse.json(result);
-    } catch (error) {
-        console.error("Error updating ket qua LCNT:", error);
-        return NextResponse.json(
-            { message: "Internal server error" },
-            { status: 500 }
-        );
+    } catch (error: unknown) {
+        return handleRouteError(error, "Error updating ket qua LCNT:");
     }
 }

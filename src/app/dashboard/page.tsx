@@ -1,16 +1,20 @@
 import { redirect } from "next/navigation";
-import { auth } from "@/auth";
+import { isRouteError, requireActiveSessionUser } from "@/lib/server-authz";
 
 export default async function DashboardPage() {
-    const session = await auth();
+    try {
+        const { user } = await requireActiveSessionUser();
 
-    if (!session?.user) {
-        redirect("/login");
-    }
+        if (user.role === "ADMIN") {
+            redirect("/dashboard/admin");
+        } else {
+            redirect("/dashboard/facility");
+        }
+    } catch (error: unknown) {
+        if (isRouteError(error) && (error.status === 401 || error.status === 403)) {
+            redirect("/login?reauth=1");
+        }
 
-    if (session.user.role === "ADMIN") {
-        redirect("/dashboard/admin");
-    } else {
-        redirect("/dashboard/facility");
+        throw error;
     }
 }

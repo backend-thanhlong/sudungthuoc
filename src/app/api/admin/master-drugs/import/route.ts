@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
+import {
+    findOrCreateTherapeuticGroup,
+    normalizeTherapeuticGroupName,
+} from "@/lib/therapeutic-groups";
 
 export async function POST(request: Request) {
     try {
@@ -19,6 +23,8 @@ export async function POST(request: Request) {
         let successCount = 0;
         let errorCount = 0;
         let skippedCount = 0;
+        let createdTherapeuticGroupCount = 0;
+        const therapeuticGroupCache = new Map<string, string | null>();
 
         for (const drug of drugs) {
             if (!drug.maChung || !drug.tenThuoc) {
@@ -35,6 +41,27 @@ export async function POST(request: Request) {
                 if (existingDrug) {
                     skippedCount++;
                     continue;
+                }
+
+                let therapeuticGroupId: string | null = null;
+                const therapeuticGroupName = typeof drug.therapeuticGroupName === "string"
+                    ? drug.therapeuticGroupName
+                    : typeof drug.nhomDieuTri === "string"
+                        ? drug.nhomDieuTri
+                        : "";
+
+                if (therapeuticGroupName.trim()) {
+                    const normalizedName = normalizeTherapeuticGroupName(therapeuticGroupName);
+                    therapeuticGroupId = therapeuticGroupCache.get(normalizedName) ?? null;
+
+                    if (!therapeuticGroupId) {
+                        const therapeuticGroupResult = await findOrCreateTherapeuticGroup(therapeuticGroupName);
+                        therapeuticGroupId = therapeuticGroupResult.group.id;
+                        therapeuticGroupCache.set(normalizedName, therapeuticGroupId);
+                        if (therapeuticGroupResult.created) {
+                            createdTherapeuticGroupCount++;
+                        }
+                    }
                 }
 
                 await prisma.masterDrug.create({
@@ -63,7 +90,9 @@ export async function POST(request: Request) {
                         diaChiDangKy: drug.diaChiDangKy ? String(drug.diaChiDangKy) : null,
 
                         nhomThuoc: drug.nhomThuoc ? String(drug.nhomThuoc) : null,
-                        nhomDieuTri: drug.nhomDieuTri ? String(drug.nhomDieuTri) : null,
+                        therapeuticGroup: therapeuticGroupId
+                            ? { connect: { id: therapeuticGroupId } }
+                            : undefined,
                         isKeDon: drug.isKeDon ? String(drug.isKeDon) : null,
                         kiemSoatDacBiet: drug.kiemSoatDacBiet ? String(drug.kiemSoatDacBiet) : null,
                         isTrongNuoc: drug.isTrongNuoc ? String(drug.isTrongNuoc) : null,
@@ -84,6 +113,7 @@ export async function POST(request: Request) {
                 success: successCount,
                 skipped: skippedCount,
                 error: errorCount,
+                createdTherapeuticGroups: createdTherapeuticGroupCount,
             },
         });
     } catch (error) {

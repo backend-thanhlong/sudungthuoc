@@ -2,6 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
 
+const getReportMonthSortValue = (reportMonth: string) => {
+    const match = /^(\d{2})\/(\d{4})$/.exec(reportMonth);
+    if (!match) return 0;
+
+    const [, month, year] = match;
+    return Number(year) * 100 + Number(month);
+};
+
 // GET: Detect abnormal inventory situations
 export async function GET(req: NextRequest) {
     try {
@@ -14,23 +22,9 @@ export async function GET(req: NextRequest) {
         const reportMonth = searchParams.get("reportMonth") || "";
         const severity = searchParams.get("severity") || ""; // "warning" or "danger"
 
-        // Get the most recent month if none specified
-        let targetMonth = reportMonth;
-        if (!targetMonth) {
-            const latest = await prisma.inventoryReport.findFirst({
-                select: { reportMonth: true },
-                orderBy: { reportMonth: "desc" },
-            });
-            targetMonth = latest?.reportMonth || "";
-        }
-
-        if (!targetMonth) {
-            return NextResponse.json({ alerts: [], months: [] });
-        }
-
-        // Fetch all reports for the target month
+        // Fetch all reports that match the selected filters.
         const reports = await prisma.inventoryReport.findMany({
-            where: { reportMonth: targetMonth },
+            where: reportMonth ? { reportMonth } : {},
             include: {
                 facility: {
                     select: {
@@ -174,8 +168,21 @@ export async function GET(req: NextRequest) {
 
         // Sort: danger first, then warning
         filteredAlerts.sort((a, b) => {
-            if (a.severity === b.severity) return 0;
-            return a.severity === "danger" ? -1 : 1;
+            if (a.severity !== b.severity) {
+                return a.severity === "danger" ? -1 : 1;
+            }
+
+            const monthDiff = getReportMonthSortValue(b.reportMonth) - getReportMonthSortValue(a.reportMonth);
+            if (monthDiff !== 0) {
+                return monthDiff;
+            }
+
+            const facilityDiff = a.facilityName.localeCompare(b.facilityName, "vi");
+            if (facilityDiff !== 0) {
+                return facilityDiff;
+            }
+
+            return a.drugName.localeCompare(b.drugName, "vi");
         });
 
         // Get months for filter
@@ -184,6 +191,10 @@ export async function GET(req: NextRequest) {
             distinct: ["reportMonth"],
             orderBy: { reportMonth: "desc" },
         });
+
+        const monthValues = months
+            .map((m) => m.reportMonth)
+            .sort((a, b) => getReportMonthSortValue(b) - getReportMonthSortValue(a));
 
         // Summary
         const summary = {
@@ -200,8 +211,8 @@ export async function GET(req: NextRequest) {
 
         return NextResponse.json({
             alerts: filteredAlerts,
-            months: months.map((m) => m.reportMonth),
-            currentMonth: targetMonth,
+            months: monthValues,
+            currentMonth: reportMonth || null,
             summary,
         });
     } catch (error) {

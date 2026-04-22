@@ -23,6 +23,7 @@ export const REPORT_FIELD_NGAY_BAT_DAU_HD = "Ngày bắt đầu HĐ";
 export const REPORT_FIELD_NGAY_KET_THUC_HD = "Ngày kết thúc HĐ";
 export const REPORT_FIELD_BHYT = "BHYT";
 export const REPORT_FIELD_DICH_VU = "Dịch vụ";
+export const REPORT_FIELD_BO_QUA = "Bỏ qua";
 export const REPORT_FIELD_GHI_CHU = "Ghi chú";
 
 export const REPORT_IMMUTABLE_FIELDS = [
@@ -60,6 +61,7 @@ export const REPORT_PRESENCE_FIELDS = [
     REPORT_FIELD_TEN_CONG_TY,
     ...REPORT_DATE_FIELDS,
     ...REPORT_CATEGORICAL_FIELDS,
+    REPORT_FIELD_BO_QUA,
 ] as const;
 
 export const REPORT_TOLERANCE = 0.01;
@@ -71,9 +73,11 @@ export const REPORT_VALIDATION_CODES = {
     invalidNumber: "INVALID_NUMBER",
     negativeNumber: "NEGATIVE_NUMBER",
     invalidCategoricalValue: "INVALID_CATEGORICAL_VALUE",
+    invalidSkipValue: "INVALID_SKIP_VALUE",
     invalidDate: "INVALID_DATE",
     dateRangeInvalid: "DATE_RANGE_INVALID",
     previousMonthStockMismatch: "PREVIOUS_MONTH_STOCK_MISMATCH",
+    previousMonthReferenceMismatch: "PREVIOUS_MONTH_REFERENCE_MISMATCH",
     endingStockFormulaMismatch: "ENDING_STOCK_FORMULA_MISMATCH",
     endingValueFormulaMismatch: "ENDING_VALUE_FORMULA_MISMATCH",
     missingCategoryMark: "MISSING_CATEGORY_MARK",
@@ -106,6 +110,7 @@ export interface ReportRowInput {
     thanhTienTonCuoi: number;
     bhyt?: string | null;
     dichVu?: string | null;
+    boQua?: string | null;
     rowToken?: string | null;
     ngayBatDauHd?: string | null;
     ngayKetThucHd?: string | null;
@@ -113,6 +118,7 @@ export interface ReportRowInput {
     negativeNumericFields?: string[];
     invalidDateFields?: string[];
     invalidCategoricalFields?: string[];
+    invalidSkipFields?: string[];
 }
 
 export interface ParsedReportRow extends ReportRowInput {
@@ -138,6 +144,7 @@ export const isMeaningfulReportRow = (row: Record<string, unknown>) =>
     REPORT_PRESENCE_FIELDS.some((field) => normalizeReportText(row[field]).length > 0);
 
 export const isCategoryMarked = (value: unknown) => normalizeReportText(value).toLowerCase() === "x";
+export const isSkipMarked = (value: unknown) => normalizeReportText(value).toLowerCase() === "x";
 
 const isStrictNumericString = (value: string) => /^-?(?:\d+|\d+\.\d+|\d*\.\d+)$/.test(value);
 
@@ -223,7 +230,6 @@ export const findDuplicateRowTokens = (rows: Array<Pick<ParsedReportRow, "rowTok
  * Parse a raw Excel row (from readExcel) into a typed row.
  * Returns null when the row is effectively blank for reporting purposes.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function parseRawRow(row: any): ParsedReportRow | null {
     if (!row || typeof row !== "object" || !isMeaningfulReportRow(row)) {
         return null;
@@ -233,6 +239,7 @@ export function parseRawRow(row: any): ParsedReportRow | null {
     const negativeNumericFields: string[] = [];
     const invalidDateFields: string[] = [];
     const invalidCategoricalFields: string[] = [];
+    const invalidSkipFields: string[] = [];
 
     const tonDauResult = parseStrictNumber(row[REPORT_FIELD_TON_DAU]);
     const nhapResult = parseStrictNumber(row[REPORT_FIELD_NHAP]);
@@ -268,8 +275,10 @@ export function parseRawRow(row: any): ParsedReportRow | null {
 
     const bhyt = toCellString(row[REPORT_FIELD_BHYT]) || null;
     const dichVu = toCellString(row[REPORT_FIELD_DICH_VU]) || null;
+    const boQua = toCellString(row[REPORT_FIELD_BO_QUA]) || null;
     if (bhyt && !isCategoryMarked(bhyt)) invalidCategoricalFields.push(REPORT_FIELD_BHYT);
     if (dichVu && !isCategoryMarked(dichVu)) invalidCategoricalFields.push(REPORT_FIELD_DICH_VU);
+    if (boQua && !isSkipMarked(boQua)) invalidSkipFields.push(REPORT_FIELD_BO_QUA);
 
     return {
         maNoiBo: toCellString(row[REPORT_FIELD_MA_NOI_BO]) || undefined,
@@ -286,10 +295,12 @@ export function parseRawRow(row: any): ParsedReportRow | null {
         ngayKetThucHd: ngayKetThucResult.value,
         bhyt,
         dichVu,
+        boQua,
         invalidNumericFields,
         negativeNumericFields,
         invalidDateFields,
         invalidCategoricalFields,
+        invalidSkipFields,
     };
 }
 
@@ -309,6 +320,7 @@ export function validateReportRow(
         thanhTienTonCuoi,
         bhyt,
         dichVu,
+        boQua,
         rowToken,
         ngayBatDauHd,
         ngayKetThucHd,
@@ -316,6 +328,7 @@ export function validateReportRow(
         negativeNumericFields = [],
         invalidDateFields = [],
         invalidCategoricalFields = [],
+        invalidSkipFields = [],
     } = row;
     const includeTokenWarning = options?.includeTokenWarning ?? true;
 
@@ -326,6 +339,19 @@ export function validateReportRow(
             code: REPORT_VALIDATION_CODES.missingRowToken,
             message: `${drugName}: File thiếu mã định danh dòng. Vui lòng tải lại mẫu báo cáo mới.`,
         });
+    }
+
+    for (const field of invalidSkipFields) {
+        warnings.push({
+            drug: drugName,
+            field,
+            code: REPORT_VALIDATION_CODES.invalidSkipValue,
+            message: `${drugName}: ${field} chỉ được nhập "X" hoặc để trống.`,
+        });
+    }
+
+    if (isSkipMarked(boQua)) {
+        return warnings;
     }
 
     for (const field of invalidNumericFields) {
@@ -355,6 +381,23 @@ export function validateReportRow(
         });
     }
 
+    const invalidCategoricalFieldSet = new Set(invalidCategoricalFields);
+
+    if (
+        invalidSkipFields.length === 0
+        && !invalidCategoricalFieldSet.has(REPORT_FIELD_BHYT)
+        && !invalidCategoricalFieldSet.has(REPORT_FIELD_DICH_VU)
+        && !isCategoryMarked(bhyt)
+        && !isCategoryMarked(dichVu)
+    ) {
+        warnings.push({
+            drug: drugName,
+            field: `${REPORT_FIELD_BHYT}/${REPORT_FIELD_DICH_VU}`,
+            code: REPORT_VALIDATION_CODES.missingCategoryMark,
+            message: `${drugName}: Nếu không đánh dấu ${REPORT_FIELD_BO_QUA}, phải nhập "X" ở ít nhất một trong hai cột BHYT hoặc Dịch vụ.`,
+        });
+    }
+
     for (const field of invalidDateFields) {
         warnings.push({
             drug: drugName,
@@ -365,7 +408,6 @@ export function validateReportRow(
     }
 
     const invalidNumericFieldSet = new Set(invalidNumericFields);
-    const invalidCategoricalFieldSet = new Set(invalidCategoricalFields);
     const invalidDateFieldSet = new Set(invalidDateFields);
 
     if (
@@ -425,20 +467,6 @@ export function validateReportRow(
             expected: expectedThanhTien,
             actual: thanhTienTonCuoi,
             message: `${drugName}: Thành tiền tồn cuối (${thanhTienTonCuoi.toLocaleString("vi-VN")}) ≠ Tồn cuối (${tonCuoi}) × Giá VAT (${giaVat.toLocaleString("vi-VN")}) = ${expectedThanhTien.toLocaleString("vi-VN")}`,
-        });
-    }
-
-    if (
-        !invalidCategoricalFieldSet.has(REPORT_FIELD_BHYT)
-        && !invalidCategoricalFieldSet.has(REPORT_FIELD_DICH_VU)
-        && !isCategoryMarked(bhyt)
-        && !isCategoryMarked(dichVu)
-    ) {
-        warnings.push({
-            drug: drugName,
-            field: `${REPORT_FIELD_BHYT}/${REPORT_FIELD_DICH_VU}`,
-            code: REPORT_VALIDATION_CODES.missingCategoryMark,
-            message: `${drugName}: Phải đánh dấu X ít nhất một trong hai cột BHYT hoặc Dịch vụ`,
         });
     }
 

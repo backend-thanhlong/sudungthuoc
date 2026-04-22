@@ -2,6 +2,7 @@ import prisma from "@/lib/prisma";
 import { verifyFacilityReportRowToken } from "@/lib/facility-report-token";
 import {
     REPORT_FIELD_BHYT,
+    REPORT_FIELD_BO_QUA,
     REPORT_FIELD_DICH_VU,
     REPORT_FIELD_DON_VI_TINH,
     REPORT_FIELD_GHI_CHU,
@@ -26,6 +27,7 @@ import {
     ParsedReportRow,
     ValidationWarning,
     isCategoryMarked,
+    isSkipMarked,
     normalizeReportText,
     parseRawRow,
     validateReportRow,
@@ -41,6 +43,8 @@ export interface FacilityReportValidationError {
 export interface FacilityReportValidationSummary {
     totalRows: number;
     errorCount: number;
+    reportedRowCount: number;
+    skippedRowCount: number;
 }
 
 export interface ValidatedFacilityReportRow {
@@ -100,9 +104,7 @@ const getPreviousMonth = (month: string) => {
 };
 
 const buildCanonicalRow = (
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mapping: any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     previousReport?: any
 ): CanonicalFacilityReportRow => ({
     mapId: mapping.id,
@@ -151,7 +153,6 @@ const normalizeOptionalCategory = (value: unknown) => {
 };
 
 const compareImmutableFields = (
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     rawRow: any,
     canonicalRow: CanonicalFacilityReportRow,
     rowNumber: number
@@ -171,6 +172,68 @@ const compareImmutableFields = (
             field,
             REPORT_VALIDATION_CODES.immutableFieldMismatch,
             `Dòng ${rowNumber}: ${field} không khớp với dữ liệu mẫu.`
+        ));
+};
+
+const comparePreviousMonthReferenceFields = (
+    rawRow: any,
+    parsedRow: ParsedReportRow,
+    canonicalRow: CanonicalFacilityReportRow,
+    rowNumber: number
+) => {
+    const invalidDateFieldSet = new Set(parsedRow.invalidDateFields || []);
+    const invalidCategoricalFieldSet = new Set(parsedRow.invalidCategoricalFields || []);
+
+    const fieldChecks = [
+        {
+            field: REPORT_FIELD_SO_QD_TRUNG_THAU,
+            previousValue: normalizeOptionalText(canonicalRow.prevSoQdTrungThau),
+            currentValue: normalizeOptionalText(rawRow[REPORT_FIELD_SO_QD_TRUNG_THAU]),
+            canCompare: true,
+        },
+        {
+            field: REPORT_FIELD_TEN_CONG_TY,
+            previousValue: normalizeOptionalText(canonicalRow.prevTenCongTy),
+            currentValue: normalizeOptionalText(rawRow[REPORT_FIELD_TEN_CONG_TY]),
+            canCompare: true,
+        },
+        {
+            field: REPORT_FIELD_NGAY_BAT_DAU_HD,
+            previousValue: normalizeOptionalText(canonicalRow.prevNgayBatDauHd),
+            currentValue: normalizeOptionalText(parsedRow.ngayBatDauHd),
+            canCompare: !invalidDateFieldSet.has(REPORT_FIELD_NGAY_BAT_DAU_HD),
+        },
+        {
+            field: REPORT_FIELD_NGAY_KET_THUC_HD,
+            previousValue: normalizeOptionalText(canonicalRow.prevNgayKetThucHd),
+            currentValue: normalizeOptionalText(parsedRow.ngayKetThucHd),
+            canCompare: !invalidDateFieldSet.has(REPORT_FIELD_NGAY_KET_THUC_HD),
+        },
+        {
+            field: REPORT_FIELD_BHYT,
+            previousValue: normalizeOptionalCategory(canonicalRow.prevBhyt),
+            currentValue: normalizeOptionalCategory(parsedRow.bhyt),
+            canCompare: !invalidCategoricalFieldSet.has(REPORT_FIELD_BHYT),
+        },
+        {
+            field: REPORT_FIELD_DICH_VU,
+            previousValue: normalizeOptionalCategory(canonicalRow.prevDichVu),
+            currentValue: normalizeOptionalCategory(parsedRow.dichVu),
+            canCompare: !invalidCategoricalFieldSet.has(REPORT_FIELD_DICH_VU),
+        },
+    ] as const;
+
+    return fieldChecks
+        .filter(({ canCompare, previousValue, currentValue }) =>
+            canCompare
+            && previousValue !== null
+            && previousValue !== currentValue
+        )
+        .map(({ field }) => buildValidationError(
+            rowNumber,
+            field,
+            REPORT_VALIDATION_CODES.previousMonthReferenceMismatch,
+            `Dòng ${rowNumber}: ${field} không khớp với báo cáo tháng trước.`
         ));
 };
 
@@ -240,12 +303,12 @@ export const buildFacilityReportTemplateRows = (context: FacilityReportCanonical
         [REPORT_FIELD_NGAY_KET_THUC_HD]: row.prevNgayKetThucHd,
         [REPORT_FIELD_BHYT]: row.prevBhyt,
         [REPORT_FIELD_DICH_VU]: row.prevDichVu,
+        [REPORT_FIELD_BO_QUA]: "",
         [REPORT_FIELD_GHI_CHU]: "",
         [REPORT_ROW_TOKEN_COLUMN]: "",
     }));
 
 export const validateFacilityReportRows = (
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     rawRows: any[],
     context: FacilityReportCanonicalContext
 ): FacilityReportValidationResult => {
@@ -254,6 +317,8 @@ export const validateFacilityReportRows = (
     const seenTokens = new Map<string, number>();
     const seenMapIds = new Map<string, number>();
     let totalRows = 0;
+    let reportedRowCount = 0;
+    let skippedRowCount = 0;
 
     rawRows.forEach((rawRow, index) => {
         const parsedRow = parseRawRow(rawRow) as ParsedReportRow | null;
@@ -345,10 +410,21 @@ export const validateFacilityReportRows = (
             includeTokenWarning: false,
         }).map((warning) => warningToValidationError(rowNumber, warning)));
 
+        if (canonicalRow && !isSkipMarked(parsedRow.boQua)) {
+            rowErrors.push(...comparePreviousMonthReferenceFields(rawRow, parsedRow, canonicalRow, rowNumber));
+        }
+
         if (rowErrors.length > 0 || !resolvedMapId) {
             errors.push(...rowErrors);
             return;
         }
+
+        if (isSkipMarked(parsedRow.boQua)) {
+            skippedRowCount += 1;
+            return;
+        }
+
+        reportedRowCount += 1;
 
         rows.push({
             mapId: resolvedMapId,
@@ -379,6 +455,8 @@ export const validateFacilityReportRows = (
         summary: {
             totalRows,
             errorCount: errors.length,
+            reportedRowCount,
+            skippedRowCount,
         },
         errors,
         rows,

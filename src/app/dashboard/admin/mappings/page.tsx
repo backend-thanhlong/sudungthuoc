@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -42,7 +42,21 @@ import { Textarea } from "@/components/ui/textarea";
 import { Trash2, XCircle, Download } from "lucide-react";
 import { exportExcel } from "@/lib/excel";
 
-interface MappingRequest {
+type ListTab = "pending" | "summary";
+type DetailViewMode = "pending" | "all";
+
+const FACILITY_PAGE_SIZE = 10;
+const DETAIL_PAGE_SIZE = 50;
+
+interface MasterDrugSummary {
+    id: string;
+    maChung: string;
+    tenThuoc: string;
+    hoatChat: string | null;
+    soDangKy: string | null;
+}
+
+interface MappingDetailItem {
     id: string;
     maNoiBo: string;
     tenThuocNoiBo: string;
@@ -53,122 +67,536 @@ interface MappingRequest {
     isOutOfCatalog: boolean;
     createdAt: string;
     updatedAt: string;
-    facility: {
-        facilityName: string;
-        facilityCode: string;
-    };
-    masterDrug: {
-        id: string;
-        maChung: string;
-        tenThuoc: string;
-        hoatChat: string | null;
-        soDangKy: string | null;
-    } | null;
+    masterDrug: MasterDrugSummary | null;
 }
 
-interface FacilitySummary {
+interface FacilitySummaryItem {
     facilityCode: string;
     facilityName: string;
     pendingCount: number;
     approvedCount: number;
+    rejectedCount: number;
+    totalUploaded: number;
+    successCount: number;
     lastRequestDate: string | null;
     lastApprovalDate: string | null;
-    mappings: MappingRequest[];
+    lastActivityDate: string | null;
+}
+
+interface PaginationMeta {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+}
+
+interface FacilityListState {
+    items: FacilitySummaryItem[];
+    pagination: PaginationMeta;
+    isLoading: boolean;
+    isLoaded: boolean;
+}
+
+interface FacilityListResponse {
+    items?: FacilitySummaryItem[];
+    pagination?: Partial<PaginationMeta>;
+}
+
+interface DetailFacilitySummary {
+    facilityCode: string;
+    facilityName: string;
+    pendingCount: number;
+}
+
+interface FacilityDetailResponse {
+    facility?: DetailFacilitySummary;
+    items?: MappingDetailItem[];
+    pagination?: Partial<PaginationMeta>;
+}
+
+const createPagination = (limit: number): PaginationMeta => ({
+    page: 1,
+    limit,
+    total: 0,
+    totalPages: 1,
+});
+
+const createFacilityListState = (): FacilityListState => ({
+    items: [],
+    pagination: createPagination(FACILITY_PAGE_SIZE),
+    isLoading: false,
+    isLoaded: false,
+});
+
+const INITIAL_LIST_STATES: Record<ListTab, FacilityListState> = {
+    pending: createFacilityListState(),
+    summary: createFacilityListState(),
+};
+
+const formatDate = (dateString: string | null) => {
+    if (!dateString) return "-";
+    try {
+        return new Date(dateString).toLocaleDateString("vi-VN", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+        });
+    } catch {
+        return dateString;
+    }
+};
+
+const getStatusBadge = (status: string) => {
+    switch (status) {
+        case "WAITING_APPROVAL":
+            return <Badge className="bg-amber-100 text-amber-800">Chờ duyệt</Badge>;
+        case "APPROVED":
+            return <Badge className="bg-green-100 text-green-800">Đã duyệt</Badge>;
+        case "REJECTED":
+            return <Badge className="bg-red-100 text-red-800">Từ chối</Badge>;
+        case "AUTO_MAPPED":
+            return <Badge className="bg-blue-100 text-blue-800">Tự động</Badge>;
+        default:
+            return <Badge variant="secondary">{status}</Badge>;
+    }
+};
+
+interface PaginationControlsProps {
+    page: number;
+    pageSize: number;
+    totalPages: number;
+    totalItems: number;
+    currentCount: number;
+    itemLabel: string;
+    onPageChange: (page: number) => void;
+}
+
+function PaginationControls({
+    page,
+    pageSize,
+    totalPages,
+    totalItems,
+    currentCount,
+    itemLabel,
+    onPageChange,
+}: PaginationControlsProps) {
+    if (totalItems === 0 || currentCount === 0) {
+        return null;
+    }
+
+    const rangeStart = (page - 1) * pageSize + 1;
+    const rangeEnd = Math.min(totalItems, (page - 1) * pageSize + currentCount);
+
+    return (
+        <div className="mt-4 flex flex-col gap-3 border-t px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-1 text-sm text-gray-500 sm:flex-row sm:items-center sm:gap-4">
+                <span>Hiển thị {rangeStart}-{rangeEnd} / {totalItems} {itemLabel}</span>
+                <span>Trang {page} / {totalPages}</span>
+            </div>
+            <div className="flex gap-2">
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onPageChange(page - 1)}
+                    disabled={page === 1}
+                >
+                    Trước
+                </Button>
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onPageChange(page + 1)}
+                    disabled={page === totalPages}
+                >
+                    Sau
+                </Button>
+            </div>
+        </div>
+    );
+}
+
+function FacilityPendingTable({
+    summaries,
+    page,
+    onOpenDetail,
+}: {
+    summaries: FacilitySummaryItem[];
+    page: number;
+    onOpenDetail: (facilityCode: string, viewMode: DetailViewMode) => void;
+}) {
+    return (
+        <Table>
+            <TableHeader>
+                <TableRow>
+                    <TableHead className="w-[50px]">STT</TableHead>
+                    <TableHead>Tên cơ sở</TableHead>
+                    <TableHead className="text-center">Số thuốc cần duyệt</TableHead>
+                    <TableHead>Ngày yêu cầu duyệt</TableHead>
+                    <TableHead className="text-right">Thao tác</TableHead>
+                </TableRow>
+            </TableHeader>
+            <TableBody>
+                {summaries.map((summary, index) => (
+                    <TableRow key={summary.facilityCode}>
+                        <TableCell>{(page - 1) * FACILITY_PAGE_SIZE + index + 1}</TableCell>
+                        <TableCell>
+                            <div>
+                                <p className="font-medium">{summary.facilityName}</p>
+                                <code className="text-xs text-gray-500">{summary.facilityCode}</code>
+                            </div>
+                        </TableCell>
+                        <TableCell className="text-center font-bold text-amber-600">
+                            {summary.pendingCount}
+                        </TableCell>
+                        <TableCell>{formatDate(summary.lastRequestDate)}</TableCell>
+                        <TableCell className="text-right">
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => onOpenDetail(summary.facilityCode, "pending")}
+                            >
+                                Xem cụ thể danh mục
+                            </Button>
+                        </TableCell>
+                    </TableRow>
+                ))}
+                {summaries.length === 0 && (
+                    <TableRow>
+                        <TableCell colSpan={5} className="py-8 text-center text-gray-500">
+                            Không có yêu cầu chờ duyệt
+                        </TableCell>
+                    </TableRow>
+                )}
+            </TableBody>
+        </Table>
+    );
+}
+
+function FacilitySummaryTable({
+    summaries,
+    page,
+    onOpenDetail,
+    onDeleteFacility,
+}: {
+    summaries: FacilitySummaryItem[];
+    page: number;
+    onOpenDetail: (facilityCode: string, viewMode: DetailViewMode) => void;
+    onDeleteFacility: (facility: { code: string; name: string }) => void;
+}) {
+    return (
+        <Table>
+            <TableHeader>
+                <TableRow>
+                    <TableHead className="w-[50px]">STT</TableHead>
+                    <TableHead>Tên cơ sở</TableHead>
+                    <TableHead className="text-center">Tổng thuốc upload</TableHead>
+                    <TableHead className="text-center">Ánh xạ thành công</TableHead>
+                    <TableHead>Ngày yêu cầu duyệt</TableHead>
+                    <TableHead className="text-center">Số thuốc đã duyệt</TableHead>
+                    <TableHead className="text-center">Số thuốc từ chối</TableHead>
+                    <TableHead>Ngày Duyệt</TableHead>
+                    <TableHead className="text-right">Thao tác</TableHead>
+                </TableRow>
+            </TableHeader>
+            <TableBody>
+                {summaries.map((summary, index) => (
+                    <TableRow key={summary.facilityCode}>
+                        <TableCell>{(page - 1) * FACILITY_PAGE_SIZE + index + 1}</TableCell>
+                        <TableCell>
+                            <div>
+                                <p className="font-medium">{summary.facilityName}</p>
+                                <code className="text-xs text-gray-500">{summary.facilityCode}</code>
+                            </div>
+                        </TableCell>
+                        <TableCell className="text-center font-bold text-gray-700">
+                            {summary.totalUploaded}
+                        </TableCell>
+                        <TableCell className="text-center font-bold text-blue-600">
+                            {summary.successCount}
+                        </TableCell>
+                        <TableCell>{formatDate(summary.lastRequestDate)}</TableCell>
+                        <TableCell className="text-center font-medium text-green-600">
+                            {summary.approvedCount}
+                        </TableCell>
+                        <TableCell className="text-center font-medium text-red-600">
+                            {summary.rejectedCount}
+                        </TableCell>
+                        <TableCell>{formatDate(summary.lastApprovalDate)}</TableCell>
+                        <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => onOpenDetail(summary.facilityCode, "all")}
+                                >
+                                    Xem chi tiết
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="text-red-500 hover:bg-red-50 hover:text-red-700"
+                                    title="Xóa tất cả dữ liệu thuốc"
+                                    onClick={() => onDeleteFacility({
+                                        code: summary.facilityCode,
+                                        name: summary.facilityName,
+                                    })}
+                                >
+                                    <Trash2 size={16} />
+                                </Button>
+                            </div>
+                        </TableCell>
+                    </TableRow>
+                ))}
+                {summaries.length === 0 && (
+                    <TableRow>
+                        <TableCell colSpan={9} className="py-8 text-center text-gray-500">
+                            Không có dữ liệu
+                        </TableCell>
+                    </TableRow>
+                )}
+            </TableBody>
+        </Table>
+    );
+}
+
+function TableLoadingState() {
+    return (
+        <div className="flex items-center justify-center py-8">
+            <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-amber-500" />
+        </div>
+    );
 }
 
 export default function MappingsApprovalPage() {
-    const [mappings, setMappings] = useState<MappingRequest[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [selectedMapping, setSelectedMapping] = useState<MappingRequest | null>(null);
+    const [activeTab, setActiveTab] = useState<ListTab>("pending");
+    const [listStates, setListStates] = useState<Record<ListTab, FacilityListState>>(INITIAL_LIST_STATES);
+    const [pageByTab, setPageByTab] = useState<Record<ListTab, number>>({
+        pending: 1,
+        summary: 1,
+    });
+
+    const [selectedMapping, setSelectedMapping] = useState<MappingDetailItem | null>(null);
     const [rejectNote, setRejectNote] = useState("");
     const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
 
-    // For Facility Detail View
     const [selectedFacilityCode, setSelectedFacilityCode] = useState<string | null>(null);
     const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
-    // New state to control which items to show in the detail dialog
-    const [detailViewMode, setDetailViewMode] = useState<"pending" | "all">("pending");
+    const [detailViewMode, setDetailViewMode] = useState<DetailViewMode>("pending");
+    const [detailFacility, setDetailFacility] = useState<DetailFacilitySummary | null>(null);
+    const [detailItems, setDetailItems] = useState<MappingDetailItem[]>([]);
+    const [detailPagination, setDetailPagination] = useState<PaginationMeta>(createPagination(DETAIL_PAGE_SIZE));
+    const [isDetailLoading, setIsDetailLoading] = useState(false);
 
-    const fetchMappings = async () => {
+    const [facilityToDelete, setFacilityToDelete] = useState<{ code: string; name: string } | null>(null);
+    const [facilityToApprove, setFacilityToApprove] = useState<{ code: string; name: string } | null>(null);
+    const [facilityToReject, setFacilityToReject] = useState<{ code: string; name: string } | null>(null);
+    const [rejectAllNote, setRejectAllNote] = useState("");
+
+    const latestRequestIds = useRef({
+        pending: 0,
+        summary: 0,
+        detail: 0,
+    });
+
+    const loadFacilityTab = useCallback(async (tab: ListTab, pageToLoad: number) => {
+        const requestId = latestRequestIds.current[tab] + 1;
+        latestRequestIds.current[tab] = requestId;
+
+        setListStates((prev) => ({
+            ...prev,
+            [tab]: {
+                ...prev[tab],
+                isLoading: true,
+            },
+        }));
+
         try {
-            const res = await fetch("/api/admin/mappings");
-            if (res.ok) {
-                const data = await res.json();
-                setMappings(data);
+            const params = new URLSearchParams({
+                tab,
+                page: pageToLoad.toString(),
+                limit: FACILITY_PAGE_SIZE.toString(),
+            });
+
+            const res = await fetch(`/api/admin/mappings/facilities?${params.toString()}`);
+            if (!res.ok) {
+                throw new Error("Failed to fetch");
+            }
+
+            const result: FacilityListResponse = await res.json();
+            if (latestRequestIds.current[tab] !== requestId) {
+                return;
+            }
+
+            const nextPagination: PaginationMeta = {
+                page: result.pagination?.page ?? pageToLoad,
+                limit: result.pagination?.limit ?? FACILITY_PAGE_SIZE,
+                total: result.pagination?.total ?? 0,
+                totalPages: result.pagination?.totalPages ?? 1,
+            };
+
+            setListStates((prev) => ({
+                ...prev,
+                [tab]: {
+                    items: result.items || [],
+                    pagination: nextPagination,
+                    isLoading: false,
+                    isLoaded: true,
+                },
+            }));
+
+            if (nextPagination.page !== pageToLoad) {
+                setPageByTab((prev) => ({
+                    ...prev,
+                    [tab]: nextPagination.page,
+                }));
             }
         } catch (error) {
-            console.error("Error fetching mappings:", error);
+            if (latestRequestIds.current[tab] !== requestId) {
+                return;
+            }
+
+            console.error(`Error fetching ${tab} facilities:`, error);
             toast.error("Không thể tải danh sách ánh xạ");
-        } finally {
-            setIsLoading(false);
+
+            setListStates((prev) => ({
+                ...prev,
+                [tab]: {
+                    ...prev[tab],
+                    isLoading: false,
+                    isLoaded: true,
+                },
+            }));
+        }
+    }, []);
+
+    const loadDetailPage = useCallback(async (facilityCode: string, viewMode: DetailViewMode, pageToLoad: number) => {
+        const requestId = latestRequestIds.current.detail + 1;
+        latestRequestIds.current.detail = requestId;
+        setIsDetailLoading(true);
+
+        try {
+            const params = new URLSearchParams({
+                viewMode,
+                page: pageToLoad.toString(),
+                limit: DETAIL_PAGE_SIZE.toString(),
+            });
+
+            const res = await fetch(`/api/admin/mappings/facilities/${facilityCode}/details?${params.toString()}`);
+            if (!res.ok) {
+                throw new Error("Failed to fetch detail");
+            }
+
+            const result: FacilityDetailResponse = await res.json();
+            if (latestRequestIds.current.detail !== requestId) {
+                return;
+            }
+
+            setDetailFacility(result.facility || null);
+            setDetailItems(result.items || []);
+            setDetailPagination({
+                page: result.pagination?.page ?? pageToLoad,
+                limit: result.pagination?.limit ?? DETAIL_PAGE_SIZE,
+                total: result.pagination?.total ?? 0,
+                totalPages: result.pagination?.totalPages ?? 1,
+            });
+            setIsDetailLoading(false);
+        } catch (error) {
+            if (latestRequestIds.current.detail !== requestId) {
+                return;
+            }
+
+            console.error("Error fetching facility detail:", error);
+            toast.error("Không thể tải chi tiết cơ sở");
+            setIsDetailLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        void Promise.all([
+            loadFacilityTab("pending", 1),
+            loadFacilityTab("summary", 1),
+        ]);
+    }, [loadFacilityTab]);
+
+    const refreshAfterMutation = useCallback(async (options?: { refetchDetail?: boolean }) => {
+        const shouldRefetchDetail = options?.refetchDetail && isDetailDialogOpen && !!selectedFacilityCode;
+        const pendingPromise = loadFacilityTab("pending", pageByTab.pending);
+        const summaryPromise = loadFacilityTab("summary", pageByTab.summary);
+        const detailPromise = shouldRefetchDetail && selectedFacilityCode
+            ? loadDetailPage(selectedFacilityCode, detailViewMode, detailPagination.page)
+            : Promise.resolve();
+
+        await Promise.all([pendingPromise, summaryPromise, detailPromise]);
+    }, [
+        detailPagination.page,
+        detailViewMode,
+        isDetailDialogOpen,
+        loadDetailPage,
+        loadFacilityTab,
+        pageByTab.pending,
+        pageByTab.summary,
+        selectedFacilityCode,
+    ]);
+
+    const openDetailDialog = (facilityCode: string, viewMode: DetailViewMode) => {
+        setSelectedFacilityCode(facilityCode);
+        setDetailViewMode(viewMode);
+        setDetailFacility(null);
+        setDetailItems([]);
+        setDetailPagination(createPagination(DETAIL_PAGE_SIZE));
+        setIsDetailDialogOpen(true);
+        void loadDetailPage(facilityCode, viewMode, 1);
+    };
+
+    const handleDetailDialogChange = (open: boolean) => {
+        setIsDetailDialogOpen(open);
+        if (!open) {
+            latestRequestIds.current.detail += 1;
+            setSelectedFacilityCode(null);
+            setDetailFacility(null);
+            setDetailItems([]);
+            setDetailPagination(createPagination(DETAIL_PAGE_SIZE));
+            setIsDetailLoading(false);
         }
     };
 
-    useEffect(() => {
-        fetchMappings();
-    }, []);
+    const handleTabChange = (value: string) => {
+        const nextTab = value === "summary" ? "summary" : "pending";
+        setActiveTab(nextTab);
 
-    // Aggregation Logic
-    const facilitySummaries = useMemo(() => {
-        const map = new Map<string, FacilitySummary & { rejectedCount: number }>();
+        if (!listStates[nextTab].isLoaded) {
+            void loadFacilityTab(nextTab, pageByTab[nextTab]);
+        }
+    };
 
-        mappings.forEach(m => {
-            const code = m.facility.facilityCode;
-            if (!map.has(code)) {
-                map.set(code, {
-                    facilityCode: code,
-                    facilityName: m.facility.facilityName,
-                    pendingCount: 0,
-                    approvedCount: 0,
-                    rejectedCount: 0,
-                    lastRequestDate: null,
-                    lastApprovalDate: null,
-                    mappings: []
-                });
-            }
-            const summary = map.get(code)!;
-            summary.mappings.push(m);
+    const handleFacilityPageChange = (tab: ListTab, nextPage: number) => {
+        const totalPages = listStates[tab].pagination.totalPages;
+        const safePage = Math.max(1, Math.min(totalPages, nextPage));
 
-            if (m.status === "WAITING_APPROVAL") {
-                summary.pendingCount++;
-                // Track latest request date (createdAt)
-                if (!summary.lastRequestDate || new Date(m.createdAt) > new Date(summary.lastRequestDate)) {
-                    summary.lastRequestDate = m.createdAt;
-                }
-            } else if (m.status === "APPROVED") {
-                summary.approvedCount++;
-                // Track latest action date
-                if (!summary.lastApprovalDate || new Date(m.updatedAt) > new Date(summary.lastApprovalDate)) {
-                    summary.lastApprovalDate = m.updatedAt;
-                }
-            } else if (m.status === "REJECTED") {
-                summary.rejectedCount++;
-                // Track latest action date for rejections too
-                if (!summary.lastApprovalDate || new Date(m.updatedAt) > new Date(summary.lastApprovalDate)) {
-                    summary.lastApprovalDate = m.updatedAt;
-                }
-            }
-        });
+        if (safePage === pageByTab[tab]) {
+            return;
+        }
 
-        return Array.from(map.values());
-    }, [mappings]);
+        setPageByTab((prev) => ({
+            ...prev,
+            [tab]: safePage,
+        }));
+        void loadFacilityTab(tab, safePage);
+    };
 
-    const pendingFacilities = facilitySummaries
-        .filter(f => f.pendingCount > 0)
-        .sort((a, b) => {
-            // Sort by latest request date desc
-            const dateA = a.lastRequestDate ? new Date(a.lastRequestDate).getTime() : 0;
-            const dateB = b.lastRequestDate ? new Date(b.lastRequestDate).getTime() : 0;
-            return dateB - dateA;
-        });
+    const handleDetailPageChange = (nextPage: number) => {
+        if (!selectedFacilityCode) {
+            return;
+        }
 
-    // Sort summarize facilities mostly by activity
-    const allFacilities = [...facilitySummaries].sort((a, b) => {
-        const dateA = a.lastRequestDate ? new Date(a.lastRequestDate).getTime() : 0;
-        const dateB = b.lastRequestDate ? new Date(b.lastRequestDate).getTime() : 0;
-        return dateB - dateA;
-    });
+        const safePage = Math.max(1, Math.min(detailPagination.totalPages, nextPage));
+        if (safePage === detailPagination.page) {
+            return;
+        }
+
+        void loadDetailPage(selectedFacilityCode, detailViewMode, safePage);
+    };
 
     const handleApprove = async (mappingId: string) => {
         setIsProcessing(true);
@@ -179,11 +607,14 @@ export default function MappingsApprovalPage() {
                 body: JSON.stringify({ status: "APPROVED" }),
             });
 
-            if (res.ok) {
-                toast.success("Đã duyệt ánh xạ");
-                fetchMappings();
+            if (!res.ok) {
+                throw new Error("Failed to approve mapping");
             }
-        } catch {
+
+            toast.success("Đã duyệt ánh xạ");
+            await refreshAfterMutation({ refetchDetail: true });
+        } catch (error) {
+            console.error("Approve error:", error);
             toast.error("Đã xảy ra lỗi");
         } finally {
             setIsProcessing(false);
@@ -201,180 +632,22 @@ export default function MappingsApprovalPage() {
                 body: JSON.stringify({ status: "REJECTED", adminNote: rejectNote }),
             });
 
-            if (res.ok) {
-                toast.success("Đã từ chối ánh xạ");
-                setIsRejectDialogOpen(false);
-                setSelectedMapping(null);
-                setRejectNote("");
-                fetchMappings();
+            if (!res.ok) {
+                throw new Error("Failed to reject mapping");
             }
-        } catch {
+
+            toast.success("Đã từ chối ánh xạ");
+            setIsRejectDialogOpen(false);
+            setSelectedMapping(null);
+            setRejectNote("");
+            await refreshAfterMutation({ refetchDetail: true });
+        } catch (error) {
+            console.error("Reject error:", error);
             toast.error("Đã xảy ra lỗi");
         } finally {
             setIsProcessing(false);
         }
     };
-
-    const getStatusBadge = (status: string) => {
-        switch (status) {
-            case "WAITING_APPROVAL":
-                return <Badge className="bg-amber-100 text-amber-800">Chờ duyệt</Badge>;
-            case "APPROVED":
-                return <Badge className="bg-green-100 text-green-800">Đã duyệt</Badge>;
-            case "REJECTED":
-                return <Badge className="bg-red-100 text-red-800">Từ chối</Badge>;
-            case "AUTO_MAPPED":
-                return <Badge className="bg-blue-100 text-blue-800">Tự động</Badge>;
-            default:
-                return <Badge variant="secondary">{status}</Badge>;
-        }
-    };
-
-    const formatDate = (dateString: string | null) => {
-        if (!dateString) return "-";
-        try {
-            return new Date(dateString).toLocaleDateString("vi-VN", {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric"
-            });
-        } catch {
-            return dateString;
-        }
-    };
-
-    const MappingTable = ({ items, showActions = false }: { items: MappingRequest[]; showActions?: boolean }) => (
-        <Table>
-            <TableHeader>
-                <TableRow>
-                    <TableHead>Thuốc nội bộ</TableHead>
-                    <TableHead>SĐK nội bộ</TableHead>
-                    <TableHead>Thuốc mapping</TableHead>
-                    <TableHead>Trạng thái</TableHead>
-                    {showActions && <TableHead className="text-right">Thao tác</TableHead>}
-                </TableRow>
-            </TableHeader>
-            <TableBody>
-                {items.map((mapping) => (
-                    <TableRow key={mapping.id}>
-                        <TableCell>
-                            <div>
-                                <p className="font-medium">{mapping.tenThuocNoiBo}</p>
-                                <code className="text-xs text-gray-500">{mapping.maNoiBo}</code>
-                            </div>
-                        </TableCell>
-                        <TableCell>
-                            <code className="px-2 py-1 bg-gray-100 rounded text-sm">
-                                {mapping.soDangKyNoiBo || "-"}
-                            </code>
-                        </TableCell>
-                        <TableCell>
-                            {mapping.isOutOfCatalog ? (
-                                <span className="text-amber-600 italic">Ngoài danh mục</span>
-                            ) : mapping.masterDrug ? (
-                                <div>
-                                    <p className="font-medium text-emerald-600">{mapping.masterDrug.tenThuoc}</p>
-                                    <code className="text-xs text-gray-500">{mapping.masterDrug.maChung}</code>
-                                </div>
-                            ) : (
-                                <span className="text-gray-400">-</span>
-                            )}
-                        </TableCell>
-                        <TableCell>{getStatusBadge(mapping.status)}</TableCell>
-                        {showActions && (
-                            <TableCell className="text-right space-x-2">
-                                <Button
-                                    size="sm"
-                                    className="bg-green-500 hover:bg-green-600"
-                                    onClick={() => handleApprove(mapping.id)}
-                                    disabled={isProcessing}
-                                >
-                                    Duyệt
-                                </Button>
-                                <Button
-                                    size="sm"
-                                    variant="destructive"
-                                    onClick={() => {
-                                        setSelectedMapping(mapping);
-                                        setIsRejectDialogOpen(true);
-                                    }}
-                                    disabled={isProcessing}
-                                >
-                                    Từ chối
-                                </Button>
-                            </TableCell>
-                        )}
-                    </TableRow>
-                ))}
-                {items.length === 0 && (
-                    <TableRow>
-                        <TableCell colSpan={showActions ? 5 : 4} className="text-center text-gray-500 py-8">
-                            Không có dữ liệu
-                        </TableCell>
-                    </TableRow>
-                )}
-            </TableBody>
-        </Table>
-    );
-
-    const FacilityPendingTable = ({ summaries }: { summaries: FacilitySummary[] }) => (
-        <Table>
-            <TableHeader>
-                <TableRow>
-                    <TableHead className="w-[50px]">STT</TableHead>
-                    <TableHead>Tên cơ sở</TableHead>
-                    <TableHead className="text-center">Số thuốc cần duyệt</TableHead>
-                    <TableHead>Ngày yêu cầu duyệt</TableHead>
-                    <TableHead className="text-right">Thao tác</TableHead>
-                </TableRow>
-            </TableHeader>
-            <TableBody>
-                {summaries.map((summary, index) => (
-                    <TableRow key={summary.facilityCode}>
-                        <TableCell>{index + 1}</TableCell>
-                        <TableCell>
-                            <div>
-                                <p className="font-medium">{summary.facilityName}</p>
-                                <code className="text-xs text-gray-500">{summary.facilityCode}</code>
-                            </div>
-                        </TableCell>
-                        <TableCell className="text-center font-bold text-amber-600">
-                            {summary.pendingCount}
-                        </TableCell>
-                        <TableCell>{formatDate(summary.lastRequestDate)}</TableCell>
-                        <TableCell className="text-right">
-                            <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => {
-                                    setSelectedFacilityCode(summary.facilityCode);
-                                    setDetailViewMode("pending");
-                                    setIsDetailDialogOpen(true);
-                                }}
-                            >
-                                Xem cụ thể danh mục
-                            </Button>
-                        </TableCell>
-                    </TableRow>
-                ))}
-                {summaries.length === 0 && (
-                    <TableRow>
-                        <TableCell colSpan={5} className="text-center text-gray-500 py-8">
-                            Không có yêu cầu chờ duyệt
-                        </TableCell>
-                    </TableRow>
-                )}
-            </TableBody>
-        </Table>
-    );
-
-    // For Delete Validation
-    const [facilityToDelete, setFacilityToDelete] = useState<{ code: string; name: string } | null>(null);
-    // For Bulk Approve Validation
-    const [facilityToApprove, setFacilityToApprove] = useState<{ code: string; name: string } | null>(null);
-    // For Bulk Reject Validation
-    const [facilityToReject, setFacilityToReject] = useState<{ code: string; name: string } | null>(null);
-    const [rejectAllNote, setRejectAllNote] = useState("");
 
     const handleDeleteHistory = async () => {
         if (!facilityToDelete) return;
@@ -387,13 +660,15 @@ export default function MappingsApprovalPage() {
                 body: JSON.stringify({ facilityCode: facilityToDelete.code }),
             });
 
-            if (res.ok) {
-                const data = await res.json();
-                toast.success(`Đã xóa ${data.count} bản ghi đã duyệt/từ chối`);
-                fetchMappings();
-            } else {
-                toast.error("Không thể xóa dữ liệu");
+            if (!res.ok) {
+                throw new Error("Failed to delete mappings");
             }
+
+            const data = await res.json();
+            toast.success(`Đã xóa ${data.count} bản ghi đã duyệt/từ chối`);
+            await refreshAfterMutation({
+                refetchDetail: selectedFacilityCode === facilityToDelete.code,
+            });
         } catch (error) {
             console.error("Delete error:", error);
             toast.error("Đã xảy ra lỗi khi xóa");
@@ -414,14 +689,14 @@ export default function MappingsApprovalPage() {
                 body: JSON.stringify({ facilityCode: facilityToApprove.code, status: "APPROVED" }),
             });
 
-            if (res.ok) {
-                const data = await res.json();
-                toast.success(`Đã duyệt tất cả ${data.count} thuốc`);
-                fetchMappings();
-                setIsDetailDialogOpen(false);
-            } else {
-                toast.error("Không thể duyệt dữ liệu");
+            if (!res.ok) {
+                throw new Error("Failed to bulk approve mappings");
             }
+
+            const data = await res.json();
+            toast.success(`Đã duyệt tất cả ${data.count} thuốc`);
+            setIsDetailDialogOpen(false);
+            await refreshAfterMutation();
         } catch (error) {
             console.error("Bulk approve error:", error);
             toast.error("Đã xảy ra lỗi khi duyệt");
@@ -439,17 +714,21 @@ export default function MappingsApprovalPage() {
             const res = await fetch("/api/admin/mappings", {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ facilityCode: facilityToReject.code, status: "REJECTED", adminNote: rejectAllNote }),
+                body: JSON.stringify({
+                    facilityCode: facilityToReject.code,
+                    status: "REJECTED",
+                    adminNote: rejectAllNote,
+                }),
             });
 
-            if (res.ok) {
-                const data = await res.json();
-                toast.success(`Đã từ chối ${data.count} thuốc`);
-                fetchMappings();
-                setIsDetailDialogOpen(false);
-            } else {
-                toast.error("Không thể từ chối dữ liệu");
+            if (!res.ok) {
+                throw new Error("Failed to bulk reject mappings");
             }
+
+            const data = await res.json();
+            toast.success(`Đã từ chối ${data.count} thuốc`);
+            setIsDetailDialogOpen(false);
+            await refreshAfterMutation();
         } catch (error) {
             console.error("Bulk reject error:", error);
             toast.error("Đã xảy ra lỗi");
@@ -460,158 +739,72 @@ export default function MappingsApprovalPage() {
         }
     };
 
-    const handleExportOutOfCatalog = () => {
-        if (!selectedFacilitySummary) return;
-
-        const outOfCatalogMappings = detailMappings.filter(m => m.isOutOfCatalog);
-
-        if (outOfCatalogMappings.length === 0) {
-            toast.info("Không có thuốc ngoài danh mục nào");
+    const handleExportOutOfCatalog = async () => {
+        if (!selectedFacilityCode || !detailFacility) {
             return;
         }
 
-        const exportData = outOfCatalogMappings.map((m, index) => ({
-            "STT": index + 1,
-            "Mã nội bộ": m.maNoiBo,
-            "Tên thuốc nội bộ": m.tenThuocNoiBo,
-            "Hoạt chất nội bộ": m.hoatChatNoiBo || "",
-            "SĐK nội bộ": m.soDangKyNoiBo || "",
-            "ĐVT nội bộ": m.donViTinhNoiBo || "",
-            "Ngày yêu cầu": new Date(m.createdAt).toLocaleDateString("vi-VN"),
-            "Trạng thái": m.status === "WAITING_APPROVAL" ? "Chờ duyệt" : m.status
-        }));
+        try {
+            const exportLimit = 200;
+            let currentPage = 1;
+            let totalPages = 1;
+            const outOfCatalogMappings: MappingDetailItem[] = [];
 
-        exportExcel(
-            exportData,
-            `Thuoc_Ngoai_DM_${selectedFacilitySummary.facilityCode}_${new Date().toISOString().split('T')[0]}`
-        );
+            while (currentPage <= totalPages) {
+                const params = new URLSearchParams({
+                    viewMode: "pending",
+                    page: currentPage.toString(),
+                    limit: exportLimit.toString(),
+                });
+
+                const res = await fetch(`/api/admin/mappings/facilities/${selectedFacilityCode}/details?${params.toString()}`);
+                if (!res.ok) {
+                    throw new Error("Failed to export out-of-catalog mappings");
+                }
+
+                const result: FacilityDetailResponse = await res.json();
+                outOfCatalogMappings.push(
+                    ...(result.items || []).filter((item) => item.isOutOfCatalog),
+                );
+                totalPages = result.pagination?.totalPages || 1;
+                currentPage += 1;
+            }
+
+            if (outOfCatalogMappings.length === 0) {
+                toast.info("Không có thuốc ngoài danh mục nào");
+                return;
+            }
+
+            const exportData = outOfCatalogMappings.map((mapping, index) => ({
+                "STT": index + 1,
+                "Mã nội bộ": mapping.maNoiBo,
+                "Tên thuốc nội bộ": mapping.tenThuocNoiBo,
+                "Hoạt chất nội bộ": mapping.hoatChatNoiBo || "",
+                "SĐK nội bộ": mapping.soDangKyNoiBo || "",
+                "ĐVT nội bộ": mapping.donViTinhNoiBo || "",
+                "Ngày yêu cầu": new Date(mapping.createdAt).toLocaleDateString("vi-VN"),
+                "Trạng thái": mapping.status === "WAITING_APPROVAL" ? "Chờ duyệt" : mapping.status,
+            }));
+
+            exportExcel(
+                exportData,
+                `Thuoc_Ngoai_DM_${detailFacility.facilityCode}_${new Date().toISOString().split("T")[0]}`,
+            );
+        } catch (error) {
+            console.error("Export out-of-catalog error:", error);
+            toast.error("Không thể xuất Excel ngoài danh mục");
+        }
     };
 
-    // New Summary Table Component
-    const FacilitySummaryTable = ({ summaries }: { summaries: (FacilitySummary & { rejectedCount: number })[] }) => (
-        <Table>
-            <TableHeader>
-                <TableRow>
-                    <TableHead className="w-[50px]">STT</TableHead>
-                    <TableHead>Tên cơ sở</TableHead>
-                    <TableHead className="text-center">Tổng thuốc upload</TableHead>
-                    <TableHead className="text-center">Ánh xạ thành công</TableHead>
-                    <TableHead>Ngày yêu cầu duyệt</TableHead>
-                    <TableHead className="text-center">Số thuốc đã duyệt</TableHead>
-                    <TableHead className="text-center">Số thuốc từ chối</TableHead>
-                    <TableHead>Ngày Duyệt</TableHead>
-                    <TableHead className="text-right">Thao tác</TableHead>
-                </TableRow>
-            </TableHeader>
-            <TableBody>
-                {summaries.map((summary, index) => {
-                    const totalUploaded = summary.mappings.length;
-                    const successCount = summary.mappings.filter(m => m.status === "APPROVED" || m.status === "AUTO_MAPPED").length;
-
-                    return (
-                        <TableRow key={summary.facilityCode}>
-                            <TableCell>{index + 1}</TableCell>
-                            <TableCell>
-                                <div>
-                                    <p className="font-medium">{summary.facilityName}</p>
-                                    <code className="text-xs text-gray-500">{summary.facilityCode}</code>
-                                </div>
-                            </TableCell>
-                            <TableCell className="text-center font-bold text-gray-700">
-                                {totalUploaded}
-                            </TableCell>
-                            <TableCell className="text-center font-bold text-blue-600">
-                                {successCount}
-                            </TableCell>
-                            <TableCell>{formatDate(summary.lastRequestDate)}</TableCell>
-                            <TableCell className="text-center font-medium text-green-600">
-                                {summary.approvedCount}
-                            </TableCell>
-                            <TableCell className="text-center font-medium text-red-600">
-                                {summary.rejectedCount}
-                            </TableCell>
-                            <TableCell>{formatDate(summary.lastApprovalDate)}</TableCell>
-                            <TableCell className="text-right">
-                                <div className="flex justify-end gap-2">
-                                    <Button
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() => {
-                                            setSelectedFacilityCode(summary.facilityCode);
-                                            setDetailViewMode("all"); // Show all items
-                                            setIsDetailDialogOpen(true);
-                                        }}
-                                    >
-                                        Xem chi tiết
-                                    </Button>
-                                    <Button
-                                        size="sm"
-                                        variant="ghost"
-                                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                                        title="Xóa tất cả dữ liệu thuốc"
-                                        onClick={() => setFacilityToDelete({ code: summary.facilityCode, name: summary.facilityName })}
-                                    >
-                                        <Trash2 size={16} />
-                                    </Button>
-                                </div>
-                            </TableCell>
-                        </TableRow>
-                    );
-                })}
-                {summaries.length === 0 && (
-                    <TableRow>
-                        <TableCell colSpan={9} className="text-center text-gray-500 py-8">
-                            Không có dữ liệu
-                        </TableCell>
-                    </TableRow>
-                )}
-            </TableBody>
-        </Table>
-    );
-
-    const pendingMappings = mappings.filter((m) => m.status === "WAITING_APPROVAL");
-    const approvedMappings = mappings.filter((m) => m.status === "APPROVED");
-    const rejectedMappings = mappings.filter((m) => m.status === "REJECTED");
-
-    const selectedFacilitySummary = selectedFacilityCode
-        ? facilitySummaries.find(f => f.facilityCode === selectedFacilityCode)
-        : null;
-
-    // Determine which mappings to show in dialog
-    const detailMappings = useMemo(() => {
-        if (!selectedFacilitySummary) return [];
-        if (detailViewMode === "pending") {
-            return selectedFacilitySummary.mappings.filter(m => m.status === "WAITING_APPROVAL");
-        }
-        return selectedFacilitySummary.mappings;
-    }, [selectedFacilitySummary, detailViewMode]);
+    const pendingState = listStates.pending;
+    const summaryState = listStates.summary;
+    const isInitialLoading = !pendingState.isLoaded && pendingState.isLoading;
 
     return (
         <div className="space-y-6">
             <div>
                 <h2 className="text-3xl font-bold text-gray-800">Duyệt ánh xạ thuốc</h2>
-                <p className="text-gray-500 mt-1">Phê duyệt yêu cầu ánh xạ từ các cơ sở y tế</p>
-            </div>
-
-            <div className="grid grid-cols-3 gap-4">
-                <Card className="border-l-4 border-l-amber-500">
-                    <CardContent className="pt-6">
-                        <div className="text-3xl font-bold text-amber-600">{pendingMappings.length}</div>
-                        <p className="text-gray-500">Tổng thuốc chờ duyệt</p>
-                    </CardContent>
-                </Card>
-                <Card className="border-l-4 border-l-green-500">
-                    <CardContent className="pt-6">
-                        <div className="text-3xl font-bold text-green-600">{approvedMappings.length}</div>
-                        <p className="text-gray-500">Đã duyệt</p>
-                    </CardContent>
-                </Card>
-                <Card className="border-l-4 border-l-red-500">
-                    <CardContent className="pt-6">
-                        <div className="text-3xl font-bold text-red-600">{rejectedMappings.length}</div>
-                        <p className="text-gray-500">Từ chối</p>
-                    </CardContent>
-                </Card>
+                <p className="mt-1 text-gray-500">Phê duyệt yêu cầu ánh xạ từ các cơ sở y tế</p>
             </div>
 
             <Card className="border-0 shadow-lg">
@@ -620,39 +813,81 @@ export default function MappingsApprovalPage() {
                     <CardDescription>Quản lý yêu cầu ánh xạ từ các cơ sở</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    {isLoading ? (
-                        <div className="flex items-center justify-center py-8">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div>
-                        </div>
+                    {isInitialLoading ? (
+                        <TableLoadingState />
                     ) : (
-                        <Tabs defaultValue="pending">
+                        <Tabs value={activeTab} onValueChange={handleTabChange}>
                             <TabsList>
                                 <TabsTrigger value="pending">
-                                    Chờ duyệt ({pendingFacilities.length} cơ sở)
+                                    Chờ duyệt ({pendingState.pagination.total} cơ sở)
                                 </TabsTrigger>
                                 <TabsTrigger value="summary">
                                     Tổng hợp
                                 </TabsTrigger>
                             </TabsList>
+
                             <TabsContent value="pending" className="mt-4">
-                                <FacilityPendingTable summaries={pendingFacilities} />
+                                {pendingState.isLoading && !pendingState.isLoaded ? (
+                                    <TableLoadingState />
+                                ) : (
+                                    <>
+                                        <FacilityPendingTable
+                                            summaries={pendingState.items}
+                                            page={pendingState.pagination.page}
+                                            onOpenDetail={openDetailDialog}
+                                        />
+                                        {pendingState.pagination.total > FACILITY_PAGE_SIZE && (
+                                            <PaginationControls
+                                                page={pendingState.pagination.page}
+                                                pageSize={pendingState.pagination.limit}
+                                                totalPages={pendingState.pagination.totalPages}
+                                                totalItems={pendingState.pagination.total}
+                                                currentCount={pendingState.items.length}
+                                                itemLabel="cơ sở"
+                                                onPageChange={(nextPage) => handleFacilityPageChange("pending", nextPage)}
+                                            />
+                                        )}
+                                    </>
+                                )}
                             </TabsContent>
+
                             <TabsContent value="summary" className="mt-4">
-                                <FacilitySummaryTable summaries={allFacilities} />
+                                {summaryState.isLoading && !summaryState.isLoaded ? (
+                                    <TableLoadingState />
+                                ) : (
+                                    <>
+                                        <FacilitySummaryTable
+                                            summaries={summaryState.items}
+                                            page={summaryState.pagination.page}
+                                            onOpenDetail={openDetailDialog}
+                                            onDeleteFacility={setFacilityToDelete}
+                                        />
+                                        {summaryState.pagination.total > FACILITY_PAGE_SIZE && (
+                                            <PaginationControls
+                                                page={summaryState.pagination.page}
+                                                pageSize={summaryState.pagination.limit}
+                                                totalPages={summaryState.pagination.totalPages}
+                                                totalItems={summaryState.pagination.total}
+                                                currentCount={summaryState.items.length}
+                                                itemLabel="cơ sở"
+                                                onPageChange={(nextPage) => handleFacilityPageChange("summary", nextPage)}
+                                            />
+                                        )}
+                                    </>
+                                )}
                             </TabsContent>
                         </Tabs>
                     )}
                 </CardContent>
             </Card>
 
-            {/* Facility Detail Dialog */}
-            <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
-                <DialogContent className="sm:max-w-none w-[95vw] max-w-[1200px] h-[85vh] flex flex-col p-6">
+            <Dialog open={isDetailDialogOpen} onOpenChange={handleDetailDialogChange}>
+                <DialogContent className="flex h-[85vh] w-[95vw] max-w-[1200px] flex-col p-6 sm:max-w-none">
                     <DialogHeader>
-                        <div className="flex justify-between items-center">
+                        <div className="flex items-center justify-between">
                             <div>
                                 <DialogTitle className="text-xl">
-                                    {detailViewMode === "pending" ? "Duyệt thuốc" : "Danh sách thuốc"} - {selectedFacilitySummary?.facilityName}
+                                    {detailViewMode === "pending" ? "Duyệt thuốc" : "Danh sách thuốc"} - {detailFacility?.facilityName}
                                 </DialogTitle>
                                 <DialogDescription>
                                     {detailViewMode === "pending"
@@ -660,58 +895,68 @@ export default function MappingsApprovalPage() {
                                         : "Tổng hợp danh sách thuốc của cơ sở."}
                                 </DialogDescription>
                             </div>
-                            {detailViewMode === "pending" && selectedFacilitySummary && selectedFacilitySummary.pendingCount > 0 && (
+                            {detailViewMode === "pending" && detailFacility && detailFacility.pendingCount > 0 && (
                                 <div className="flex items-center gap-2">
                                     <Button
                                         variant="outline"
                                         className="border-slate-300 text-slate-700 hover:bg-slate-50"
                                         onClick={handleExportOutOfCatalog}
                                     >
-                                        <Download className="w-4 h-4 mr-1.5" />
+                                        <Download className="mr-1.5 h-4 w-4" />
                                         Xuất Excel ngoài danh mục
                                     </Button>
                                     <Button
                                         variant="outline"
                                         className="border-red-300 text-red-600 hover:bg-red-50"
-                                        onClick={() => setFacilityToReject({ code: selectedFacilitySummary.facilityCode, name: selectedFacilitySummary.facilityName })}
+                                        onClick={() => setFacilityToReject({
+                                            code: detailFacility.facilityCode,
+                                            name: detailFacility.facilityName,
+                                        })}
                                     >
-                                        <XCircle className="w-4 h-4 mr-1.5" />
-                                        Từ chối tất cả ({selectedFacilitySummary.pendingCount})
+                                        <XCircle className="mr-1.5 h-4 w-4" />
+                                        Từ chối tất cả ({detailFacility.pendingCount})
                                     </Button>
                                     <Button
                                         className="bg-green-600 hover:bg-green-700"
-                                        onClick={() => setFacilityToApprove({ code: selectedFacilitySummary.facilityCode, name: selectedFacilitySummary.facilityName })}
+                                        onClick={() => setFacilityToApprove({
+                                            code: detailFacility.facilityCode,
+                                            name: detailFacility.facilityName,
+                                        })}
                                     >
-                                        Duyệt tất cả ({selectedFacilitySummary.pendingCount})
+                                        Duyệt tất cả ({detailFacility.pendingCount})
                                     </Button>
                                 </div>
                             )}
                         </div>
                     </DialogHeader>
 
-                    <div className="flex-1 overflow-auto mt-4 border rounded-md">
-                        {selectedFacilitySummary && (
+                    <div className="mt-4 flex-1 overflow-auto rounded-md border">
+                        {isDetailLoading ? (
+                            <TableLoadingState />
+                        ) : (
                             <Table>
-                                <TableHeader className="sticky top-0 bg-gray-50 z-10">
+                                <TableHeader className="sticky top-0 z-10 bg-gray-50">
                                     <TableRow>
-                                        <TableHead className="w-[40px] font-bold text-gray-700 bg-gray-100">STT</TableHead>
-                                        <TableHead className="min-w-[150px] font-bold text-gray-700 bg-gray-100">Thuốc nội bộ</TableHead>
-                                        <TableHead className="min-w-[150px] font-bold text-gray-700 bg-gray-100">Hoạt chất / Hàm lượng (NB)</TableHead>
-                                        <TableHead className="min-w-[120px] font-bold text-gray-700 bg-gray-100">SĐK / ĐVT (NB)</TableHead>
-                                        <TableHead className="min-w-[200px] font-bold text-gray-700 bg-gray-100">Thuốc Dược Quốc Gia</TableHead>
-                                        <TableHead className="min-w-[100px] font-bold text-gray-700 bg-gray-100">Trạng thái</TableHead>
-                                        <TableHead className="text-right min-w-[120px] font-bold text-gray-700 bg-gray-100 sticky right-0">Thao tác</TableHead>
+                                        <TableHead className="w-[40px] bg-gray-100 font-bold text-gray-700">STT</TableHead>
+                                        <TableHead className="min-w-[150px] bg-gray-100 font-bold text-gray-700">Thuốc nội bộ</TableHead>
+                                        <TableHead className="min-w-[150px] bg-gray-100 font-bold text-gray-700">Hoạt chất / Hàm lượng (NB)</TableHead>
+                                        <TableHead className="min-w-[120px] bg-gray-100 font-bold text-gray-700">SĐK / ĐVT (NB)</TableHead>
+                                        <TableHead className="min-w-[200px] bg-gray-100 font-bold text-gray-700">Thuốc Dược Quốc Gia</TableHead>
+                                        <TableHead className="min-w-[100px] bg-gray-100 font-bold text-gray-700">Trạng thái</TableHead>
+                                        <TableHead className="sticky right-0 min-w-[120px] bg-gray-100 text-right font-bold text-gray-700">Thao tác</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {detailMappings.map((mapping, index) => (
+                                    {detailItems.map((mapping, index) => (
                                         <TableRow key={mapping.id} className="hover:bg-slate-50">
-                                            <TableCell className="whitespace-nowrap">{index + 1}</TableCell>
+                                            <TableCell className="whitespace-nowrap">
+                                                {(detailPagination.page - 1) * detailPagination.limit + index + 1}
+                                            </TableCell>
                                             <TableCell className="min-w-[180px] max-w-[250px] whitespace-normal break-words">
                                                 <div className="space-y-1">
-                                                    <p className="font-semibold text-blue-700 leading-tight">{mapping.tenThuocNoiBo}</p>
+                                                    <p className="font-semibold leading-tight text-blue-700">{mapping.tenThuocNoiBo}</p>
                                                     <div className="flex items-center gap-2">
-                                                        <code className="text-[11px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-600 border font-mono">
+                                                        <code className="rounded border bg-slate-100 px-1.5 py-0.5 font-mono text-[11px] text-slate-600">
                                                             {mapping.maNoiBo}
                                                         </code>
                                                     </div>
@@ -720,7 +965,7 @@ export default function MappingsApprovalPage() {
                                             <TableCell className="min-w-[150px] max-w-[200px] whitespace-normal break-words">
                                                 <div className="space-y-1.5 text-sm">
                                                     <div>
-                                                        <span className="text-[10px] uppercase text-slate-400 font-bold tracking-wider">Hoạt chất</span>
+                                                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Hoạt chất</span>
                                                         <p className="font-medium text-slate-700">{mapping.hoatChatNoiBo || "-"}</p>
                                                     </div>
                                                 </div>
@@ -728,33 +973,33 @@ export default function MappingsApprovalPage() {
                                             <TableCell className="min-w-[120px] max-w-[160px] whitespace-normal break-words">
                                                 <div className="space-y-2 text-sm">
                                                     <div>
-                                                        <span className="text-[10px] uppercase text-slate-400 font-bold tracking-wider">SĐK</span>
+                                                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">SĐK</span>
                                                         <p className="font-medium text-slate-700">{mapping.soDangKyNoiBo || "-"}</p>
                                                     </div>
                                                     <div>
-                                                        <span className="text-[10px] uppercase text-slate-400 font-bold tracking-wider">ĐVT</span>
+                                                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">ĐVT</span>
                                                         <p className="text-slate-700">{mapping.donViTinhNoiBo || "-"}</p>
                                                     </div>
                                                 </div>
                                             </TableCell>
                                             <TableCell className="min-w-[240px] max-w-[320px] whitespace-normal break-words">
                                                 {mapping.isOutOfCatalog ? (
-                                                    <div className="bg-amber-50 border border-amber-200 rounded-md p-3">
-                                                        <span className="text-amber-700 font-medium flex items-center gap-2">
+                                                    <div className="rounded-md border border-amber-200 bg-amber-50 p-3">
+                                                        <span className="flex items-center gap-2 font-medium text-amber-700">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" x2="12" y1="8" y2="12" /><line x1="12" x2="12.01" y1="16" y2="16" /></svg>
                                                             Khai báo ngoài danh mục
                                                         </span>
                                                     </div>
                                                 ) : mapping.masterDrug ? (
-                                                    <div className="bg-emerald-50/50 rounded-md border border-emerald-100 p-2.5 space-y-2 relative group">
+                                                    <div className="group relative space-y-2 rounded-md border border-emerald-100 bg-emerald-50/50 p-2.5">
                                                         <div>
-                                                            <p className="font-bold text-emerald-800 leading-tight">{mapping.masterDrug.tenThuoc}</p>
-                                                            <div className="flex gap-2 mt-1">
-                                                                <code className="text-[10px] bg-emerald-100 text-emerald-800 px-1 rounded font-mono border border-emerald-200">
+                                                            <p className="font-bold leading-tight text-emerald-800">{mapping.masterDrug.tenThuoc}</p>
+                                                            <div className="mt-1 flex gap-2">
+                                                                <code className="rounded border border-emerald-200 bg-emerald-100 px-1 font-mono text-[10px] text-emerald-800">
                                                                     {mapping.masterDrug.maChung}
                                                                 </code>
                                                                 {mapping.masterDrug.soDangKy && (
-                                                                    <span className="text-[10px] bg-white border border-emerald-200 text-emerald-700 px-1 rounded">
+                                                                    <span className="rounded border border-emerald-200 bg-white px-1 text-[10px] text-emerald-700">
                                                                         SĐK: {mapping.masterDrug.soDangKy}
                                                                     </span>
                                                                 )}
@@ -762,27 +1007,26 @@ export default function MappingsApprovalPage() {
                                                         </div>
 
                                                         {mapping.masterDrug.hoatChat && (
-                                                            <div className="border-t border-emerald-100 pt-1.5 mt-1">
+                                                            <div className="mt-1 border-t border-emerald-100 pt-1.5">
                                                                 <p className="text-xs text-emerald-800">
-                                                                    <span className="opacity-60 mr-1">HC:</span>
+                                                                    <span className="mr-1 opacity-60">HC:</span>
                                                                     {mapping.masterDrug.hoatChat}
                                                                 </p>
                                                             </div>
                                                         )}
                                                     </div>
                                                 ) : (
-                                                    <span className="text-gray-300 italic">Chưa map danh mục</span>
+                                                    <span className="italic text-gray-300">Chưa map danh mục</span>
                                                 )}
                                             </TableCell>
                                             <TableCell className="whitespace-nowrap">{getStatusBadge(mapping.status)}</TableCell>
-                                            <TableCell className="text-right sticky right-0 bg-white group-hover:bg-slate-50 shadow-[-10px_0_10px_-5px_rgba(0,0,0,0.05)] whitespace-nowrap">
+                                            <TableCell className="sticky right-0 whitespace-nowrap bg-white text-right shadow-[-10px_0_10px_-5px_rgba(0,0,0,0.05)] group-hover:bg-slate-50">
                                                 <div className="flex justify-end gap-2 px-1">
-                                                    {/* Only show Approve/Reject buttons if status is WAITING_APPROVAL */}
                                                     {mapping.status === "WAITING_APPROVAL" && (
                                                         <>
                                                             <Button
                                                                 size="sm"
-                                                                className="bg-green-600 hover:bg-green-700 h-8 px-3"
+                                                                className="h-8 bg-green-600 px-3 hover:bg-green-700"
                                                                 onClick={() => handleApprove(mapping.id)}
                                                                 disabled={isProcessing}
                                                             >
@@ -791,7 +1035,7 @@ export default function MappingsApprovalPage() {
                                                             <Button
                                                                 size="sm"
                                                                 variant="ghost"
-                                                                className="text-red-600 hover:text-red-700 hover:bg-red-50 h-8 px-3"
+                                                                className="h-8 px-3 text-red-600 hover:bg-red-50 hover:text-red-700"
                                                                 onClick={() => {
                                                                     setSelectedMapping(mapping);
                                                                     setIsRejectDialogOpen(true);
@@ -806,9 +1050,9 @@ export default function MappingsApprovalPage() {
                                             </TableCell>
                                         </TableRow>
                                     ))}
-                                    {detailMappings.length === 0 && (
+                                    {detailItems.length === 0 && (
                                         <TableRow>
-                                            <TableCell colSpan={7} className="text-center text-gray-500 py-12">
+                                            <TableCell colSpan={7} className="py-12 text-center text-gray-500">
                                                 <div className="flex flex-col items-center gap-2">
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="text-gray-300"><circle cx="12" cy="12" r="10" /><path d="m9 12 2 2 4-4" /></svg>
                                                     <p>Không có dữ liệu</p>
@@ -821,15 +1065,26 @@ export default function MappingsApprovalPage() {
                         )}
                     </div>
 
-                    <DialogFooter className="mt-4 pt-4 border-t">
-                        <Button variant="outline" onClick={() => setIsDetailDialogOpen(false)}>
+                    {detailPagination.total > DETAIL_PAGE_SIZE && (
+                        <PaginationControls
+                            page={detailPagination.page}
+                            pageSize={detailPagination.limit}
+                            totalPages={detailPagination.totalPages}
+                            totalItems={detailPagination.total}
+                            currentCount={detailItems.length}
+                            itemLabel="thuốc"
+                            onPageChange={handleDetailPageChange}
+                        />
+                    )}
+
+                    <DialogFooter className="pt-0">
+                        <Button variant="outline" onClick={() => handleDetailDialogChange(false)}>
                             Đóng
                         </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
 
-            {/* Reject Dialog */}
             <Dialog open={isRejectDialogOpen} onOpenChange={setIsRejectDialogOpen}>
                 <DialogContent>
                     <DialogHeader>
@@ -840,11 +1095,11 @@ export default function MappingsApprovalPage() {
                     </DialogHeader>
                     <div className="space-y-4">
                         <div>
-                            <p className="text-sm text-gray-500 mb-2">Thuốc nội bộ:</p>
+                            <p className="mb-2 text-sm text-gray-500">Thuốc nội bộ:</p>
                             <p className="font-medium">{selectedMapping?.tenThuocNoiBo}</p>
                         </div>
                         <div>
-                            <p className="text-sm text-gray-500 mb-2">Lý do từ chối:</p>
+                            <p className="mb-2 text-sm text-gray-500">Lý do từ chối:</p>
                             <Textarea
                                 placeholder="VD: Sai hàm lượng, Chọn sai mã..."
                                 value={rejectNote}
@@ -863,7 +1118,7 @@ export default function MappingsApprovalPage() {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-            {/* Delete Confirmation Alert */}
+
             <AlertDialog open={!!facilityToDelete} onOpenChange={(open) => !open && setFacilityToDelete(null)}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
@@ -891,7 +1146,6 @@ export default function MappingsApprovalPage() {
                 </AlertDialogContent>
             </AlertDialog>
 
-            {/* Bulk Approve Confirmation Alert */}
             <AlertDialog open={!!facilityToApprove} onOpenChange={(open) => !open && setFacilityToApprove(null)}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
@@ -919,7 +1173,6 @@ export default function MappingsApprovalPage() {
                 </AlertDialogContent>
             </AlertDialog>
 
-            {/* Bulk Reject Dialog (Dialog to allow textarea input) */}
             <Dialog open={!!facilityToReject} onOpenChange={(open) => !open && (setFacilityToReject(null), setRejectAllNote(""))}>
                 <DialogContent>
                     <DialogHeader>
@@ -941,7 +1194,10 @@ export default function MappingsApprovalPage() {
                     <DialogFooter>
                         <Button
                             variant="outline"
-                            onClick={() => { setFacilityToReject(null); setRejectAllNote(""); }}
+                            onClick={() => {
+                                setFacilityToReject(null);
+                                setRejectAllNote("");
+                            }}
                             disabled={isProcessing}
                         >
                             Hủy
@@ -957,6 +1213,5 @@ export default function MappingsApprovalPage() {
                 </DialogContent>
             </Dialog>
         </div>
-
     );
 }

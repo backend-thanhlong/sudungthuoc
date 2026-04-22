@@ -19,6 +19,11 @@ export type PrismaPromise<T> = $Public.PrismaPromise<T>
  */
 export type User = $Result.DefaultSelection<Prisma.$UserPayload>
 /**
+ * Model TherapeuticGroup
+ * 
+ */
+export type TherapeuticGroup = $Result.DefaultSelection<Prisma.$TherapeuticGroupPayload>
+/**
  * Model MasterDrug
  * 
  */
@@ -33,6 +38,11 @@ export type FacilityDrugMap = $Result.DefaultSelection<Prisma.$FacilityDrugMapPa
  * 
  */
 export type InventoryReport = $Result.DefaultSelection<Prisma.$InventoryReportPayload>
+/**
+ * Model FacilityReportSubmission
+ * 
+ */
+export type FacilityReportSubmission = $Result.DefaultSelection<Prisma.$FacilityReportSubmissionPayload>
 /**
  * Model ReportReviewLog
  * 
@@ -257,6 +267,16 @@ export class PrismaClient<
   get user(): Prisma.UserDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.therapeuticGroup`: Exposes CRUD operations for the **TherapeuticGroup** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more TherapeuticGroups
+    * const therapeuticGroups = await prisma.therapeuticGroup.findMany()
+    * ```
+    */
+  get therapeuticGroup(): Prisma.TherapeuticGroupDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.masterDrug`: Exposes CRUD operations for the **MasterDrug** model.
     * Example usage:
     * ```ts
@@ -285,6 +305,16 @@ export class PrismaClient<
     * ```
     */
   get inventoryReport(): Prisma.InventoryReportDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.facilityReportSubmission`: Exposes CRUD operations for the **FacilityReportSubmission** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more FacilityReportSubmissions
+    * const facilityReportSubmissions = await prisma.facilityReportSubmission.findMany()
+    * ```
+    */
+  get facilityReportSubmission(): Prisma.FacilityReportSubmissionDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.reportReviewLog`: Exposes CRUD operations for the **ReportReviewLog** model.
@@ -820,9 +850,11 @@ export namespace Prisma {
 
   export const ModelName: {
     User: 'User',
+    TherapeuticGroup: 'TherapeuticGroup',
     MasterDrug: 'MasterDrug',
     FacilityDrugMap: 'FacilityDrugMap',
     InventoryReport: 'InventoryReport',
+    FacilityReportSubmission: 'FacilityReportSubmission',
     ReportReviewLog: 'ReportReviewLog',
     ReportPeriod: 'ReportPeriod',
     KeHoachLCNT: 'KeHoachLCNT',
@@ -848,7 +880,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "masterDrug" | "facilityDrugMap" | "inventoryReport" | "reportReviewLog" | "reportPeriod" | "keHoachLCNT" | "goiThau" | "thongBaoMoiThau" | "phanLoGoiThau" | "ketQuaLCNT" | "ketQuaPhanLo" | "notification" | "activityLog"
+      modelProps: "user" | "therapeuticGroup" | "masterDrug" | "facilityDrugMap" | "inventoryReport" | "facilityReportSubmission" | "reportReviewLog" | "reportPeriod" | "keHoachLCNT" | "goiThau" | "thongBaoMoiThau" | "phanLoGoiThau" | "ketQuaLCNT" | "ketQuaPhanLo" | "notification" | "activityLog"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -923,6 +955,80 @@ export namespace Prisma {
           count: {
             args: Prisma.UserCountArgs<ExtArgs>
             result: $Utils.Optional<UserCountAggregateOutputType> | number
+          }
+        }
+      }
+      TherapeuticGroup: {
+        payload: Prisma.$TherapeuticGroupPayload<ExtArgs>
+        fields: Prisma.TherapeuticGroupFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.TherapeuticGroupFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TherapeuticGroupPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.TherapeuticGroupFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TherapeuticGroupPayload>
+          }
+          findFirst: {
+            args: Prisma.TherapeuticGroupFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TherapeuticGroupPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.TherapeuticGroupFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TherapeuticGroupPayload>
+          }
+          findMany: {
+            args: Prisma.TherapeuticGroupFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TherapeuticGroupPayload>[]
+          }
+          create: {
+            args: Prisma.TherapeuticGroupCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TherapeuticGroupPayload>
+          }
+          createMany: {
+            args: Prisma.TherapeuticGroupCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.TherapeuticGroupCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TherapeuticGroupPayload>[]
+          }
+          delete: {
+            args: Prisma.TherapeuticGroupDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TherapeuticGroupPayload>
+          }
+          update: {
+            args: Prisma.TherapeuticGroupUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TherapeuticGroupPayload>
+          }
+          deleteMany: {
+            args: Prisma.TherapeuticGroupDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.TherapeuticGroupUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.TherapeuticGroupUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TherapeuticGroupPayload>[]
+          }
+          upsert: {
+            args: Prisma.TherapeuticGroupUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TherapeuticGroupPayload>
+          }
+          aggregate: {
+            args: Prisma.TherapeuticGroupAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateTherapeuticGroup>
+          }
+          groupBy: {
+            args: Prisma.TherapeuticGroupGroupByArgs<ExtArgs>
+            result: $Utils.Optional<TherapeuticGroupGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.TherapeuticGroupCountArgs<ExtArgs>
+            result: $Utils.Optional<TherapeuticGroupCountAggregateOutputType> | number
           }
         }
       }
@@ -1145,6 +1251,80 @@ export namespace Prisma {
           count: {
             args: Prisma.InventoryReportCountArgs<ExtArgs>
             result: $Utils.Optional<InventoryReportCountAggregateOutputType> | number
+          }
+        }
+      }
+      FacilityReportSubmission: {
+        payload: Prisma.$FacilityReportSubmissionPayload<ExtArgs>
+        fields: Prisma.FacilityReportSubmissionFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.FacilityReportSubmissionFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FacilityReportSubmissionPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.FacilityReportSubmissionFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FacilityReportSubmissionPayload>
+          }
+          findFirst: {
+            args: Prisma.FacilityReportSubmissionFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FacilityReportSubmissionPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.FacilityReportSubmissionFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FacilityReportSubmissionPayload>
+          }
+          findMany: {
+            args: Prisma.FacilityReportSubmissionFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FacilityReportSubmissionPayload>[]
+          }
+          create: {
+            args: Prisma.FacilityReportSubmissionCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FacilityReportSubmissionPayload>
+          }
+          createMany: {
+            args: Prisma.FacilityReportSubmissionCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.FacilityReportSubmissionCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FacilityReportSubmissionPayload>[]
+          }
+          delete: {
+            args: Prisma.FacilityReportSubmissionDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FacilityReportSubmissionPayload>
+          }
+          update: {
+            args: Prisma.FacilityReportSubmissionUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FacilityReportSubmissionPayload>
+          }
+          deleteMany: {
+            args: Prisma.FacilityReportSubmissionDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.FacilityReportSubmissionUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.FacilityReportSubmissionUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FacilityReportSubmissionPayload>[]
+          }
+          upsert: {
+            args: Prisma.FacilityReportSubmissionUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FacilityReportSubmissionPayload>
+          }
+          aggregate: {
+            args: Prisma.FacilityReportSubmissionAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateFacilityReportSubmission>
+          }
+          groupBy: {
+            args: Prisma.FacilityReportSubmissionGroupByArgs<ExtArgs>
+            result: $Utils.Optional<FacilityReportSubmissionGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.FacilityReportSubmissionCountArgs<ExtArgs>
+            result: $Utils.Optional<FacilityReportSubmissionCountAggregateOutputType> | number
           }
         }
       }
@@ -1997,9 +2177,11 @@ export namespace Prisma {
   }
   export type GlobalOmitConfig = {
     user?: UserOmit
+    therapeuticGroup?: TherapeuticGroupOmit
     masterDrug?: MasterDrugOmit
     facilityDrugMap?: FacilityDrugMapOmit
     inventoryReport?: InventoryReportOmit
+    facilityReportSubmission?: FacilityReportSubmissionOmit
     reportReviewLog?: ReportReviewLogOmit
     reportPeriod?: ReportPeriodOmit
     keHoachLCNT?: KeHoachLCNTOmit
@@ -2092,6 +2274,7 @@ export namespace Prisma {
   export type UserCountOutputType = {
     drugMaps: number
     reports: number
+    reportSubmissions: number
     keHoachLCNTs: number
     notifications: number
     activityLogs: number
@@ -2100,6 +2283,7 @@ export namespace Prisma {
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     drugMaps?: boolean | UserCountOutputTypeCountDrugMapsArgs
     reports?: boolean | UserCountOutputTypeCountReportsArgs
+    reportSubmissions?: boolean | UserCountOutputTypeCountReportSubmissionsArgs
     keHoachLCNTs?: boolean | UserCountOutputTypeCountKeHoachLCNTsArgs
     notifications?: boolean | UserCountOutputTypeCountNotificationsArgs
     activityLogs?: boolean | UserCountOutputTypeCountActivityLogsArgs
@@ -2133,6 +2317,13 @@ export namespace Prisma {
   /**
    * UserCountOutputType without action
    */
+  export type UserCountOutputTypeCountReportSubmissionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FacilityReportSubmissionWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
   export type UserCountOutputTypeCountKeHoachLCNTsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: KeHoachLCNTWhereInput
   }
@@ -2149,6 +2340,37 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountActivityLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ActivityLogWhereInput
+  }
+
+
+  /**
+   * Count Type TherapeuticGroupCountOutputType
+   */
+
+  export type TherapeuticGroupCountOutputType = {
+    masterDrugs: number
+  }
+
+  export type TherapeuticGroupCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    masterDrugs?: boolean | TherapeuticGroupCountOutputTypeCountMasterDrugsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * TherapeuticGroupCountOutputType without action
+   */
+  export type TherapeuticGroupCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TherapeuticGroupCountOutputType
+     */
+    select?: TherapeuticGroupCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * TherapeuticGroupCountOutputType without action
+   */
+  export type TherapeuticGroupCountOutputTypeCountMasterDrugsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: MasterDrugWhereInput
   }
 
 
@@ -2629,6 +2851,7 @@ export namespace Prisma {
     updatedAt?: boolean
     drugMaps?: boolean | User$drugMapsArgs<ExtArgs>
     reports?: boolean | User$reportsArgs<ExtArgs>
+    reportSubmissions?: boolean | User$reportSubmissionsArgs<ExtArgs>
     keHoachLCNTs?: boolean | User$keHoachLCNTsArgs<ExtArgs>
     notifications?: boolean | User$notificationsArgs<ExtArgs>
     activityLogs?: boolean | User$activityLogsArgs<ExtArgs>
@@ -2690,6 +2913,7 @@ export namespace Prisma {
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     drugMaps?: boolean | User$drugMapsArgs<ExtArgs>
     reports?: boolean | User$reportsArgs<ExtArgs>
+    reportSubmissions?: boolean | User$reportSubmissionsArgs<ExtArgs>
     keHoachLCNTs?: boolean | User$keHoachLCNTsArgs<ExtArgs>
     notifications?: boolean | User$notificationsArgs<ExtArgs>
     activityLogs?: boolean | User$activityLogsArgs<ExtArgs>
@@ -2703,6 +2927,7 @@ export namespace Prisma {
     objects: {
       drugMaps: Prisma.$FacilityDrugMapPayload<ExtArgs>[]
       reports: Prisma.$InventoryReportPayload<ExtArgs>[]
+      reportSubmissions: Prisma.$FacilityReportSubmissionPayload<ExtArgs>[]
       keHoachLCNTs: Prisma.$KeHoachLCNTPayload<ExtArgs>[]
       notifications: Prisma.$NotificationPayload<ExtArgs>[]
       activityLogs: Prisma.$ActivityLogPayload<ExtArgs>[]
@@ -3118,6 +3343,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     drugMaps<T extends User$drugMapsArgs<ExtArgs> = {}>(args?: Subset<T, User$drugMapsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FacilityDrugMapPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     reports<T extends User$reportsArgs<ExtArgs> = {}>(args?: Subset<T, User$reportsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    reportSubmissions<T extends User$reportSubmissionsArgs<ExtArgs> = {}>(args?: Subset<T, User$reportSubmissionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FacilityReportSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     keHoachLCNTs<T extends User$keHoachLCNTsArgs<ExtArgs> = {}>(args?: Subset<T, User$keHoachLCNTsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KeHoachLCNTPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     notifications<T extends User$notificationsArgs<ExtArgs> = {}>(args?: Subset<T, User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     activityLogs<T extends User$activityLogsArgs<ExtArgs> = {}>(args?: Subset<T, User$activityLogsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ActivityLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -3600,6 +3826,30 @@ export namespace Prisma {
   }
 
   /**
+   * User.reportSubmissions
+   */
+  export type User$reportSubmissionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FacilityReportSubmission
+     */
+    select?: FacilityReportSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FacilityReportSubmission
+     */
+    omit?: FacilityReportSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacilityReportSubmissionInclude<ExtArgs> | null
+    where?: FacilityReportSubmissionWhereInput
+    orderBy?: FacilityReportSubmissionOrderByWithRelationInput | FacilityReportSubmissionOrderByWithRelationInput[]
+    cursor?: FacilityReportSubmissionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: FacilityReportSubmissionScalarFieldEnum | FacilityReportSubmissionScalarFieldEnum[]
+  }
+
+  /**
    * User.keHoachLCNTs
    */
   export type User$keHoachLCNTsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -3691,6 +3941,1089 @@ export namespace Prisma {
 
 
   /**
+   * Model TherapeuticGroup
+   */
+
+  export type AggregateTherapeuticGroup = {
+    _count: TherapeuticGroupCountAggregateOutputType | null
+    _min: TherapeuticGroupMinAggregateOutputType | null
+    _max: TherapeuticGroupMaxAggregateOutputType | null
+  }
+
+  export type TherapeuticGroupMinAggregateOutputType = {
+    id: string | null
+    name: string | null
+    normalizedName: string | null
+    isActive: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type TherapeuticGroupMaxAggregateOutputType = {
+    id: string | null
+    name: string | null
+    normalizedName: string | null
+    isActive: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type TherapeuticGroupCountAggregateOutputType = {
+    id: number
+    name: number
+    normalizedName: number
+    isActive: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type TherapeuticGroupMinAggregateInputType = {
+    id?: true
+    name?: true
+    normalizedName?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type TherapeuticGroupMaxAggregateInputType = {
+    id?: true
+    name?: true
+    normalizedName?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type TherapeuticGroupCountAggregateInputType = {
+    id?: true
+    name?: true
+    normalizedName?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type TherapeuticGroupAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which TherapeuticGroup to aggregate.
+     */
+    where?: TherapeuticGroupWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TherapeuticGroups to fetch.
+     */
+    orderBy?: TherapeuticGroupOrderByWithRelationInput | TherapeuticGroupOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: TherapeuticGroupWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TherapeuticGroups from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TherapeuticGroups.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned TherapeuticGroups
+    **/
+    _count?: true | TherapeuticGroupCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: TherapeuticGroupMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: TherapeuticGroupMaxAggregateInputType
+  }
+
+  export type GetTherapeuticGroupAggregateType<T extends TherapeuticGroupAggregateArgs> = {
+        [P in keyof T & keyof AggregateTherapeuticGroup]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateTherapeuticGroup[P]>
+      : GetScalarType<T[P], AggregateTherapeuticGroup[P]>
+  }
+
+
+
+
+  export type TherapeuticGroupGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TherapeuticGroupWhereInput
+    orderBy?: TherapeuticGroupOrderByWithAggregationInput | TherapeuticGroupOrderByWithAggregationInput[]
+    by: TherapeuticGroupScalarFieldEnum[] | TherapeuticGroupScalarFieldEnum
+    having?: TherapeuticGroupScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: TherapeuticGroupCountAggregateInputType | true
+    _min?: TherapeuticGroupMinAggregateInputType
+    _max?: TherapeuticGroupMaxAggregateInputType
+  }
+
+  export type TherapeuticGroupGroupByOutputType = {
+    id: string
+    name: string
+    normalizedName: string
+    isActive: boolean
+    createdAt: Date
+    updatedAt: Date
+    _count: TherapeuticGroupCountAggregateOutputType | null
+    _min: TherapeuticGroupMinAggregateOutputType | null
+    _max: TherapeuticGroupMaxAggregateOutputType | null
+  }
+
+  type GetTherapeuticGroupGroupByPayload<T extends TherapeuticGroupGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<TherapeuticGroupGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof TherapeuticGroupGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], TherapeuticGroupGroupByOutputType[P]>
+            : GetScalarType<T[P], TherapeuticGroupGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type TherapeuticGroupSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    normalizedName?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    masterDrugs?: boolean | TherapeuticGroup$masterDrugsArgs<ExtArgs>
+    _count?: boolean | TherapeuticGroupCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["therapeuticGroup"]>
+
+  export type TherapeuticGroupSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    normalizedName?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["therapeuticGroup"]>
+
+  export type TherapeuticGroupSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    normalizedName?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["therapeuticGroup"]>
+
+  export type TherapeuticGroupSelectScalar = {
+    id?: boolean
+    name?: boolean
+    normalizedName?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type TherapeuticGroupOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "normalizedName" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["therapeuticGroup"]>
+  export type TherapeuticGroupInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    masterDrugs?: boolean | TherapeuticGroup$masterDrugsArgs<ExtArgs>
+    _count?: boolean | TherapeuticGroupCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type TherapeuticGroupIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type TherapeuticGroupIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+
+  export type $TherapeuticGroupPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "TherapeuticGroup"
+    objects: {
+      masterDrugs: Prisma.$MasterDrugPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      name: string
+      normalizedName: string
+      isActive: boolean
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["therapeuticGroup"]>
+    composites: {}
+  }
+
+  type TherapeuticGroupGetPayload<S extends boolean | null | undefined | TherapeuticGroupDefaultArgs> = $Result.GetResult<Prisma.$TherapeuticGroupPayload, S>
+
+  type TherapeuticGroupCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<TherapeuticGroupFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: TherapeuticGroupCountAggregateInputType | true
+    }
+
+  export interface TherapeuticGroupDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['TherapeuticGroup'], meta: { name: 'TherapeuticGroup' } }
+    /**
+     * Find zero or one TherapeuticGroup that matches the filter.
+     * @param {TherapeuticGroupFindUniqueArgs} args - Arguments to find a TherapeuticGroup
+     * @example
+     * // Get one TherapeuticGroup
+     * const therapeuticGroup = await prisma.therapeuticGroup.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends TherapeuticGroupFindUniqueArgs>(args: SelectSubset<T, TherapeuticGroupFindUniqueArgs<ExtArgs>>): Prisma__TherapeuticGroupClient<$Result.GetResult<Prisma.$TherapeuticGroupPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one TherapeuticGroup that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {TherapeuticGroupFindUniqueOrThrowArgs} args - Arguments to find a TherapeuticGroup
+     * @example
+     * // Get one TherapeuticGroup
+     * const therapeuticGroup = await prisma.therapeuticGroup.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends TherapeuticGroupFindUniqueOrThrowArgs>(args: SelectSubset<T, TherapeuticGroupFindUniqueOrThrowArgs<ExtArgs>>): Prisma__TherapeuticGroupClient<$Result.GetResult<Prisma.$TherapeuticGroupPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first TherapeuticGroup that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TherapeuticGroupFindFirstArgs} args - Arguments to find a TherapeuticGroup
+     * @example
+     * // Get one TherapeuticGroup
+     * const therapeuticGroup = await prisma.therapeuticGroup.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends TherapeuticGroupFindFirstArgs>(args?: SelectSubset<T, TherapeuticGroupFindFirstArgs<ExtArgs>>): Prisma__TherapeuticGroupClient<$Result.GetResult<Prisma.$TherapeuticGroupPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first TherapeuticGroup that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TherapeuticGroupFindFirstOrThrowArgs} args - Arguments to find a TherapeuticGroup
+     * @example
+     * // Get one TherapeuticGroup
+     * const therapeuticGroup = await prisma.therapeuticGroup.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends TherapeuticGroupFindFirstOrThrowArgs>(args?: SelectSubset<T, TherapeuticGroupFindFirstOrThrowArgs<ExtArgs>>): Prisma__TherapeuticGroupClient<$Result.GetResult<Prisma.$TherapeuticGroupPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more TherapeuticGroups that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TherapeuticGroupFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all TherapeuticGroups
+     * const therapeuticGroups = await prisma.therapeuticGroup.findMany()
+     * 
+     * // Get first 10 TherapeuticGroups
+     * const therapeuticGroups = await prisma.therapeuticGroup.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const therapeuticGroupWithIdOnly = await prisma.therapeuticGroup.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends TherapeuticGroupFindManyArgs>(args?: SelectSubset<T, TherapeuticGroupFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TherapeuticGroupPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a TherapeuticGroup.
+     * @param {TherapeuticGroupCreateArgs} args - Arguments to create a TherapeuticGroup.
+     * @example
+     * // Create one TherapeuticGroup
+     * const TherapeuticGroup = await prisma.therapeuticGroup.create({
+     *   data: {
+     *     // ... data to create a TherapeuticGroup
+     *   }
+     * })
+     * 
+     */
+    create<T extends TherapeuticGroupCreateArgs>(args: SelectSubset<T, TherapeuticGroupCreateArgs<ExtArgs>>): Prisma__TherapeuticGroupClient<$Result.GetResult<Prisma.$TherapeuticGroupPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many TherapeuticGroups.
+     * @param {TherapeuticGroupCreateManyArgs} args - Arguments to create many TherapeuticGroups.
+     * @example
+     * // Create many TherapeuticGroups
+     * const therapeuticGroup = await prisma.therapeuticGroup.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends TherapeuticGroupCreateManyArgs>(args?: SelectSubset<T, TherapeuticGroupCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many TherapeuticGroups and returns the data saved in the database.
+     * @param {TherapeuticGroupCreateManyAndReturnArgs} args - Arguments to create many TherapeuticGroups.
+     * @example
+     * // Create many TherapeuticGroups
+     * const therapeuticGroup = await prisma.therapeuticGroup.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many TherapeuticGroups and only return the `id`
+     * const therapeuticGroupWithIdOnly = await prisma.therapeuticGroup.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends TherapeuticGroupCreateManyAndReturnArgs>(args?: SelectSubset<T, TherapeuticGroupCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TherapeuticGroupPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a TherapeuticGroup.
+     * @param {TherapeuticGroupDeleteArgs} args - Arguments to delete one TherapeuticGroup.
+     * @example
+     * // Delete one TherapeuticGroup
+     * const TherapeuticGroup = await prisma.therapeuticGroup.delete({
+     *   where: {
+     *     // ... filter to delete one TherapeuticGroup
+     *   }
+     * })
+     * 
+     */
+    delete<T extends TherapeuticGroupDeleteArgs>(args: SelectSubset<T, TherapeuticGroupDeleteArgs<ExtArgs>>): Prisma__TherapeuticGroupClient<$Result.GetResult<Prisma.$TherapeuticGroupPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one TherapeuticGroup.
+     * @param {TherapeuticGroupUpdateArgs} args - Arguments to update one TherapeuticGroup.
+     * @example
+     * // Update one TherapeuticGroup
+     * const therapeuticGroup = await prisma.therapeuticGroup.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends TherapeuticGroupUpdateArgs>(args: SelectSubset<T, TherapeuticGroupUpdateArgs<ExtArgs>>): Prisma__TherapeuticGroupClient<$Result.GetResult<Prisma.$TherapeuticGroupPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more TherapeuticGroups.
+     * @param {TherapeuticGroupDeleteManyArgs} args - Arguments to filter TherapeuticGroups to delete.
+     * @example
+     * // Delete a few TherapeuticGroups
+     * const { count } = await prisma.therapeuticGroup.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends TherapeuticGroupDeleteManyArgs>(args?: SelectSubset<T, TherapeuticGroupDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more TherapeuticGroups.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TherapeuticGroupUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many TherapeuticGroups
+     * const therapeuticGroup = await prisma.therapeuticGroup.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends TherapeuticGroupUpdateManyArgs>(args: SelectSubset<T, TherapeuticGroupUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more TherapeuticGroups and returns the data updated in the database.
+     * @param {TherapeuticGroupUpdateManyAndReturnArgs} args - Arguments to update many TherapeuticGroups.
+     * @example
+     * // Update many TherapeuticGroups
+     * const therapeuticGroup = await prisma.therapeuticGroup.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more TherapeuticGroups and only return the `id`
+     * const therapeuticGroupWithIdOnly = await prisma.therapeuticGroup.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends TherapeuticGroupUpdateManyAndReturnArgs>(args: SelectSubset<T, TherapeuticGroupUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TherapeuticGroupPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one TherapeuticGroup.
+     * @param {TherapeuticGroupUpsertArgs} args - Arguments to update or create a TherapeuticGroup.
+     * @example
+     * // Update or create a TherapeuticGroup
+     * const therapeuticGroup = await prisma.therapeuticGroup.upsert({
+     *   create: {
+     *     // ... data to create a TherapeuticGroup
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the TherapeuticGroup we want to update
+     *   }
+     * })
+     */
+    upsert<T extends TherapeuticGroupUpsertArgs>(args: SelectSubset<T, TherapeuticGroupUpsertArgs<ExtArgs>>): Prisma__TherapeuticGroupClient<$Result.GetResult<Prisma.$TherapeuticGroupPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of TherapeuticGroups.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TherapeuticGroupCountArgs} args - Arguments to filter TherapeuticGroups to count.
+     * @example
+     * // Count the number of TherapeuticGroups
+     * const count = await prisma.therapeuticGroup.count({
+     *   where: {
+     *     // ... the filter for the TherapeuticGroups we want to count
+     *   }
+     * })
+    **/
+    count<T extends TherapeuticGroupCountArgs>(
+      args?: Subset<T, TherapeuticGroupCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], TherapeuticGroupCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a TherapeuticGroup.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TherapeuticGroupAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends TherapeuticGroupAggregateArgs>(args: Subset<T, TherapeuticGroupAggregateArgs>): Prisma.PrismaPromise<GetTherapeuticGroupAggregateType<T>>
+
+    /**
+     * Group by TherapeuticGroup.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TherapeuticGroupGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends TherapeuticGroupGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: TherapeuticGroupGroupByArgs['orderBy'] }
+        : { orderBy?: TherapeuticGroupGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, TherapeuticGroupGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetTherapeuticGroupGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the TherapeuticGroup model
+   */
+  readonly fields: TherapeuticGroupFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for TherapeuticGroup.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__TherapeuticGroupClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    masterDrugs<T extends TherapeuticGroup$masterDrugsArgs<ExtArgs> = {}>(args?: Subset<T, TherapeuticGroup$masterDrugsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MasterDrugPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the TherapeuticGroup model
+   */
+  interface TherapeuticGroupFieldRefs {
+    readonly id: FieldRef<"TherapeuticGroup", 'String'>
+    readonly name: FieldRef<"TherapeuticGroup", 'String'>
+    readonly normalizedName: FieldRef<"TherapeuticGroup", 'String'>
+    readonly isActive: FieldRef<"TherapeuticGroup", 'Boolean'>
+    readonly createdAt: FieldRef<"TherapeuticGroup", 'DateTime'>
+    readonly updatedAt: FieldRef<"TherapeuticGroup", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * TherapeuticGroup findUnique
+   */
+  export type TherapeuticGroupFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TherapeuticGroup
+     */
+    select?: TherapeuticGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TherapeuticGroup
+     */
+    omit?: TherapeuticGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TherapeuticGroupInclude<ExtArgs> | null
+    /**
+     * Filter, which TherapeuticGroup to fetch.
+     */
+    where: TherapeuticGroupWhereUniqueInput
+  }
+
+  /**
+   * TherapeuticGroup findUniqueOrThrow
+   */
+  export type TherapeuticGroupFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TherapeuticGroup
+     */
+    select?: TherapeuticGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TherapeuticGroup
+     */
+    omit?: TherapeuticGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TherapeuticGroupInclude<ExtArgs> | null
+    /**
+     * Filter, which TherapeuticGroup to fetch.
+     */
+    where: TherapeuticGroupWhereUniqueInput
+  }
+
+  /**
+   * TherapeuticGroup findFirst
+   */
+  export type TherapeuticGroupFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TherapeuticGroup
+     */
+    select?: TherapeuticGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TherapeuticGroup
+     */
+    omit?: TherapeuticGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TherapeuticGroupInclude<ExtArgs> | null
+    /**
+     * Filter, which TherapeuticGroup to fetch.
+     */
+    where?: TherapeuticGroupWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TherapeuticGroups to fetch.
+     */
+    orderBy?: TherapeuticGroupOrderByWithRelationInput | TherapeuticGroupOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for TherapeuticGroups.
+     */
+    cursor?: TherapeuticGroupWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TherapeuticGroups from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TherapeuticGroups.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TherapeuticGroups.
+     */
+    distinct?: TherapeuticGroupScalarFieldEnum | TherapeuticGroupScalarFieldEnum[]
+  }
+
+  /**
+   * TherapeuticGroup findFirstOrThrow
+   */
+  export type TherapeuticGroupFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TherapeuticGroup
+     */
+    select?: TherapeuticGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TherapeuticGroup
+     */
+    omit?: TherapeuticGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TherapeuticGroupInclude<ExtArgs> | null
+    /**
+     * Filter, which TherapeuticGroup to fetch.
+     */
+    where?: TherapeuticGroupWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TherapeuticGroups to fetch.
+     */
+    orderBy?: TherapeuticGroupOrderByWithRelationInput | TherapeuticGroupOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for TherapeuticGroups.
+     */
+    cursor?: TherapeuticGroupWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TherapeuticGroups from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TherapeuticGroups.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TherapeuticGroups.
+     */
+    distinct?: TherapeuticGroupScalarFieldEnum | TherapeuticGroupScalarFieldEnum[]
+  }
+
+  /**
+   * TherapeuticGroup findMany
+   */
+  export type TherapeuticGroupFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TherapeuticGroup
+     */
+    select?: TherapeuticGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TherapeuticGroup
+     */
+    omit?: TherapeuticGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TherapeuticGroupInclude<ExtArgs> | null
+    /**
+     * Filter, which TherapeuticGroups to fetch.
+     */
+    where?: TherapeuticGroupWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TherapeuticGroups to fetch.
+     */
+    orderBy?: TherapeuticGroupOrderByWithRelationInput | TherapeuticGroupOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing TherapeuticGroups.
+     */
+    cursor?: TherapeuticGroupWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TherapeuticGroups from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TherapeuticGroups.
+     */
+    skip?: number
+    distinct?: TherapeuticGroupScalarFieldEnum | TherapeuticGroupScalarFieldEnum[]
+  }
+
+  /**
+   * TherapeuticGroup create
+   */
+  export type TherapeuticGroupCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TherapeuticGroup
+     */
+    select?: TherapeuticGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TherapeuticGroup
+     */
+    omit?: TherapeuticGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TherapeuticGroupInclude<ExtArgs> | null
+    /**
+     * The data needed to create a TherapeuticGroup.
+     */
+    data: XOR<TherapeuticGroupCreateInput, TherapeuticGroupUncheckedCreateInput>
+  }
+
+  /**
+   * TherapeuticGroup createMany
+   */
+  export type TherapeuticGroupCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many TherapeuticGroups.
+     */
+    data: TherapeuticGroupCreateManyInput | TherapeuticGroupCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * TherapeuticGroup createManyAndReturn
+   */
+  export type TherapeuticGroupCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TherapeuticGroup
+     */
+    select?: TherapeuticGroupSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the TherapeuticGroup
+     */
+    omit?: TherapeuticGroupOmit<ExtArgs> | null
+    /**
+     * The data used to create many TherapeuticGroups.
+     */
+    data: TherapeuticGroupCreateManyInput | TherapeuticGroupCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * TherapeuticGroup update
+   */
+  export type TherapeuticGroupUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TherapeuticGroup
+     */
+    select?: TherapeuticGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TherapeuticGroup
+     */
+    omit?: TherapeuticGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TherapeuticGroupInclude<ExtArgs> | null
+    /**
+     * The data needed to update a TherapeuticGroup.
+     */
+    data: XOR<TherapeuticGroupUpdateInput, TherapeuticGroupUncheckedUpdateInput>
+    /**
+     * Choose, which TherapeuticGroup to update.
+     */
+    where: TherapeuticGroupWhereUniqueInput
+  }
+
+  /**
+   * TherapeuticGroup updateMany
+   */
+  export type TherapeuticGroupUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update TherapeuticGroups.
+     */
+    data: XOR<TherapeuticGroupUpdateManyMutationInput, TherapeuticGroupUncheckedUpdateManyInput>
+    /**
+     * Filter which TherapeuticGroups to update
+     */
+    where?: TherapeuticGroupWhereInput
+    /**
+     * Limit how many TherapeuticGroups to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * TherapeuticGroup updateManyAndReturn
+   */
+  export type TherapeuticGroupUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TherapeuticGroup
+     */
+    select?: TherapeuticGroupSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the TherapeuticGroup
+     */
+    omit?: TherapeuticGroupOmit<ExtArgs> | null
+    /**
+     * The data used to update TherapeuticGroups.
+     */
+    data: XOR<TherapeuticGroupUpdateManyMutationInput, TherapeuticGroupUncheckedUpdateManyInput>
+    /**
+     * Filter which TherapeuticGroups to update
+     */
+    where?: TherapeuticGroupWhereInput
+    /**
+     * Limit how many TherapeuticGroups to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * TherapeuticGroup upsert
+   */
+  export type TherapeuticGroupUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TherapeuticGroup
+     */
+    select?: TherapeuticGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TherapeuticGroup
+     */
+    omit?: TherapeuticGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TherapeuticGroupInclude<ExtArgs> | null
+    /**
+     * The filter to search for the TherapeuticGroup to update in case it exists.
+     */
+    where: TherapeuticGroupWhereUniqueInput
+    /**
+     * In case the TherapeuticGroup found by the `where` argument doesn't exist, create a new TherapeuticGroup with this data.
+     */
+    create: XOR<TherapeuticGroupCreateInput, TherapeuticGroupUncheckedCreateInput>
+    /**
+     * In case the TherapeuticGroup was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<TherapeuticGroupUpdateInput, TherapeuticGroupUncheckedUpdateInput>
+  }
+
+  /**
+   * TherapeuticGroup delete
+   */
+  export type TherapeuticGroupDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TherapeuticGroup
+     */
+    select?: TherapeuticGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TherapeuticGroup
+     */
+    omit?: TherapeuticGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TherapeuticGroupInclude<ExtArgs> | null
+    /**
+     * Filter which TherapeuticGroup to delete.
+     */
+    where: TherapeuticGroupWhereUniqueInput
+  }
+
+  /**
+   * TherapeuticGroup deleteMany
+   */
+  export type TherapeuticGroupDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which TherapeuticGroups to delete
+     */
+    where?: TherapeuticGroupWhereInput
+    /**
+     * Limit how many TherapeuticGroups to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * TherapeuticGroup.masterDrugs
+   */
+  export type TherapeuticGroup$masterDrugsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MasterDrug
+     */
+    select?: MasterDrugSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MasterDrug
+     */
+    omit?: MasterDrugOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MasterDrugInclude<ExtArgs> | null
+    where?: MasterDrugWhereInput
+    orderBy?: MasterDrugOrderByWithRelationInput | MasterDrugOrderByWithRelationInput[]
+    cursor?: MasterDrugWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: MasterDrugScalarFieldEnum | MasterDrugScalarFieldEnum[]
+  }
+
+  /**
+   * TherapeuticGroup without action
+   */
+  export type TherapeuticGroupDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TherapeuticGroup
+     */
+    select?: TherapeuticGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TherapeuticGroup
+     */
+    omit?: TherapeuticGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TherapeuticGroupInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Model MasterDrug
    */
 
@@ -3722,7 +5055,7 @@ export namespace Prisma {
     nuocDangKy: string | null
     diaChiDangKy: string | null
     nhomThuoc: string | null
-    nhomDieuTri: string | null
+    therapeuticGroupId: string | null
     isKeDon: string | null
     kiemSoatDacBiet: string | null
     isTrongNuoc: string | null
@@ -3753,7 +5086,7 @@ export namespace Prisma {
     nuocDangKy: string | null
     diaChiDangKy: string | null
     nhomThuoc: string | null
-    nhomDieuTri: string | null
+    therapeuticGroupId: string | null
     isKeDon: string | null
     kiemSoatDacBiet: string | null
     isTrongNuoc: string | null
@@ -3784,7 +5117,7 @@ export namespace Prisma {
     nuocDangKy: number
     diaChiDangKy: number
     nhomThuoc: number
-    nhomDieuTri: number
+    therapeuticGroupId: number
     isKeDon: number
     kiemSoatDacBiet: number
     isTrongNuoc: number
@@ -3817,7 +5150,7 @@ export namespace Prisma {
     nuocDangKy?: true
     diaChiDangKy?: true
     nhomThuoc?: true
-    nhomDieuTri?: true
+    therapeuticGroupId?: true
     isKeDon?: true
     kiemSoatDacBiet?: true
     isTrongNuoc?: true
@@ -3848,7 +5181,7 @@ export namespace Prisma {
     nuocDangKy?: true
     diaChiDangKy?: true
     nhomThuoc?: true
-    nhomDieuTri?: true
+    therapeuticGroupId?: true
     isKeDon?: true
     kiemSoatDacBiet?: true
     isTrongNuoc?: true
@@ -3879,7 +5212,7 @@ export namespace Prisma {
     nuocDangKy?: true
     diaChiDangKy?: true
     nhomThuoc?: true
-    nhomDieuTri?: true
+    therapeuticGroupId?: true
     isKeDon?: true
     kiemSoatDacBiet?: true
     isTrongNuoc?: true
@@ -3983,7 +5316,7 @@ export namespace Prisma {
     nuocDangKy: string | null
     diaChiDangKy: string | null
     nhomThuoc: string | null
-    nhomDieuTri: string | null
+    therapeuticGroupId: string | null
     isKeDon: string | null
     kiemSoatDacBiet: string | null
     isTrongNuoc: string | null
@@ -4031,13 +5364,14 @@ export namespace Prisma {
     nuocDangKy?: boolean
     diaChiDangKy?: boolean
     nhomThuoc?: boolean
-    nhomDieuTri?: boolean
+    therapeuticGroupId?: boolean
     isKeDon?: boolean
     kiemSoatDacBiet?: boolean
     isTrongNuoc?: boolean
     isActive?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    therapeuticGroup?: boolean | MasterDrug$therapeuticGroupArgs<ExtArgs>
     drugMaps?: boolean | MasterDrug$drugMapsArgs<ExtArgs>
     _count?: boolean | MasterDrugCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["masterDrug"]>
@@ -4064,13 +5398,14 @@ export namespace Prisma {
     nuocDangKy?: boolean
     diaChiDangKy?: boolean
     nhomThuoc?: boolean
-    nhomDieuTri?: boolean
+    therapeuticGroupId?: boolean
     isKeDon?: boolean
     kiemSoatDacBiet?: boolean
     isTrongNuoc?: boolean
     isActive?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    therapeuticGroup?: boolean | MasterDrug$therapeuticGroupArgs<ExtArgs>
   }, ExtArgs["result"]["masterDrug"]>
 
   export type MasterDrugSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -4095,13 +5430,14 @@ export namespace Prisma {
     nuocDangKy?: boolean
     diaChiDangKy?: boolean
     nhomThuoc?: boolean
-    nhomDieuTri?: boolean
+    therapeuticGroupId?: boolean
     isKeDon?: boolean
     kiemSoatDacBiet?: boolean
     isTrongNuoc?: boolean
     isActive?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    therapeuticGroup?: boolean | MasterDrug$therapeuticGroupArgs<ExtArgs>
   }, ExtArgs["result"]["masterDrug"]>
 
   export type MasterDrugSelectScalar = {
@@ -4126,7 +5462,7 @@ export namespace Prisma {
     nuocDangKy?: boolean
     diaChiDangKy?: boolean
     nhomThuoc?: boolean
-    nhomDieuTri?: boolean
+    therapeuticGroupId?: boolean
     isKeDon?: boolean
     kiemSoatDacBiet?: boolean
     isTrongNuoc?: boolean
@@ -4135,17 +5471,23 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type MasterDrugOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "maChung" | "maBhyt" | "tenThuoc" | "hoatChat" | "hamLuong" | "dangBaoChe" | "soDangKy" | "quyCach" | "donViTinh" | "tieuChuan" | "tuoiTho" | "duongDung" | "nguonGoc" | "congTySanXuat" | "nuocSanXuat" | "diaChiSanXuat" | "congTyDangKy" | "nuocDangKy" | "diaChiDangKy" | "nhomThuoc" | "nhomDieuTri" | "isKeDon" | "kiemSoatDacBiet" | "isTrongNuoc" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["masterDrug"]>
+  export type MasterDrugOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "maChung" | "maBhyt" | "tenThuoc" | "hoatChat" | "hamLuong" | "dangBaoChe" | "soDangKy" | "quyCach" | "donViTinh" | "tieuChuan" | "tuoiTho" | "duongDung" | "nguonGoc" | "congTySanXuat" | "nuocSanXuat" | "diaChiSanXuat" | "congTyDangKy" | "nuocDangKy" | "diaChiDangKy" | "nhomThuoc" | "therapeuticGroupId" | "isKeDon" | "kiemSoatDacBiet" | "isTrongNuoc" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["masterDrug"]>
   export type MasterDrugInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    therapeuticGroup?: boolean | MasterDrug$therapeuticGroupArgs<ExtArgs>
     drugMaps?: boolean | MasterDrug$drugMapsArgs<ExtArgs>
     _count?: boolean | MasterDrugCountOutputTypeDefaultArgs<ExtArgs>
   }
-  export type MasterDrugIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
-  export type MasterDrugIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type MasterDrugIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    therapeuticGroup?: boolean | MasterDrug$therapeuticGroupArgs<ExtArgs>
+  }
+  export type MasterDrugIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    therapeuticGroup?: boolean | MasterDrug$therapeuticGroupArgs<ExtArgs>
+  }
 
   export type $MasterDrugPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "MasterDrug"
     objects: {
+      therapeuticGroup: Prisma.$TherapeuticGroupPayload<ExtArgs> | null
       drugMaps: Prisma.$FacilityDrugMapPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -4170,7 +5512,7 @@ export namespace Prisma {
       nuocDangKy: string | null
       diaChiDangKy: string | null
       nhomThuoc: string | null
-      nhomDieuTri: string | null
+      therapeuticGroupId: string | null
       isKeDon: string | null
       kiemSoatDacBiet: string | null
       isTrongNuoc: string | null
@@ -4571,6 +5913,7 @@ export namespace Prisma {
    */
   export interface Prisma__MasterDrugClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    therapeuticGroup<T extends MasterDrug$therapeuticGroupArgs<ExtArgs> = {}>(args?: Subset<T, MasterDrug$therapeuticGroupArgs<ExtArgs>>): Prisma__TherapeuticGroupClient<$Result.GetResult<Prisma.$TherapeuticGroupPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     drugMaps<T extends MasterDrug$drugMapsArgs<ExtArgs> = {}>(args?: Subset<T, MasterDrug$drugMapsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FacilityDrugMapPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -4622,7 +5965,7 @@ export namespace Prisma {
     readonly nuocDangKy: FieldRef<"MasterDrug", 'String'>
     readonly diaChiDangKy: FieldRef<"MasterDrug", 'String'>
     readonly nhomThuoc: FieldRef<"MasterDrug", 'String'>
-    readonly nhomDieuTri: FieldRef<"MasterDrug", 'String'>
+    readonly therapeuticGroupId: FieldRef<"MasterDrug", 'String'>
     readonly isKeDon: FieldRef<"MasterDrug", 'String'>
     readonly kiemSoatDacBiet: FieldRef<"MasterDrug", 'String'>
     readonly isTrongNuoc: FieldRef<"MasterDrug", 'String'>
@@ -4878,6 +6221,10 @@ export namespace Prisma {
      */
     data: MasterDrugCreateManyInput | MasterDrugCreateManyInput[]
     skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MasterDrugIncludeCreateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -4948,6 +6295,10 @@ export namespace Prisma {
      * Limit how many MasterDrugs to update.
      */
     limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MasterDrugIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -5014,6 +6365,25 @@ export namespace Prisma {
      * Limit how many MasterDrugs to delete.
      */
     limit?: number
+  }
+
+  /**
+   * MasterDrug.therapeuticGroup
+   */
+  export type MasterDrug$therapeuticGroupArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TherapeuticGroup
+     */
+    select?: TherapeuticGroupSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TherapeuticGroup
+     */
+    omit?: TherapeuticGroupOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TherapeuticGroupInclude<ExtArgs> | null
+    where?: TherapeuticGroupWhereInput
   }
 
   /**
@@ -7590,6 +8960,1141 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: InventoryReportInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model FacilityReportSubmission
+   */
+
+  export type AggregateFacilityReportSubmission = {
+    _count: FacilityReportSubmissionCountAggregateOutputType | null
+    _avg: FacilityReportSubmissionAvgAggregateOutputType | null
+    _sum: FacilityReportSubmissionSumAggregateOutputType | null
+    _min: FacilityReportSubmissionMinAggregateOutputType | null
+    _max: FacilityReportSubmissionMaxAggregateOutputType | null
+  }
+
+  export type FacilityReportSubmissionAvgAggregateOutputType = {
+    reportedRowCount: number | null
+    skippedRowCount: number | null
+  }
+
+  export type FacilityReportSubmissionSumAggregateOutputType = {
+    reportedRowCount: number | null
+    skippedRowCount: number | null
+  }
+
+  export type FacilityReportSubmissionMinAggregateOutputType = {
+    id: string | null
+    facilityId: string | null
+    reportMonth: string | null
+    submittedAt: Date | null
+    reportedRowCount: number | null
+    skippedRowCount: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type FacilityReportSubmissionMaxAggregateOutputType = {
+    id: string | null
+    facilityId: string | null
+    reportMonth: string | null
+    submittedAt: Date | null
+    reportedRowCount: number | null
+    skippedRowCount: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type FacilityReportSubmissionCountAggregateOutputType = {
+    id: number
+    facilityId: number
+    reportMonth: number
+    submittedAt: number
+    reportedRowCount: number
+    skippedRowCount: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type FacilityReportSubmissionAvgAggregateInputType = {
+    reportedRowCount?: true
+    skippedRowCount?: true
+  }
+
+  export type FacilityReportSubmissionSumAggregateInputType = {
+    reportedRowCount?: true
+    skippedRowCount?: true
+  }
+
+  export type FacilityReportSubmissionMinAggregateInputType = {
+    id?: true
+    facilityId?: true
+    reportMonth?: true
+    submittedAt?: true
+    reportedRowCount?: true
+    skippedRowCount?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type FacilityReportSubmissionMaxAggregateInputType = {
+    id?: true
+    facilityId?: true
+    reportMonth?: true
+    submittedAt?: true
+    reportedRowCount?: true
+    skippedRowCount?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type FacilityReportSubmissionCountAggregateInputType = {
+    id?: true
+    facilityId?: true
+    reportMonth?: true
+    submittedAt?: true
+    reportedRowCount?: true
+    skippedRowCount?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type FacilityReportSubmissionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FacilityReportSubmission to aggregate.
+     */
+    where?: FacilityReportSubmissionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FacilityReportSubmissions to fetch.
+     */
+    orderBy?: FacilityReportSubmissionOrderByWithRelationInput | FacilityReportSubmissionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: FacilityReportSubmissionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FacilityReportSubmissions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FacilityReportSubmissions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned FacilityReportSubmissions
+    **/
+    _count?: true | FacilityReportSubmissionCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: FacilityReportSubmissionAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: FacilityReportSubmissionSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: FacilityReportSubmissionMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: FacilityReportSubmissionMaxAggregateInputType
+  }
+
+  export type GetFacilityReportSubmissionAggregateType<T extends FacilityReportSubmissionAggregateArgs> = {
+        [P in keyof T & keyof AggregateFacilityReportSubmission]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateFacilityReportSubmission[P]>
+      : GetScalarType<T[P], AggregateFacilityReportSubmission[P]>
+  }
+
+
+
+
+  export type FacilityReportSubmissionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FacilityReportSubmissionWhereInput
+    orderBy?: FacilityReportSubmissionOrderByWithAggregationInput | FacilityReportSubmissionOrderByWithAggregationInput[]
+    by: FacilityReportSubmissionScalarFieldEnum[] | FacilityReportSubmissionScalarFieldEnum
+    having?: FacilityReportSubmissionScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: FacilityReportSubmissionCountAggregateInputType | true
+    _avg?: FacilityReportSubmissionAvgAggregateInputType
+    _sum?: FacilityReportSubmissionSumAggregateInputType
+    _min?: FacilityReportSubmissionMinAggregateInputType
+    _max?: FacilityReportSubmissionMaxAggregateInputType
+  }
+
+  export type FacilityReportSubmissionGroupByOutputType = {
+    id: string
+    facilityId: string
+    reportMonth: string
+    submittedAt: Date
+    reportedRowCount: number
+    skippedRowCount: number
+    createdAt: Date
+    updatedAt: Date
+    _count: FacilityReportSubmissionCountAggregateOutputType | null
+    _avg: FacilityReportSubmissionAvgAggregateOutputType | null
+    _sum: FacilityReportSubmissionSumAggregateOutputType | null
+    _min: FacilityReportSubmissionMinAggregateOutputType | null
+    _max: FacilityReportSubmissionMaxAggregateOutputType | null
+  }
+
+  type GetFacilityReportSubmissionGroupByPayload<T extends FacilityReportSubmissionGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<FacilityReportSubmissionGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof FacilityReportSubmissionGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], FacilityReportSubmissionGroupByOutputType[P]>
+            : GetScalarType<T[P], FacilityReportSubmissionGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type FacilityReportSubmissionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    facilityId?: boolean
+    reportMonth?: boolean
+    submittedAt?: boolean
+    reportedRowCount?: boolean
+    skippedRowCount?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    facility?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["facilityReportSubmission"]>
+
+  export type FacilityReportSubmissionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    facilityId?: boolean
+    reportMonth?: boolean
+    submittedAt?: boolean
+    reportedRowCount?: boolean
+    skippedRowCount?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    facility?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["facilityReportSubmission"]>
+
+  export type FacilityReportSubmissionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    facilityId?: boolean
+    reportMonth?: boolean
+    submittedAt?: boolean
+    reportedRowCount?: boolean
+    skippedRowCount?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    facility?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["facilityReportSubmission"]>
+
+  export type FacilityReportSubmissionSelectScalar = {
+    id?: boolean
+    facilityId?: boolean
+    reportMonth?: boolean
+    submittedAt?: boolean
+    reportedRowCount?: boolean
+    skippedRowCount?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type FacilityReportSubmissionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "facilityId" | "reportMonth" | "submittedAt" | "reportedRowCount" | "skippedRowCount" | "createdAt" | "updatedAt", ExtArgs["result"]["facilityReportSubmission"]>
+  export type FacilityReportSubmissionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    facility?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type FacilityReportSubmissionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    facility?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type FacilityReportSubmissionIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    facility?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $FacilityReportSubmissionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "FacilityReportSubmission"
+    objects: {
+      facility: Prisma.$UserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      facilityId: string
+      reportMonth: string
+      submittedAt: Date
+      reportedRowCount: number
+      skippedRowCount: number
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["facilityReportSubmission"]>
+    composites: {}
+  }
+
+  type FacilityReportSubmissionGetPayload<S extends boolean | null | undefined | FacilityReportSubmissionDefaultArgs> = $Result.GetResult<Prisma.$FacilityReportSubmissionPayload, S>
+
+  type FacilityReportSubmissionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<FacilityReportSubmissionFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: FacilityReportSubmissionCountAggregateInputType | true
+    }
+
+  export interface FacilityReportSubmissionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['FacilityReportSubmission'], meta: { name: 'FacilityReportSubmission' } }
+    /**
+     * Find zero or one FacilityReportSubmission that matches the filter.
+     * @param {FacilityReportSubmissionFindUniqueArgs} args - Arguments to find a FacilityReportSubmission
+     * @example
+     * // Get one FacilityReportSubmission
+     * const facilityReportSubmission = await prisma.facilityReportSubmission.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends FacilityReportSubmissionFindUniqueArgs>(args: SelectSubset<T, FacilityReportSubmissionFindUniqueArgs<ExtArgs>>): Prisma__FacilityReportSubmissionClient<$Result.GetResult<Prisma.$FacilityReportSubmissionPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one FacilityReportSubmission that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {FacilityReportSubmissionFindUniqueOrThrowArgs} args - Arguments to find a FacilityReportSubmission
+     * @example
+     * // Get one FacilityReportSubmission
+     * const facilityReportSubmission = await prisma.facilityReportSubmission.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends FacilityReportSubmissionFindUniqueOrThrowArgs>(args: SelectSubset<T, FacilityReportSubmissionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__FacilityReportSubmissionClient<$Result.GetResult<Prisma.$FacilityReportSubmissionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first FacilityReportSubmission that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FacilityReportSubmissionFindFirstArgs} args - Arguments to find a FacilityReportSubmission
+     * @example
+     * // Get one FacilityReportSubmission
+     * const facilityReportSubmission = await prisma.facilityReportSubmission.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends FacilityReportSubmissionFindFirstArgs>(args?: SelectSubset<T, FacilityReportSubmissionFindFirstArgs<ExtArgs>>): Prisma__FacilityReportSubmissionClient<$Result.GetResult<Prisma.$FacilityReportSubmissionPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first FacilityReportSubmission that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FacilityReportSubmissionFindFirstOrThrowArgs} args - Arguments to find a FacilityReportSubmission
+     * @example
+     * // Get one FacilityReportSubmission
+     * const facilityReportSubmission = await prisma.facilityReportSubmission.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends FacilityReportSubmissionFindFirstOrThrowArgs>(args?: SelectSubset<T, FacilityReportSubmissionFindFirstOrThrowArgs<ExtArgs>>): Prisma__FacilityReportSubmissionClient<$Result.GetResult<Prisma.$FacilityReportSubmissionPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more FacilityReportSubmissions that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FacilityReportSubmissionFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all FacilityReportSubmissions
+     * const facilityReportSubmissions = await prisma.facilityReportSubmission.findMany()
+     * 
+     * // Get first 10 FacilityReportSubmissions
+     * const facilityReportSubmissions = await prisma.facilityReportSubmission.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const facilityReportSubmissionWithIdOnly = await prisma.facilityReportSubmission.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends FacilityReportSubmissionFindManyArgs>(args?: SelectSubset<T, FacilityReportSubmissionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FacilityReportSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a FacilityReportSubmission.
+     * @param {FacilityReportSubmissionCreateArgs} args - Arguments to create a FacilityReportSubmission.
+     * @example
+     * // Create one FacilityReportSubmission
+     * const FacilityReportSubmission = await prisma.facilityReportSubmission.create({
+     *   data: {
+     *     // ... data to create a FacilityReportSubmission
+     *   }
+     * })
+     * 
+     */
+    create<T extends FacilityReportSubmissionCreateArgs>(args: SelectSubset<T, FacilityReportSubmissionCreateArgs<ExtArgs>>): Prisma__FacilityReportSubmissionClient<$Result.GetResult<Prisma.$FacilityReportSubmissionPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many FacilityReportSubmissions.
+     * @param {FacilityReportSubmissionCreateManyArgs} args - Arguments to create many FacilityReportSubmissions.
+     * @example
+     * // Create many FacilityReportSubmissions
+     * const facilityReportSubmission = await prisma.facilityReportSubmission.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends FacilityReportSubmissionCreateManyArgs>(args?: SelectSubset<T, FacilityReportSubmissionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many FacilityReportSubmissions and returns the data saved in the database.
+     * @param {FacilityReportSubmissionCreateManyAndReturnArgs} args - Arguments to create many FacilityReportSubmissions.
+     * @example
+     * // Create many FacilityReportSubmissions
+     * const facilityReportSubmission = await prisma.facilityReportSubmission.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many FacilityReportSubmissions and only return the `id`
+     * const facilityReportSubmissionWithIdOnly = await prisma.facilityReportSubmission.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends FacilityReportSubmissionCreateManyAndReturnArgs>(args?: SelectSubset<T, FacilityReportSubmissionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FacilityReportSubmissionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a FacilityReportSubmission.
+     * @param {FacilityReportSubmissionDeleteArgs} args - Arguments to delete one FacilityReportSubmission.
+     * @example
+     * // Delete one FacilityReportSubmission
+     * const FacilityReportSubmission = await prisma.facilityReportSubmission.delete({
+     *   where: {
+     *     // ... filter to delete one FacilityReportSubmission
+     *   }
+     * })
+     * 
+     */
+    delete<T extends FacilityReportSubmissionDeleteArgs>(args: SelectSubset<T, FacilityReportSubmissionDeleteArgs<ExtArgs>>): Prisma__FacilityReportSubmissionClient<$Result.GetResult<Prisma.$FacilityReportSubmissionPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one FacilityReportSubmission.
+     * @param {FacilityReportSubmissionUpdateArgs} args - Arguments to update one FacilityReportSubmission.
+     * @example
+     * // Update one FacilityReportSubmission
+     * const facilityReportSubmission = await prisma.facilityReportSubmission.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends FacilityReportSubmissionUpdateArgs>(args: SelectSubset<T, FacilityReportSubmissionUpdateArgs<ExtArgs>>): Prisma__FacilityReportSubmissionClient<$Result.GetResult<Prisma.$FacilityReportSubmissionPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more FacilityReportSubmissions.
+     * @param {FacilityReportSubmissionDeleteManyArgs} args - Arguments to filter FacilityReportSubmissions to delete.
+     * @example
+     * // Delete a few FacilityReportSubmissions
+     * const { count } = await prisma.facilityReportSubmission.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends FacilityReportSubmissionDeleteManyArgs>(args?: SelectSubset<T, FacilityReportSubmissionDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FacilityReportSubmissions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FacilityReportSubmissionUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many FacilityReportSubmissions
+     * const facilityReportSubmission = await prisma.facilityReportSubmission.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends FacilityReportSubmissionUpdateManyArgs>(args: SelectSubset<T, FacilityReportSubmissionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FacilityReportSubmissions and returns the data updated in the database.
+     * @param {FacilityReportSubmissionUpdateManyAndReturnArgs} args - Arguments to update many FacilityReportSubmissions.
+     * @example
+     * // Update many FacilityReportSubmissions
+     * const facilityReportSubmission = await prisma.facilityReportSubmission.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more FacilityReportSubmissions and only return the `id`
+     * const facilityReportSubmissionWithIdOnly = await prisma.facilityReportSubmission.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends FacilityReportSubmissionUpdateManyAndReturnArgs>(args: SelectSubset<T, FacilityReportSubmissionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FacilityReportSubmissionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one FacilityReportSubmission.
+     * @param {FacilityReportSubmissionUpsertArgs} args - Arguments to update or create a FacilityReportSubmission.
+     * @example
+     * // Update or create a FacilityReportSubmission
+     * const facilityReportSubmission = await prisma.facilityReportSubmission.upsert({
+     *   create: {
+     *     // ... data to create a FacilityReportSubmission
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the FacilityReportSubmission we want to update
+     *   }
+     * })
+     */
+    upsert<T extends FacilityReportSubmissionUpsertArgs>(args: SelectSubset<T, FacilityReportSubmissionUpsertArgs<ExtArgs>>): Prisma__FacilityReportSubmissionClient<$Result.GetResult<Prisma.$FacilityReportSubmissionPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of FacilityReportSubmissions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FacilityReportSubmissionCountArgs} args - Arguments to filter FacilityReportSubmissions to count.
+     * @example
+     * // Count the number of FacilityReportSubmissions
+     * const count = await prisma.facilityReportSubmission.count({
+     *   where: {
+     *     // ... the filter for the FacilityReportSubmissions we want to count
+     *   }
+     * })
+    **/
+    count<T extends FacilityReportSubmissionCountArgs>(
+      args?: Subset<T, FacilityReportSubmissionCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], FacilityReportSubmissionCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a FacilityReportSubmission.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FacilityReportSubmissionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends FacilityReportSubmissionAggregateArgs>(args: Subset<T, FacilityReportSubmissionAggregateArgs>): Prisma.PrismaPromise<GetFacilityReportSubmissionAggregateType<T>>
+
+    /**
+     * Group by FacilityReportSubmission.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FacilityReportSubmissionGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends FacilityReportSubmissionGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: FacilityReportSubmissionGroupByArgs['orderBy'] }
+        : { orderBy?: FacilityReportSubmissionGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, FacilityReportSubmissionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetFacilityReportSubmissionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the FacilityReportSubmission model
+   */
+  readonly fields: FacilityReportSubmissionFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for FacilityReportSubmission.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__FacilityReportSubmissionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    facility<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the FacilityReportSubmission model
+   */
+  interface FacilityReportSubmissionFieldRefs {
+    readonly id: FieldRef<"FacilityReportSubmission", 'String'>
+    readonly facilityId: FieldRef<"FacilityReportSubmission", 'String'>
+    readonly reportMonth: FieldRef<"FacilityReportSubmission", 'String'>
+    readonly submittedAt: FieldRef<"FacilityReportSubmission", 'DateTime'>
+    readonly reportedRowCount: FieldRef<"FacilityReportSubmission", 'Int'>
+    readonly skippedRowCount: FieldRef<"FacilityReportSubmission", 'Int'>
+    readonly createdAt: FieldRef<"FacilityReportSubmission", 'DateTime'>
+    readonly updatedAt: FieldRef<"FacilityReportSubmission", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * FacilityReportSubmission findUnique
+   */
+  export type FacilityReportSubmissionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FacilityReportSubmission
+     */
+    select?: FacilityReportSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FacilityReportSubmission
+     */
+    omit?: FacilityReportSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacilityReportSubmissionInclude<ExtArgs> | null
+    /**
+     * Filter, which FacilityReportSubmission to fetch.
+     */
+    where: FacilityReportSubmissionWhereUniqueInput
+  }
+
+  /**
+   * FacilityReportSubmission findUniqueOrThrow
+   */
+  export type FacilityReportSubmissionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FacilityReportSubmission
+     */
+    select?: FacilityReportSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FacilityReportSubmission
+     */
+    omit?: FacilityReportSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacilityReportSubmissionInclude<ExtArgs> | null
+    /**
+     * Filter, which FacilityReportSubmission to fetch.
+     */
+    where: FacilityReportSubmissionWhereUniqueInput
+  }
+
+  /**
+   * FacilityReportSubmission findFirst
+   */
+  export type FacilityReportSubmissionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FacilityReportSubmission
+     */
+    select?: FacilityReportSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FacilityReportSubmission
+     */
+    omit?: FacilityReportSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacilityReportSubmissionInclude<ExtArgs> | null
+    /**
+     * Filter, which FacilityReportSubmission to fetch.
+     */
+    where?: FacilityReportSubmissionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FacilityReportSubmissions to fetch.
+     */
+    orderBy?: FacilityReportSubmissionOrderByWithRelationInput | FacilityReportSubmissionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FacilityReportSubmissions.
+     */
+    cursor?: FacilityReportSubmissionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FacilityReportSubmissions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FacilityReportSubmissions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FacilityReportSubmissions.
+     */
+    distinct?: FacilityReportSubmissionScalarFieldEnum | FacilityReportSubmissionScalarFieldEnum[]
+  }
+
+  /**
+   * FacilityReportSubmission findFirstOrThrow
+   */
+  export type FacilityReportSubmissionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FacilityReportSubmission
+     */
+    select?: FacilityReportSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FacilityReportSubmission
+     */
+    omit?: FacilityReportSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacilityReportSubmissionInclude<ExtArgs> | null
+    /**
+     * Filter, which FacilityReportSubmission to fetch.
+     */
+    where?: FacilityReportSubmissionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FacilityReportSubmissions to fetch.
+     */
+    orderBy?: FacilityReportSubmissionOrderByWithRelationInput | FacilityReportSubmissionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FacilityReportSubmissions.
+     */
+    cursor?: FacilityReportSubmissionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FacilityReportSubmissions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FacilityReportSubmissions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FacilityReportSubmissions.
+     */
+    distinct?: FacilityReportSubmissionScalarFieldEnum | FacilityReportSubmissionScalarFieldEnum[]
+  }
+
+  /**
+   * FacilityReportSubmission findMany
+   */
+  export type FacilityReportSubmissionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FacilityReportSubmission
+     */
+    select?: FacilityReportSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FacilityReportSubmission
+     */
+    omit?: FacilityReportSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacilityReportSubmissionInclude<ExtArgs> | null
+    /**
+     * Filter, which FacilityReportSubmissions to fetch.
+     */
+    where?: FacilityReportSubmissionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FacilityReportSubmissions to fetch.
+     */
+    orderBy?: FacilityReportSubmissionOrderByWithRelationInput | FacilityReportSubmissionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing FacilityReportSubmissions.
+     */
+    cursor?: FacilityReportSubmissionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FacilityReportSubmissions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FacilityReportSubmissions.
+     */
+    skip?: number
+    distinct?: FacilityReportSubmissionScalarFieldEnum | FacilityReportSubmissionScalarFieldEnum[]
+  }
+
+  /**
+   * FacilityReportSubmission create
+   */
+  export type FacilityReportSubmissionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FacilityReportSubmission
+     */
+    select?: FacilityReportSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FacilityReportSubmission
+     */
+    omit?: FacilityReportSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacilityReportSubmissionInclude<ExtArgs> | null
+    /**
+     * The data needed to create a FacilityReportSubmission.
+     */
+    data: XOR<FacilityReportSubmissionCreateInput, FacilityReportSubmissionUncheckedCreateInput>
+  }
+
+  /**
+   * FacilityReportSubmission createMany
+   */
+  export type FacilityReportSubmissionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many FacilityReportSubmissions.
+     */
+    data: FacilityReportSubmissionCreateManyInput | FacilityReportSubmissionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * FacilityReportSubmission createManyAndReturn
+   */
+  export type FacilityReportSubmissionCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FacilityReportSubmission
+     */
+    select?: FacilityReportSubmissionSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the FacilityReportSubmission
+     */
+    omit?: FacilityReportSubmissionOmit<ExtArgs> | null
+    /**
+     * The data used to create many FacilityReportSubmissions.
+     */
+    data: FacilityReportSubmissionCreateManyInput | FacilityReportSubmissionCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacilityReportSubmissionIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * FacilityReportSubmission update
+   */
+  export type FacilityReportSubmissionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FacilityReportSubmission
+     */
+    select?: FacilityReportSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FacilityReportSubmission
+     */
+    omit?: FacilityReportSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacilityReportSubmissionInclude<ExtArgs> | null
+    /**
+     * The data needed to update a FacilityReportSubmission.
+     */
+    data: XOR<FacilityReportSubmissionUpdateInput, FacilityReportSubmissionUncheckedUpdateInput>
+    /**
+     * Choose, which FacilityReportSubmission to update.
+     */
+    where: FacilityReportSubmissionWhereUniqueInput
+  }
+
+  /**
+   * FacilityReportSubmission updateMany
+   */
+  export type FacilityReportSubmissionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update FacilityReportSubmissions.
+     */
+    data: XOR<FacilityReportSubmissionUpdateManyMutationInput, FacilityReportSubmissionUncheckedUpdateManyInput>
+    /**
+     * Filter which FacilityReportSubmissions to update
+     */
+    where?: FacilityReportSubmissionWhereInput
+    /**
+     * Limit how many FacilityReportSubmissions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * FacilityReportSubmission updateManyAndReturn
+   */
+  export type FacilityReportSubmissionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FacilityReportSubmission
+     */
+    select?: FacilityReportSubmissionSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the FacilityReportSubmission
+     */
+    omit?: FacilityReportSubmissionOmit<ExtArgs> | null
+    /**
+     * The data used to update FacilityReportSubmissions.
+     */
+    data: XOR<FacilityReportSubmissionUpdateManyMutationInput, FacilityReportSubmissionUncheckedUpdateManyInput>
+    /**
+     * Filter which FacilityReportSubmissions to update
+     */
+    where?: FacilityReportSubmissionWhereInput
+    /**
+     * Limit how many FacilityReportSubmissions to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacilityReportSubmissionIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * FacilityReportSubmission upsert
+   */
+  export type FacilityReportSubmissionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FacilityReportSubmission
+     */
+    select?: FacilityReportSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FacilityReportSubmission
+     */
+    omit?: FacilityReportSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacilityReportSubmissionInclude<ExtArgs> | null
+    /**
+     * The filter to search for the FacilityReportSubmission to update in case it exists.
+     */
+    where: FacilityReportSubmissionWhereUniqueInput
+    /**
+     * In case the FacilityReportSubmission found by the `where` argument doesn't exist, create a new FacilityReportSubmission with this data.
+     */
+    create: XOR<FacilityReportSubmissionCreateInput, FacilityReportSubmissionUncheckedCreateInput>
+    /**
+     * In case the FacilityReportSubmission was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<FacilityReportSubmissionUpdateInput, FacilityReportSubmissionUncheckedUpdateInput>
+  }
+
+  /**
+   * FacilityReportSubmission delete
+   */
+  export type FacilityReportSubmissionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FacilityReportSubmission
+     */
+    select?: FacilityReportSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FacilityReportSubmission
+     */
+    omit?: FacilityReportSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacilityReportSubmissionInclude<ExtArgs> | null
+    /**
+     * Filter which FacilityReportSubmission to delete.
+     */
+    where: FacilityReportSubmissionWhereUniqueInput
+  }
+
+  /**
+   * FacilityReportSubmission deleteMany
+   */
+  export type FacilityReportSubmissionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FacilityReportSubmissions to delete
+     */
+    where?: FacilityReportSubmissionWhereInput
+    /**
+     * Limit how many FacilityReportSubmissions to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * FacilityReportSubmission without action
+   */
+  export type FacilityReportSubmissionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FacilityReportSubmission
+     */
+    select?: FacilityReportSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FacilityReportSubmission
+     */
+    omit?: FacilityReportSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacilityReportSubmissionInclude<ExtArgs> | null
   }
 
 
@@ -11016,7 +13521,7 @@ export namespace Prisma {
     chiTietNguonVon: string | null
     soLuongPhanLo: number | null
     thoiGianToChuc: string | null
-    thoiGianBatDau: Date | null
+    thoiGianBatDau: string | null
     thoiGianThucHien: string | null
     trangThai: string | null
     maThongBao: string | null
@@ -11037,7 +13542,7 @@ export namespace Prisma {
     chiTietNguonVon: string | null
     soLuongPhanLo: number | null
     thoiGianToChuc: string | null
-    thoiGianBatDau: Date | null
+    thoiGianBatDau: string | null
     thoiGianThucHien: string | null
     trangThai: string | null
     maThongBao: string | null
@@ -11241,7 +13746,7 @@ export namespace Prisma {
     chiTietNguonVon: string | null
     soLuongPhanLo: number | null
     thoiGianToChuc: string | null
-    thoiGianBatDau: Date | null
+    thoiGianBatDau: string | null
     thoiGianThucHien: string | null
     trangThai: string | null
     maThongBao: string | null
@@ -11395,7 +13900,7 @@ export namespace Prisma {
       chiTietNguonVon: string | null
       soLuongPhanLo: number | null
       thoiGianToChuc: string | null
-      thoiGianBatDau: Date | null
+      thoiGianBatDau: string | null
       thoiGianThucHien: string | null
       trangThai: string | null
       maThongBao: string | null
@@ -11840,7 +14345,7 @@ export namespace Prisma {
     readonly chiTietNguonVon: FieldRef<"GoiThau", 'String'>
     readonly soLuongPhanLo: FieldRef<"GoiThau", 'Int'>
     readonly thoiGianToChuc: FieldRef<"GoiThau", 'String'>
-    readonly thoiGianBatDau: FieldRef<"GoiThau", 'DateTime'>
+    readonly thoiGianBatDau: FieldRef<"GoiThau", 'String'>
     readonly thoiGianThucHien: FieldRef<"GoiThau", 'String'>
     readonly trangThai: FieldRef<"GoiThau", 'String'>
     readonly maThongBao: FieldRef<"GoiThau", 'String'>
@@ -19280,6 +21785,18 @@ export namespace Prisma {
   export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
 
 
+  export const TherapeuticGroupScalarFieldEnum: {
+    id: 'id',
+    name: 'name',
+    normalizedName: 'normalizedName',
+    isActive: 'isActive',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type TherapeuticGroupScalarFieldEnum = (typeof TherapeuticGroupScalarFieldEnum)[keyof typeof TherapeuticGroupScalarFieldEnum]
+
+
   export const MasterDrugScalarFieldEnum: {
     id: 'id',
     maChung: 'maChung',
@@ -19302,7 +21819,7 @@ export namespace Prisma {
     nuocDangKy: 'nuocDangKy',
     diaChiDangKy: 'diaChiDangKy',
     nhomThuoc: 'nhomThuoc',
-    nhomDieuTri: 'nhomDieuTri',
+    therapeuticGroupId: 'therapeuticGroupId',
     isKeDon: 'isKeDon',
     kiemSoatDacBiet: 'kiemSoatDacBiet',
     isTrongNuoc: 'isTrongNuoc',
@@ -19357,6 +21874,20 @@ export namespace Prisma {
   };
 
   export type InventoryReportScalarFieldEnum = (typeof InventoryReportScalarFieldEnum)[keyof typeof InventoryReportScalarFieldEnum]
+
+
+  export const FacilityReportSubmissionScalarFieldEnum: {
+    id: 'id',
+    facilityId: 'facilityId',
+    reportMonth: 'reportMonth',
+    submittedAt: 'submittedAt',
+    reportedRowCount: 'reportedRowCount',
+    skippedRowCount: 'skippedRowCount',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type FacilityReportSubmissionScalarFieldEnum = (typeof FacilityReportSubmissionScalarFieldEnum)[keyof typeof FacilityReportSubmissionScalarFieldEnum]
 
 
   export const ReportReviewLogScalarFieldEnum: {
@@ -19697,6 +22228,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"User"> | Date | string
     drugMaps?: FacilityDrugMapListRelationFilter
     reports?: InventoryReportListRelationFilter
+    reportSubmissions?: FacilityReportSubmissionListRelationFilter
     keHoachLCNTs?: KeHoachLCNTListRelationFilter
     notifications?: NotificationListRelationFilter
     activityLogs?: ActivityLogListRelationFilter
@@ -19719,6 +22251,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     drugMaps?: FacilityDrugMapOrderByRelationAggregateInput
     reports?: InventoryReportOrderByRelationAggregateInput
+    reportSubmissions?: FacilityReportSubmissionOrderByRelationAggregateInput
     keHoachLCNTs?: KeHoachLCNTOrderByRelationAggregateInput
     notifications?: NotificationOrderByRelationAggregateInput
     activityLogs?: ActivityLogOrderByRelationAggregateInput
@@ -19744,6 +22277,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"User"> | Date | string
     drugMaps?: FacilityDrugMapListRelationFilter
     reports?: InventoryReportListRelationFilter
+    reportSubmissions?: FacilityReportSubmissionListRelationFilter
     keHoachLCNTs?: KeHoachLCNTListRelationFilter
     notifications?: NotificationListRelationFilter
     activityLogs?: ActivityLogListRelationFilter
@@ -19789,6 +22323,66 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
   }
 
+  export type TherapeuticGroupWhereInput = {
+    AND?: TherapeuticGroupWhereInput | TherapeuticGroupWhereInput[]
+    OR?: TherapeuticGroupWhereInput[]
+    NOT?: TherapeuticGroupWhereInput | TherapeuticGroupWhereInput[]
+    id?: StringFilter<"TherapeuticGroup"> | string
+    name?: StringFilter<"TherapeuticGroup"> | string
+    normalizedName?: StringFilter<"TherapeuticGroup"> | string
+    isActive?: BoolFilter<"TherapeuticGroup"> | boolean
+    createdAt?: DateTimeFilter<"TherapeuticGroup"> | Date | string
+    updatedAt?: DateTimeFilter<"TherapeuticGroup"> | Date | string
+    masterDrugs?: MasterDrugListRelationFilter
+  }
+
+  export type TherapeuticGroupOrderByWithRelationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    normalizedName?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    masterDrugs?: MasterDrugOrderByRelationAggregateInput
+  }
+
+  export type TherapeuticGroupWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    normalizedName?: string
+    AND?: TherapeuticGroupWhereInput | TherapeuticGroupWhereInput[]
+    OR?: TherapeuticGroupWhereInput[]
+    NOT?: TherapeuticGroupWhereInput | TherapeuticGroupWhereInput[]
+    name?: StringFilter<"TherapeuticGroup"> | string
+    isActive?: BoolFilter<"TherapeuticGroup"> | boolean
+    createdAt?: DateTimeFilter<"TherapeuticGroup"> | Date | string
+    updatedAt?: DateTimeFilter<"TherapeuticGroup"> | Date | string
+    masterDrugs?: MasterDrugListRelationFilter
+  }, "id" | "normalizedName">
+
+  export type TherapeuticGroupOrderByWithAggregationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    normalizedName?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: TherapeuticGroupCountOrderByAggregateInput
+    _max?: TherapeuticGroupMaxOrderByAggregateInput
+    _min?: TherapeuticGroupMinOrderByAggregateInput
+  }
+
+  export type TherapeuticGroupScalarWhereWithAggregatesInput = {
+    AND?: TherapeuticGroupScalarWhereWithAggregatesInput | TherapeuticGroupScalarWhereWithAggregatesInput[]
+    OR?: TherapeuticGroupScalarWhereWithAggregatesInput[]
+    NOT?: TherapeuticGroupScalarWhereWithAggregatesInput | TherapeuticGroupScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"TherapeuticGroup"> | string
+    name?: StringWithAggregatesFilter<"TherapeuticGroup"> | string
+    normalizedName?: StringWithAggregatesFilter<"TherapeuticGroup"> | string
+    isActive?: BoolWithAggregatesFilter<"TherapeuticGroup"> | boolean
+    createdAt?: DateTimeWithAggregatesFilter<"TherapeuticGroup"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"TherapeuticGroup"> | Date | string
+  }
+
   export type MasterDrugWhereInput = {
     AND?: MasterDrugWhereInput | MasterDrugWhereInput[]
     OR?: MasterDrugWhereInput[]
@@ -19814,13 +22408,14 @@ export namespace Prisma {
     nuocDangKy?: StringNullableFilter<"MasterDrug"> | string | null
     diaChiDangKy?: StringNullableFilter<"MasterDrug"> | string | null
     nhomThuoc?: StringNullableFilter<"MasterDrug"> | string | null
-    nhomDieuTri?: StringNullableFilter<"MasterDrug"> | string | null
+    therapeuticGroupId?: StringNullableFilter<"MasterDrug"> | string | null
     isKeDon?: StringNullableFilter<"MasterDrug"> | string | null
     kiemSoatDacBiet?: StringNullableFilter<"MasterDrug"> | string | null
     isTrongNuoc?: StringNullableFilter<"MasterDrug"> | string | null
     isActive?: BoolFilter<"MasterDrug"> | boolean
     createdAt?: DateTimeFilter<"MasterDrug"> | Date | string
     updatedAt?: DateTimeFilter<"MasterDrug"> | Date | string
+    therapeuticGroup?: XOR<TherapeuticGroupNullableScalarRelationFilter, TherapeuticGroupWhereInput> | null
     drugMaps?: FacilityDrugMapListRelationFilter
   }
 
@@ -19846,13 +22441,14 @@ export namespace Prisma {
     nuocDangKy?: SortOrderInput | SortOrder
     diaChiDangKy?: SortOrderInput | SortOrder
     nhomThuoc?: SortOrderInput | SortOrder
-    nhomDieuTri?: SortOrderInput | SortOrder
+    therapeuticGroupId?: SortOrderInput | SortOrder
     isKeDon?: SortOrderInput | SortOrder
     kiemSoatDacBiet?: SortOrderInput | SortOrder
     isTrongNuoc?: SortOrderInput | SortOrder
     isActive?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    therapeuticGroup?: TherapeuticGroupOrderByWithRelationInput
     drugMaps?: FacilityDrugMapOrderByRelationAggregateInput
   }
 
@@ -19881,13 +22477,14 @@ export namespace Prisma {
     nuocDangKy?: StringNullableFilter<"MasterDrug"> | string | null
     diaChiDangKy?: StringNullableFilter<"MasterDrug"> | string | null
     nhomThuoc?: StringNullableFilter<"MasterDrug"> | string | null
-    nhomDieuTri?: StringNullableFilter<"MasterDrug"> | string | null
+    therapeuticGroupId?: StringNullableFilter<"MasterDrug"> | string | null
     isKeDon?: StringNullableFilter<"MasterDrug"> | string | null
     kiemSoatDacBiet?: StringNullableFilter<"MasterDrug"> | string | null
     isTrongNuoc?: StringNullableFilter<"MasterDrug"> | string | null
     isActive?: BoolFilter<"MasterDrug"> | boolean
     createdAt?: DateTimeFilter<"MasterDrug"> | Date | string
     updatedAt?: DateTimeFilter<"MasterDrug"> | Date | string
+    therapeuticGroup?: XOR<TherapeuticGroupNullableScalarRelationFilter, TherapeuticGroupWhereInput> | null
     drugMaps?: FacilityDrugMapListRelationFilter
   }, "id" | "maChung">
 
@@ -19913,7 +22510,7 @@ export namespace Prisma {
     nuocDangKy?: SortOrderInput | SortOrder
     diaChiDangKy?: SortOrderInput | SortOrder
     nhomThuoc?: SortOrderInput | SortOrder
-    nhomDieuTri?: SortOrderInput | SortOrder
+    therapeuticGroupId?: SortOrderInput | SortOrder
     isKeDon?: SortOrderInput | SortOrder
     kiemSoatDacBiet?: SortOrderInput | SortOrder
     isTrongNuoc?: SortOrderInput | SortOrder
@@ -19950,7 +22547,7 @@ export namespace Prisma {
     nuocDangKy?: StringNullableWithAggregatesFilter<"MasterDrug"> | string | null
     diaChiDangKy?: StringNullableWithAggregatesFilter<"MasterDrug"> | string | null
     nhomThuoc?: StringNullableWithAggregatesFilter<"MasterDrug"> | string | null
-    nhomDieuTri?: StringNullableWithAggregatesFilter<"MasterDrug"> | string | null
+    therapeuticGroupId?: StringNullableWithAggregatesFilter<"MasterDrug"> | string | null
     isKeDon?: StringNullableWithAggregatesFilter<"MasterDrug"> | string | null
     kiemSoatDacBiet?: StringNullableWithAggregatesFilter<"MasterDrug"> | string | null
     isTrongNuoc?: StringNullableWithAggregatesFilter<"MasterDrug"> | string | null
@@ -20195,6 +22792,79 @@ export namespace Prisma {
     adminNote?: StringNullableWithAggregatesFilter<"InventoryReport"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"InventoryReport"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"InventoryReport"> | Date | string
+  }
+
+  export type FacilityReportSubmissionWhereInput = {
+    AND?: FacilityReportSubmissionWhereInput | FacilityReportSubmissionWhereInput[]
+    OR?: FacilityReportSubmissionWhereInput[]
+    NOT?: FacilityReportSubmissionWhereInput | FacilityReportSubmissionWhereInput[]
+    id?: StringFilter<"FacilityReportSubmission"> | string
+    facilityId?: StringFilter<"FacilityReportSubmission"> | string
+    reportMonth?: StringFilter<"FacilityReportSubmission"> | string
+    submittedAt?: DateTimeFilter<"FacilityReportSubmission"> | Date | string
+    reportedRowCount?: IntFilter<"FacilityReportSubmission"> | number
+    skippedRowCount?: IntFilter<"FacilityReportSubmission"> | number
+    createdAt?: DateTimeFilter<"FacilityReportSubmission"> | Date | string
+    updatedAt?: DateTimeFilter<"FacilityReportSubmission"> | Date | string
+    facility?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }
+
+  export type FacilityReportSubmissionOrderByWithRelationInput = {
+    id?: SortOrder
+    facilityId?: SortOrder
+    reportMonth?: SortOrder
+    submittedAt?: SortOrder
+    reportedRowCount?: SortOrder
+    skippedRowCount?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    facility?: UserOrderByWithRelationInput
+  }
+
+  export type FacilityReportSubmissionWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    facilityId_reportMonth?: FacilityReportSubmissionFacilityIdReportMonthCompoundUniqueInput
+    AND?: FacilityReportSubmissionWhereInput | FacilityReportSubmissionWhereInput[]
+    OR?: FacilityReportSubmissionWhereInput[]
+    NOT?: FacilityReportSubmissionWhereInput | FacilityReportSubmissionWhereInput[]
+    facilityId?: StringFilter<"FacilityReportSubmission"> | string
+    reportMonth?: StringFilter<"FacilityReportSubmission"> | string
+    submittedAt?: DateTimeFilter<"FacilityReportSubmission"> | Date | string
+    reportedRowCount?: IntFilter<"FacilityReportSubmission"> | number
+    skippedRowCount?: IntFilter<"FacilityReportSubmission"> | number
+    createdAt?: DateTimeFilter<"FacilityReportSubmission"> | Date | string
+    updatedAt?: DateTimeFilter<"FacilityReportSubmission"> | Date | string
+    facility?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }, "id" | "facilityId_reportMonth">
+
+  export type FacilityReportSubmissionOrderByWithAggregationInput = {
+    id?: SortOrder
+    facilityId?: SortOrder
+    reportMonth?: SortOrder
+    submittedAt?: SortOrder
+    reportedRowCount?: SortOrder
+    skippedRowCount?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: FacilityReportSubmissionCountOrderByAggregateInput
+    _avg?: FacilityReportSubmissionAvgOrderByAggregateInput
+    _max?: FacilityReportSubmissionMaxOrderByAggregateInput
+    _min?: FacilityReportSubmissionMinOrderByAggregateInput
+    _sum?: FacilityReportSubmissionSumOrderByAggregateInput
+  }
+
+  export type FacilityReportSubmissionScalarWhereWithAggregatesInput = {
+    AND?: FacilityReportSubmissionScalarWhereWithAggregatesInput | FacilityReportSubmissionScalarWhereWithAggregatesInput[]
+    OR?: FacilityReportSubmissionScalarWhereWithAggregatesInput[]
+    NOT?: FacilityReportSubmissionScalarWhereWithAggregatesInput | FacilityReportSubmissionScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"FacilityReportSubmission"> | string
+    facilityId?: StringWithAggregatesFilter<"FacilityReportSubmission"> | string
+    reportMonth?: StringWithAggregatesFilter<"FacilityReportSubmission"> | string
+    submittedAt?: DateTimeWithAggregatesFilter<"FacilityReportSubmission"> | Date | string
+    reportedRowCount?: IntWithAggregatesFilter<"FacilityReportSubmission"> | number
+    skippedRowCount?: IntWithAggregatesFilter<"FacilityReportSubmission"> | number
+    createdAt?: DateTimeWithAggregatesFilter<"FacilityReportSubmission"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"FacilityReportSubmission"> | Date | string
   }
 
   export type ReportReviewLogWhereInput = {
@@ -20469,7 +23139,7 @@ export namespace Prisma {
     chiTietNguonVon?: StringNullableFilter<"GoiThau"> | string | null
     soLuongPhanLo?: IntNullableFilter<"GoiThau"> | number | null
     thoiGianToChuc?: StringNullableFilter<"GoiThau"> | string | null
-    thoiGianBatDau?: DateTimeNullableFilter<"GoiThau"> | Date | string | null
+    thoiGianBatDau?: StringNullableFilter<"GoiThau"> | string | null
     thoiGianThucHien?: StringNullableFilter<"GoiThau"> | string | null
     trangThai?: StringNullableFilter<"GoiThau"> | string | null
     maThongBao?: StringNullableFilter<"GoiThau"> | string | null
@@ -20522,7 +23192,7 @@ export namespace Prisma {
     chiTietNguonVon?: StringNullableFilter<"GoiThau"> | string | null
     soLuongPhanLo?: IntNullableFilter<"GoiThau"> | number | null
     thoiGianToChuc?: StringNullableFilter<"GoiThau"> | string | null
-    thoiGianBatDau?: DateTimeNullableFilter<"GoiThau"> | Date | string | null
+    thoiGianBatDau?: StringNullableFilter<"GoiThau"> | string | null
     thoiGianThucHien?: StringNullableFilter<"GoiThau"> | string | null
     trangThai?: StringNullableFilter<"GoiThau"> | string | null
     maThongBao?: StringNullableFilter<"GoiThau"> | string | null
@@ -20576,7 +23246,7 @@ export namespace Prisma {
     chiTietNguonVon?: StringNullableWithAggregatesFilter<"GoiThau"> | string | null
     soLuongPhanLo?: IntNullableWithAggregatesFilter<"GoiThau"> | number | null
     thoiGianToChuc?: StringNullableWithAggregatesFilter<"GoiThau"> | string | null
-    thoiGianBatDau?: DateTimeNullableWithAggregatesFilter<"GoiThau"> | Date | string | null
+    thoiGianBatDau?: StringNullableWithAggregatesFilter<"GoiThau"> | string | null
     thoiGianThucHien?: StringNullableWithAggregatesFilter<"GoiThau"> | string | null
     trangThai?: StringNullableWithAggregatesFilter<"GoiThau"> | string | null
     maThongBao?: StringNullableWithAggregatesFilter<"GoiThau"> | string | null
@@ -21082,6 +23752,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     drugMaps?: FacilityDrugMapCreateNestedManyWithoutFacilityInput
     reports?: InventoryReportCreateNestedManyWithoutFacilityInput
+    reportSubmissions?: FacilityReportSubmissionCreateNestedManyWithoutFacilityInput
     keHoachLCNTs?: KeHoachLCNTCreateNestedManyWithoutFacilityInput
     notifications?: NotificationCreateNestedManyWithoutUserInput
     activityLogs?: ActivityLogCreateNestedManyWithoutUserInput
@@ -21104,6 +23775,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     drugMaps?: FacilityDrugMapUncheckedCreateNestedManyWithoutFacilityInput
     reports?: InventoryReportUncheckedCreateNestedManyWithoutFacilityInput
+    reportSubmissions?: FacilityReportSubmissionUncheckedCreateNestedManyWithoutFacilityInput
     keHoachLCNTs?: KeHoachLCNTUncheckedCreateNestedManyWithoutFacilityInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
     activityLogs?: ActivityLogUncheckedCreateNestedManyWithoutUserInput
@@ -21126,6 +23798,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     drugMaps?: FacilityDrugMapUpdateManyWithoutFacilityNestedInput
     reports?: InventoryReportUpdateManyWithoutFacilityNestedInput
+    reportSubmissions?: FacilityReportSubmissionUpdateManyWithoutFacilityNestedInput
     keHoachLCNTs?: KeHoachLCNTUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUpdateManyWithoutUserNestedInput
     activityLogs?: ActivityLogUpdateManyWithoutUserNestedInput
@@ -21148,6 +23821,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     drugMaps?: FacilityDrugMapUncheckedUpdateManyWithoutFacilityNestedInput
     reports?: InventoryReportUncheckedUpdateManyWithoutFacilityNestedInput
+    reportSubmissions?: FacilityReportSubmissionUncheckedUpdateManyWithoutFacilityNestedInput
     keHoachLCNTs?: KeHoachLCNTUncheckedUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
     activityLogs?: ActivityLogUncheckedUpdateManyWithoutUserNestedInput
@@ -21204,6 +23878,73 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type TherapeuticGroupCreateInput = {
+    id?: string
+    name: string
+    normalizedName: string
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    masterDrugs?: MasterDrugCreateNestedManyWithoutTherapeuticGroupInput
+  }
+
+  export type TherapeuticGroupUncheckedCreateInput = {
+    id?: string
+    name: string
+    normalizedName: string
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    masterDrugs?: MasterDrugUncheckedCreateNestedManyWithoutTherapeuticGroupInput
+  }
+
+  export type TherapeuticGroupUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    normalizedName?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    masterDrugs?: MasterDrugUpdateManyWithoutTherapeuticGroupNestedInput
+  }
+
+  export type TherapeuticGroupUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    normalizedName?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    masterDrugs?: MasterDrugUncheckedUpdateManyWithoutTherapeuticGroupNestedInput
+  }
+
+  export type TherapeuticGroupCreateManyInput = {
+    id?: string
+    name: string
+    normalizedName: string
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TherapeuticGroupUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    normalizedName?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TherapeuticGroupUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    normalizedName?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type MasterDrugCreateInput = {
     id?: string
     maChung: string
@@ -21226,13 +23967,13 @@ export namespace Prisma {
     nuocDangKy?: string | null
     diaChiDangKy?: string | null
     nhomThuoc?: string | null
-    nhomDieuTri?: string | null
     isKeDon?: string | null
     kiemSoatDacBiet?: string | null
     isTrongNuoc?: string | null
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    therapeuticGroup?: TherapeuticGroupCreateNestedOneWithoutMasterDrugsInput
     drugMaps?: FacilityDrugMapCreateNestedManyWithoutMasterDrugInput
   }
 
@@ -21258,7 +23999,7 @@ export namespace Prisma {
     nuocDangKy?: string | null
     diaChiDangKy?: string | null
     nhomThuoc?: string | null
-    nhomDieuTri?: string | null
+    therapeuticGroupId?: string | null
     isKeDon?: string | null
     kiemSoatDacBiet?: string | null
     isTrongNuoc?: string | null
@@ -21290,13 +24031,13 @@ export namespace Prisma {
     nuocDangKy?: NullableStringFieldUpdateOperationsInput | string | null
     diaChiDangKy?: NullableStringFieldUpdateOperationsInput | string | null
     nhomThuoc?: NullableStringFieldUpdateOperationsInput | string | null
-    nhomDieuTri?: NullableStringFieldUpdateOperationsInput | string | null
     isKeDon?: NullableStringFieldUpdateOperationsInput | string | null
     kiemSoatDacBiet?: NullableStringFieldUpdateOperationsInput | string | null
     isTrongNuoc?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    therapeuticGroup?: TherapeuticGroupUpdateOneWithoutMasterDrugsNestedInput
     drugMaps?: FacilityDrugMapUpdateManyWithoutMasterDrugNestedInput
   }
 
@@ -21322,7 +24063,7 @@ export namespace Prisma {
     nuocDangKy?: NullableStringFieldUpdateOperationsInput | string | null
     diaChiDangKy?: NullableStringFieldUpdateOperationsInput | string | null
     nhomThuoc?: NullableStringFieldUpdateOperationsInput | string | null
-    nhomDieuTri?: NullableStringFieldUpdateOperationsInput | string | null
+    therapeuticGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     isKeDon?: NullableStringFieldUpdateOperationsInput | string | null
     kiemSoatDacBiet?: NullableStringFieldUpdateOperationsInput | string | null
     isTrongNuoc?: NullableStringFieldUpdateOperationsInput | string | null
@@ -21354,7 +24095,7 @@ export namespace Prisma {
     nuocDangKy?: string | null
     diaChiDangKy?: string | null
     nhomThuoc?: string | null
-    nhomDieuTri?: string | null
+    therapeuticGroupId?: string | null
     isKeDon?: string | null
     kiemSoatDacBiet?: string | null
     isTrongNuoc?: string | null
@@ -21385,7 +24126,6 @@ export namespace Prisma {
     nuocDangKy?: NullableStringFieldUpdateOperationsInput | string | null
     diaChiDangKy?: NullableStringFieldUpdateOperationsInput | string | null
     nhomThuoc?: NullableStringFieldUpdateOperationsInput | string | null
-    nhomDieuTri?: NullableStringFieldUpdateOperationsInput | string | null
     isKeDon?: NullableStringFieldUpdateOperationsInput | string | null
     kiemSoatDacBiet?: NullableStringFieldUpdateOperationsInput | string | null
     isTrongNuoc?: NullableStringFieldUpdateOperationsInput | string | null
@@ -21416,7 +24156,7 @@ export namespace Prisma {
     nuocDangKy?: NullableStringFieldUpdateOperationsInput | string | null
     diaChiDangKy?: NullableStringFieldUpdateOperationsInput | string | null
     nhomThuoc?: NullableStringFieldUpdateOperationsInput | string | null
-    nhomDieuTri?: NullableStringFieldUpdateOperationsInput | string | null
+    therapeuticGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     isKeDon?: NullableStringFieldUpdateOperationsInput | string | null
     kiemSoatDacBiet?: NullableStringFieldUpdateOperationsInput | string | null
     isTrongNuoc?: NullableStringFieldUpdateOperationsInput | string | null
@@ -21694,6 +24434,82 @@ export namespace Prisma {
     dichVu?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumReportStatusFieldUpdateOperationsInput | $Enums.ReportStatus
     adminNote?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FacilityReportSubmissionCreateInput = {
+    id?: string
+    reportMonth: string
+    submittedAt?: Date | string
+    reportedRowCount?: number
+    skippedRowCount?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    facility: UserCreateNestedOneWithoutReportSubmissionsInput
+  }
+
+  export type FacilityReportSubmissionUncheckedCreateInput = {
+    id?: string
+    facilityId: string
+    reportMonth: string
+    submittedAt?: Date | string
+    reportedRowCount?: number
+    skippedRowCount?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FacilityReportSubmissionUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    reportMonth?: StringFieldUpdateOperationsInput | string
+    submittedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    reportedRowCount?: IntFieldUpdateOperationsInput | number
+    skippedRowCount?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    facility?: UserUpdateOneRequiredWithoutReportSubmissionsNestedInput
+  }
+
+  export type FacilityReportSubmissionUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    facilityId?: StringFieldUpdateOperationsInput | string
+    reportMonth?: StringFieldUpdateOperationsInput | string
+    submittedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    reportedRowCount?: IntFieldUpdateOperationsInput | number
+    skippedRowCount?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FacilityReportSubmissionCreateManyInput = {
+    id?: string
+    facilityId: string
+    reportMonth: string
+    submittedAt?: Date | string
+    reportedRowCount?: number
+    skippedRowCount?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FacilityReportSubmissionUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    reportMonth?: StringFieldUpdateOperationsInput | string
+    submittedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    reportedRowCount?: IntFieldUpdateOperationsInput | number
+    skippedRowCount?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FacilityReportSubmissionUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    facilityId?: StringFieldUpdateOperationsInput | string
+    reportMonth?: StringFieldUpdateOperationsInput | string
+    submittedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    reportedRowCount?: IntFieldUpdateOperationsInput | number
+    skippedRowCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -22007,7 +24823,7 @@ export namespace Prisma {
     chiTietNguonVon?: string | null
     soLuongPhanLo?: number | null
     thoiGianToChuc?: string | null
-    thoiGianBatDau?: Date | string | null
+    thoiGianBatDau?: string | null
     thoiGianThucHien?: string | null
     trangThai?: string | null
     maThongBao?: string | null
@@ -22032,7 +24848,7 @@ export namespace Prisma {
     chiTietNguonVon?: string | null
     soLuongPhanLo?: number | null
     thoiGianToChuc?: string | null
-    thoiGianBatDau?: Date | string | null
+    thoiGianBatDau?: string | null
     thoiGianThucHien?: string | null
     trangThai?: string | null
     maThongBao?: string | null
@@ -22055,7 +24871,7 @@ export namespace Prisma {
     chiTietNguonVon?: NullableStringFieldUpdateOperationsInput | string | null
     soLuongPhanLo?: NullableIntFieldUpdateOperationsInput | number | null
     thoiGianToChuc?: NullableStringFieldUpdateOperationsInput | string | null
-    thoiGianBatDau?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    thoiGianBatDau?: NullableStringFieldUpdateOperationsInput | string | null
     thoiGianThucHien?: NullableStringFieldUpdateOperationsInput | string | null
     trangThai?: NullableStringFieldUpdateOperationsInput | string | null
     maThongBao?: NullableStringFieldUpdateOperationsInput | string | null
@@ -22080,7 +24896,7 @@ export namespace Prisma {
     chiTietNguonVon?: NullableStringFieldUpdateOperationsInput | string | null
     soLuongPhanLo?: NullableIntFieldUpdateOperationsInput | number | null
     thoiGianToChuc?: NullableStringFieldUpdateOperationsInput | string | null
-    thoiGianBatDau?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    thoiGianBatDau?: NullableStringFieldUpdateOperationsInput | string | null
     thoiGianThucHien?: NullableStringFieldUpdateOperationsInput | string | null
     trangThai?: NullableStringFieldUpdateOperationsInput | string | null
     maThongBao?: NullableStringFieldUpdateOperationsInput | string | null
@@ -22104,7 +24920,7 @@ export namespace Prisma {
     chiTietNguonVon?: string | null
     soLuongPhanLo?: number | null
     thoiGianToChuc?: string | null
-    thoiGianBatDau?: Date | string | null
+    thoiGianBatDau?: string | null
     thoiGianThucHien?: string | null
     trangThai?: string | null
     maThongBao?: string | null
@@ -22124,7 +24940,7 @@ export namespace Prisma {
     chiTietNguonVon?: NullableStringFieldUpdateOperationsInput | string | null
     soLuongPhanLo?: NullableIntFieldUpdateOperationsInput | number | null
     thoiGianToChuc?: NullableStringFieldUpdateOperationsInput | string | null
-    thoiGianBatDau?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    thoiGianBatDau?: NullableStringFieldUpdateOperationsInput | string | null
     thoiGianThucHien?: NullableStringFieldUpdateOperationsInput | string | null
     trangThai?: NullableStringFieldUpdateOperationsInput | string | null
     maThongBao?: NullableStringFieldUpdateOperationsInput | string | null
@@ -22145,7 +24961,7 @@ export namespace Prisma {
     chiTietNguonVon?: NullableStringFieldUpdateOperationsInput | string | null
     soLuongPhanLo?: NullableIntFieldUpdateOperationsInput | number | null
     thoiGianToChuc?: NullableStringFieldUpdateOperationsInput | string | null
-    thoiGianBatDau?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    thoiGianBatDau?: NullableStringFieldUpdateOperationsInput | string | null
     thoiGianThucHien?: NullableStringFieldUpdateOperationsInput | string | null
     trangThai?: NullableStringFieldUpdateOperationsInput | string | null
     maThongBao?: NullableStringFieldUpdateOperationsInput | string | null
@@ -22740,6 +25556,12 @@ export namespace Prisma {
     none?: InventoryReportWhereInput
   }
 
+  export type FacilityReportSubmissionListRelationFilter = {
+    every?: FacilityReportSubmissionWhereInput
+    some?: FacilityReportSubmissionWhereInput
+    none?: FacilityReportSubmissionWhereInput
+  }
+
   export type KeHoachLCNTListRelationFilter = {
     every?: KeHoachLCNTWhereInput
     some?: KeHoachLCNTWhereInput
@@ -22768,6 +25590,10 @@ export namespace Prisma {
   }
 
   export type InventoryReportOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type FacilityReportSubmissionOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -22902,6 +25728,48 @@ export namespace Prisma {
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
+  export type MasterDrugListRelationFilter = {
+    every?: MasterDrugWhereInput
+    some?: MasterDrugWhereInput
+    none?: MasterDrugWhereInput
+  }
+
+  export type MasterDrugOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type TherapeuticGroupCountOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    normalizedName?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TherapeuticGroupMaxOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    normalizedName?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TherapeuticGroupMinOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    normalizedName?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TherapeuticGroupNullableScalarRelationFilter = {
+    is?: TherapeuticGroupWhereInput | null
+    isNot?: TherapeuticGroupWhereInput | null
+  }
+
   export type MasterDrugCountOrderByAggregateInput = {
     id?: SortOrder
     maChung?: SortOrder
@@ -22924,7 +25792,7 @@ export namespace Prisma {
     nuocDangKy?: SortOrder
     diaChiDangKy?: SortOrder
     nhomThuoc?: SortOrder
-    nhomDieuTri?: SortOrder
+    therapeuticGroupId?: SortOrder
     isKeDon?: SortOrder
     kiemSoatDacBiet?: SortOrder
     isTrongNuoc?: SortOrder
@@ -22955,7 +25823,7 @@ export namespace Prisma {
     nuocDangKy?: SortOrder
     diaChiDangKy?: SortOrder
     nhomThuoc?: SortOrder
-    nhomDieuTri?: SortOrder
+    therapeuticGroupId?: SortOrder
     isKeDon?: SortOrder
     kiemSoatDacBiet?: SortOrder
     isTrongNuoc?: SortOrder
@@ -22986,7 +25854,7 @@ export namespace Prisma {
     nuocDangKy?: SortOrder
     diaChiDangKy?: SortOrder
     nhomThuoc?: SortOrder
-    nhomDieuTri?: SortOrder
+    therapeuticGroupId?: SortOrder
     isKeDon?: SortOrder
     kiemSoatDacBiet?: SortOrder
     isTrongNuoc?: SortOrder
@@ -23217,6 +26085,81 @@ export namespace Prisma {
     _max?: NestedEnumReportStatusFilter<$PrismaModel>
   }
 
+  export type IntFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntFilter<$PrismaModel> | number
+  }
+
+  export type FacilityReportSubmissionFacilityIdReportMonthCompoundUniqueInput = {
+    facilityId: string
+    reportMonth: string
+  }
+
+  export type FacilityReportSubmissionCountOrderByAggregateInput = {
+    id?: SortOrder
+    facilityId?: SortOrder
+    reportMonth?: SortOrder
+    submittedAt?: SortOrder
+    reportedRowCount?: SortOrder
+    skippedRowCount?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FacilityReportSubmissionAvgOrderByAggregateInput = {
+    reportedRowCount?: SortOrder
+    skippedRowCount?: SortOrder
+  }
+
+  export type FacilityReportSubmissionMaxOrderByAggregateInput = {
+    id?: SortOrder
+    facilityId?: SortOrder
+    reportMonth?: SortOrder
+    submittedAt?: SortOrder
+    reportedRowCount?: SortOrder
+    skippedRowCount?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FacilityReportSubmissionMinOrderByAggregateInput = {
+    id?: SortOrder
+    facilityId?: SortOrder
+    reportMonth?: SortOrder
+    submittedAt?: SortOrder
+    reportedRowCount?: SortOrder
+    skippedRowCount?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FacilityReportSubmissionSumOrderByAggregateInput = {
+    reportedRowCount?: SortOrder
+    skippedRowCount?: SortOrder
+  }
+
+  export type IntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
+  }
+
   export type ReportReviewLogCountOrderByAggregateInput = {
     id?: SortOrder
     facilityId?: SortOrder
@@ -23245,17 +26188,6 @@ export namespace Prisma {
     adminNote?: SortOrder
     adminId?: SortOrder
     createdAt?: SortOrder
-  }
-
-  export type IntFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntFilter<$PrismaModel> | number
   }
 
   export type DateTimeNullableFilter<$PrismaModel = never> = {
@@ -23313,22 +26245,6 @@ export namespace Prisma {
   export type ReportPeriodSumOrderByAggregateInput = {
     year?: SortOrder
     periodMonth?: SortOrder
-  }
-
-  export type IntWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedIntFilter<$PrismaModel>
-    _min?: NestedIntFilter<$PrismaModel>
-    _max?: NestedIntFilter<$PrismaModel>
   }
 
   export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -23887,6 +26803,13 @@ export namespace Prisma {
     connect?: InventoryReportWhereUniqueInput | InventoryReportWhereUniqueInput[]
   }
 
+  export type FacilityReportSubmissionCreateNestedManyWithoutFacilityInput = {
+    create?: XOR<FacilityReportSubmissionCreateWithoutFacilityInput, FacilityReportSubmissionUncheckedCreateWithoutFacilityInput> | FacilityReportSubmissionCreateWithoutFacilityInput[] | FacilityReportSubmissionUncheckedCreateWithoutFacilityInput[]
+    connectOrCreate?: FacilityReportSubmissionCreateOrConnectWithoutFacilityInput | FacilityReportSubmissionCreateOrConnectWithoutFacilityInput[]
+    createMany?: FacilityReportSubmissionCreateManyFacilityInputEnvelope
+    connect?: FacilityReportSubmissionWhereUniqueInput | FacilityReportSubmissionWhereUniqueInput[]
+  }
+
   export type KeHoachLCNTCreateNestedManyWithoutFacilityInput = {
     create?: XOR<KeHoachLCNTCreateWithoutFacilityInput, KeHoachLCNTUncheckedCreateWithoutFacilityInput> | KeHoachLCNTCreateWithoutFacilityInput[] | KeHoachLCNTUncheckedCreateWithoutFacilityInput[]
     connectOrCreate?: KeHoachLCNTCreateOrConnectWithoutFacilityInput | KeHoachLCNTCreateOrConnectWithoutFacilityInput[]
@@ -23920,6 +26843,13 @@ export namespace Prisma {
     connectOrCreate?: InventoryReportCreateOrConnectWithoutFacilityInput | InventoryReportCreateOrConnectWithoutFacilityInput[]
     createMany?: InventoryReportCreateManyFacilityInputEnvelope
     connect?: InventoryReportWhereUniqueInput | InventoryReportWhereUniqueInput[]
+  }
+
+  export type FacilityReportSubmissionUncheckedCreateNestedManyWithoutFacilityInput = {
+    create?: XOR<FacilityReportSubmissionCreateWithoutFacilityInput, FacilityReportSubmissionUncheckedCreateWithoutFacilityInput> | FacilityReportSubmissionCreateWithoutFacilityInput[] | FacilityReportSubmissionUncheckedCreateWithoutFacilityInput[]
+    connectOrCreate?: FacilityReportSubmissionCreateOrConnectWithoutFacilityInput | FacilityReportSubmissionCreateOrConnectWithoutFacilityInput[]
+    createMany?: FacilityReportSubmissionCreateManyFacilityInputEnvelope
+    connect?: FacilityReportSubmissionWhereUniqueInput | FacilityReportSubmissionWhereUniqueInput[]
   }
 
   export type KeHoachLCNTUncheckedCreateNestedManyWithoutFacilityInput = {
@@ -23989,6 +26919,20 @@ export namespace Prisma {
     update?: InventoryReportUpdateWithWhereUniqueWithoutFacilityInput | InventoryReportUpdateWithWhereUniqueWithoutFacilityInput[]
     updateMany?: InventoryReportUpdateManyWithWhereWithoutFacilityInput | InventoryReportUpdateManyWithWhereWithoutFacilityInput[]
     deleteMany?: InventoryReportScalarWhereInput | InventoryReportScalarWhereInput[]
+  }
+
+  export type FacilityReportSubmissionUpdateManyWithoutFacilityNestedInput = {
+    create?: XOR<FacilityReportSubmissionCreateWithoutFacilityInput, FacilityReportSubmissionUncheckedCreateWithoutFacilityInput> | FacilityReportSubmissionCreateWithoutFacilityInput[] | FacilityReportSubmissionUncheckedCreateWithoutFacilityInput[]
+    connectOrCreate?: FacilityReportSubmissionCreateOrConnectWithoutFacilityInput | FacilityReportSubmissionCreateOrConnectWithoutFacilityInput[]
+    upsert?: FacilityReportSubmissionUpsertWithWhereUniqueWithoutFacilityInput | FacilityReportSubmissionUpsertWithWhereUniqueWithoutFacilityInput[]
+    createMany?: FacilityReportSubmissionCreateManyFacilityInputEnvelope
+    set?: FacilityReportSubmissionWhereUniqueInput | FacilityReportSubmissionWhereUniqueInput[]
+    disconnect?: FacilityReportSubmissionWhereUniqueInput | FacilityReportSubmissionWhereUniqueInput[]
+    delete?: FacilityReportSubmissionWhereUniqueInput | FacilityReportSubmissionWhereUniqueInput[]
+    connect?: FacilityReportSubmissionWhereUniqueInput | FacilityReportSubmissionWhereUniqueInput[]
+    update?: FacilityReportSubmissionUpdateWithWhereUniqueWithoutFacilityInput | FacilityReportSubmissionUpdateWithWhereUniqueWithoutFacilityInput[]
+    updateMany?: FacilityReportSubmissionUpdateManyWithWhereWithoutFacilityInput | FacilityReportSubmissionUpdateManyWithWhereWithoutFacilityInput[]
+    deleteMany?: FacilityReportSubmissionScalarWhereInput | FacilityReportSubmissionScalarWhereInput[]
   }
 
   export type KeHoachLCNTUpdateManyWithoutFacilityNestedInput = {
@@ -24061,6 +27005,20 @@ export namespace Prisma {
     deleteMany?: InventoryReportScalarWhereInput | InventoryReportScalarWhereInput[]
   }
 
+  export type FacilityReportSubmissionUncheckedUpdateManyWithoutFacilityNestedInput = {
+    create?: XOR<FacilityReportSubmissionCreateWithoutFacilityInput, FacilityReportSubmissionUncheckedCreateWithoutFacilityInput> | FacilityReportSubmissionCreateWithoutFacilityInput[] | FacilityReportSubmissionUncheckedCreateWithoutFacilityInput[]
+    connectOrCreate?: FacilityReportSubmissionCreateOrConnectWithoutFacilityInput | FacilityReportSubmissionCreateOrConnectWithoutFacilityInput[]
+    upsert?: FacilityReportSubmissionUpsertWithWhereUniqueWithoutFacilityInput | FacilityReportSubmissionUpsertWithWhereUniqueWithoutFacilityInput[]
+    createMany?: FacilityReportSubmissionCreateManyFacilityInputEnvelope
+    set?: FacilityReportSubmissionWhereUniqueInput | FacilityReportSubmissionWhereUniqueInput[]
+    disconnect?: FacilityReportSubmissionWhereUniqueInput | FacilityReportSubmissionWhereUniqueInput[]
+    delete?: FacilityReportSubmissionWhereUniqueInput | FacilityReportSubmissionWhereUniqueInput[]
+    connect?: FacilityReportSubmissionWhereUniqueInput | FacilityReportSubmissionWhereUniqueInput[]
+    update?: FacilityReportSubmissionUpdateWithWhereUniqueWithoutFacilityInput | FacilityReportSubmissionUpdateWithWhereUniqueWithoutFacilityInput[]
+    updateMany?: FacilityReportSubmissionUpdateManyWithWhereWithoutFacilityInput | FacilityReportSubmissionUpdateManyWithWhereWithoutFacilityInput[]
+    deleteMany?: FacilityReportSubmissionScalarWhereInput | FacilityReportSubmissionScalarWhereInput[]
+  }
+
   export type KeHoachLCNTUncheckedUpdateManyWithoutFacilityNestedInput = {
     create?: XOR<KeHoachLCNTCreateWithoutFacilityInput, KeHoachLCNTUncheckedCreateWithoutFacilityInput> | KeHoachLCNTCreateWithoutFacilityInput[] | KeHoachLCNTUncheckedCreateWithoutFacilityInput[]
     connectOrCreate?: KeHoachLCNTCreateOrConnectWithoutFacilityInput | KeHoachLCNTCreateOrConnectWithoutFacilityInput[]
@@ -24103,6 +27061,54 @@ export namespace Prisma {
     deleteMany?: ActivityLogScalarWhereInput | ActivityLogScalarWhereInput[]
   }
 
+  export type MasterDrugCreateNestedManyWithoutTherapeuticGroupInput = {
+    create?: XOR<MasterDrugCreateWithoutTherapeuticGroupInput, MasterDrugUncheckedCreateWithoutTherapeuticGroupInput> | MasterDrugCreateWithoutTherapeuticGroupInput[] | MasterDrugUncheckedCreateWithoutTherapeuticGroupInput[]
+    connectOrCreate?: MasterDrugCreateOrConnectWithoutTherapeuticGroupInput | MasterDrugCreateOrConnectWithoutTherapeuticGroupInput[]
+    createMany?: MasterDrugCreateManyTherapeuticGroupInputEnvelope
+    connect?: MasterDrugWhereUniqueInput | MasterDrugWhereUniqueInput[]
+  }
+
+  export type MasterDrugUncheckedCreateNestedManyWithoutTherapeuticGroupInput = {
+    create?: XOR<MasterDrugCreateWithoutTherapeuticGroupInput, MasterDrugUncheckedCreateWithoutTherapeuticGroupInput> | MasterDrugCreateWithoutTherapeuticGroupInput[] | MasterDrugUncheckedCreateWithoutTherapeuticGroupInput[]
+    connectOrCreate?: MasterDrugCreateOrConnectWithoutTherapeuticGroupInput | MasterDrugCreateOrConnectWithoutTherapeuticGroupInput[]
+    createMany?: MasterDrugCreateManyTherapeuticGroupInputEnvelope
+    connect?: MasterDrugWhereUniqueInput | MasterDrugWhereUniqueInput[]
+  }
+
+  export type MasterDrugUpdateManyWithoutTherapeuticGroupNestedInput = {
+    create?: XOR<MasterDrugCreateWithoutTherapeuticGroupInput, MasterDrugUncheckedCreateWithoutTherapeuticGroupInput> | MasterDrugCreateWithoutTherapeuticGroupInput[] | MasterDrugUncheckedCreateWithoutTherapeuticGroupInput[]
+    connectOrCreate?: MasterDrugCreateOrConnectWithoutTherapeuticGroupInput | MasterDrugCreateOrConnectWithoutTherapeuticGroupInput[]
+    upsert?: MasterDrugUpsertWithWhereUniqueWithoutTherapeuticGroupInput | MasterDrugUpsertWithWhereUniqueWithoutTherapeuticGroupInput[]
+    createMany?: MasterDrugCreateManyTherapeuticGroupInputEnvelope
+    set?: MasterDrugWhereUniqueInput | MasterDrugWhereUniqueInput[]
+    disconnect?: MasterDrugWhereUniqueInput | MasterDrugWhereUniqueInput[]
+    delete?: MasterDrugWhereUniqueInput | MasterDrugWhereUniqueInput[]
+    connect?: MasterDrugWhereUniqueInput | MasterDrugWhereUniqueInput[]
+    update?: MasterDrugUpdateWithWhereUniqueWithoutTherapeuticGroupInput | MasterDrugUpdateWithWhereUniqueWithoutTherapeuticGroupInput[]
+    updateMany?: MasterDrugUpdateManyWithWhereWithoutTherapeuticGroupInput | MasterDrugUpdateManyWithWhereWithoutTherapeuticGroupInput[]
+    deleteMany?: MasterDrugScalarWhereInput | MasterDrugScalarWhereInput[]
+  }
+
+  export type MasterDrugUncheckedUpdateManyWithoutTherapeuticGroupNestedInput = {
+    create?: XOR<MasterDrugCreateWithoutTherapeuticGroupInput, MasterDrugUncheckedCreateWithoutTherapeuticGroupInput> | MasterDrugCreateWithoutTherapeuticGroupInput[] | MasterDrugUncheckedCreateWithoutTherapeuticGroupInput[]
+    connectOrCreate?: MasterDrugCreateOrConnectWithoutTherapeuticGroupInput | MasterDrugCreateOrConnectWithoutTherapeuticGroupInput[]
+    upsert?: MasterDrugUpsertWithWhereUniqueWithoutTherapeuticGroupInput | MasterDrugUpsertWithWhereUniqueWithoutTherapeuticGroupInput[]
+    createMany?: MasterDrugCreateManyTherapeuticGroupInputEnvelope
+    set?: MasterDrugWhereUniqueInput | MasterDrugWhereUniqueInput[]
+    disconnect?: MasterDrugWhereUniqueInput | MasterDrugWhereUniqueInput[]
+    delete?: MasterDrugWhereUniqueInput | MasterDrugWhereUniqueInput[]
+    connect?: MasterDrugWhereUniqueInput | MasterDrugWhereUniqueInput[]
+    update?: MasterDrugUpdateWithWhereUniqueWithoutTherapeuticGroupInput | MasterDrugUpdateWithWhereUniqueWithoutTherapeuticGroupInput[]
+    updateMany?: MasterDrugUpdateManyWithWhereWithoutTherapeuticGroupInput | MasterDrugUpdateManyWithWhereWithoutTherapeuticGroupInput[]
+    deleteMany?: MasterDrugScalarWhereInput | MasterDrugScalarWhereInput[]
+  }
+
+  export type TherapeuticGroupCreateNestedOneWithoutMasterDrugsInput = {
+    create?: XOR<TherapeuticGroupCreateWithoutMasterDrugsInput, TherapeuticGroupUncheckedCreateWithoutMasterDrugsInput>
+    connectOrCreate?: TherapeuticGroupCreateOrConnectWithoutMasterDrugsInput
+    connect?: TherapeuticGroupWhereUniqueInput
+  }
+
   export type FacilityDrugMapCreateNestedManyWithoutMasterDrugInput = {
     create?: XOR<FacilityDrugMapCreateWithoutMasterDrugInput, FacilityDrugMapUncheckedCreateWithoutMasterDrugInput> | FacilityDrugMapCreateWithoutMasterDrugInput[] | FacilityDrugMapUncheckedCreateWithoutMasterDrugInput[]
     connectOrCreate?: FacilityDrugMapCreateOrConnectWithoutMasterDrugInput | FacilityDrugMapCreateOrConnectWithoutMasterDrugInput[]
@@ -24115,6 +27121,16 @@ export namespace Prisma {
     connectOrCreate?: FacilityDrugMapCreateOrConnectWithoutMasterDrugInput | FacilityDrugMapCreateOrConnectWithoutMasterDrugInput[]
     createMany?: FacilityDrugMapCreateManyMasterDrugInputEnvelope
     connect?: FacilityDrugMapWhereUniqueInput | FacilityDrugMapWhereUniqueInput[]
+  }
+
+  export type TherapeuticGroupUpdateOneWithoutMasterDrugsNestedInput = {
+    create?: XOR<TherapeuticGroupCreateWithoutMasterDrugsInput, TherapeuticGroupUncheckedCreateWithoutMasterDrugsInput>
+    connectOrCreate?: TherapeuticGroupCreateOrConnectWithoutMasterDrugsInput
+    upsert?: TherapeuticGroupUpsertWithoutMasterDrugsInput
+    disconnect?: TherapeuticGroupWhereInput | boolean
+    delete?: TherapeuticGroupWhereInput | boolean
+    connect?: TherapeuticGroupWhereUniqueInput
+    update?: XOR<XOR<TherapeuticGroupUpdateToOneWithWhereWithoutMasterDrugsInput, TherapeuticGroupUpdateWithoutMasterDrugsInput>, TherapeuticGroupUncheckedUpdateWithoutMasterDrugsInput>
   }
 
   export type FacilityDrugMapUpdateManyWithoutMasterDrugNestedInput = {
@@ -24261,12 +27277,26 @@ export namespace Prisma {
     update?: XOR<XOR<FacilityDrugMapUpdateToOneWithWhereWithoutReportsInput, FacilityDrugMapUpdateWithoutReportsInput>, FacilityDrugMapUncheckedUpdateWithoutReportsInput>
   }
 
+  export type UserCreateNestedOneWithoutReportSubmissionsInput = {
+    create?: XOR<UserCreateWithoutReportSubmissionsInput, UserUncheckedCreateWithoutReportSubmissionsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutReportSubmissionsInput
+    connect?: UserWhereUniqueInput
+  }
+
   export type IntFieldUpdateOperationsInput = {
     set?: number
     increment?: number
     decrement?: number
     multiply?: number
     divide?: number
+  }
+
+  export type UserUpdateOneRequiredWithoutReportSubmissionsNestedInput = {
+    create?: XOR<UserCreateWithoutReportSubmissionsInput, UserUncheckedCreateWithoutReportSubmissionsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutReportSubmissionsInput
+    upsert?: UserUpsertWithoutReportSubmissionsInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutReportSubmissionsInput, UserUpdateWithoutReportSubmissionsInput>, UserUncheckedUpdateWithoutReportSubmissionsInput>
   }
 
   export type NullableDateTimeFieldUpdateOperationsInput = {
@@ -24923,17 +27953,6 @@ export namespace Prisma {
     _max?: NestedEnumReportStatusFilter<$PrismaModel>
   }
 
-  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
-  }
-
   export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -24959,6 +27978,17 @@ export namespace Prisma {
     gt?: number | FloatFieldRefInput<$PrismaModel>
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
+  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
   }
 
   export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -25122,6 +28152,36 @@ export namespace Prisma {
 
   export type InventoryReportCreateManyFacilityInputEnvelope = {
     data: InventoryReportCreateManyFacilityInput | InventoryReportCreateManyFacilityInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type FacilityReportSubmissionCreateWithoutFacilityInput = {
+    id?: string
+    reportMonth: string
+    submittedAt?: Date | string
+    reportedRowCount?: number
+    skippedRowCount?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FacilityReportSubmissionUncheckedCreateWithoutFacilityInput = {
+    id?: string
+    reportMonth: string
+    submittedAt?: Date | string
+    reportedRowCount?: number
+    skippedRowCount?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FacilityReportSubmissionCreateOrConnectWithoutFacilityInput = {
+    where: FacilityReportSubmissionWhereUniqueInput
+    create: XOR<FacilityReportSubmissionCreateWithoutFacilityInput, FacilityReportSubmissionUncheckedCreateWithoutFacilityInput>
+  }
+
+  export type FacilityReportSubmissionCreateManyFacilityInputEnvelope = {
+    data: FacilityReportSubmissionCreateManyFacilityInput | FacilityReportSubmissionCreateManyFacilityInput[]
     skipDuplicates?: boolean
   }
 
@@ -25314,6 +28374,36 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"InventoryReport"> | Date | string
   }
 
+  export type FacilityReportSubmissionUpsertWithWhereUniqueWithoutFacilityInput = {
+    where: FacilityReportSubmissionWhereUniqueInput
+    update: XOR<FacilityReportSubmissionUpdateWithoutFacilityInput, FacilityReportSubmissionUncheckedUpdateWithoutFacilityInput>
+    create: XOR<FacilityReportSubmissionCreateWithoutFacilityInput, FacilityReportSubmissionUncheckedCreateWithoutFacilityInput>
+  }
+
+  export type FacilityReportSubmissionUpdateWithWhereUniqueWithoutFacilityInput = {
+    where: FacilityReportSubmissionWhereUniqueInput
+    data: XOR<FacilityReportSubmissionUpdateWithoutFacilityInput, FacilityReportSubmissionUncheckedUpdateWithoutFacilityInput>
+  }
+
+  export type FacilityReportSubmissionUpdateManyWithWhereWithoutFacilityInput = {
+    where: FacilityReportSubmissionScalarWhereInput
+    data: XOR<FacilityReportSubmissionUpdateManyMutationInput, FacilityReportSubmissionUncheckedUpdateManyWithoutFacilityInput>
+  }
+
+  export type FacilityReportSubmissionScalarWhereInput = {
+    AND?: FacilityReportSubmissionScalarWhereInput | FacilityReportSubmissionScalarWhereInput[]
+    OR?: FacilityReportSubmissionScalarWhereInput[]
+    NOT?: FacilityReportSubmissionScalarWhereInput | FacilityReportSubmissionScalarWhereInput[]
+    id?: StringFilter<"FacilityReportSubmission"> | string
+    facilityId?: StringFilter<"FacilityReportSubmission"> | string
+    reportMonth?: StringFilter<"FacilityReportSubmission"> | string
+    submittedAt?: DateTimeFilter<"FacilityReportSubmission"> | Date | string
+    reportedRowCount?: IntFilter<"FacilityReportSubmission"> | number
+    skippedRowCount?: IntFilter<"FacilityReportSubmission"> | number
+    createdAt?: DateTimeFilter<"FacilityReportSubmission"> | Date | string
+    updatedAt?: DateTimeFilter<"FacilityReportSubmission"> | Date | string
+  }
+
   export type KeHoachLCNTUpsertWithWhereUniqueWithoutFacilityInput = {
     where: KeHoachLCNTWhereUniqueInput
     update: XOR<KeHoachLCNTUpdateWithoutFacilityInput, KeHoachLCNTUncheckedUpdateWithoutFacilityInput>
@@ -25414,6 +28504,151 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"ActivityLog"> | Date | string
   }
 
+  export type MasterDrugCreateWithoutTherapeuticGroupInput = {
+    id?: string
+    maChung: string
+    maBhyt?: string | null
+    tenThuoc: string
+    hoatChat?: string | null
+    hamLuong?: string | null
+    dangBaoChe?: string | null
+    soDangKy?: string | null
+    quyCach?: string | null
+    donViTinh?: string | null
+    tieuChuan?: string | null
+    tuoiTho?: string | null
+    duongDung?: string | null
+    nguonGoc?: string | null
+    congTySanXuat?: string | null
+    nuocSanXuat?: string | null
+    diaChiSanXuat?: string | null
+    congTyDangKy?: string | null
+    nuocDangKy?: string | null
+    diaChiDangKy?: string | null
+    nhomThuoc?: string | null
+    isKeDon?: string | null
+    kiemSoatDacBiet?: string | null
+    isTrongNuoc?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    drugMaps?: FacilityDrugMapCreateNestedManyWithoutMasterDrugInput
+  }
+
+  export type MasterDrugUncheckedCreateWithoutTherapeuticGroupInput = {
+    id?: string
+    maChung: string
+    maBhyt?: string | null
+    tenThuoc: string
+    hoatChat?: string | null
+    hamLuong?: string | null
+    dangBaoChe?: string | null
+    soDangKy?: string | null
+    quyCach?: string | null
+    donViTinh?: string | null
+    tieuChuan?: string | null
+    tuoiTho?: string | null
+    duongDung?: string | null
+    nguonGoc?: string | null
+    congTySanXuat?: string | null
+    nuocSanXuat?: string | null
+    diaChiSanXuat?: string | null
+    congTyDangKy?: string | null
+    nuocDangKy?: string | null
+    diaChiDangKy?: string | null
+    nhomThuoc?: string | null
+    isKeDon?: string | null
+    kiemSoatDacBiet?: string | null
+    isTrongNuoc?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    drugMaps?: FacilityDrugMapUncheckedCreateNestedManyWithoutMasterDrugInput
+  }
+
+  export type MasterDrugCreateOrConnectWithoutTherapeuticGroupInput = {
+    where: MasterDrugWhereUniqueInput
+    create: XOR<MasterDrugCreateWithoutTherapeuticGroupInput, MasterDrugUncheckedCreateWithoutTherapeuticGroupInput>
+  }
+
+  export type MasterDrugCreateManyTherapeuticGroupInputEnvelope = {
+    data: MasterDrugCreateManyTherapeuticGroupInput | MasterDrugCreateManyTherapeuticGroupInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type MasterDrugUpsertWithWhereUniqueWithoutTherapeuticGroupInput = {
+    where: MasterDrugWhereUniqueInput
+    update: XOR<MasterDrugUpdateWithoutTherapeuticGroupInput, MasterDrugUncheckedUpdateWithoutTherapeuticGroupInput>
+    create: XOR<MasterDrugCreateWithoutTherapeuticGroupInput, MasterDrugUncheckedCreateWithoutTherapeuticGroupInput>
+  }
+
+  export type MasterDrugUpdateWithWhereUniqueWithoutTherapeuticGroupInput = {
+    where: MasterDrugWhereUniqueInput
+    data: XOR<MasterDrugUpdateWithoutTherapeuticGroupInput, MasterDrugUncheckedUpdateWithoutTherapeuticGroupInput>
+  }
+
+  export type MasterDrugUpdateManyWithWhereWithoutTherapeuticGroupInput = {
+    where: MasterDrugScalarWhereInput
+    data: XOR<MasterDrugUpdateManyMutationInput, MasterDrugUncheckedUpdateManyWithoutTherapeuticGroupInput>
+  }
+
+  export type MasterDrugScalarWhereInput = {
+    AND?: MasterDrugScalarWhereInput | MasterDrugScalarWhereInput[]
+    OR?: MasterDrugScalarWhereInput[]
+    NOT?: MasterDrugScalarWhereInput | MasterDrugScalarWhereInput[]
+    id?: StringFilter<"MasterDrug"> | string
+    maChung?: StringFilter<"MasterDrug"> | string
+    maBhyt?: StringNullableFilter<"MasterDrug"> | string | null
+    tenThuoc?: StringFilter<"MasterDrug"> | string
+    hoatChat?: StringNullableFilter<"MasterDrug"> | string | null
+    hamLuong?: StringNullableFilter<"MasterDrug"> | string | null
+    dangBaoChe?: StringNullableFilter<"MasterDrug"> | string | null
+    soDangKy?: StringNullableFilter<"MasterDrug"> | string | null
+    quyCach?: StringNullableFilter<"MasterDrug"> | string | null
+    donViTinh?: StringNullableFilter<"MasterDrug"> | string | null
+    tieuChuan?: StringNullableFilter<"MasterDrug"> | string | null
+    tuoiTho?: StringNullableFilter<"MasterDrug"> | string | null
+    duongDung?: StringNullableFilter<"MasterDrug"> | string | null
+    nguonGoc?: StringNullableFilter<"MasterDrug"> | string | null
+    congTySanXuat?: StringNullableFilter<"MasterDrug"> | string | null
+    nuocSanXuat?: StringNullableFilter<"MasterDrug"> | string | null
+    diaChiSanXuat?: StringNullableFilter<"MasterDrug"> | string | null
+    congTyDangKy?: StringNullableFilter<"MasterDrug"> | string | null
+    nuocDangKy?: StringNullableFilter<"MasterDrug"> | string | null
+    diaChiDangKy?: StringNullableFilter<"MasterDrug"> | string | null
+    nhomThuoc?: StringNullableFilter<"MasterDrug"> | string | null
+    therapeuticGroupId?: StringNullableFilter<"MasterDrug"> | string | null
+    isKeDon?: StringNullableFilter<"MasterDrug"> | string | null
+    kiemSoatDacBiet?: StringNullableFilter<"MasterDrug"> | string | null
+    isTrongNuoc?: StringNullableFilter<"MasterDrug"> | string | null
+    isActive?: BoolFilter<"MasterDrug"> | boolean
+    createdAt?: DateTimeFilter<"MasterDrug"> | Date | string
+    updatedAt?: DateTimeFilter<"MasterDrug"> | Date | string
+  }
+
+  export type TherapeuticGroupCreateWithoutMasterDrugsInput = {
+    id?: string
+    name: string
+    normalizedName: string
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TherapeuticGroupUncheckedCreateWithoutMasterDrugsInput = {
+    id?: string
+    name: string
+    normalizedName: string
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TherapeuticGroupCreateOrConnectWithoutMasterDrugsInput = {
+    where: TherapeuticGroupWhereUniqueInput
+    create: XOR<TherapeuticGroupCreateWithoutMasterDrugsInput, TherapeuticGroupUncheckedCreateWithoutMasterDrugsInput>
+  }
+
   export type FacilityDrugMapCreateWithoutMasterDrugInput = {
     id?: string
     maNoiBo: string
@@ -25456,6 +28691,35 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type TherapeuticGroupUpsertWithoutMasterDrugsInput = {
+    update: XOR<TherapeuticGroupUpdateWithoutMasterDrugsInput, TherapeuticGroupUncheckedUpdateWithoutMasterDrugsInput>
+    create: XOR<TherapeuticGroupCreateWithoutMasterDrugsInput, TherapeuticGroupUncheckedCreateWithoutMasterDrugsInput>
+    where?: TherapeuticGroupWhereInput
+  }
+
+  export type TherapeuticGroupUpdateToOneWithWhereWithoutMasterDrugsInput = {
+    where?: TherapeuticGroupWhereInput
+    data: XOR<TherapeuticGroupUpdateWithoutMasterDrugsInput, TherapeuticGroupUncheckedUpdateWithoutMasterDrugsInput>
+  }
+
+  export type TherapeuticGroupUpdateWithoutMasterDrugsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    normalizedName?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TherapeuticGroupUncheckedUpdateWithoutMasterDrugsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    normalizedName?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type FacilityDrugMapUpsertWithWhereUniqueWithoutMasterDrugInput = {
     where: FacilityDrugMapWhereUniqueInput
     update: XOR<FacilityDrugMapUpdateWithoutMasterDrugInput, FacilityDrugMapUncheckedUpdateWithoutMasterDrugInput>
@@ -25488,6 +28752,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     reports?: InventoryReportCreateNestedManyWithoutFacilityInput
+    reportSubmissions?: FacilityReportSubmissionCreateNestedManyWithoutFacilityInput
     keHoachLCNTs?: KeHoachLCNTCreateNestedManyWithoutFacilityInput
     notifications?: NotificationCreateNestedManyWithoutUserInput
     activityLogs?: ActivityLogCreateNestedManyWithoutUserInput
@@ -25509,6 +28774,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     reports?: InventoryReportUncheckedCreateNestedManyWithoutFacilityInput
+    reportSubmissions?: FacilityReportSubmissionUncheckedCreateNestedManyWithoutFacilityInput
     keHoachLCNTs?: KeHoachLCNTUncheckedCreateNestedManyWithoutFacilityInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
     activityLogs?: ActivityLogUncheckedCreateNestedManyWithoutUserInput
@@ -25541,13 +28807,13 @@ export namespace Prisma {
     nuocDangKy?: string | null
     diaChiDangKy?: string | null
     nhomThuoc?: string | null
-    nhomDieuTri?: string | null
     isKeDon?: string | null
     kiemSoatDacBiet?: string | null
     isTrongNuoc?: string | null
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    therapeuticGroup?: TherapeuticGroupCreateNestedOneWithoutMasterDrugsInput
   }
 
   export type MasterDrugUncheckedCreateWithoutDrugMapsInput = {
@@ -25572,7 +28838,7 @@ export namespace Prisma {
     nuocDangKy?: string | null
     diaChiDangKy?: string | null
     nhomThuoc?: string | null
-    nhomDieuTri?: string | null
+    therapeuticGroupId?: string | null
     isKeDon?: string | null
     kiemSoatDacBiet?: string | null
     isTrongNuoc?: string | null
@@ -25667,6 +28933,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     reports?: InventoryReportUpdateManyWithoutFacilityNestedInput
+    reportSubmissions?: FacilityReportSubmissionUpdateManyWithoutFacilityNestedInput
     keHoachLCNTs?: KeHoachLCNTUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUpdateManyWithoutUserNestedInput
     activityLogs?: ActivityLogUpdateManyWithoutUserNestedInput
@@ -25688,6 +28955,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     reports?: InventoryReportUncheckedUpdateManyWithoutFacilityNestedInput
+    reportSubmissions?: FacilityReportSubmissionUncheckedUpdateManyWithoutFacilityNestedInput
     keHoachLCNTs?: KeHoachLCNTUncheckedUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
     activityLogs?: ActivityLogUncheckedUpdateManyWithoutUserNestedInput
@@ -25726,13 +28994,13 @@ export namespace Prisma {
     nuocDangKy?: NullableStringFieldUpdateOperationsInput | string | null
     diaChiDangKy?: NullableStringFieldUpdateOperationsInput | string | null
     nhomThuoc?: NullableStringFieldUpdateOperationsInput | string | null
-    nhomDieuTri?: NullableStringFieldUpdateOperationsInput | string | null
     isKeDon?: NullableStringFieldUpdateOperationsInput | string | null
     kiemSoatDacBiet?: NullableStringFieldUpdateOperationsInput | string | null
     isTrongNuoc?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    therapeuticGroup?: TherapeuticGroupUpdateOneWithoutMasterDrugsNestedInput
   }
 
   export type MasterDrugUncheckedUpdateWithoutDrugMapsInput = {
@@ -25757,7 +29025,7 @@ export namespace Prisma {
     nuocDangKy?: NullableStringFieldUpdateOperationsInput | string | null
     diaChiDangKy?: NullableStringFieldUpdateOperationsInput | string | null
     nhomThuoc?: NullableStringFieldUpdateOperationsInput | string | null
-    nhomDieuTri?: NullableStringFieldUpdateOperationsInput | string | null
+    therapeuticGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     isKeDon?: NullableStringFieldUpdateOperationsInput | string | null
     kiemSoatDacBiet?: NullableStringFieldUpdateOperationsInput | string | null
     isTrongNuoc?: NullableStringFieldUpdateOperationsInput | string | null
@@ -25798,6 +29066,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     drugMaps?: FacilityDrugMapCreateNestedManyWithoutFacilityInput
+    reportSubmissions?: FacilityReportSubmissionCreateNestedManyWithoutFacilityInput
     keHoachLCNTs?: KeHoachLCNTCreateNestedManyWithoutFacilityInput
     notifications?: NotificationCreateNestedManyWithoutUserInput
     activityLogs?: ActivityLogCreateNestedManyWithoutUserInput
@@ -25819,6 +29088,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     drugMaps?: FacilityDrugMapUncheckedCreateNestedManyWithoutFacilityInput
+    reportSubmissions?: FacilityReportSubmissionUncheckedCreateNestedManyWithoutFacilityInput
     keHoachLCNTs?: KeHoachLCNTUncheckedCreateNestedManyWithoutFacilityInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
     activityLogs?: ActivityLogUncheckedCreateNestedManyWithoutUserInput
@@ -25893,6 +29163,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     drugMaps?: FacilityDrugMapUpdateManyWithoutFacilityNestedInput
+    reportSubmissions?: FacilityReportSubmissionUpdateManyWithoutFacilityNestedInput
     keHoachLCNTs?: KeHoachLCNTUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUpdateManyWithoutUserNestedInput
     activityLogs?: ActivityLogUpdateManyWithoutUserNestedInput
@@ -25914,6 +29185,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     drugMaps?: FacilityDrugMapUncheckedUpdateManyWithoutFacilityNestedInput
+    reportSubmissions?: FacilityReportSubmissionUncheckedUpdateManyWithoutFacilityNestedInput
     keHoachLCNTs?: KeHoachLCNTUncheckedUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
     activityLogs?: ActivityLogUncheckedUpdateManyWithoutUserNestedInput
@@ -25962,6 +29234,110 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type UserCreateWithoutReportSubmissionsInput = {
+    id?: string
+    username: string
+    passwordHash: string
+    role?: $Enums.Role
+    facilityName?: string | null
+    facilityCode?: string | null
+    isActive?: boolean
+    autonomyGroup?: string | null
+    facilityType?: string | null
+    contactPerson?: string | null
+    phoneNumber?: string | null
+    address?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    drugMaps?: FacilityDrugMapCreateNestedManyWithoutFacilityInput
+    reports?: InventoryReportCreateNestedManyWithoutFacilityInput
+    keHoachLCNTs?: KeHoachLCNTCreateNestedManyWithoutFacilityInput
+    notifications?: NotificationCreateNestedManyWithoutUserInput
+    activityLogs?: ActivityLogCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutReportSubmissionsInput = {
+    id?: string
+    username: string
+    passwordHash: string
+    role?: $Enums.Role
+    facilityName?: string | null
+    facilityCode?: string | null
+    isActive?: boolean
+    autonomyGroup?: string | null
+    facilityType?: string | null
+    contactPerson?: string | null
+    phoneNumber?: string | null
+    address?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    drugMaps?: FacilityDrugMapUncheckedCreateNestedManyWithoutFacilityInput
+    reports?: InventoryReportUncheckedCreateNestedManyWithoutFacilityInput
+    keHoachLCNTs?: KeHoachLCNTUncheckedCreateNestedManyWithoutFacilityInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
+    activityLogs?: ActivityLogUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutReportSubmissionsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutReportSubmissionsInput, UserUncheckedCreateWithoutReportSubmissionsInput>
+  }
+
+  export type UserUpsertWithoutReportSubmissionsInput = {
+    update: XOR<UserUpdateWithoutReportSubmissionsInput, UserUncheckedUpdateWithoutReportSubmissionsInput>
+    create: XOR<UserCreateWithoutReportSubmissionsInput, UserUncheckedCreateWithoutReportSubmissionsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutReportSubmissionsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutReportSubmissionsInput, UserUncheckedUpdateWithoutReportSubmissionsInput>
+  }
+
+  export type UserUpdateWithoutReportSubmissionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    facilityName?: NullableStringFieldUpdateOperationsInput | string | null
+    facilityCode?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    autonomyGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    facilityType?: NullableStringFieldUpdateOperationsInput | string | null
+    contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    drugMaps?: FacilityDrugMapUpdateManyWithoutFacilityNestedInput
+    reports?: InventoryReportUpdateManyWithoutFacilityNestedInput
+    keHoachLCNTs?: KeHoachLCNTUpdateManyWithoutFacilityNestedInput
+    notifications?: NotificationUpdateManyWithoutUserNestedInput
+    activityLogs?: ActivityLogUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutReportSubmissionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    facilityName?: NullableStringFieldUpdateOperationsInput | string | null
+    facilityCode?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    autonomyGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    facilityType?: NullableStringFieldUpdateOperationsInput | string | null
+    contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    drugMaps?: FacilityDrugMapUncheckedUpdateManyWithoutFacilityNestedInput
+    reports?: InventoryReportUncheckedUpdateManyWithoutFacilityNestedInput
+    keHoachLCNTs?: KeHoachLCNTUncheckedUpdateManyWithoutFacilityNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
+    activityLogs?: ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+  }
+
   export type UserCreateWithoutKeHoachLCNTsInput = {
     id?: string
     username: string
@@ -25979,6 +29355,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     drugMaps?: FacilityDrugMapCreateNestedManyWithoutFacilityInput
     reports?: InventoryReportCreateNestedManyWithoutFacilityInput
+    reportSubmissions?: FacilityReportSubmissionCreateNestedManyWithoutFacilityInput
     notifications?: NotificationCreateNestedManyWithoutUserInput
     activityLogs?: ActivityLogCreateNestedManyWithoutUserInput
   }
@@ -26000,6 +29377,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     drugMaps?: FacilityDrugMapUncheckedCreateNestedManyWithoutFacilityInput
     reports?: InventoryReportUncheckedCreateNestedManyWithoutFacilityInput
+    reportSubmissions?: FacilityReportSubmissionUncheckedCreateNestedManyWithoutFacilityInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
     activityLogs?: ActivityLogUncheckedCreateNestedManyWithoutUserInput
   }
@@ -26021,7 +29399,7 @@ export namespace Prisma {
     chiTietNguonVon?: string | null
     soLuongPhanLo?: number | null
     thoiGianToChuc?: string | null
-    thoiGianBatDau?: Date | string | null
+    thoiGianBatDau?: string | null
     thoiGianThucHien?: string | null
     trangThai?: string | null
     maThongBao?: string | null
@@ -26044,7 +29422,7 @@ export namespace Prisma {
     chiTietNguonVon?: string | null
     soLuongPhanLo?: number | null
     thoiGianToChuc?: string | null
-    thoiGianBatDau?: Date | string | null
+    thoiGianBatDau?: string | null
     thoiGianThucHien?: string | null
     trangThai?: string | null
     maThongBao?: string | null
@@ -26093,6 +29471,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     drugMaps?: FacilityDrugMapUpdateManyWithoutFacilityNestedInput
     reports?: InventoryReportUpdateManyWithoutFacilityNestedInput
+    reportSubmissions?: FacilityReportSubmissionUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUpdateManyWithoutUserNestedInput
     activityLogs?: ActivityLogUpdateManyWithoutUserNestedInput
   }
@@ -26114,6 +29493,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     drugMaps?: FacilityDrugMapUncheckedUpdateManyWithoutFacilityNestedInput
     reports?: InventoryReportUncheckedUpdateManyWithoutFacilityNestedInput
+    reportSubmissions?: FacilityReportSubmissionUncheckedUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
     activityLogs?: ActivityLogUncheckedUpdateManyWithoutUserNestedInput
   }
@@ -26150,7 +29530,7 @@ export namespace Prisma {
     chiTietNguonVon?: StringNullableFilter<"GoiThau"> | string | null
     soLuongPhanLo?: IntNullableFilter<"GoiThau"> | number | null
     thoiGianToChuc?: StringNullableFilter<"GoiThau"> | string | null
-    thoiGianBatDau?: DateTimeNullableFilter<"GoiThau"> | Date | string | null
+    thoiGianBatDau?: StringNullableFilter<"GoiThau"> | string | null
     thoiGianThucHien?: StringNullableFilter<"GoiThau"> | string | null
     trangThai?: StringNullableFilter<"GoiThau"> | string | null
     maThongBao?: StringNullableFilter<"GoiThau"> | string | null
@@ -26473,7 +29853,7 @@ export namespace Prisma {
     chiTietNguonVon?: string | null
     soLuongPhanLo?: number | null
     thoiGianToChuc?: string | null
-    thoiGianBatDau?: Date | string | null
+    thoiGianBatDau?: string | null
     thoiGianThucHien?: string | null
     trangThai?: string | null
     maThongBao?: string | null
@@ -26497,7 +29877,7 @@ export namespace Prisma {
     chiTietNguonVon?: string | null
     soLuongPhanLo?: number | null
     thoiGianToChuc?: string | null
-    thoiGianBatDau?: Date | string | null
+    thoiGianBatDau?: string | null
     thoiGianThucHien?: string | null
     trangThai?: string | null
     maThongBao?: string | null
@@ -26571,7 +29951,7 @@ export namespace Prisma {
     chiTietNguonVon?: NullableStringFieldUpdateOperationsInput | string | null
     soLuongPhanLo?: NullableIntFieldUpdateOperationsInput | number | null
     thoiGianToChuc?: NullableStringFieldUpdateOperationsInput | string | null
-    thoiGianBatDau?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    thoiGianBatDau?: NullableStringFieldUpdateOperationsInput | string | null
     thoiGianThucHien?: NullableStringFieldUpdateOperationsInput | string | null
     trangThai?: NullableStringFieldUpdateOperationsInput | string | null
     maThongBao?: NullableStringFieldUpdateOperationsInput | string | null
@@ -26595,7 +29975,7 @@ export namespace Prisma {
     chiTietNguonVon?: NullableStringFieldUpdateOperationsInput | string | null
     soLuongPhanLo?: NullableIntFieldUpdateOperationsInput | number | null
     thoiGianToChuc?: NullableStringFieldUpdateOperationsInput | string | null
-    thoiGianBatDau?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    thoiGianBatDau?: NullableStringFieldUpdateOperationsInput | string | null
     thoiGianThucHien?: NullableStringFieldUpdateOperationsInput | string | null
     trangThai?: NullableStringFieldUpdateOperationsInput | string | null
     maThongBao?: NullableStringFieldUpdateOperationsInput | string | null
@@ -26633,7 +30013,7 @@ export namespace Prisma {
     chiTietNguonVon?: string | null
     soLuongPhanLo?: number | null
     thoiGianToChuc?: string | null
-    thoiGianBatDau?: Date | string | null
+    thoiGianBatDau?: string | null
     thoiGianThucHien?: string | null
     trangThai?: string | null
     maThongBao?: string | null
@@ -26657,7 +30037,7 @@ export namespace Prisma {
     chiTietNguonVon?: string | null
     soLuongPhanLo?: number | null
     thoiGianToChuc?: string | null
-    thoiGianBatDau?: Date | string | null
+    thoiGianBatDau?: string | null
     thoiGianThucHien?: string | null
     trangThai?: string | null
     maThongBao?: string | null
@@ -26725,7 +30105,7 @@ export namespace Prisma {
     chiTietNguonVon?: NullableStringFieldUpdateOperationsInput | string | null
     soLuongPhanLo?: NullableIntFieldUpdateOperationsInput | number | null
     thoiGianToChuc?: NullableStringFieldUpdateOperationsInput | string | null
-    thoiGianBatDau?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    thoiGianBatDau?: NullableStringFieldUpdateOperationsInput | string | null
     thoiGianThucHien?: NullableStringFieldUpdateOperationsInput | string | null
     trangThai?: NullableStringFieldUpdateOperationsInput | string | null
     maThongBao?: NullableStringFieldUpdateOperationsInput | string | null
@@ -26749,7 +30129,7 @@ export namespace Prisma {
     chiTietNguonVon?: NullableStringFieldUpdateOperationsInput | string | null
     soLuongPhanLo?: NullableIntFieldUpdateOperationsInput | number | null
     thoiGianToChuc?: NullableStringFieldUpdateOperationsInput | string | null
-    thoiGianBatDau?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    thoiGianBatDau?: NullableStringFieldUpdateOperationsInput | string | null
     thoiGianThucHien?: NullableStringFieldUpdateOperationsInput | string | null
     trangThai?: NullableStringFieldUpdateOperationsInput | string | null
     maThongBao?: NullableStringFieldUpdateOperationsInput | string | null
@@ -26801,7 +30181,7 @@ export namespace Prisma {
     chiTietNguonVon?: string | null
     soLuongPhanLo?: number | null
     thoiGianToChuc?: string | null
-    thoiGianBatDau?: Date | string | null
+    thoiGianBatDau?: string | null
     thoiGianThucHien?: string | null
     trangThai?: string | null
     maThongBao?: string | null
@@ -26825,7 +30205,7 @@ export namespace Prisma {
     chiTietNguonVon?: string | null
     soLuongPhanLo?: number | null
     thoiGianToChuc?: string | null
-    thoiGianBatDau?: Date | string | null
+    thoiGianBatDau?: string | null
     thoiGianThucHien?: string | null
     trangThai?: string | null
     maThongBao?: string | null
@@ -26922,7 +30302,7 @@ export namespace Prisma {
     chiTietNguonVon?: NullableStringFieldUpdateOperationsInput | string | null
     soLuongPhanLo?: NullableIntFieldUpdateOperationsInput | number | null
     thoiGianToChuc?: NullableStringFieldUpdateOperationsInput | string | null
-    thoiGianBatDau?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    thoiGianBatDau?: NullableStringFieldUpdateOperationsInput | string | null
     thoiGianThucHien?: NullableStringFieldUpdateOperationsInput | string | null
     trangThai?: NullableStringFieldUpdateOperationsInput | string | null
     maThongBao?: NullableStringFieldUpdateOperationsInput | string | null
@@ -26946,7 +30326,7 @@ export namespace Prisma {
     chiTietNguonVon?: NullableStringFieldUpdateOperationsInput | string | null
     soLuongPhanLo?: NullableIntFieldUpdateOperationsInput | number | null
     thoiGianToChuc?: NullableStringFieldUpdateOperationsInput | string | null
-    thoiGianBatDau?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    thoiGianBatDau?: NullableStringFieldUpdateOperationsInput | string | null
     thoiGianThucHien?: NullableStringFieldUpdateOperationsInput | string | null
     trangThai?: NullableStringFieldUpdateOperationsInput | string | null
     maThongBao?: NullableStringFieldUpdateOperationsInput | string | null
@@ -27168,6 +30548,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     drugMaps?: FacilityDrugMapCreateNestedManyWithoutFacilityInput
     reports?: InventoryReportCreateNestedManyWithoutFacilityInput
+    reportSubmissions?: FacilityReportSubmissionCreateNestedManyWithoutFacilityInput
     keHoachLCNTs?: KeHoachLCNTCreateNestedManyWithoutFacilityInput
     activityLogs?: ActivityLogCreateNestedManyWithoutUserInput
   }
@@ -27189,6 +30570,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     drugMaps?: FacilityDrugMapUncheckedCreateNestedManyWithoutFacilityInput
     reports?: InventoryReportUncheckedCreateNestedManyWithoutFacilityInput
+    reportSubmissions?: FacilityReportSubmissionUncheckedCreateNestedManyWithoutFacilityInput
     keHoachLCNTs?: KeHoachLCNTUncheckedCreateNestedManyWithoutFacilityInput
     activityLogs?: ActivityLogUncheckedCreateNestedManyWithoutUserInput
   }
@@ -27226,6 +30608,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     drugMaps?: FacilityDrugMapUpdateManyWithoutFacilityNestedInput
     reports?: InventoryReportUpdateManyWithoutFacilityNestedInput
+    reportSubmissions?: FacilityReportSubmissionUpdateManyWithoutFacilityNestedInput
     keHoachLCNTs?: KeHoachLCNTUpdateManyWithoutFacilityNestedInput
     activityLogs?: ActivityLogUpdateManyWithoutUserNestedInput
   }
@@ -27247,6 +30630,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     drugMaps?: FacilityDrugMapUncheckedUpdateManyWithoutFacilityNestedInput
     reports?: InventoryReportUncheckedUpdateManyWithoutFacilityNestedInput
+    reportSubmissions?: FacilityReportSubmissionUncheckedUpdateManyWithoutFacilityNestedInput
     keHoachLCNTs?: KeHoachLCNTUncheckedUpdateManyWithoutFacilityNestedInput
     activityLogs?: ActivityLogUncheckedUpdateManyWithoutUserNestedInput
   }
@@ -27268,6 +30652,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     drugMaps?: FacilityDrugMapCreateNestedManyWithoutFacilityInput
     reports?: InventoryReportCreateNestedManyWithoutFacilityInput
+    reportSubmissions?: FacilityReportSubmissionCreateNestedManyWithoutFacilityInput
     keHoachLCNTs?: KeHoachLCNTCreateNestedManyWithoutFacilityInput
     notifications?: NotificationCreateNestedManyWithoutUserInput
   }
@@ -27289,6 +30674,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     drugMaps?: FacilityDrugMapUncheckedCreateNestedManyWithoutFacilityInput
     reports?: InventoryReportUncheckedCreateNestedManyWithoutFacilityInput
+    reportSubmissions?: FacilityReportSubmissionUncheckedCreateNestedManyWithoutFacilityInput
     keHoachLCNTs?: KeHoachLCNTUncheckedCreateNestedManyWithoutFacilityInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
   }
@@ -27326,6 +30712,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     drugMaps?: FacilityDrugMapUpdateManyWithoutFacilityNestedInput
     reports?: InventoryReportUpdateManyWithoutFacilityNestedInput
+    reportSubmissions?: FacilityReportSubmissionUpdateManyWithoutFacilityNestedInput
     keHoachLCNTs?: KeHoachLCNTUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUpdateManyWithoutUserNestedInput
   }
@@ -27347,6 +30734,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     drugMaps?: FacilityDrugMapUncheckedUpdateManyWithoutFacilityNestedInput
     reports?: InventoryReportUncheckedUpdateManyWithoutFacilityNestedInput
+    reportSubmissions?: FacilityReportSubmissionUncheckedUpdateManyWithoutFacilityNestedInput
     keHoachLCNTs?: KeHoachLCNTUncheckedUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
   }
@@ -27384,6 +30772,16 @@ export namespace Prisma {
     dichVu?: string | null
     status?: $Enums.ReportStatus
     adminNote?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FacilityReportSubmissionCreateManyFacilityInput = {
+    id?: string
+    reportMonth: string
+    submittedAt?: Date | string
+    reportedRowCount?: number
+    skippedRowCount?: number
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -27541,6 +30939,36 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type FacilityReportSubmissionUpdateWithoutFacilityInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    reportMonth?: StringFieldUpdateOperationsInput | string
+    submittedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    reportedRowCount?: IntFieldUpdateOperationsInput | number
+    skippedRowCount?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FacilityReportSubmissionUncheckedUpdateWithoutFacilityInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    reportMonth?: StringFieldUpdateOperationsInput | string
+    submittedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    reportedRowCount?: IntFieldUpdateOperationsInput | number
+    skippedRowCount?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FacilityReportSubmissionUncheckedUpdateManyWithoutFacilityInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    reportMonth?: StringFieldUpdateOperationsInput | string
+    submittedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    reportedRowCount?: IntFieldUpdateOperationsInput | number
+    skippedRowCount?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type KeHoachLCNTUpdateWithoutFacilityInput = {
     id?: StringFieldUpdateOperationsInput | string
     quyTrinh?: IntFieldUpdateOperationsInput | number
@@ -27661,6 +31089,128 @@ export namespace Prisma {
     entityId?: NullableStringFieldUpdateOperationsInput | string | null
     details?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type MasterDrugCreateManyTherapeuticGroupInput = {
+    id?: string
+    maChung: string
+    maBhyt?: string | null
+    tenThuoc: string
+    hoatChat?: string | null
+    hamLuong?: string | null
+    dangBaoChe?: string | null
+    soDangKy?: string | null
+    quyCach?: string | null
+    donViTinh?: string | null
+    tieuChuan?: string | null
+    tuoiTho?: string | null
+    duongDung?: string | null
+    nguonGoc?: string | null
+    congTySanXuat?: string | null
+    nuocSanXuat?: string | null
+    diaChiSanXuat?: string | null
+    congTyDangKy?: string | null
+    nuocDangKy?: string | null
+    diaChiDangKy?: string | null
+    nhomThuoc?: string | null
+    isKeDon?: string | null
+    kiemSoatDacBiet?: string | null
+    isTrongNuoc?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type MasterDrugUpdateWithoutTherapeuticGroupInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    maChung?: StringFieldUpdateOperationsInput | string
+    maBhyt?: NullableStringFieldUpdateOperationsInput | string | null
+    tenThuoc?: StringFieldUpdateOperationsInput | string
+    hoatChat?: NullableStringFieldUpdateOperationsInput | string | null
+    hamLuong?: NullableStringFieldUpdateOperationsInput | string | null
+    dangBaoChe?: NullableStringFieldUpdateOperationsInput | string | null
+    soDangKy?: NullableStringFieldUpdateOperationsInput | string | null
+    quyCach?: NullableStringFieldUpdateOperationsInput | string | null
+    donViTinh?: NullableStringFieldUpdateOperationsInput | string | null
+    tieuChuan?: NullableStringFieldUpdateOperationsInput | string | null
+    tuoiTho?: NullableStringFieldUpdateOperationsInput | string | null
+    duongDung?: NullableStringFieldUpdateOperationsInput | string | null
+    nguonGoc?: NullableStringFieldUpdateOperationsInput | string | null
+    congTySanXuat?: NullableStringFieldUpdateOperationsInput | string | null
+    nuocSanXuat?: NullableStringFieldUpdateOperationsInput | string | null
+    diaChiSanXuat?: NullableStringFieldUpdateOperationsInput | string | null
+    congTyDangKy?: NullableStringFieldUpdateOperationsInput | string | null
+    nuocDangKy?: NullableStringFieldUpdateOperationsInput | string | null
+    diaChiDangKy?: NullableStringFieldUpdateOperationsInput | string | null
+    nhomThuoc?: NullableStringFieldUpdateOperationsInput | string | null
+    isKeDon?: NullableStringFieldUpdateOperationsInput | string | null
+    kiemSoatDacBiet?: NullableStringFieldUpdateOperationsInput | string | null
+    isTrongNuoc?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    drugMaps?: FacilityDrugMapUpdateManyWithoutMasterDrugNestedInput
+  }
+
+  export type MasterDrugUncheckedUpdateWithoutTherapeuticGroupInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    maChung?: StringFieldUpdateOperationsInput | string
+    maBhyt?: NullableStringFieldUpdateOperationsInput | string | null
+    tenThuoc?: StringFieldUpdateOperationsInput | string
+    hoatChat?: NullableStringFieldUpdateOperationsInput | string | null
+    hamLuong?: NullableStringFieldUpdateOperationsInput | string | null
+    dangBaoChe?: NullableStringFieldUpdateOperationsInput | string | null
+    soDangKy?: NullableStringFieldUpdateOperationsInput | string | null
+    quyCach?: NullableStringFieldUpdateOperationsInput | string | null
+    donViTinh?: NullableStringFieldUpdateOperationsInput | string | null
+    tieuChuan?: NullableStringFieldUpdateOperationsInput | string | null
+    tuoiTho?: NullableStringFieldUpdateOperationsInput | string | null
+    duongDung?: NullableStringFieldUpdateOperationsInput | string | null
+    nguonGoc?: NullableStringFieldUpdateOperationsInput | string | null
+    congTySanXuat?: NullableStringFieldUpdateOperationsInput | string | null
+    nuocSanXuat?: NullableStringFieldUpdateOperationsInput | string | null
+    diaChiSanXuat?: NullableStringFieldUpdateOperationsInput | string | null
+    congTyDangKy?: NullableStringFieldUpdateOperationsInput | string | null
+    nuocDangKy?: NullableStringFieldUpdateOperationsInput | string | null
+    diaChiDangKy?: NullableStringFieldUpdateOperationsInput | string | null
+    nhomThuoc?: NullableStringFieldUpdateOperationsInput | string | null
+    isKeDon?: NullableStringFieldUpdateOperationsInput | string | null
+    kiemSoatDacBiet?: NullableStringFieldUpdateOperationsInput | string | null
+    isTrongNuoc?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    drugMaps?: FacilityDrugMapUncheckedUpdateManyWithoutMasterDrugNestedInput
+  }
+
+  export type MasterDrugUncheckedUpdateManyWithoutTherapeuticGroupInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    maChung?: StringFieldUpdateOperationsInput | string
+    maBhyt?: NullableStringFieldUpdateOperationsInput | string | null
+    tenThuoc?: StringFieldUpdateOperationsInput | string
+    hoatChat?: NullableStringFieldUpdateOperationsInput | string | null
+    hamLuong?: NullableStringFieldUpdateOperationsInput | string | null
+    dangBaoChe?: NullableStringFieldUpdateOperationsInput | string | null
+    soDangKy?: NullableStringFieldUpdateOperationsInput | string | null
+    quyCach?: NullableStringFieldUpdateOperationsInput | string | null
+    donViTinh?: NullableStringFieldUpdateOperationsInput | string | null
+    tieuChuan?: NullableStringFieldUpdateOperationsInput | string | null
+    tuoiTho?: NullableStringFieldUpdateOperationsInput | string | null
+    duongDung?: NullableStringFieldUpdateOperationsInput | string | null
+    nguonGoc?: NullableStringFieldUpdateOperationsInput | string | null
+    congTySanXuat?: NullableStringFieldUpdateOperationsInput | string | null
+    nuocSanXuat?: NullableStringFieldUpdateOperationsInput | string | null
+    diaChiSanXuat?: NullableStringFieldUpdateOperationsInput | string | null
+    congTyDangKy?: NullableStringFieldUpdateOperationsInput | string | null
+    nuocDangKy?: NullableStringFieldUpdateOperationsInput | string | null
+    diaChiDangKy?: NullableStringFieldUpdateOperationsInput | string | null
+    nhomThuoc?: NullableStringFieldUpdateOperationsInput | string | null
+    isKeDon?: NullableStringFieldUpdateOperationsInput | string | null
+    kiemSoatDacBiet?: NullableStringFieldUpdateOperationsInput | string | null
+    isTrongNuoc?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type FacilityDrugMapCreateManyMasterDrugInput = {
@@ -27825,7 +31375,7 @@ export namespace Prisma {
     chiTietNguonVon?: string | null
     soLuongPhanLo?: number | null
     thoiGianToChuc?: string | null
-    thoiGianBatDau?: Date | string | null
+    thoiGianBatDau?: string | null
     thoiGianThucHien?: string | null
     trangThai?: string | null
     maThongBao?: string | null
@@ -27845,7 +31395,7 @@ export namespace Prisma {
     chiTietNguonVon?: NullableStringFieldUpdateOperationsInput | string | null
     soLuongPhanLo?: NullableIntFieldUpdateOperationsInput | number | null
     thoiGianToChuc?: NullableStringFieldUpdateOperationsInput | string | null
-    thoiGianBatDau?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    thoiGianBatDau?: NullableStringFieldUpdateOperationsInput | string | null
     thoiGianThucHien?: NullableStringFieldUpdateOperationsInput | string | null
     trangThai?: NullableStringFieldUpdateOperationsInput | string | null
     maThongBao?: NullableStringFieldUpdateOperationsInput | string | null
@@ -27868,7 +31418,7 @@ export namespace Prisma {
     chiTietNguonVon?: NullableStringFieldUpdateOperationsInput | string | null
     soLuongPhanLo?: NullableIntFieldUpdateOperationsInput | number | null
     thoiGianToChuc?: NullableStringFieldUpdateOperationsInput | string | null
-    thoiGianBatDau?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    thoiGianBatDau?: NullableStringFieldUpdateOperationsInput | string | null
     thoiGianThucHien?: NullableStringFieldUpdateOperationsInput | string | null
     trangThai?: NullableStringFieldUpdateOperationsInput | string | null
     maThongBao?: NullableStringFieldUpdateOperationsInput | string | null
@@ -27891,7 +31441,7 @@ export namespace Prisma {
     chiTietNguonVon?: NullableStringFieldUpdateOperationsInput | string | null
     soLuongPhanLo?: NullableIntFieldUpdateOperationsInput | number | null
     thoiGianToChuc?: NullableStringFieldUpdateOperationsInput | string | null
-    thoiGianBatDau?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    thoiGianBatDau?: NullableStringFieldUpdateOperationsInput | string | null
     thoiGianThucHien?: NullableStringFieldUpdateOperationsInput | string | null
     trangThai?: NullableStringFieldUpdateOperationsInput | string | null
     maThongBao?: NullableStringFieldUpdateOperationsInput | string | null

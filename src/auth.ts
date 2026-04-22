@@ -15,39 +15,35 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 password: { label: "Password", type: "password" },
             },
             async authorize(credentials) {
-                console.log("Login attempt for:", credentials?.username);
                 try {
-                    if (!credentials?.username || !credentials?.password) {
-                        console.log("Missing credentials");
+                    const username = credentials?.username?.toString().trim();
+                    const password = credentials?.password?.toString();
+
+                    if (!username || !password) {
                         return null;
                     }
 
                     const user = await prisma.user.findUnique({
-                        where: { username: credentials.username as string },
+                        where: { username },
                     });
 
                     if (!user) {
-                        console.log("User not found");
                         return null;
                     }
 
                     if (!user.isActive) {
-                        console.log("User inactive");
                         return null;
                     }
 
-
                     const isPasswordValid = await bcrypt.compare(
-                        credentials.password as string,
+                        password,
                         user.passwordHash
                     );
 
                     if (!isPasswordValid) {
-                        console.log("Invalid password");
                         return null;
                     }
 
-                    console.log("Login successful for:", user.username);
                     return {
                         id: user.id,
                         name: user.facilityName || user.username,
@@ -56,7 +52,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                         facilityCode: user.facilityCode,
                     };
                 } catch (error) {
-                    console.error("Login critical error:", error);
+                    console.error("Login error", error);
                     throw error;
                 }
             },

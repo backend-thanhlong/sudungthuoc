@@ -13,8 +13,7 @@ interface FacilityDashboardShellProps {
 }
 
 export default function FacilityDashboardShell({ reportPeriods, facilityName }: FacilityDashboardShellProps) {
-    const latestMonth = reportPeriods.length > 0 ? reportPeriods[0] : "all";
-    const [selectedMonth, setSelectedMonth] = useState<string>(latestMonth);
+    const [selectedMonth, setSelectedMonth] = useState<string>("all");
     const [activeTab, setActiveTab] = useState("overview");
 
     const tabIcons: Record<string, string> = {
@@ -90,7 +89,7 @@ export default function FacilityDashboardShell({ reportPeriods, facilityName }: 
                 </TabsContent>
 
                 <TabsContent value="supply" className="mt-5">
-                    <Tab2Supply reportMonth={selectedMonth} facilityId="" apiPrefix={apiPrefix} />
+                    <Tab2Supply reportMonth={selectedMonth} facilityId="" apiPrefix={apiPrefix} scope="facility" />
                 </TabsContent>
 
                 <TabsContent value="tender" className="mt-5">

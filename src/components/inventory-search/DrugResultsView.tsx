@@ -77,6 +77,7 @@ export default function DrugResultsView({
                             <TableHead>Tên thuốc</TableHead>
                             <TableHead>Hoạt chất</TableHead>
                             <TableHead>Hàm lượng</TableHead>
+                            <TableHead>Số đăng ký</TableHead>
                             <TableHead>ĐVT</TableHead>
                             <TableHead className="text-center">Số cơ sở</TableHead>
                             <TableHead className="text-right">Tổng tồn kho</TableHead>
@@ -110,6 +111,9 @@ export default function DrugResultsView({
                                     <TableCell className="whitespace-normal break-words align-top">
                                         {drug.dosage}
                                     </TableCell>
+                                    <TableCell className="whitespace-normal break-words align-top text-slate-600">
+                                        {drug.soDangKy || "-"}
+                                    </TableCell>
                                     <TableCell>{drug.unit}</TableCell>
                                     <TableCell className="text-center">
                                         <Badge variant="outline" className="border-blue-200 bg-blue-50 text-blue-700">
@@ -124,7 +128,7 @@ export default function DrugResultsView({
 
                                 {expandedRows.has(drug.masterDrugId || drug.drugCode) && (
                                     <TableRow key={`${drug.masterDrugId || drug.drugCode}-facilities`}>
-                                        <TableCell colSpan={9} className="bg-slate-50 p-0">
+                                        <TableCell colSpan={10} className="bg-slate-50 p-0">
                                             <div className="px-6 py-3">
                                                 <p className="mb-3 text-sm font-medium text-slate-600">
                                                     Danh sách cơ sở còn tồn kho

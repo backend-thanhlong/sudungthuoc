@@ -33,16 +33,7 @@ const adminNavItems: NavItem[] = [
         ),
     },
     {
-        label: "Quản lý Users",
-        href: "/dashboard/admin/users",
-        icon: (
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-            </svg>
-        ),
-    },
-    {
-        label: "Mua sắm",
+        label: "Tổng hợp mua sắm",
         href: "#mua-sam-admin",
         icon: (
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -78,6 +69,15 @@ const adminNavItems: NavItem[] = [
                 ),
             },
             {
+                label: "Tra cứu",
+                href: "/dashboard/admin/mua-sam/tra-cuu",
+                icon: (
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                ),
+            },
+            {
                 label: "Thống kê",
                 href: "/dashboard/admin/mua-sam/thong-ke",
                 icon: (
@@ -107,20 +107,11 @@ const adminNavItems: NavItem[] = [
         ),
     },
     {
-        label: "Báo cáo tổng hợp",
+        label: "Tổng hợp Xuất-Nhập-Tồn",
         href: "/dashboard/admin/reports",
         icon: (
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-        ),
-    },
-    {
-        label: "Quản lý kỳ báo cáo",
-        href: "/dashboard/admin/report-periods",
-        icon: (
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
         ),
     },
@@ -134,15 +125,6 @@ const adminNavItems: NavItem[] = [
         ),
     },
     {
-        label: "Nhật ký hoạt động",
-        href: "/dashboard/admin/activity-logs",
-        icon: (
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-        ),
-    },
-    {
         label: "Tra cứu tồn kho",
         href: "/dashboard/inventory-search",
         icon: (
@@ -150,6 +132,54 @@ const adminNavItems: NavItem[] = [
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
         ),
+    },
+    {
+        label: "Cài đặt",
+        href: "#cai-dat-admin",
+        icon: (
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317a1 1 0 011.35-.936l1.2.48a1 1 0 00.75 0l1.2-.48a1 1 0 011.35.936l.106 1.287a1 1 0 00.53.79l1.115.62a1 1 0 01.37 1.37l-.6 1.04a1 1 0 000 1l.6 1.04a1 1 0 01-.37 1.37l-1.115.62a1 1 0 00-.53.79l-.106 1.287a1 1 0 01-1.35.936l-1.2-.48a1 1 0 00-.75 0l-1.2.48a1 1 0 01-1.35-.936l-.106-1.287a1 1 0 00-.53-.79l-1.115-.62a1 1 0 01-.37-1.37l.6-1.04a1 1 0 000-1l-.6-1.04a1 1 0 01.37-1.37l1.115-.62a1 1 0 00.53-.79l.106-1.287z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15a3 3 0 100-6 3 3 0 000 6z" />
+            </svg>
+        ),
+        children: [
+            {
+                label: "Quản lý Users",
+                href: "/dashboard/admin/users",
+                icon: (
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                ),
+            },
+            {
+                label: "Quản lý kỳ báo cáo",
+                href: "/dashboard/admin/report-periods",
+                icon: (
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                ),
+            },
+            {
+                label: "Danh mục nhóm điều trị",
+                href: "/dashboard/admin/therapeutic-groups",
+                icon: (
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h10M7 12h8M7 17h6M5 4h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z" />
+                    </svg>
+                ),
+            },
+            {
+                label: "Nhật ký hoạt động",
+                href: "/dashboard/admin/activity-logs",
+                icon: (
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                ),
+            },
+        ],
     },
 ];
 
@@ -164,7 +194,7 @@ const facilityNavItems: NavItem[] = [
         ),
     },
     {
-        label: "Mua sắm",
+        label: "Báo cáo mua sắm",
         href: "#mua-sam",
         icon: (
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -200,6 +230,15 @@ const facilityNavItems: NavItem[] = [
                 ),
             },
             {
+                label: "Tra cứu",
+                href: "/dashboard/facility/mua-sam/tra-cuu",
+                icon: (
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                ),
+            },
+            {
                 label: "Thống kê",
                 href: "/dashboard/facility/mua-sam/thong-ke",
                 icon: (
@@ -220,7 +259,7 @@ const facilityNavItems: NavItem[] = [
         ),
     },
     {
-        label: "Quản lý danh mục",
+        label: "Ánh xạ danh mục thuốc",
         href: "/dashboard/facility/mappings",
         icon: (
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -229,7 +268,7 @@ const facilityNavItems: NavItem[] = [
         ),
     },
     {
-        label: "Báo cáo hàng tháng",
+        label: "Báo cáo Xuất-Nhập-Tồn",
         href: "/dashboard/facility/reports",
         icon: (
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -283,7 +322,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
                                 </svg>
                             </div>
-                            <span className="text-blue-900 font-bold text-lg">Hệ thống Kho Dược CSYT</span>
+                            <span className="text-blue-900 font-bold text-lg">Quản lý Mua sắm và Kho Dược</span>
                         </div>
                     )}
                     <button

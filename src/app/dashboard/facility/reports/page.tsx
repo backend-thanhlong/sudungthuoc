@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { readExcel } from "@/lib/excel";
+import { triggerBlobDownload } from "@/lib/browser-download";
 import { Badge } from "@/components/ui/badge";
 import {
     Card,
@@ -39,8 +40,10 @@ import { Eye, Loader2, CheckCircle, XCircle, AlertCircle } from "lucide-react";
 import {
     findDuplicateRowTokens,
     parseRawRow,
+    REPORT_FIELD_BO_QUA,
     REPORT_VALIDATION_CODES,
     REPORT_ROW_TOKEN_COLUMN,
+    isSkipMarked,
     validateReportRow,
     ValidationWarning,
 } from "@/lib/report-validation";
@@ -60,8 +63,9 @@ interface PreviewRow {
     thanhTienTonCuoi: number;
     bhyt?: string | null;
     dichVu?: string | null;
+    boQua?: string | null;
+    isSkipped: boolean;
     warnings: ValidationWarning[];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     rawRow: any;
 }
 
@@ -135,7 +139,6 @@ export default function FacilityReportsPage() {
     const [periods, setPeriods] = useState<{ value: string; label: string; deadline?: string | null }[]>([]);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [isUploading, setIsUploading] = useState(false);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [reports, setReports] = useState<any[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -198,14 +201,7 @@ export default function FacilityReportsPage() {
             const res = await fetch(`/api/facility/reports/template?month=${selectedMonth}`);
             if (res.ok) {
                 const blob = await res.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = `bao_cao_${selectedMonth.replace("/", "_")}.xlsx`;
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                a.remove();
+                triggerBlobDownload(blob, `bao_cao_${selectedMonth.replace("/", "_")}.xlsx`);
                 toast.success("Đã tải mẫu báo cáo");
             } else {
                 toast.error("Không thể tải mẫu báo cáo");
@@ -218,9 +214,7 @@ export default function FacilityReportsPage() {
     };
 
     const currentMonthReport = reports.find(r => r.month === selectedMonth);
-    const isApproved = currentMonthReport?.status === "APPROVED";
-    const isRejected = currentMonthReport?.status === "REJECTED";
-    const isPending = currentMonthReport?.status === "PENDING";
+    const isSubmitted = Boolean(currentMonthReport);
 
     const resetUploadValidationState = () => {
         setPreviewRows([]);
@@ -274,7 +268,6 @@ export default function FacilityReportsPage() {
             // Auto-parse and preview
             setIsParsingFile(true);
             try {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const rawData = await readExcel(file) as any[];
                 if (!rawData || rawData.length === 0) {
                     toast.error("File không có dữ liệu");
@@ -288,6 +281,7 @@ export default function FacilityReportsPage() {
                     const parsed = parseRawRow(row);
                     if (!parsed) return null;
                     const warnings = validateReportRow(parsed);
+                    const isSkipped = isSkipMarked(parsed.boQua);
                     if (parsed.rowToken && duplicateTokens.has(parsed.rowToken.trim())) {
                         warnings.push({
                             drug: parsed.drugName,
@@ -311,6 +305,8 @@ export default function FacilityReportsPage() {
                         thanhTienTonCuoi: parsed.thanhTienTonCuoi,
                         bhyt: parsed.bhyt,
                         dichVu: parsed.dichVu,
+                        boQua: parsed.boQua,
+                        isSkipped,
                         warnings,
                         rawRow: row,
                     };
@@ -359,7 +355,8 @@ export default function FacilityReportsPage() {
     const localErrorCount = previewRows.reduce((acc, row) => acc + row.warnings.length, 0);
     const serverErrorCount = serverValidationErrors.length;
     const totalErrors = localErrorCount + serverErrorCount;
-    const validRows = previewRowsWithErrors.filter((row) => row.combinedErrors.length === 0).length;
+    const skippedRows = previewRowsWithErrors.filter((row) => row.isSkipped).length;
+    const reportedRows = previewRowsWithErrors.filter((row) => !row.isSkipped).length;
     const canSubmit = Boolean(
         selectedFile
         && selectedMonth
@@ -390,7 +387,6 @@ export default function FacilityReportsPage() {
 
         setIsUploading(true);
         try {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const rawData = await readExcel(selectedFile) as any[];
             if (!rawData || rawData.length === 0) {
                 toast.error("File không có dữ liệu");
@@ -404,7 +400,10 @@ export default function FacilityReportsPage() {
             });
 
             if (res.ok) {
-                toast.success("Nộp báo cáo thành công");
+                const responseData = await res.json().catch(() => null);
+                const successCount = responseData?.stats?.success ?? 0;
+                const skippedCount = responseData?.stats?.skipped ?? 0;
+                toast.success(`Nộp báo cáo thành công (${successCount} dòng báo cáo, ${skippedCount} dòng bỏ qua)`);
                 setSelectedFile(null);
                 resetUploadValidationState();
                 if (fileInputRef.current) fileInputRef.current.value = "";
@@ -525,6 +524,7 @@ export default function FacilityReportsPage() {
     };
 
     const selectedPeriod = periods.find(p => p.value === selectedMonth);
+    const selectedDetailReport = reports.find((report) => report.month === detailMonth);
     const deadline = selectedPeriod?.deadline;
     const detailRangeStart = detailTotal === 0 ? 0 : (detailPage - 1) * DETAIL_PAGE_SIZE + 1;
     const detailRangeEnd = detailTotal === 0 ? 0 : Math.min(detailTotal, (detailPage - 1) * DETAIL_PAGE_SIZE + detailData.length);
@@ -534,6 +534,7 @@ export default function FacilityReportsPage() {
         || detailAppliedSearchField !== "all"
         || detailSearchInput.length > 0
         || detailSearchTerm.length > 0;
+    const detailReportHasNoSavedRows = (selectedDetailReport?.drugCount || 0) === 0;
     const formatDetailNumber = (value: number | string | null | undefined) => new Intl.NumberFormat("vi-VN").format(Number(value || 0));
     const renderDetailText = (value: string | null | undefined) => {
         if (!value?.trim()) return <span className="text-gray-300">—</span>;
@@ -597,7 +598,7 @@ export default function FacilityReportsPage() {
                         <Button
                             className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600"
                             onClick={handleDownloadTemplate}
-                            disabled={!selectedMonth || isDownloading}
+                            disabled={!selectedMonth || isDownloading || isSubmitted}
                         >
                             {isDownloading ? (
                                 <>
@@ -620,6 +621,11 @@ export default function FacilityReportsPage() {
                                 <span className="font-semibold">Đã duyệt</span> hoặc{" "}
                                 <span className="font-semibold">Tự động khớp</span>.
                             </p>
+                            {isSubmitted && (
+                                <p className="text-sm text-blue-700 mt-2">
+                                    Tháng {selectedMonth} đã được nộp và chốt. Không thể tải lại mẫu để nộp tiếp.
+                                </p>
+                            )}
                         </div>
                     </CardContent>
                 </Card>
@@ -638,34 +644,14 @@ export default function FacilityReportsPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        {isApproved ? (
+                        {isSubmitted ? (
                             <div className="p-8 text-center bg-emerald-50 rounded-lg border border-emerald-100">
                                 <CheckCircle className="w-12 h-12 mx-auto text-emerald-500 mb-4" />
-                                <h3 className="text-lg font-medium text-emerald-800 mb-2">Đã được duyệt</h3>
-                                <p className="text-emerald-600">Báo cáo tháng {selectedMonth} đã được duyệt. Không thể nộp lại.</p>
+                                <h3 className="text-lg font-medium text-emerald-800 mb-2">Đã nộp</h3>
+                                <p className="text-emerald-600">Báo cáo tháng {selectedMonth} đã được nộp và chốt. Không thể nộp lại.</p>
                             </div>
                         ) : (
                             <>
-                                {isRejected && (
-                                    <div className="p-4 bg-red-50 rounded-lg border border-red-100">
-                                        <h4 className="font-semibold text-red-800 flex items-center gap-2">
-                                            <XCircle className="w-5 h-5" />
-                                            Báo cáo bị từ chối
-                                        </h4>
-                                        <p className="text-red-600 mt-1">Lý do: {currentMonthReport.adminNote}</p>
-                                        <p className="text-sm text-red-500 mt-2">Vui lòng chỉnh sửa và nộp lại file mới.</p>
-                                    </div>
-                                )}
-
-                                {isPending && (
-                                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
-                                        <p className="text-blue-700 text-sm flex items-center gap-2">
-                                            <AlertCircle className="w-5 h-5" />
-                                            Báo cáo đang chờ duyệt. Bạn có thể nộp lại để cập nhật số liệu.
-                                        </p>
-                                    </div>
-                                )}
-
                                 <input
                                     type="file"
                                     ref={fileInputRef}
@@ -714,7 +700,7 @@ export default function FacilityReportsPage() {
                                             ) : isServerValidating ? (
                                                 <><Loader2 className="w-4 h-4 text-blue-600 animate-spin" /><span className="text-blue-700">Đang kiểm tra dữ liệu với máy chủ</span></>
                                             ) : (
-                                                <><CheckCircle className="w-4 h-4 text-emerald-600" /><span className="text-emerald-700">Tất cả {validRows} dòng hợp lệ – sẵn sàng nộp</span></>
+                                                <><CheckCircle className="w-4 h-4 text-emerald-600" /><span className="text-emerald-700">{reportedRows} dòng báo cáo, {skippedRows} dòng bỏ qua – sẵn sàng nộp</span></>
                                             )}
                                         </div>
                                         {totalErrors > 0 && (
@@ -739,14 +725,14 @@ export default function FacilityReportsPage() {
                                         ? "Đang xử lý..."
                                         : isServerValidating
                                             ? "Đang xác thực dữ liệu..."
-                                            : (isRejected ? "Nộp lại báo cáo" : "Xác nhận nộp báo cáo")}
+                                            : "Xác nhận nộp báo cáo"}
                                 </Button>
                             </>
                         )}
 
                         <div className="p-4 bg-emerald-50 rounded-lg">
                             <p className="text-sm text-emerald-700">
-                                <strong>Hướng dẫn:</strong> Điền đầy đủ Tồn đầu, Nhập, Xuất, Tồn cuối, Giá VAT, Thành tiền vào file mẫu rồi upload. Hệ thống sẽ kiểm tra tự động.
+                                <strong>Hướng dẫn:</strong> Điền số liệu cho các dòng cần báo cáo. Nếu thuốc không phát sinh dữ liệu trong tháng, nhập <span className="font-semibold">{REPORT_FIELD_BO_QUA}</span> = X. Nếu không bỏ qua dòng, phải đánh dấu X ở ít nhất một trong hai cột BHYT hoặc Dịch vụ; có thể đánh dấu cả hai. Hệ thống sẽ kiểm tra tự động trước khi nộp.
                             </p>
                         </div>
                     </CardContent>
@@ -787,12 +773,13 @@ export default function FacilityReportsPage() {
                                     <th className="px-3 py-3 text-right">Giá VAT</th>
                                     <th className="px-3 py-3 text-right">Thành tiền</th>
                                     <th className="px-3 py-3 text-center">BHYT/DV</th>
+                                    <th className="px-3 py-3 text-center">Bỏ qua</th>
                                     <th className="px-3 py-3">Trạng thái</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {previewRowsWithErrors.map((row) => (
-                                    <tr key={`${row.stt}-${row.excelRowNumber}`} className={`border-b ${row.combinedErrors.length > 0 ? "bg-red-50" : "bg-white hover:bg-gray-50"}`}>
+                                    <tr key={`${row.stt}-${row.excelRowNumber}`} className={`border-b ${row.combinedErrors.length > 0 ? "bg-red-50" : row.isSkipped ? "bg-amber-50" : "bg-white hover:bg-gray-50"}`}>
                                         <td className="px-3 py-2 text-gray-500">{row.stt}</td>
                                         <td className="px-3 py-2 text-xs text-gray-500">{row.maNoiBo}</td>
                                         <td className="px-3 py-2 font-medium text-gray-800">{row.drugName}</td>
@@ -810,11 +797,22 @@ export default function FacilityReportsPage() {
                                             {row.bhyt?.trim().toLowerCase() === "x" && <span className="text-emerald-600 font-bold">BH</span>}
                                             {row.bhyt?.trim().toLowerCase() === "x" && row.dichVu?.trim().toLowerCase() === "x" && " / "}
                                             {row.dichVu?.trim().toLowerCase() === "x" && <span className="text-blue-600 font-bold">DV</span>}
-                                            {!row.bhyt?.trim() && !row.dichVu?.trim() && <span className="text-red-500">—</span>}
+                                            {!row.bhyt?.trim() && !row.dichVu?.trim() && <span className="text-gray-400">—</span>}
+                                        </td>
+                                        <td className="px-3 py-2 text-center text-xs">
+                                            {row.isSkipped ? (
+                                                <Badge className="bg-amber-100 text-amber-700 border-0">X</Badge>
+                                            ) : (
+                                                <span className="text-gray-400">—</span>
+                                            )}
                                         </td>
                                         <td className="px-3 py-2">
                                             {row.combinedErrors.length === 0 ? (
-                                                <CheckCircle className="w-4 h-4 text-emerald-500" />
+                                                row.isSkipped ? (
+                                                    <Badge className="bg-amber-100 text-amber-700 border-0">Bỏ qua</Badge>
+                                                ) : (
+                                                    <CheckCircle className="w-4 h-4 text-emerald-500" />
+                                                )
                                             ) : (
                                                 <div className="space-y-1">
                                                     {row.combinedErrors.map((w, i) => (
@@ -851,8 +849,8 @@ export default function FacilityReportsPage() {
                                 <TableRow>
                                     <TableHead>Tháng báo cáo</TableHead>
                                     <TableHead>Số thuốc</TableHead>
-                                    <TableHead>Tổng nhập</TableHead>
-                                    <TableHead>Tổng xuất</TableHead>
+                                    <TableHead>Tổng tiền nhập</TableHead>
+                                    <TableHead>Tổng tiền xuất</TableHead>
                                     <TableHead>Cập nhật lần cuối</TableHead>
                                     <TableHead>Trạng thái</TableHead>
                                     <TableHead className="text-right">Thao tác</TableHead>
@@ -865,22 +863,14 @@ export default function FacilityReportsPage() {
                                         <TableCell>{report.drugCount}</TableCell>
                                         <TableCell className="text-blue-600">{new Intl.NumberFormat("vi-VN").format(report.totalImport || 0)}</TableCell>
                                         <TableCell className="text-orange-600">{new Intl.NumberFormat("vi-VN").format(report.totalExport || 0)}</TableCell>
-                                        <TableCell className="text-gray-400 text-sm">{new Date(report.lastUpdated).toLocaleString("vi-VN")}</TableCell>
+                                        <TableCell className="text-gray-400 text-sm">{report.lastUpdated ? new Date(report.lastUpdated).toLocaleString("vi-VN") : "—"}</TableCell>
                                         <TableCell>
-                                            {report.status === "APPROVED" && (
-                                                <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-200 border-0">Đã duyệt</Badge>
-                                            )}
-                                            {report.status === "REJECTED" && (
-                                                <div className="flex flex-col gap-1">
-                                                    <Badge className="bg-red-100 text-red-700 hover:bg-red-200 border-0 w-fit">Bị từ chối</Badge>
-                                                    {report.adminNote && (
-                                                        <span className="text-xs text-red-500 max-w-[200px] truncate" title={report.adminNote}>Lý do: {report.adminNote}</span>
-                                                    )}
-                                                </div>
-                                            )}
-                                            {(!report.status || report.status === "PENDING") && (
-                                                <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-200 border-0">Chờ xử lý</Badge>
-                                            )}
+                                            <div className="flex flex-col gap-1">
+                                                <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-200 border-0 w-fit">Đã nộp</Badge>
+                                                {report.skippedRowCount > 0 && (
+                                                    <span className="text-xs text-amber-600">{report.skippedRowCount} dòng bỏ qua</span>
+                                                )}
+                                            </div>
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <Button
@@ -971,11 +961,20 @@ export default function FacilityReportsPage() {
                             <div className="flex flex-1 items-center justify-center text-gray-500">
                                 <div className="text-center">
                                     <p className="text-base font-medium text-gray-600">
-                                        {hasActiveDetailSearch ? "Không tìm thấy dữ liệu phù hợp" : "Không có dữ liệu chi tiết"}
+                                        {hasActiveDetailSearch
+                                            ? "Không tìm thấy dữ liệu phù hợp"
+                                            : detailReportHasNoSavedRows
+                                                ? "Báo cáo này không có dòng dữ liệu đã lưu"
+                                                : "Không có dữ liệu chi tiết"}
                                     </p>
                                     {hasActiveDetailSearch && (
                                         <p className="text-sm text-gray-400 mt-1">
                                             Thử đổi trường tìm kiếm hoặc từ khóa khác.
+                                        </p>
+                                    )}
+                                    {!hasActiveDetailSearch && detailReportHasNoSavedRows && (
+                                        <p className="text-sm text-gray-400 mt-1">
+                                            Tất cả các dòng trong file nộp tháng này đã được đánh dấu Bỏ qua.
                                         </p>
                                     )}
                                 </div>

@@ -2,6 +2,18 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
 
+const normalizeDomesticFlag = (value: string | null | undefined) =>
+    value
+        ?.trim()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "") || "";
+
+const isDomesticDrug = (value: string | null | undefined) => {
+    const normalized = normalizeDomesticFlag(value);
+    return normalized === "trong nuoc" || normalized === "co" || normalized === "true" || normalized === "1";
+};
+
 export async function GET(request: Request) {
     const session = await auth();
     if (!session || (session.user as any).role !== "ADMIN") {
@@ -71,7 +83,7 @@ export async function GET(request: Request) {
         allReports.forEach((r) => {
             const exportVal = Number(r.xuat) * Number(r.giaVat);
             totalExportValue += exportVal;
-            if (r.drugMap?.masterDrug?.isTrongNuoc === "Có" || r.drugMap?.masterDrug?.isTrongNuoc === "có" || r.drugMap?.masterDrug?.isTrongNuoc === "TRUE" || r.drugMap?.masterDrug?.isTrongNuoc === "true" || r.drugMap?.masterDrug?.isTrongNuoc === "1") {
+            if (isDomesticDrug(r.drugMap?.masterDrug?.isTrongNuoc)) {
                 domesticValue += exportVal;
             }
         });

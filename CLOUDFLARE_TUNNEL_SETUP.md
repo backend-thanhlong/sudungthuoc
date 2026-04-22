@@ -107,11 +107,17 @@ Sau khi tạo xong, Cloudflare sẽ hiển thị cách cài đặt. Bạn cần:
 
 ### Bước 4: Cấu hình Docker
 
-Tạo file `.env.docker`:
+Tạo file `.env.docker` từ template rồi điền giá trị thật:
 
 ```bash
+cp .env.docker.example .env.docker
+
+# Cập nhật các giá trị cần thiết:
 TUNNEL_TOKEN=eyJ... (token bạn vừa copy)
-DATABASE_URL="postgresql://postgres:123456@db:5432/sudungthuoc_db?schema=public"
+POSTGRES_SUPERUSER_PASSWORD="doi-mat-khau-superuser-manh"
+APP_DB_PASSWORD="doi-mat-khau-app-manh"
+APP_DATABASE_URL="postgresql://sudungthuoc_app:doi-mat-khau-app-manh@db:5432/sudungthuoc_db?schema=public"
+DATABASE_ADMIN_URL="postgresql://postgres:doi-mat-khau-superuser-manh@db:5432/sudungthuoc_db?schema=public"
 AUTH_SECRET="your-super-secret-key-change-in-production"
 AUTH_URL="https://khoduoc.nvdcantho.com"
 NODE_ENV="production"
@@ -121,18 +127,23 @@ NODE_ENV="production"
 
 ```bash
 # Load environment variables và start
-docker-compose --env-file .env.docker up -d
+docker compose --env-file .env.docker up -d
 
-# Đợi database ready, sau đó:
-docker-compose exec app npx prisma db push
-docker-compose exec app npm run db:seed
+# Đợi database ready, sau đó chạy DDL bằng admin profile:
+docker compose --env-file .env.docker --profile admin run --build --rm app-admin npm run db:push
+
+# Nếu cần tạo admin production ban đầu:
+docker compose --env-file .env.docker --profile admin run --build --rm \
+  -e ALLOW_PRODUCTION_SEED=true \
+  -e SEED_ADMIN_PASSWORD='doi-mat-khau-admin-dau-tien' \
+  app-admin npm run db:seed
 ```
 
 ### Bước 6: Kiểm tra tunnel
 
 ```bash
 # Xem logs tunnel
-docker-compose logs -f tunnel
+docker compose logs -f tunnel
 
 # Output mong đợi:
 # "Connection ... registered"

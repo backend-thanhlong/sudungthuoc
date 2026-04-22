@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
+import { buildPackageStatusData } from "@/lib/mua-sam-package-status";
 
 // GET - Statistics for admin (all facilities)
 export async function GET() {
@@ -17,7 +18,6 @@ export async function GET() {
             tbmtCount,
             ketQuaLCNTs,
             keHoachs,
-            facilitiesWithPlans,
         ] = await Promise.all([
             prisma.keHoachLCNT.count(),
             prisma.goiThau.findMany({
@@ -26,13 +26,22 @@ export async function GET() {
                     tenGoiThau: true,
                     giaGoiThau: true,
                     hinhThucLCNT: true,
-                    trangThai: true,
                     createdAt: true,
                     keHoach: {
                         select: {
+                            id: true,
+                            tenKHLCNT: true,
+                            maKHLCNT: true,
+                            quyTrinh: true,
                             facility: {
                                 select: { id: true, facilityName: true },
                             },
+                        },
+                    },
+                    _count: {
+                        select: {
+                            thongBaoMoiThaus: true,
+                            ketQuaLCNTs: true,
                         },
                     },
                 },
@@ -63,10 +72,6 @@ export async function GET() {
                     quyTrinh: true,
                     createdAt: true,
                 },
-            }),
-            prisma.keHoachLCNT.groupBy({
-                by: ["facilityId"],
-                _count: { id: true },
             }),
         ]);
 
@@ -120,16 +125,20 @@ export async function GET() {
             .sort((a, b) => b.value - a.value)
             .slice(0, 10);
 
-        // Bar chart: Trạng thái gói thầu
-        const statusMap: Record<string, number> = {};
-        goiThaus.forEach((g) => {
-            const status = g.trangThai || "Không xác định";
-            statusMap[status] = (statusMap[status] || 0) + 1;
-        });
-        const statusData = Object.entries(statusMap).map(([name, value]) => ({
-            name,
-            value,
-        }));
+        const { statusData, statusBreakdown, statusSummary } = buildPackageStatusData(
+            goiThaus.map((g) => ({
+                goiThauId: g.id,
+                tenGoiThau: g.tenGoiThau,
+                keHoachId: g.keHoach.id,
+                tenKHLCNT: g.keHoach.tenKHLCNT,
+                maKHLCNT: g.keHoach.maKHLCNT,
+                quyTrinh: g.keHoach.quyTrinh,
+                tbmtCount: g._count.thongBaoMoiThaus,
+                kqlcntCount: g._count.ketQuaLCNTs,
+                facilityId: g.keHoach.facility.id,
+                facilityName: g.keHoach.facility.facilityName,
+            }))
+        );
 
         // Table: Tỷ lệ trúng thầu theo cơ sở
         const facilityBidMap: Record<string, { name: string; moiThau: number; trungThau: number }> = {};
@@ -180,6 +189,8 @@ export async function GET() {
             pieHinhThuc,
             topFacilities,
             statusData,
+            statusBreakdown,
+            statusSummary,
             bidRateByFacility,
             trendData,
             pieQuyTrinh,

@@ -56,7 +56,6 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Tháng báo cáo này đã tồn tại" }, { status: 400 });
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const newPeriod = await (prisma.reportPeriod as any).create({
             data: {
                 month,

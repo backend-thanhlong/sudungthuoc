@@ -18,9 +18,7 @@ interface InventoryValueChartWithFiltersProps {
 }
 
 export default function InventoryValueChartWithFilters({ data, reportPeriods }: InventoryValueChartWithFiltersProps) {
-    // Default to the latest month if available, otherwise "all"
-    const latestMonth = reportPeriods.length > 0 ? reportPeriods[0] : "all";
-    const [selectedMonth, setSelectedMonth] = useState<string>(latestMonth);
+    const [selectedMonth, setSelectedMonth] = useState<string>("all");
 
     // Filter data based on selected month
     const filteredData = useMemo(() => {
@@ -29,25 +27,11 @@ export default function InventoryValueChartWithFilters({ data, reportPeriods }: 
         if (selectedMonth !== "all") {
             currentData = data.filter(item => item.month === selectedMonth);
         } else {
-            // When "all" is selected, we should probably aggregate values by facility across all months
-            // OR show an average. For simplicity and meaningful data, let's SUM user values.
-            // But wait, summing inventory value across months doesn't make sense (it's a snapshot).
-            // So if "all" is selected, let's show the LATEST data for each facility.
-
-            // Group by facility and find the latest report for each
+            // For the aggregate view, keep one latest snapshot per facility.
             const latestByFacility = new Map<string, InventoryValueData>();
 
             data.forEach(item => {
                 const existing = latestByFacility.get(item.facilityId);
-                // Simple string comparison for "MM/YYYY" isn't perfect for sorting time, 
-                // but if we assume data comes sorted or we parse it, it's safer.
-                // Here we rely on the fact that we probably want the most recent entry.
-                // Let's assume the API returns data that helps us, or we parse the date.
-                // Ideally, the user should select a specific month.
-                // Let's just default to showing the raw data if it matches, 
-                // OR we just summing it up is WRONG.
-                // Safe bet: Default to latest month.
-
                 if (!existing || isLater(item.month, existing.month)) {
                     latestByFacility.set(item.facilityId, item);
                 }
@@ -80,9 +64,10 @@ export default function InventoryValueChartWithFilters({ data, reportPeriods }: 
                     <div className="w-full md:w-[200px]">
                         <Select value={selectedMonth} onValueChange={setSelectedMonth}>
                             <SelectTrigger>
-                                <SelectValue placeholder="Chọn tháng" />
+                                <SelectValue placeholder="Tất cả các kỳ" />
                             </SelectTrigger>
                             <SelectContent>
+                                <SelectItem value="all">Tất cả các kỳ</SelectItem>
                                 {reportPeriods.map(month => (
                                     <SelectItem key={month} value={month}>
                                         {month}
@@ -99,7 +84,7 @@ export default function InventoryValueChartWithFilters({ data, reportPeriods }: 
                 ) : (
                     <div className="h-[400px] flex items-center justify-center bg-gray-50 rounded-lg border border-gray-200">
                         <p className="text-gray-500 text-center">
-                            Không có dữ liệu cho tháng đã chọn
+                            Không có dữ liệu cho kỳ báo cáo đã chọn
                         </p>
                     </div>
                 )}

@@ -14,6 +14,44 @@ const prisma = new PrismaClient({ adapter });
 async function main() {
     console.log("🌱 Seeding database...");
 
+    const isProduction = process.env.NODE_ENV === "production";
+    const allowProductionSeed = process.env.ALLOW_PRODUCTION_SEED === "true";
+
+    if (isProduction && !allowProductionSeed) {
+        throw new Error("Production seed is disabled. Set ALLOW_PRODUCTION_SEED=true to run it explicitly.");
+    }
+
+    if (isProduction) {
+        const adminUsername = process.env.SEED_ADMIN_USERNAME?.trim() || "admin";
+        const adminPasswordInput = process.env.SEED_ADMIN_PASSWORD?.trim();
+
+        if (!adminPasswordInput) {
+            throw new Error("SEED_ADMIN_PASSWORD is required when seeding production.");
+        }
+
+        const adminPassword = await bcrypt.hash(adminPasswordInput, 10);
+        const admin = await prisma.user.upsert({
+            where: { username: adminUsername },
+            update: {
+                passwordHash: adminPassword,
+                role: "ADMIN",
+                facilityName: "Sở Y Tế",
+                isActive: true,
+            },
+            create: {
+                username: adminUsername,
+                passwordHash: adminPassword,
+                role: "ADMIN",
+                facilityName: "Sở Y Tế",
+                isActive: true,
+            },
+        });
+
+        console.log("✅ Created production admin user:", admin.username);
+        console.log("🎉 Production seed completed!");
+        return;
+    }
+
     // Create Admin user
     const adminPassword = await bcrypt.hash("admin123", 10);
     const admin = await prisma.user.upsert({

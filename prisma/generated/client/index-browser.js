@@ -137,6 +137,15 @@ exports.Prisma.UserScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.TherapeuticGroupScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  normalizedName: 'normalizedName',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.MasterDrugScalarFieldEnum = {
   id: 'id',
   maChung: 'maChung',
@@ -159,7 +168,7 @@ exports.Prisma.MasterDrugScalarFieldEnum = {
   nuocDangKy: 'nuocDangKy',
   diaChiDangKy: 'diaChiDangKy',
   nhomThuoc: 'nhomThuoc',
-  nhomDieuTri: 'nhomDieuTri',
+  therapeuticGroupId: 'therapeuticGroupId',
   isKeDon: 'isKeDon',
   kiemSoatDacBiet: 'kiemSoatDacBiet',
   isTrongNuoc: 'isTrongNuoc',
@@ -203,6 +212,17 @@ exports.Prisma.InventoryReportScalarFieldEnum = {
   dichVu: 'dichVu',
   status: 'status',
   adminNote: 'adminNote',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.FacilityReportSubmissionScalarFieldEnum = {
+  id: 'id',
+  facilityId: 'facilityId',
+  reportMonth: 'reportMonth',
+  submittedAt: 'submittedAt',
+  reportedRowCount: 'reportedRowCount',
+  skippedRowCount: 'skippedRowCount',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -379,9 +399,11 @@ exports.ReportStatus = exports.$Enums.ReportStatus = {
 
 exports.Prisma.ModelName = {
   User: 'User',
+  TherapeuticGroup: 'TherapeuticGroup',
   MasterDrug: 'MasterDrug',
   FacilityDrugMap: 'FacilityDrugMap',
   InventoryReport: 'InventoryReport',
+  FacilityReportSubmission: 'FacilityReportSubmission',
   ReportReviewLog: 'ReportReviewLog',
   ReportPeriod: 'ReportPeriod',
   KeHoachLCNT: 'KeHoachLCNT',

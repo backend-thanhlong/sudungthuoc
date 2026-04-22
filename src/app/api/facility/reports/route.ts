@@ -9,6 +9,10 @@ import {
     loadFacilityReportCanonicalContext,
     validateFacilityReportRows,
 } from "@/lib/facility-report-upload";
+import {
+    hasExistingFacilityReportMonth,
+    listReportMonthSummaries,
+} from "@/lib/report-submissions";
 
 export async function GET() {
     try {
@@ -17,58 +21,20 @@ export async function GET() {
             return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
         }
 
-        // Group reports by month with aggregation
-        const reports = await prisma.inventoryReport.groupBy({
-            by: ['reportMonth'],
-            where: {
-                facilityId: session.user.id
-            },
-            _count: {
-                id: true
-            },
-            _sum: {
-                nhap: true,
-                xuat: true,
-                tonCuoi: true,
-                giaVat: true
-            },
-            _max: {
-                updatedAt: true
-            },
-            orderBy: {
-                reportMonth: 'desc'
-            }
-        });
+        const summaries = await listReportMonthSummaries({ facilityId: session.user.id });
 
-        // Fetch status/adminNote for all months in ONE query to avoid N+1
-        const monthStatuses = await prisma.inventoryReport.findMany({
-            where: {
-                facilityId: session.user.id,
-                reportMonth: { in: reports.map(r => r.reportMonth) }
-            },
-            select: { reportMonth: true, status: true, adminNote: true },
-            distinct: ['reportMonth'],
-        });
-
-        // Build lookup Map: reportMonth -> { status, adminNote }
-        const statusMap = new Map(
-            monthStatuses.map(r => [r.reportMonth, r])
+        return NextResponse.json(
+            summaries.map((summary) => ({
+                month: summary.month,
+                drugCount: summary.drugCount,
+                totalImport: summary.totalImport,
+                totalExport: summary.totalExport,
+                lastUpdated: summary.lastUpdated,
+                status: summary.status,
+                reportedRowCount: summary.reportedRowCount,
+                skippedRowCount: summary.skippedRowCount,
+            }))
         );
-
-        const historyWithDetails = reports.map(r => {
-            const statusInfo = statusMap.get(r.reportMonth);
-            return {
-                month: r.reportMonth,
-                drugCount: r._count.id,
-                totalImport: r._sum.nhap,
-                totalExport: r._sum.xuat,
-                lastUpdated: r._max.updatedAt,
-                status: statusInfo?.status || "PENDING",
-                adminNote: statusInfo?.adminNote,
-            };
-        });
-
-        return NextResponse.json(historyWithDetails);
     } catch (error) {
         console.error("Error fetching report history:", error);
         return NextResponse.json({ message: "Internal server error" }, { status: 500 });
@@ -98,50 +64,33 @@ export async function POST(request: Request) {
             return NextResponse.json({ message: "Invalid data format" }, { status: 400 });
         }
 
-        // Guard: Nếu báo cáo tháng này đã được APPROVED, không cho phép ghi đè
-        const existingApproved = await prisma.inventoryReport.findFirst({
-            where: { facilityId: session.user.id, reportMonth: month, status: "APPROVED" },
-            select: { id: true }
-        });
-        if (existingApproved) {
+        const existingReportMonth = await hasExistingFacilityReportMonth(session.user.id, month);
+        if (existingReportMonth) {
             return NextResponse.json({
-                message: `Báo cáo tháng ${month} đã được phê duyệt. Vui lòng liên hệ Admin để chỉnh sửa.`
+                message: `Báo cáo tháng ${month} đã được nộp và đã chốt. Không thể nộp lại.`
             }, { status: 403 });
         }
+
         const context = await loadFacilityReportCanonicalContext(session.user.id, month);
         const validationResult = validateFacilityReportRows(data, context);
         if (!validationResult.ok) {
             return NextResponse.json(buildFacilityReportValidationResponse(validationResult), { status: 400 });
         }
 
-        let successCount = 0;
         await prisma.$transaction(async (tx) => {
+            await tx.facilityReportSubmission.create({
+                data: {
+                    facilityId: session.user.id,
+                    reportMonth: month,
+                    submittedAt: new Date(),
+                    reportedRowCount: validationResult.summary.reportedRowCount,
+                    skippedRowCount: validationResult.summary.skippedRowCount,
+                },
+            });
+
             for (const row of validationResult.rows) {
-                await tx.inventoryReport.upsert({
-                    where: {
-                        facilityId_mapId_reportMonth: {
-                            facilityId: session.user.id,
-                            mapId: row.mapId,
-                            reportMonth: month
-                        }
-                    },
-                    update: {
-                        tonDau: row.tonDau,
-                        nhap: row.nhap,
-                        xuat: row.xuat,
-                        tonCuoi: row.tonCuoi,
-                        giaVat: row.giaVat,
-                        thanhTienTonCuoi: row.thanhTienTonCuoi,
-                        soQdTrungThau: row.soQdTrungThau,
-                        tenCongTy: row.tenCongTy,
-                        ngayBatDauHd: row.ngayBatDauHd,
-                        ngayKetThucHd: row.ngayKetThucHd,
-                        bhyt: row.bhyt,
-                        dichVu: row.dichVu,
-                        status: "PENDING",
-                        adminNote: null
-                    },
-                    create: {
+                await tx.inventoryReport.create({
+                    data: {
                         facilityId: session.user.id,
                         mapId: row.mapId,
                         reportMonth: month,
@@ -157,11 +106,10 @@ export async function POST(request: Request) {
                         ngayKetThucHd: row.ngayKetThucHd,
                         bhyt: row.bhyt,
                         dichVu: row.dichVu,
-                        status: "PENDING"
+                        status: "APPROVED",
+                        adminNote: null,
                     }
                 });
-
-                successCount++;
             }
         });
 
@@ -170,14 +118,18 @@ export async function POST(request: Request) {
             userId: session.user.id,
             action: ACTIONS.SUBMIT,
             entityType: ENTITY_TYPES.REPORT,
-            details: { month, drugCount: successCount },
+            details: {
+                month,
+                drugCount: validationResult.summary.reportedRowCount,
+                skippedCount: validationResult.summary.skippedRowCount,
+            },
         });
 
         const facilityName = userExists.facilityName || session.user.name || "Cơ sở";
         createNotificationForAdmins(
             "REPORT_SUBMITTED",
             "Báo cáo mới được nộp",
-            `${facilityName} đã nộp báo cáo tồn kho tháng ${month} (${successCount} mặt hàng)`,
+            `${facilityName} đã nộp báo cáo tồn kho tháng ${month} (${validationResult.summary.reportedRowCount} mặt hàng, ${validationResult.summary.skippedRowCount} dòng bỏ qua)`,
             "report",
             undefined,
             "/dashboard/admin/reports"
@@ -186,7 +138,8 @@ export async function POST(request: Request) {
         return NextResponse.json({
             message: "Nộp báo cáo thành công",
             stats: {
-                success: successCount,
+                success: validationResult.summary.reportedRowCount,
+                skipped: validationResult.summary.skippedRowCount,
                 error: 0
             }
         });

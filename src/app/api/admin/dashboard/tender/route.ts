@@ -192,7 +192,7 @@ export async function GET(request: Request) {
             variance: number;
         }> = [];
 
-        priceGroups.forEach((items, key) => {
+        priceGroups.forEach((items) => {
             // Deduplicate by soQd + congTy
             const uniqueItems = new Map<string, typeof items[0]>();
             items.forEach(item => {

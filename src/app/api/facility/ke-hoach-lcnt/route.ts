@@ -16,7 +16,26 @@ export async function GET() {
 
         const keHoachs = await prisma.keHoachLCNT.findMany({
             where: { facilityId: session.user.id },
-            include: { goiThaus: { include: { phanLos: true } } },
+            include: {
+                goiThaus: {
+                    include: {
+                        phanLos: {
+                            orderBy: {
+                                stt: "asc",
+                            },
+                        },
+                        thongBaoMoiThaus: {
+                            select: {
+                                id: true,
+                                maTBMT: true,
+                            },
+                        },
+                        ketQuaLCNTs: {
+                            select: { id: true },
+                        },
+                    },
+                },
+            },
             orderBy: { createdAt: "desc" },
         });
 

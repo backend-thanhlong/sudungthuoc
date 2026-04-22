@@ -1,6 +1,19 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { auth } from "@/auth";
+import {
+    getFacilityOwnedGoiThau,
+    isRouteError,
+    requireActiveSessionUser,
+} from "@/lib/server-authz";
+
+const handleRouteError = (error: unknown, context: string) => {
+    if (isRouteError(error)) {
+        return NextResponse.json({ message: error.message }, { status: error.status });
+    }
+
+    console.error(context, error);
+    return NextResponse.json({ message: "Internal server error" }, { status: 500 });
+};
 
 // GET - Get TBMT for a specific goi thau
 export async function GET(
@@ -8,21 +21,19 @@ export async function GET(
     { params }: { params: Promise<{ goiThauId: string }> }
 ) {
     try {
-        const session = await auth();
-        if (!session) {
-            return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-        }
+        void request;
+        const { user } = await requireActiveSessionUser("FACILITY");
 
         const { goiThauId } = await params;
+        await getFacilityOwnedGoiThau(goiThauId, user.id);
 
         const tbmt = await prisma.thongBaoMoiThau.findFirst({
             where: { goiThauId },
         });
 
         return NextResponse.json(tbmt);
-    } catch (error) {
-        console.error("Error fetching TBMT:", error);
-        return NextResponse.json({ message: "Internal server error" }, { status: 500 });
+    } catch (error: unknown) {
+        return handleRouteError(error, "Error fetching TBMT:");
     }
 }
 
@@ -32,13 +43,11 @@ export async function POST(
     { params }: { params: Promise<{ goiThauId: string }> }
 ) {
     try {
-        const session = await auth();
-        if (!session) {
-            return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-        }
+        const { user } = await requireActiveSessionUser("FACILITY");
 
         const { goiThauId } = await params;
         const body = await request.json();
+        await getFacilityOwnedGoiThau(goiThauId, user.id);
 
         const tbmt = await prisma.thongBaoMoiThau.create({
             data: {
@@ -52,12 +61,8 @@ export async function POST(
         });
 
         return NextResponse.json(tbmt, { status: 201 });
-    } catch (error: any) {
-        console.error("Error creating TBMT:", error);
-        return NextResponse.json(
-            { message: error.message || "Internal server error" },
-            { status: 500 }
-        );
+    } catch (error: unknown) {
+        return handleRouteError(error, "Error creating TBMT:");
     }
 }
 
@@ -67,13 +72,11 @@ export async function PATCH(
     { params }: { params: Promise<{ goiThauId: string }> }
 ) {
     try {
-        const session = await auth();
-        if (!session) {
-            return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-        }
+        const { user } = await requireActiveSessionUser("FACILITY");
 
         const { goiThauId } = await params;
         const body = await request.json();
+        await getFacilityOwnedGoiThau(goiThauId, user.id);
 
         // Find the existing TBMT
         const existing = await prisma.thongBaoMoiThau.findFirst({
@@ -96,11 +99,7 @@ export async function PATCH(
         });
 
         return NextResponse.json(tbmt);
-    } catch (error: any) {
-        console.error("Error updating TBMT:", error);
-        return NextResponse.json(
-            { message: error.message || "Internal server error" },
-            { status: 500 }
-        );
+    } catch (error: unknown) {
+        return handleRouteError(error, "Error updating TBMT:");
     }
 }

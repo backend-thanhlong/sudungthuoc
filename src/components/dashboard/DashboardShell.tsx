@@ -19,11 +19,9 @@ interface DashboardShellProps {
 }
 
 export default function DashboardShell({ reportPeriods, facilities }: DashboardShellProps) {
-    const latestMonth = reportPeriods.length > 0 ? reportPeriods[0] : "all";
-    const [selectedMonth, setSelectedMonth] = useState<string>(latestMonth);
+    const [selectedMonth, setSelectedMonth] = useState<string>("all");
     const [selectedFacility, setSelectedFacility] = useState<string>("all");
     const [activeTab, setActiveTab] = useState("overview");
-    const [facilitySearch, setFacilitySearch] = useState("");
 
     const tabIcons: Record<string, string> = {
         overview: "📊",
@@ -36,11 +34,6 @@ export default function DashboardShell({ reportPeriods, facilities }: DashboardS
     const selectedFacilityName = selectedFacility === "all"
         ? "Tất cả đơn vị"
         : facilities.find(f => f.id === selectedFacility)?.name || "";
-
-    const filteredFacilities = facilities.filter(f =>
-        f.name.toLowerCase().includes(facilitySearch.toLowerCase()) ||
-        f.type.toLowerCase().includes(facilitySearch.toLowerCase())
-    );
 
     return (
         <div className="space-y-5">
@@ -152,7 +145,7 @@ export default function DashboardShell({ reportPeriods, facilities }: DashboardS
                 </TabsContent>
 
                 <TabsContent value="supply" className="mt-5">
-                    <Tab2Supply reportMonth={selectedMonth} facilityId={facilityId} />
+                    <Tab2Supply reportMonth={selectedMonth} facilityId={facilityId} scope="admin" />
                 </TabsContent>
 
                 <TabsContent value="tender" className="mt-5">
