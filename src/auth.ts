@@ -25,6 +25,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
                     const user = await prisma.user.findUnique({
                         where: { username },
+                        include: {
+                            company: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                    isActive: true,
+                                },
+                            },
+                        },
                     });
 
                     if (!user) {
@@ -33,6 +42,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
                     if (!user.isActive) {
                         return null;
+                    }
+
+                    if (user.role === "COMPANY") {
+                        if (!user.companyId || !user.company?.isActive) {
+                            return null;
+                        }
                     }
 
                     const isPasswordValid = await bcrypt.compare(
@@ -46,10 +61,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
                     return {
                         id: user.id,
-                        name: user.facilityName || user.username,
+                        name: user.role === "COMPANY"
+                            ? user.company?.name || user.username
+                            : user.facilityName || user.username,
                         email: user.username,
                         role: user.role,
                         facilityCode: user.facilityCode,
+                        companyId: user.companyId,
                     };
                 } catch (error) {
                     console.error("Login error", error);

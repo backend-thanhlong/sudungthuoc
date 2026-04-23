@@ -9,7 +9,16 @@ const ACTIVE_USER_SELECT = {
     role: true,
     facilityName: true,
     facilityCode: true,
+    companyId: true,
     isActive: true,
+    company: {
+        select: {
+            id: true,
+            name: true,
+            code: true,
+            isActive: true,
+        },
+    },
 } satisfies Prisma.UserSelect;
 
 export type ActiveUserRecord = Prisma.UserGetPayload<{
@@ -52,6 +61,16 @@ export async function requireActiveSessionUser(expectedRole?: Role): Promise<Act
 
     if (!user.isActive) {
         throw new RouteError(403, "Tài khoản đã bị vô hiệu hóa");
+    }
+
+    if (user.role === "COMPANY") {
+        if (!user.companyId || !user.company) {
+            throw new RouteError(403, "Tài khoản công ty chưa được gán công ty");
+        }
+
+        if (!user.company.isActive) {
+            throw new RouteError(403, "Công ty đã bị vô hiệu hóa");
+        }
     }
 
     if (expectedRole && user.role !== expectedRole) {
@@ -160,15 +179,37 @@ export async function assertPhanLoIdsBelongToGoiThau(phanLoIds: string[], goiTha
 }
 
 export function getDashboardRedirectPath(role: Role, pathname: string) {
-    if (pathname.startsWith("/dashboard/admin") && !pathname.startsWith("/dashboard/admin/master-drugs") && role !== "ADMIN") {
-        return "/dashboard/facility";
+    if (pathname.startsWith("/dashboard/admin")) {
+        if (pathname.startsWith("/dashboard/admin/master-drugs") && role === "FACILITY") {
+            return null;
+        }
+
+        if (role !== "ADMIN") {
+            return getRoleDashboardHome(role);
+        }
     }
 
     if (pathname.startsWith("/dashboard/facility") && role !== "FACILITY") {
-        return "/dashboard/admin";
+        return getRoleDashboardHome(role);
+    }
+
+    if (pathname.startsWith("/dashboard/company") && role !== "COMPANY") {
+        return getRoleDashboardHome(role);
     }
 
     return null;
+}
+
+export function getRoleDashboardHome(role: Role) {
+    if (role === "ADMIN") {
+        return "/dashboard/admin";
+    }
+
+    if (role === "COMPANY") {
+        return "/dashboard/company";
+    }
+
+    return "/dashboard/facility";
 }
 
 export function buildFreshSession(session: SessionValue, user: ActiveUserRecord): SessionValue {
@@ -177,10 +218,13 @@ export function buildFreshSession(session: SessionValue, user: ActiveUserRecord)
         user: {
             ...session.user,
             id: user.id,
-            name: user.facilityName || user.username,
+            name: user.role === "COMPANY"
+                ? user.company?.name || user.username
+                : user.facilityName || user.username,
             email: user.username,
             role: user.role,
             facilityCode: user.facilityCode,
+            companyId: user.companyId,
         },
     };
 }

@@ -102,7 +102,7 @@ async function buildMasterDrugCreateData(body: Record<string, unknown>): Promise
 export async function GET(request: Request) {
     try {
         const session = await auth();
-        if (!session) {
+        if (!session || (session.user.role !== "ADMIN" && session.user.role !== "FACILITY")) {
             return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
         }
 

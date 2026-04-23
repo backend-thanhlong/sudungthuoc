@@ -2,6 +2,16 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
 
+type FacilityGroupMetricMap = Map<string, Map<string, number>>;
+
+interface TreemapDatum {
+    name: string;
+    value: number;
+    facility?: string;
+    drugGroup?: string;
+    children?: TreemapDatum[];
+}
+
 const normalizeDomesticFlag = (value: string | null | undefined) =>
     value
         ?.trim()
@@ -13,6 +23,62 @@ const isDomesticDrug = (value: string | null | undefined) => {
     const normalized = normalizeDomesticFlag(value);
     return normalized === "trong nuoc" || normalized === "co" || normalized === "true" || normalized === "1";
 };
+
+const addMetricToFacilityGroupMap = (
+    metricMap: FacilityGroupMetricMap,
+    facilityName: string,
+    drugGroup: string,
+    value: number
+) => {
+    if (!Number.isFinite(value) || value <= 0) {
+        return;
+    }
+
+    if (!metricMap.has(facilityName)) {
+        metricMap.set(facilityName, new Map());
+    }
+
+    const groupMap = metricMap.get(facilityName)!;
+    groupMap.set(drugGroup, (groupMap.get(drugGroup) || 0) + value);
+};
+
+const getTopFacilityMetrics = (metricMap: FacilityGroupMetricMap) =>
+    Array.from(metricMap.entries())
+        .map(([facility, groups]) => {
+            const total = Array.from(groups.values()).reduce((sum, value) => sum + value, 0);
+            return { facility, total, groups };
+        })
+        .filter((item) => item.total > 0)
+        .sort((a, b) => b.total - a.total)
+        .slice(0, 10);
+
+const buildTopStackedBarData = (metricMap: FacilityGroupMetricMap) => {
+    const topFacilities = getTopFacilityMetrics(metricMap);
+
+    return topFacilities.map((item) => ({
+        facility: item.facility,
+        total: Math.round(item.total),
+        ...Object.fromEntries(
+            Array.from(item.groups.entries()).map(([group, value]) => [group, Math.round(value)])
+        ),
+    }));
+};
+
+const buildTreemapData = (metricMap: FacilityGroupMetricMap): TreemapDatum[] =>
+    getTopFacilityMetrics(metricMap).map((item) => ({
+        name: item.facility,
+        facility: item.facility,
+        value: Math.round(item.total),
+        children: Array.from(item.groups.entries())
+            .filter(([, value]) => value > 0)
+            .sort((a, b) => b[1] - a[1])
+            .map(([group, value]) => ({
+                name: group,
+                facility: item.facility,
+                drugGroup: group,
+                value: Math.round(value),
+            })),
+    }));
 
 export async function GET(request: Request) {
     const session = await auth();
@@ -53,6 +119,7 @@ export async function GET(request: Request) {
                 select: {
                     facilityId: true,
                     thanhTienTonCuoi: true,
+                    nhap: true,
                     xuat: true,
                     giaVat: true,
                     bhyt: true,
@@ -80,48 +147,31 @@ export async function GET(request: Request) {
         // 2. Domestic drug usage ratio
         let domesticValue = 0;
         let totalExportValue = 0;
+        let bhytValue = 0;
+        let dichvuValue = 0;
+        const inventoryMetricMap: FacilityGroupMetricMap = new Map();
+        const exportMetricMap: FacilityGroupMetricMap = new Map();
+        const importMetricMap: FacilityGroupMetricMap = new Map();
+        const addressMap = new Map<string, number>();
+
         allReports.forEach((r) => {
+            const facilityName = r.facility?.facilityName || "Unknown";
+            const drugGroup = r.drugMap?.masterDrug?.nhomThuoc || "Khác";
+            const inventoryValue = Number(r.thanhTienTonCuoi);
             const exportVal = Number(r.xuat) * Number(r.giaVat);
+            const importVal = Number(r.nhap) * Number(r.giaVat);
+            const addr = r.facility?.address || "Không rõ";
+
+            addMetricToFacilityGroupMap(inventoryMetricMap, facilityName, drugGroup, inventoryValue);
+            addMetricToFacilityGroupMap(exportMetricMap, facilityName, drugGroup, exportVal);
+            addMetricToFacilityGroupMap(importMetricMap, facilityName, drugGroup, importVal);
+            addressMap.set(addr, (addressMap.get(addr) || 0) + inventoryValue);
+
             totalExportValue += exportVal;
             if (isDomesticDrug(r.drugMap?.masterDrug?.isTrongNuoc)) {
                 domesticValue += exportVal;
             }
-        });
-        const domesticRatio = totalExportValue > 0 ? (domesticValue / totalExportValue) * 100 : 0;
 
-        // 3. Top 10 CSYT by inventory value (grouped by nhomThuoc for stacked bar)
-        const facilityDrugGroupMap = new Map<string, Map<string, number>>();
-        allReports.forEach((r) => {
-            const fname = r.facility?.facilityName || "Unknown";
-            const nhom = r.drugMap?.masterDrug?.nhomThuoc || "Khác";
-            const val = Number(r.thanhTienTonCuoi);
-            if (!facilityDrugGroupMap.has(fname)) {
-                facilityDrugGroupMap.set(fname, new Map());
-            }
-            const groupMap = facilityDrugGroupMap.get(fname)!;
-            groupMap.set(nhom, (groupMap.get(nhom) || 0) + val);
-        });
-
-        // Sort by total value, take top 10
-        const facilityTotals = Array.from(facilityDrugGroupMap.entries()).map(([name, groups]) => {
-            const total = Array.from(groups.values()).reduce((s, v) => s + v, 0);
-            return { name, groups: Object.fromEntries(groups), total };
-        }).sort((a, b) => b.total - a.total).slice(0, 10);
-
-        // Collect all unique drug groups from top 10
-        const allDrugGroups = new Set<string>();
-        facilityTotals.forEach(f => Object.keys(f.groups).forEach(g => allDrugGroups.add(g)));
-
-        const stackedBarData = facilityTotals.map(f => ({
-            facility: f.name,
-            ...f.groups,
-        }));
-
-        // 4. BHYT vs Dịch vụ donut
-        let bhytValue = 0;
-        let dichvuValue = 0;
-        allReports.forEach((r) => {
-            const exportVal = Number(r.xuat) * Number(r.giaVat);
             if (r.bhyt === "Có" || r.bhyt === "có" || r.bhyt === "TRUE" || r.bhyt === "true" || r.bhyt === "1" || r.bhyt === "x" || r.bhyt === "X") {
                 bhytValue += exportVal;
             }
@@ -129,6 +179,22 @@ export async function GET(request: Request) {
                 dichvuValue += exportVal;
             }
         });
+        const domesticRatio = totalExportValue > 0 ? (domesticValue / totalExportValue) * 100 : 0;
+
+        // 3. Top 10 CSYT by inventory value (grouped by nhomThuoc for stacked bar)
+        const inventoryTopFacilities = getTopFacilityMetrics(inventoryMetricMap);
+        const allDrugGroups = new Set<string>();
+        inventoryTopFacilities.forEach((item) => {
+            item.groups.forEach((_, group) => allDrugGroups.add(group));
+        });
+
+        const stackedBarData = inventoryTopFacilities.map((item) => ({
+            facility: item.facility,
+            ...Object.fromEntries(item.groups.entries()),
+        }));
+
+        const topExportByFacility = buildTopStackedBarData(exportMetricMap);
+        const topImportTreemap = buildTreemapData(importMetricMap);
 
         const donutData = [
             { name: "Thuốc BHYT", value: Math.round(bhytValue) },
@@ -136,11 +202,6 @@ export async function GET(request: Request) {
         ];
 
         // 5. Heatmap by address
-        const addressMap = new Map<string, number>();
-        allReports.forEach((r) => {
-            const addr = r.facility?.address || "Không rõ";
-            addressMap.set(addr, (addressMap.get(addr) || 0) + Number(r.thanhTienTonCuoi));
-        });
         const heatmapData = Array.from(addressMap.entries())
             .map(([address, value]) => ({ address, value: Math.round(value) }))
             .sort((a, b) => b.value - a.value);
@@ -154,6 +215,8 @@ export async function GET(request: Request) {
             stackedBarData,
             drugGroups: Array.from(allDrugGroups),
             donutData,
+            topExportByFacility,
+            topImportTreemap,
             heatmapData,
         });
     } catch (error) {

@@ -28,7 +28,11 @@ export default auth((req) => {
     if (publicRoutes.includes(pathname)) {
         if (isLoggedIn && pathname === "/login" && !allowReauth) {
             // Redirect logged in users away from login page
-            const redirectUrl = userRole === "ADMIN" ? "/dashboard/admin" : "/dashboard/facility";
+            const redirectUrl = userRole === "ADMIN"
+                ? "/dashboard/admin"
+                : userRole === "COMPANY"
+                    ? "/dashboard/company"
+                    : "/dashboard/facility";
             return NextResponse.redirect(new URL(redirectUrl, req.url));
         }
         return nextWithPathname();
@@ -42,15 +46,23 @@ export default auth((req) => {
     // Admin routes protection (with exception for master-drugs which is shared)
     if (pathname.startsWith("/dashboard/admin") && userRole !== "ADMIN") {
         // Allow facility users to view master-drugs (read-only)
-        if (pathname.startsWith("/dashboard/admin/master-drugs")) {
+        if (pathname.startsWith("/dashboard/admin/master-drugs") && userRole === "FACILITY") {
             return nextWithPathname();
         }
-        return NextResponse.redirect(new URL("/dashboard/facility", req.url));
+        const redirectUrl = userRole === "COMPANY" ? "/dashboard/company" : "/dashboard/facility";
+        return NextResponse.redirect(new URL(redirectUrl, req.url));
     }
 
     // Facility routes protection
     if (pathname.startsWith("/dashboard/facility") && userRole !== "FACILITY") {
-        return NextResponse.redirect(new URL("/dashboard/admin", req.url));
+        const redirectUrl = userRole === "COMPANY" ? "/dashboard/company" : "/dashboard/admin";
+        return NextResponse.redirect(new URL(redirectUrl, req.url));
+    }
+
+    // Company routes protection
+    if (pathname.startsWith("/dashboard/company") && userRole !== "COMPANY") {
+        const redirectUrl = userRole === "ADMIN" ? "/dashboard/admin" : "/dashboard/facility";
+        return NextResponse.redirect(new URL(redirectUrl, req.url));
     }
 
     return nextWithPathname();

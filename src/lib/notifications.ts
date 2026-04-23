@@ -89,6 +89,48 @@ export async function createNotificationForFacility(
 }
 
 /**
+ * Create notifications for all active users of a company
+ */
+export async function createNotificationForCompany(
+    companyId: string,
+    type: string,
+    title: string,
+    message: string,
+    entityType?: string,
+    entityId?: string,
+    entityUrl?: string
+) {
+    try {
+        const companyUsers = await prisma.user.findMany({
+            where: {
+                role: "COMPANY",
+                companyId,
+                isActive: true,
+            },
+            select: { id: true },
+        });
+
+        if (companyUsers.length === 0) {
+            return;
+        }
+
+        await prisma.notification.createMany({
+            data: companyUsers.map((user) => ({
+                userId: user.id,
+                type,
+                title,
+                message,
+                entityType,
+                entityId,
+                entityUrl,
+            })),
+        });
+    } catch (error) {
+        console.error("Failed to create company notifications:", error);
+    }
+}
+
+/**
  * Create notifications for all active facility users
  */
 export async function createNotificationForAllFacilities(

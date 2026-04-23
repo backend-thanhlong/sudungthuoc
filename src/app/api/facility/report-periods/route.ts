@@ -5,7 +5,7 @@ import { auth } from "@/auth";
 export async function GET() {
     try {
         const session = await auth();
-        if (!session) {
+        if (!session || session.user.role !== "FACILITY") {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 

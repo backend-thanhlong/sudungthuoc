@@ -125,6 +125,15 @@ const adminNavItems: NavItem[] = [
         ),
     },
     {
+        label: "Dự trù đặt hàng",
+        href: "/dashboard/admin/dutru-dat-hang",
+        icon: (
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6M7 4h10a2 2 0 012 2v12a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2z" />
+            </svg>
+        ),
+    },
+    {
         label: "Tra cứu tồn kho",
         href: "/dashboard/inventory-search",
         icon: (
@@ -149,6 +158,15 @@ const adminNavItems: NavItem[] = [
                 icon: (
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                ),
+            },
+            {
+                label: "Quản lý Companies",
+                href: "/dashboard/admin/companies",
+                icon: (
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21h18M5 21V7l8-4 6 4v14M9 9h.01M9 13h.01M9 17h.01M15 9h.01M15 13h.01M15 17h.01" />
                     </svg>
                 ),
             },
@@ -277,11 +295,32 @@ const facilityNavItems: NavItem[] = [
         ),
     },
     {
+        label: "Dự trù đặt hàng",
+        href: "/dashboard/facility/dutru-dat-hang",
+        icon: (
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6M7 4h10a2 2 0 012 2v12a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2z" />
+            </svg>
+        ),
+    },
+    {
         label: "Tra cứu tồn kho",
         href: "/dashboard/inventory-search",
         icon: (
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+        ),
+    },
+];
+
+const companyNavItems: NavItem[] = [
+    {
+        label: "Dự trù đặt hàng",
+        href: "/dashboard/company/dutru-dat-hang",
+        icon: (
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6M7 4h10a2 2 0 012 2v12a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2z" />
             </svg>
         ),
     },
@@ -300,8 +339,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         );
     };
 
-    const isAdmin = session?.user?.role === "ADMIN";
-    const navItems = isAdmin ? adminNavItems : facilityNavItems;
+    const role = session?.user?.role;
+    const navItems = role === "ADMIN"
+        ? adminNavItems
+        : role === "COMPANY"
+            ? companyNavItems
+            : facilityNavItems;
+    const roleLabel = role === "ADMIN" ? "Admin" : role === "COMPANY" ? "Công ty" : "Cơ sở";
+    const headerTitle = role === "ADMIN"
+        ? "Sở Y Tế - Quản trị hệ thống"
+        : role === "COMPANY"
+            ? `Công ty - ${session?.user?.name || "Tài khoản công ty"}`
+            : session?.user?.name;
 
     const handleLogout = async () => {
         await signOut({ callbackUrl: "/login" });
@@ -415,7 +464,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         {sidebarOpen && (
                             <div className="flex-1 min-w-0">
                                 <p className="text-blue-900 text-sm font-medium truncate">{session?.user?.name}</p>
-                                <p className="text-blue-600 text-xs">{isAdmin ? "Admin" : "Cơ sở"}</p>
+                                <p className="text-blue-600 text-xs">{roleLabel}</p>
                             </div>
                         )}
                     </div>
@@ -427,9 +476,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 {/* Header */}
                 <header className="h-16 bg-white shadow-sm border-b border-gray-100 flex items-center justify-between px-6">
                     <div>
-                        <h1 className="text-lg font-semibold text-gray-800">
-                            {isAdmin ? "Sở Y Tế - Quản trị hệ thống" : session?.user?.name}
-                        </h1>
+                        <h1 className="text-lg font-semibold text-gray-800">{headerTitle}</h1>
                     </div>
                     <div className="flex items-center gap-4">
                         <NotificationBell />

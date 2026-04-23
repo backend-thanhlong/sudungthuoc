@@ -98,6 +98,55 @@ async function main() {
     });
     console.log("✅ Created facility user:", facility2.username);
 
+    const seedSampleCompany = process.env.SEED_SAMPLE_COMPANY === "true";
+
+    if (seedSampleCompany) {
+        const companyPasswordInput = process.env.SEED_SAMPLE_COMPANY_PASSWORD?.trim() || "company123";
+        const companyPassword = await bcrypt.hash(companyPasswordInput, 10);
+        const companyCode = process.env.SEED_SAMPLE_COMPANY_CODE?.trim() || "CTYDUOC01";
+        const companyName = process.env.SEED_SAMPLE_COMPANY_NAME?.trim() || "Công ty Dược Thí điểm";
+        const companyUsername = process.env.SEED_SAMPLE_COMPANY_USERNAME?.trim() || "ctyduocthidiem";
+
+        const company = await prisma.company.upsert({
+            where: { code: companyCode },
+            update: {
+                name: companyName,
+                isActive: true,
+            },
+            create: {
+                code: companyCode,
+                name: companyName,
+                contactPerson: "Phòng kinh doanh",
+                phoneNumber: "0900000000",
+                email: "pilot-company@example.com",
+                address: "Khu công nghiệp thí điểm",
+                isActive: true,
+            },
+        });
+
+        const companyUser = await prisma.user.upsert({
+            where: { username: companyUsername },
+            update: {
+                passwordHash: companyPassword,
+                role: "COMPANY",
+                companyId: company.id,
+                isActive: true,
+                facilityName: null,
+                facilityCode: null,
+            },
+            create: {
+                username: companyUsername,
+                passwordHash: companyPassword,
+                role: "COMPANY",
+                companyId: company.id,
+                isActive: true,
+            },
+        });
+
+        console.log("✅ Created sample company:", company.name);
+        console.log("✅ Created company user:", companyUser.username);
+    }
+
     // Create sample Master Drugs
     const sampleDrugs = [
         {

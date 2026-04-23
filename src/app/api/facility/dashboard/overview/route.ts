@@ -46,6 +46,7 @@ export async function GET(request: Request) {
                 select: {
                     facilityId: true,
                     thanhTienTonCuoi: true,
+                    nhap: true,
                     xuat: true,
                     giaVat: true,
                     bhyt: true,
@@ -73,29 +74,74 @@ export async function GET(request: Request) {
         // 2. Domestic drug usage ratio
         let domesticValue = 0;
         let totalExportValue = 0;
+        let totalImportValue = 0;
         allReports.forEach((r) => {
             const exportVal = Number(r.xuat) * Number(r.giaVat);
+            const importVal = Number(r.nhap || 0) * Number(r.giaVat);
             totalExportValue += exportVal;
+            totalImportValue += importVal;
             if (isDomesticDrug(r.drugMap?.masterDrug?.isTrongNuoc)) {
                 domesticValue += exportVal;
             }
         });
         const domesticRatio = totalExportValue > 0 ? (domesticValue / totalExportValue) * 100 : 0;
 
-        // 3. Top drug groups by inventory value (stacked bar - single facility so group by nhomThuoc)
-        const drugGroupMap = new Map<string, number>();
+        // 3. Drug groups by inventory / export / import value (single facility)
+        const inventoryGroupMap = new Map<string, number>();
+        const exportGroupMap = new Map<string, number>();
+        const importGroupMap = new Map<string, number>();
         allReports.forEach((r) => {
             const nhom = r.drugMap?.masterDrug?.nhomThuoc || "Khác";
-            const val = Number(r.thanhTienTonCuoi);
-            drugGroupMap.set(nhom, (drugGroupMap.get(nhom) || 0) + val);
+            const inventoryValue = Number(r.thanhTienTonCuoi);
+            const exportValue = Number(r.xuat) * Number(r.giaVat);
+            const importValue = Number(r.nhap || 0) * Number(r.giaVat);
+
+            inventoryGroupMap.set(nhom, (inventoryGroupMap.get(nhom) || 0) + inventoryValue);
+            exportGroupMap.set(nhom, (exportGroupMap.get(nhom) || 0) + exportValue);
+            importGroupMap.set(nhom, (importGroupMap.get(nhom) || 0) + importValue);
         });
 
         const facilityName = allReports[0]?.facility?.facilityName || "Đơn vị";
-        const allDrugGroups = Array.from(drugGroupMap.keys());
+        const allDrugGroups = Array.from(
+            new Set([
+                ...inventoryGroupMap.keys(),
+                ...exportGroupMap.keys(),
+                ...importGroupMap.keys(),
+            ])
+        );
         const stackedBarData = [{
             facility: facilityName,
-            ...Object.fromEntries(drugGroupMap),
+            ...Object.fromEntries(inventoryGroupMap),
         }];
+
+        const topExportByFacility = totalExportValue > 0
+            ? [{
+                facility: facilityName,
+                total: Math.round(totalExportValue),
+                ...Object.fromEntries(
+                    Array.from(exportGroupMap.entries()).map(([group, value]) => [group, Math.round(value)])
+                ),
+            }]
+            : [];
+
+        const topImportChildren = Array.from(importGroupMap.entries())
+            .filter(([, value]) => value > 0)
+            .sort((left, right) => right[1] - left[1])
+            .map(([group, value]) => ({
+                name: group,
+                facility: facilityName,
+                drugGroup: group,
+                value: Math.round(value),
+            }));
+
+        const topImportTreemap = totalImportValue > 0 && topImportChildren.length > 0
+            ? [{
+                name: facilityName,
+                facility: facilityName,
+                value: Math.round(totalImportValue),
+                children: topImportChildren,
+            }]
+            : [];
 
         // 4. BHYT vs Dịch vụ donut
         let bhytValue = 0;
@@ -116,7 +162,7 @@ export async function GET(request: Request) {
         ];
 
         // 5. Heatmap by nhomThuoc (since single facility, use drug groups instead of address)
-        const heatmapData = Array.from(drugGroupMap.entries())
+        const heatmapData = Array.from(inventoryGroupMap.entries())
             .map(([address, value]) => ({ address, value: Math.round(value) }))
             .sort((a, b) => b.value - a.value);
 
@@ -129,6 +175,8 @@ export async function GET(request: Request) {
             stackedBarData,
             drugGroups: allDrugGroups,
             donutData,
+            topExportByFacility,
+            topImportTreemap,
             heatmapData,
         });
     } catch (error) {

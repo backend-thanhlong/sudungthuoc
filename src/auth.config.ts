@@ -8,6 +8,7 @@ export const authConfig = {
                 token.id = user.id;
                 token.role = (user as any).role;
                 token.facilityCode = (user as any).facilityCode;
+                token.companyId = (user as any).companyId;
             }
             return token;
         },
@@ -16,6 +17,7 @@ export const authConfig = {
                 session.user.id = token.id as string;
                 session.user.role = token.role as string;
                 session.user.facilityCode = token.facilityCode as string | null;
+                session.user.companyId = token.companyId as string | null;
             }
             return session;
         },

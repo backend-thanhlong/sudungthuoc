@@ -37,9 +37,11 @@ export const ACTIONS = {
     DELETE: "DELETE",
     APPROVE: "APPROVE",
     REJECT: "REJECT",
+    CONFIRM: "CONFIRM",
     EXPORT: "EXPORT",
     IMPORT: "IMPORT",
     SUBMIT: "SUBMIT",
+    RECALL: "RECALL",
 } as const;
 
 // Entity type constants
@@ -48,12 +50,17 @@ export const ENTITY_TYPES = {
     REPORT: "report",
     MAPPING: "mapping",
     MASTER_DRUG: "master_drug",
+    COMPANY: "company",
+    COMPANY_DRUG: "company_drug",
+    DRUG_ORDER_SHIPMENT: "drug_order_shipment",
+    DRUG_ORDER_RECEIPT: "drug_order_receipt",
     LCNT: "lcnt",
     GOI_THAU: "goi_thau",
     TBMT: "tbmt",
     KET_QUA: "ket_qua",
     REPORT_PERIOD: "report_period",
     NOTIFICATION: "notification",
+    DRUG_ORDER: "drug_order",
 } as const;
 
 // Vietnamese labels for display
@@ -65,9 +72,11 @@ export const ACTION_LABELS: Record<string, string> = {
     DELETE: "Xóa",
     APPROVE: "Phê duyệt",
     REJECT: "Từ chối",
+    CONFIRM: "Xác nhận",
     EXPORT: "Xuất file",
     IMPORT: "Nhập file",
     SUBMIT: "Gửi",
+    RECALL: "Thu hồi",
 };
 
 export const ENTITY_TYPE_LABELS: Record<string, string> = {
@@ -75,10 +84,15 @@ export const ENTITY_TYPE_LABELS: Record<string, string> = {
     report: "Báo cáo tồn kho",
     mapping: "Ánh xạ thuốc",
     master_drug: "Danh mục thuốc",
+    company: "Công ty",
+    company_drug: "Thuốc công ty",
+    drug_order_shipment: "Đợt giao đơn hàng",
+    drug_order_receipt: "Biên nhận thực nhận",
     lcnt: "KH LCNT",
     goi_thau: "Gói thầu",
     tbmt: "Thông báo mời thầu",
     ket_qua: "Kết quả LCNT",
     report_period: "Kỳ báo cáo",
     notification: "Thông báo",
+    drug_order: "Dự trù đặt hàng",
 };
