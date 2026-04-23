@@ -11,13 +11,15 @@ datasource db {
 
 // Users: Admin (Sở Y tế) và Facility (Cơ sở)
 model User {
-  id           String  @id @default(cuid())
-  username     String  @unique
-  passwordHash String  @map("password_hash")
-  role         Role    @default(FACILITY)
-  facilityName String? @map("facility_name")
-  facilityCode String? @unique @map("facility_code")
-  isActive     Boolean @default(true) @map("is_active")
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String   @map("password_hash")
+  role         Role     @default(FACILITY)
+  facilityName String?  @map("facility_name")
+  facilityCode String?  @unique @map("facility_code")
+  companyId    String?  @map("company_id")
+  company      Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  isActive     Boolean  @default(true) @map("is_active")
 
   // Thông tin thêm cho cơ sở
   autonomyGroup String? @map("autonomy_group")
@@ -33,15 +35,38 @@ model User {
   reports           InventoryReport[]
   reportSubmissions FacilityReportSubmission[]
   keHoachLCNTs      KeHoachLCNT[]
+  drugOrders        DrugOrder[]                @relation("FacilityDrugOrders")
+  drugOrderReceipts DrugOrderReceipt[]         @relation("FacilityDrugOrderReceipts")
   notifications     Notification[]
   activityLogs      ActivityLog[]
 
+  @@index([companyId])
   @@map("users")
 }
 
 enum Role {
   ADMIN
   FACILITY
+  COMPANY
+}
+
+model Company {
+  id            String   @id @default(cuid())
+  code          String   @unique @map("code")
+  name          String   @map("name")
+  contactPerson String?  @map("contact_person")
+  phoneNumber   String?  @map("phone_number")
+  email         String?  @map("email")
+  address       String?  @map("address")
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  users        User[]
+  companyDrugs CompanyDrug[]
+  drugOrders   DrugOrder[]
+
+  @@map("companies")
 }
 
 model TherapeuticGroup {
@@ -94,9 +119,34 @@ model MasterDrug {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  drugMaps FacilityDrugMap[]
+  drugMaps       FacilityDrugMap[]
+  companyDrugs   CompanyDrug[]
+  drugOrderLines DrugOrderLine[]
 
   @@map("master_drugs")
+}
+
+model CompanyDrug {
+  id               String      @id @default(cuid())
+  companyId        String      @map("company_id")
+  company          Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  masterDrugId     String?     @map("master_drug_id")
+  masterDrug       MasterDrug? @relation(fields: [masterDrugId], references: [id], onDelete: SetNull)
+  companyDrugCode  String      @map("company_drug_code")
+  companyDrugName  String      @map("company_drug_name")
+  activeIngredient String?     @map("active_ingredient")
+  quyCach          String?     @map("quy_cach")
+  unit             String?     @map("unit")
+  isActive         Boolean     @default(true) @map("is_active")
+  createdAt        DateTime    @default(now()) @map("created_at")
+  updatedAt        DateTime    @updatedAt @map("updated_at")
+
+  drugOrderLines DrugOrderLine[]
+
+  @@unique([companyId, companyDrugCode])
+  @@index([companyId, isActive])
+  @@index([masterDrugId])
+  @@map("company_drugs")
 }
 
 // FacilityDrugMap: Ánh xạ thuốc cơ sở -> danh mục chung
@@ -189,10 +239,170 @@ model FacilityReportSubmission {
   @@map("facility_report_submissions")
 }
 
+model DrugOrder {
+  id              String          @id @default(cuid())
+  orderNo         String          @unique @map("order_no")
+  facilityId      String          @map("facility_id")
+  facility        User            @relation("FacilityDrugOrders", fields: [facilityId], references: [id], onDelete: Cascade)
+  companyId       String          @map("company_id")
+  company         Company         @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  status          DrugOrderStatus @default(DRAFT)
+  baseReportMonth String?         @map("base_report_month")
+  note            String?         @map("note")
+  submittedAt     DateTime?       @map("submitted_at")
+  closedAt        DateTime?       @map("closed_at")
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+
+  lines     DrugOrderLine[]
+  shipments DrugOrderShipment[]
+  receipts  DrugOrderReceipt[]
+
+  @@index([facilityId, companyId, status, createdAt])
+  @@index([companyId, status, createdAt])
+  @@index([facilityId, status, createdAt])
+  @@map("drug_orders")
+}
+
+model DrugOrderLine {
+  id                    String                  @id @default(cuid())
+  orderId               String                  @map("order_id")
+  order                 DrugOrder               @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  sourceType            DrugOrderLineSourceType @map("source_type")
+  masterDrugId          String?                 @map("master_drug_id")
+  masterDrug            MasterDrug?             @relation(fields: [masterDrugId], references: [id], onDelete: SetNull)
+  companyDrugId         String?                 @map("company_drug_id")
+  companyDrug           CompanyDrug?            @relation(fields: [companyDrugId], references: [id], onDelete: SetNull)
+  displayName           String                  @map("display_name")
+  unit                  String?                 @map("unit")
+  requestedQty          Decimal                 @default(0) @map("requested_qty")
+  acceptedQty           Decimal                 @default(0) @map("accepted_qty")
+  suggestedQty          Decimal?                @map("suggested_qty")
+  lineStatus            DrugOrderLineStatus     @default(PENDING) @map("line_status")
+  companyResponseReason String?                 @map("company_response_reason")
+  suggestionBasis       String?                 @map("suggestion_basis")
+  suggestionReportMonth String?                 @map("suggestion_report_month")
+  suggestionRuleVersion String?                 @map("suggestion_rule_version")
+  createdAt             DateTime                @default(now()) @map("created_at")
+  updatedAt             DateTime                @updatedAt @map("updated_at")
+
+  shipmentLines DrugOrderShipmentLine[]
+  receiptLines  DrugOrderReceiptLine[]
+
+  @@index([orderId, lineStatus])
+  @@index([masterDrugId])
+  @@index([companyDrugId])
+  @@map("drug_order_lines")
+}
+
+model DrugOrderShipment {
+  id          String                  @id @default(cuid())
+  orderId     String                  @map("order_id")
+  order       DrugOrder               @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  shipmentNo  Int                     @map("shipment_no")
+  status      DrugOrderShipmentStatus @default(CREATED)
+  shippedAt   DateTime?               @map("shipped_at")
+  companyNote String?                 @map("company_note")
+  createdAt   DateTime                @default(now()) @map("created_at")
+  updatedAt   DateTime                @updatedAt @map("updated_at")
+
+  lines    DrugOrderShipmentLine[]
+  receipts DrugOrderReceipt[]
+
+  @@unique([orderId, shipmentNo])
+  @@index([orderId, shippedAt])
+  @@map("drug_order_shipments")
+}
+
+model DrugOrderShipmentLine {
+  id          String            @id @default(cuid())
+  shipmentId  String            @map("shipment_id")
+  shipment    DrugOrderShipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  orderLineId String            @map("order_line_id")
+  orderLine   DrugOrderLine     @relation(fields: [orderLineId], references: [id], onDelete: Cascade)
+  shippedQty  Decimal           @default(0) @map("shipped_qty")
+  reason      String?           @map("reason")
+  createdAt   DateTime          @default(now()) @map("created_at")
+  updatedAt   DateTime          @updatedAt @map("updated_at")
+
+  receiptLines DrugOrderReceiptLine[]
+
+  @@unique([shipmentId, orderLineId])
+  @@index([orderLineId])
+  @@map("drug_order_shipment_lines")
+}
+
+model DrugOrderReceipt {
+  id          String            @id @default(cuid())
+  orderId     String            @map("order_id")
+  order       DrugOrder         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  shipmentId  String            @unique @map("shipment_id")
+  shipment    DrugOrderShipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  facilityId  String            @map("facility_id")
+  facility    User              @relation("FacilityDrugOrderReceipts", fields: [facilityId], references: [id], onDelete: Cascade)
+  confirmedAt DateTime          @default(now()) @map("confirmed_at")
+  note        String?           @map("note")
+  createdAt   DateTime          @default(now()) @map("created_at")
+  updatedAt   DateTime          @updatedAt @map("updated_at")
+
+  lines DrugOrderReceiptLine[]
+
+  @@index([orderId, confirmedAt])
+  @@index([facilityId, confirmedAt])
+  @@map("drug_order_receipts")
+}
+
+model DrugOrderReceiptLine {
+  id               String                @id @default(cuid())
+  receiptId        String                @map("receipt_id")
+  receipt          DrugOrderReceipt      @relation(fields: [receiptId], references: [id], onDelete: Cascade)
+  shipmentLineId   String                @map("shipment_line_id")
+  shipmentLine     DrugOrderShipmentLine @relation(fields: [shipmentLineId], references: [id], onDelete: Cascade)
+  orderLineId      String                @map("order_line_id")
+  orderLine        DrugOrderLine         @relation(fields: [orderLineId], references: [id], onDelete: Cascade)
+  receivedQty      Decimal               @default(0) @map("received_qty")
+  differenceReason String?               @map("difference_reason")
+  createdAt        DateTime              @default(now()) @map("created_at")
+  updatedAt        DateTime              @updatedAt @map("updated_at")
+
+  @@unique([receiptId, shipmentLineId])
+  @@index([orderLineId])
+  @@map("drug_order_receipt_lines")
+}
+
 enum ReportStatus {
   PENDING
   APPROVED
   REJECTED
+}
+
+enum DrugOrderStatus {
+  DRAFT
+  SUBMITTED
+  REJECTED
+  READY_FOR_SHIPMENT
+  IN_DELIVERY
+  COMPLETED
+}
+
+enum DrugOrderLineStatus {
+  PENDING
+  PENDING_CATALOG_CONFIRMATION
+  CONFIRMED
+  PARTIAL
+  REJECTED
+  COMPLETED
+}
+
+enum DrugOrderLineSourceType {
+  MASTER_DRUG
+  COMPANY_DRUG
+}
+
+enum DrugOrderShipmentStatus {
+  CREATED
+  PARTIALLY_RECEIVED
+  RECEIVED
 }
 
 // ReportReviewLog: Lịch sử duyệt báo cáo

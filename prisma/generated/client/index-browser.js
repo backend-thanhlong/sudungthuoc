@@ -127,12 +127,26 @@ exports.Prisma.UserScalarFieldEnum = {
   role: 'role',
   facilityName: 'facilityName',
   facilityCode: 'facilityCode',
+  companyId: 'companyId',
   isActive: 'isActive',
   autonomyGroup: 'autonomyGroup',
   facilityType: 'facilityType',
   contactPerson: 'contactPerson',
   phoneNumber: 'phoneNumber',
   address: 'address',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.CompanyScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  name: 'name',
+  contactPerson: 'contactPerson',
+  phoneNumber: 'phoneNumber',
+  email: 'email',
+  address: 'address',
+  isActive: 'isActive',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -172,6 +186,20 @@ exports.Prisma.MasterDrugScalarFieldEnum = {
   isKeDon: 'isKeDon',
   kiemSoatDacBiet: 'kiemSoatDacBiet',
   isTrongNuoc: 'isTrongNuoc',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.CompanyDrugScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  masterDrugId: 'masterDrugId',
+  companyDrugCode: 'companyDrugCode',
+  companyDrugName: 'companyDrugName',
+  activeIngredient: 'activeIngredient',
+  quyCach: 'quyCach',
+  unit: 'unit',
   isActive: 'isActive',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -223,6 +251,83 @@ exports.Prisma.FacilityReportSubmissionScalarFieldEnum = {
   submittedAt: 'submittedAt',
   reportedRowCount: 'reportedRowCount',
   skippedRowCount: 'skippedRowCount',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.DrugOrderScalarFieldEnum = {
+  id: 'id',
+  orderNo: 'orderNo',
+  facilityId: 'facilityId',
+  companyId: 'companyId',
+  status: 'status',
+  baseReportMonth: 'baseReportMonth',
+  note: 'note',
+  submittedAt: 'submittedAt',
+  closedAt: 'closedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.DrugOrderLineScalarFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  sourceType: 'sourceType',
+  masterDrugId: 'masterDrugId',
+  companyDrugId: 'companyDrugId',
+  displayName: 'displayName',
+  unit: 'unit',
+  requestedQty: 'requestedQty',
+  acceptedQty: 'acceptedQty',
+  suggestedQty: 'suggestedQty',
+  lineStatus: 'lineStatus',
+  companyResponseReason: 'companyResponseReason',
+  suggestionBasis: 'suggestionBasis',
+  suggestionReportMonth: 'suggestionReportMonth',
+  suggestionRuleVersion: 'suggestionRuleVersion',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.DrugOrderShipmentScalarFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  shipmentNo: 'shipmentNo',
+  status: 'status',
+  shippedAt: 'shippedAt',
+  companyNote: 'companyNote',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.DrugOrderShipmentLineScalarFieldEnum = {
+  id: 'id',
+  shipmentId: 'shipmentId',
+  orderLineId: 'orderLineId',
+  shippedQty: 'shippedQty',
+  reason: 'reason',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.DrugOrderReceiptScalarFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  shipmentId: 'shipmentId',
+  facilityId: 'facilityId',
+  confirmedAt: 'confirmedAt',
+  note: 'note',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.DrugOrderReceiptLineScalarFieldEnum = {
+  id: 'id',
+  receiptId: 'receiptId',
+  shipmentLineId: 'shipmentLineId',
+  orderLineId: 'orderLineId',
+  receivedQty: 'receivedQty',
+  differenceReason: 'differenceReason',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -380,7 +485,8 @@ exports.Prisma.NullsOrder = {
 };
 exports.Role = exports.$Enums.Role = {
   ADMIN: 'ADMIN',
-  FACILITY: 'FACILITY'
+  FACILITY: 'FACILITY',
+  COMPANY: 'COMPANY'
 };
 
 exports.MappingStatus = exports.$Enums.MappingStatus = {
@@ -397,13 +503,50 @@ exports.ReportStatus = exports.$Enums.ReportStatus = {
   REJECTED: 'REJECTED'
 };
 
+exports.DrugOrderStatus = exports.$Enums.DrugOrderStatus = {
+  DRAFT: 'DRAFT',
+  SUBMITTED: 'SUBMITTED',
+  REJECTED: 'REJECTED',
+  READY_FOR_SHIPMENT: 'READY_FOR_SHIPMENT',
+  IN_DELIVERY: 'IN_DELIVERY',
+  COMPLETED: 'COMPLETED'
+};
+
+exports.DrugOrderLineSourceType = exports.$Enums.DrugOrderLineSourceType = {
+  MASTER_DRUG: 'MASTER_DRUG',
+  COMPANY_DRUG: 'COMPANY_DRUG'
+};
+
+exports.DrugOrderLineStatus = exports.$Enums.DrugOrderLineStatus = {
+  PENDING: 'PENDING',
+  PENDING_CATALOG_CONFIRMATION: 'PENDING_CATALOG_CONFIRMATION',
+  CONFIRMED: 'CONFIRMED',
+  PARTIAL: 'PARTIAL',
+  REJECTED: 'REJECTED',
+  COMPLETED: 'COMPLETED'
+};
+
+exports.DrugOrderShipmentStatus = exports.$Enums.DrugOrderShipmentStatus = {
+  CREATED: 'CREATED',
+  PARTIALLY_RECEIVED: 'PARTIALLY_RECEIVED',
+  RECEIVED: 'RECEIVED'
+};
+
 exports.Prisma.ModelName = {
   User: 'User',
+  Company: 'Company',
   TherapeuticGroup: 'TherapeuticGroup',
   MasterDrug: 'MasterDrug',
+  CompanyDrug: 'CompanyDrug',
   FacilityDrugMap: 'FacilityDrugMap',
   InventoryReport: 'InventoryReport',
   FacilityReportSubmission: 'FacilityReportSubmission',
+  DrugOrder: 'DrugOrder',
+  DrugOrderLine: 'DrugOrderLine',
+  DrugOrderShipment: 'DrugOrderShipment',
+  DrugOrderShipmentLine: 'DrugOrderShipmentLine',
+  DrugOrderReceipt: 'DrugOrderReceipt',
+  DrugOrderReceiptLine: 'DrugOrderReceiptLine',
   ReportReviewLog: 'ReportReviewLog',
   ReportPeriod: 'ReportPeriod',
   KeHoachLCNT: 'KeHoachLCNT',

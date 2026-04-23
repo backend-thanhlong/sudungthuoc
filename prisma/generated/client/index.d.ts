@@ -19,6 +19,11 @@ export type PrismaPromise<T> = $Public.PrismaPromise<T>
  */
 export type User = $Result.DefaultSelection<Prisma.$UserPayload>
 /**
+ * Model Company
+ * 
+ */
+export type Company = $Result.DefaultSelection<Prisma.$CompanyPayload>
+/**
  * Model TherapeuticGroup
  * 
  */
@@ -28,6 +33,11 @@ export type TherapeuticGroup = $Result.DefaultSelection<Prisma.$TherapeuticGroup
  * 
  */
 export type MasterDrug = $Result.DefaultSelection<Prisma.$MasterDrugPayload>
+/**
+ * Model CompanyDrug
+ * 
+ */
+export type CompanyDrug = $Result.DefaultSelection<Prisma.$CompanyDrugPayload>
 /**
  * Model FacilityDrugMap
  * 
@@ -43,6 +53,36 @@ export type InventoryReport = $Result.DefaultSelection<Prisma.$InventoryReportPa
  * 
  */
 export type FacilityReportSubmission = $Result.DefaultSelection<Prisma.$FacilityReportSubmissionPayload>
+/**
+ * Model DrugOrder
+ * 
+ */
+export type DrugOrder = $Result.DefaultSelection<Prisma.$DrugOrderPayload>
+/**
+ * Model DrugOrderLine
+ * 
+ */
+export type DrugOrderLine = $Result.DefaultSelection<Prisma.$DrugOrderLinePayload>
+/**
+ * Model DrugOrderShipment
+ * 
+ */
+export type DrugOrderShipment = $Result.DefaultSelection<Prisma.$DrugOrderShipmentPayload>
+/**
+ * Model DrugOrderShipmentLine
+ * 
+ */
+export type DrugOrderShipmentLine = $Result.DefaultSelection<Prisma.$DrugOrderShipmentLinePayload>
+/**
+ * Model DrugOrderReceipt
+ * 
+ */
+export type DrugOrderReceipt = $Result.DefaultSelection<Prisma.$DrugOrderReceiptPayload>
+/**
+ * Model DrugOrderReceiptLine
+ * 
+ */
+export type DrugOrderReceiptLine = $Result.DefaultSelection<Prisma.$DrugOrderReceiptLinePayload>
 /**
  * Model ReportReviewLog
  * 
@@ -100,7 +140,8 @@ export type ActivityLog = $Result.DefaultSelection<Prisma.$ActivityLogPayload>
 export namespace $Enums {
   export const Role: {
   ADMIN: 'ADMIN',
-  FACILITY: 'FACILITY'
+  FACILITY: 'FACILITY',
+  COMPANY: 'COMPANY'
 };
 
 export type Role = (typeof Role)[keyof typeof Role]
@@ -125,6 +166,47 @@ export const ReportStatus: {
 
 export type ReportStatus = (typeof ReportStatus)[keyof typeof ReportStatus]
 
+
+export const DrugOrderStatus: {
+  DRAFT: 'DRAFT',
+  SUBMITTED: 'SUBMITTED',
+  REJECTED: 'REJECTED',
+  READY_FOR_SHIPMENT: 'READY_FOR_SHIPMENT',
+  IN_DELIVERY: 'IN_DELIVERY',
+  COMPLETED: 'COMPLETED'
+};
+
+export type DrugOrderStatus = (typeof DrugOrderStatus)[keyof typeof DrugOrderStatus]
+
+
+export const DrugOrderLineStatus: {
+  PENDING: 'PENDING',
+  PENDING_CATALOG_CONFIRMATION: 'PENDING_CATALOG_CONFIRMATION',
+  CONFIRMED: 'CONFIRMED',
+  PARTIAL: 'PARTIAL',
+  REJECTED: 'REJECTED',
+  COMPLETED: 'COMPLETED'
+};
+
+export type DrugOrderLineStatus = (typeof DrugOrderLineStatus)[keyof typeof DrugOrderLineStatus]
+
+
+export const DrugOrderLineSourceType: {
+  MASTER_DRUG: 'MASTER_DRUG',
+  COMPANY_DRUG: 'COMPANY_DRUG'
+};
+
+export type DrugOrderLineSourceType = (typeof DrugOrderLineSourceType)[keyof typeof DrugOrderLineSourceType]
+
+
+export const DrugOrderShipmentStatus: {
+  CREATED: 'CREATED',
+  PARTIALLY_RECEIVED: 'PARTIALLY_RECEIVED',
+  RECEIVED: 'RECEIVED'
+};
+
+export type DrugOrderShipmentStatus = (typeof DrugOrderShipmentStatus)[keyof typeof DrugOrderShipmentStatus]
+
 }
 
 export type Role = $Enums.Role
@@ -138,6 +220,22 @@ export const MappingStatus: typeof $Enums.MappingStatus
 export type ReportStatus = $Enums.ReportStatus
 
 export const ReportStatus: typeof $Enums.ReportStatus
+
+export type DrugOrderStatus = $Enums.DrugOrderStatus
+
+export const DrugOrderStatus: typeof $Enums.DrugOrderStatus
+
+export type DrugOrderLineStatus = $Enums.DrugOrderLineStatus
+
+export const DrugOrderLineStatus: typeof $Enums.DrugOrderLineStatus
+
+export type DrugOrderLineSourceType = $Enums.DrugOrderLineSourceType
+
+export const DrugOrderLineSourceType: typeof $Enums.DrugOrderLineSourceType
+
+export type DrugOrderShipmentStatus = $Enums.DrugOrderShipmentStatus
+
+export const DrugOrderShipmentStatus: typeof $Enums.DrugOrderShipmentStatus
 
 /**
  * ##  Prisma Client ʲˢ
@@ -267,6 +365,16 @@ export class PrismaClient<
   get user(): Prisma.UserDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.company`: Exposes CRUD operations for the **Company** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Companies
+    * const companies = await prisma.company.findMany()
+    * ```
+    */
+  get company(): Prisma.CompanyDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.therapeuticGroup`: Exposes CRUD operations for the **TherapeuticGroup** model.
     * Example usage:
     * ```ts
@@ -285,6 +393,16 @@ export class PrismaClient<
     * ```
     */
   get masterDrug(): Prisma.MasterDrugDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.companyDrug`: Exposes CRUD operations for the **CompanyDrug** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more CompanyDrugs
+    * const companyDrugs = await prisma.companyDrug.findMany()
+    * ```
+    */
+  get companyDrug(): Prisma.CompanyDrugDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.facilityDrugMap`: Exposes CRUD operations for the **FacilityDrugMap** model.
@@ -315,6 +433,66 @@ export class PrismaClient<
     * ```
     */
   get facilityReportSubmission(): Prisma.FacilityReportSubmissionDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.drugOrder`: Exposes CRUD operations for the **DrugOrder** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more DrugOrders
+    * const drugOrders = await prisma.drugOrder.findMany()
+    * ```
+    */
+  get drugOrder(): Prisma.DrugOrderDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.drugOrderLine`: Exposes CRUD operations for the **DrugOrderLine** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more DrugOrderLines
+    * const drugOrderLines = await prisma.drugOrderLine.findMany()
+    * ```
+    */
+  get drugOrderLine(): Prisma.DrugOrderLineDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.drugOrderShipment`: Exposes CRUD operations for the **DrugOrderShipment** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more DrugOrderShipments
+    * const drugOrderShipments = await prisma.drugOrderShipment.findMany()
+    * ```
+    */
+  get drugOrderShipment(): Prisma.DrugOrderShipmentDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.drugOrderShipmentLine`: Exposes CRUD operations for the **DrugOrderShipmentLine** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more DrugOrderShipmentLines
+    * const drugOrderShipmentLines = await prisma.drugOrderShipmentLine.findMany()
+    * ```
+    */
+  get drugOrderShipmentLine(): Prisma.DrugOrderShipmentLineDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.drugOrderReceipt`: Exposes CRUD operations for the **DrugOrderReceipt** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more DrugOrderReceipts
+    * const drugOrderReceipts = await prisma.drugOrderReceipt.findMany()
+    * ```
+    */
+  get drugOrderReceipt(): Prisma.DrugOrderReceiptDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.drugOrderReceiptLine`: Exposes CRUD operations for the **DrugOrderReceiptLine** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more DrugOrderReceiptLines
+    * const drugOrderReceiptLines = await prisma.drugOrderReceiptLine.findMany()
+    * ```
+    */
+  get drugOrderReceiptLine(): Prisma.DrugOrderReceiptLineDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.reportReviewLog`: Exposes CRUD operations for the **ReportReviewLog** model.
@@ -850,11 +1028,19 @@ export namespace Prisma {
 
   export const ModelName: {
     User: 'User',
+    Company: 'Company',
     TherapeuticGroup: 'TherapeuticGroup',
     MasterDrug: 'MasterDrug',
+    CompanyDrug: 'CompanyDrug',
     FacilityDrugMap: 'FacilityDrugMap',
     InventoryReport: 'InventoryReport',
     FacilityReportSubmission: 'FacilityReportSubmission',
+    DrugOrder: 'DrugOrder',
+    DrugOrderLine: 'DrugOrderLine',
+    DrugOrderShipment: 'DrugOrderShipment',
+    DrugOrderShipmentLine: 'DrugOrderShipmentLine',
+    DrugOrderReceipt: 'DrugOrderReceipt',
+    DrugOrderReceiptLine: 'DrugOrderReceiptLine',
     ReportReviewLog: 'ReportReviewLog',
     ReportPeriod: 'ReportPeriod',
     KeHoachLCNT: 'KeHoachLCNT',
@@ -880,7 +1066,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "therapeuticGroup" | "masterDrug" | "facilityDrugMap" | "inventoryReport" | "facilityReportSubmission" | "reportReviewLog" | "reportPeriod" | "keHoachLCNT" | "goiThau" | "thongBaoMoiThau" | "phanLoGoiThau" | "ketQuaLCNT" | "ketQuaPhanLo" | "notification" | "activityLog"
+      modelProps: "user" | "company" | "therapeuticGroup" | "masterDrug" | "companyDrug" | "facilityDrugMap" | "inventoryReport" | "facilityReportSubmission" | "drugOrder" | "drugOrderLine" | "drugOrderShipment" | "drugOrderShipmentLine" | "drugOrderReceipt" | "drugOrderReceiptLine" | "reportReviewLog" | "reportPeriod" | "keHoachLCNT" | "goiThau" | "thongBaoMoiThau" | "phanLoGoiThau" | "ketQuaLCNT" | "ketQuaPhanLo" | "notification" | "activityLog"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -955,6 +1141,80 @@ export namespace Prisma {
           count: {
             args: Prisma.UserCountArgs<ExtArgs>
             result: $Utils.Optional<UserCountAggregateOutputType> | number
+          }
+        }
+      }
+      Company: {
+        payload: Prisma.$CompanyPayload<ExtArgs>
+        fields: Prisma.CompanyFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.CompanyFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CompanyPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.CompanyFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CompanyPayload>
+          }
+          findFirst: {
+            args: Prisma.CompanyFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CompanyPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.CompanyFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CompanyPayload>
+          }
+          findMany: {
+            args: Prisma.CompanyFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CompanyPayload>[]
+          }
+          create: {
+            args: Prisma.CompanyCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CompanyPayload>
+          }
+          createMany: {
+            args: Prisma.CompanyCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.CompanyCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CompanyPayload>[]
+          }
+          delete: {
+            args: Prisma.CompanyDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CompanyPayload>
+          }
+          update: {
+            args: Prisma.CompanyUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CompanyPayload>
+          }
+          deleteMany: {
+            args: Prisma.CompanyDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.CompanyUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.CompanyUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CompanyPayload>[]
+          }
+          upsert: {
+            args: Prisma.CompanyUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CompanyPayload>
+          }
+          aggregate: {
+            args: Prisma.CompanyAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateCompany>
+          }
+          groupBy: {
+            args: Prisma.CompanyGroupByArgs<ExtArgs>
+            result: $Utils.Optional<CompanyGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.CompanyCountArgs<ExtArgs>
+            result: $Utils.Optional<CompanyCountAggregateOutputType> | number
           }
         }
       }
@@ -1103,6 +1363,80 @@ export namespace Prisma {
           count: {
             args: Prisma.MasterDrugCountArgs<ExtArgs>
             result: $Utils.Optional<MasterDrugCountAggregateOutputType> | number
+          }
+        }
+      }
+      CompanyDrug: {
+        payload: Prisma.$CompanyDrugPayload<ExtArgs>
+        fields: Prisma.CompanyDrugFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.CompanyDrugFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CompanyDrugPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.CompanyDrugFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CompanyDrugPayload>
+          }
+          findFirst: {
+            args: Prisma.CompanyDrugFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CompanyDrugPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.CompanyDrugFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CompanyDrugPayload>
+          }
+          findMany: {
+            args: Prisma.CompanyDrugFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CompanyDrugPayload>[]
+          }
+          create: {
+            args: Prisma.CompanyDrugCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CompanyDrugPayload>
+          }
+          createMany: {
+            args: Prisma.CompanyDrugCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.CompanyDrugCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CompanyDrugPayload>[]
+          }
+          delete: {
+            args: Prisma.CompanyDrugDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CompanyDrugPayload>
+          }
+          update: {
+            args: Prisma.CompanyDrugUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CompanyDrugPayload>
+          }
+          deleteMany: {
+            args: Prisma.CompanyDrugDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.CompanyDrugUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.CompanyDrugUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CompanyDrugPayload>[]
+          }
+          upsert: {
+            args: Prisma.CompanyDrugUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CompanyDrugPayload>
+          }
+          aggregate: {
+            args: Prisma.CompanyDrugAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateCompanyDrug>
+          }
+          groupBy: {
+            args: Prisma.CompanyDrugGroupByArgs<ExtArgs>
+            result: $Utils.Optional<CompanyDrugGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.CompanyDrugCountArgs<ExtArgs>
+            result: $Utils.Optional<CompanyDrugCountAggregateOutputType> | number
           }
         }
       }
@@ -1325,6 +1659,450 @@ export namespace Prisma {
           count: {
             args: Prisma.FacilityReportSubmissionCountArgs<ExtArgs>
             result: $Utils.Optional<FacilityReportSubmissionCountAggregateOutputType> | number
+          }
+        }
+      }
+      DrugOrder: {
+        payload: Prisma.$DrugOrderPayload<ExtArgs>
+        fields: Prisma.DrugOrderFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.DrugOrderFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.DrugOrderFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderPayload>
+          }
+          findFirst: {
+            args: Prisma.DrugOrderFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.DrugOrderFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderPayload>
+          }
+          findMany: {
+            args: Prisma.DrugOrderFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderPayload>[]
+          }
+          create: {
+            args: Prisma.DrugOrderCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderPayload>
+          }
+          createMany: {
+            args: Prisma.DrugOrderCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.DrugOrderCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderPayload>[]
+          }
+          delete: {
+            args: Prisma.DrugOrderDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderPayload>
+          }
+          update: {
+            args: Prisma.DrugOrderUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderPayload>
+          }
+          deleteMany: {
+            args: Prisma.DrugOrderDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.DrugOrderUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.DrugOrderUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderPayload>[]
+          }
+          upsert: {
+            args: Prisma.DrugOrderUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderPayload>
+          }
+          aggregate: {
+            args: Prisma.DrugOrderAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateDrugOrder>
+          }
+          groupBy: {
+            args: Prisma.DrugOrderGroupByArgs<ExtArgs>
+            result: $Utils.Optional<DrugOrderGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.DrugOrderCountArgs<ExtArgs>
+            result: $Utils.Optional<DrugOrderCountAggregateOutputType> | number
+          }
+        }
+      }
+      DrugOrderLine: {
+        payload: Prisma.$DrugOrderLinePayload<ExtArgs>
+        fields: Prisma.DrugOrderLineFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.DrugOrderLineFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderLinePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.DrugOrderLineFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderLinePayload>
+          }
+          findFirst: {
+            args: Prisma.DrugOrderLineFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderLinePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.DrugOrderLineFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderLinePayload>
+          }
+          findMany: {
+            args: Prisma.DrugOrderLineFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderLinePayload>[]
+          }
+          create: {
+            args: Prisma.DrugOrderLineCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderLinePayload>
+          }
+          createMany: {
+            args: Prisma.DrugOrderLineCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.DrugOrderLineCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderLinePayload>[]
+          }
+          delete: {
+            args: Prisma.DrugOrderLineDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderLinePayload>
+          }
+          update: {
+            args: Prisma.DrugOrderLineUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderLinePayload>
+          }
+          deleteMany: {
+            args: Prisma.DrugOrderLineDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.DrugOrderLineUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.DrugOrderLineUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderLinePayload>[]
+          }
+          upsert: {
+            args: Prisma.DrugOrderLineUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderLinePayload>
+          }
+          aggregate: {
+            args: Prisma.DrugOrderLineAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateDrugOrderLine>
+          }
+          groupBy: {
+            args: Prisma.DrugOrderLineGroupByArgs<ExtArgs>
+            result: $Utils.Optional<DrugOrderLineGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.DrugOrderLineCountArgs<ExtArgs>
+            result: $Utils.Optional<DrugOrderLineCountAggregateOutputType> | number
+          }
+        }
+      }
+      DrugOrderShipment: {
+        payload: Prisma.$DrugOrderShipmentPayload<ExtArgs>
+        fields: Prisma.DrugOrderShipmentFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.DrugOrderShipmentFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderShipmentPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.DrugOrderShipmentFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderShipmentPayload>
+          }
+          findFirst: {
+            args: Prisma.DrugOrderShipmentFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderShipmentPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.DrugOrderShipmentFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderShipmentPayload>
+          }
+          findMany: {
+            args: Prisma.DrugOrderShipmentFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderShipmentPayload>[]
+          }
+          create: {
+            args: Prisma.DrugOrderShipmentCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderShipmentPayload>
+          }
+          createMany: {
+            args: Prisma.DrugOrderShipmentCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.DrugOrderShipmentCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderShipmentPayload>[]
+          }
+          delete: {
+            args: Prisma.DrugOrderShipmentDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderShipmentPayload>
+          }
+          update: {
+            args: Prisma.DrugOrderShipmentUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderShipmentPayload>
+          }
+          deleteMany: {
+            args: Prisma.DrugOrderShipmentDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.DrugOrderShipmentUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.DrugOrderShipmentUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderShipmentPayload>[]
+          }
+          upsert: {
+            args: Prisma.DrugOrderShipmentUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderShipmentPayload>
+          }
+          aggregate: {
+            args: Prisma.DrugOrderShipmentAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateDrugOrderShipment>
+          }
+          groupBy: {
+            args: Prisma.DrugOrderShipmentGroupByArgs<ExtArgs>
+            result: $Utils.Optional<DrugOrderShipmentGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.DrugOrderShipmentCountArgs<ExtArgs>
+            result: $Utils.Optional<DrugOrderShipmentCountAggregateOutputType> | number
+          }
+        }
+      }
+      DrugOrderShipmentLine: {
+        payload: Prisma.$DrugOrderShipmentLinePayload<ExtArgs>
+        fields: Prisma.DrugOrderShipmentLineFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.DrugOrderShipmentLineFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderShipmentLinePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.DrugOrderShipmentLineFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderShipmentLinePayload>
+          }
+          findFirst: {
+            args: Prisma.DrugOrderShipmentLineFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderShipmentLinePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.DrugOrderShipmentLineFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderShipmentLinePayload>
+          }
+          findMany: {
+            args: Prisma.DrugOrderShipmentLineFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderShipmentLinePayload>[]
+          }
+          create: {
+            args: Prisma.DrugOrderShipmentLineCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderShipmentLinePayload>
+          }
+          createMany: {
+            args: Prisma.DrugOrderShipmentLineCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.DrugOrderShipmentLineCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderShipmentLinePayload>[]
+          }
+          delete: {
+            args: Prisma.DrugOrderShipmentLineDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderShipmentLinePayload>
+          }
+          update: {
+            args: Prisma.DrugOrderShipmentLineUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderShipmentLinePayload>
+          }
+          deleteMany: {
+            args: Prisma.DrugOrderShipmentLineDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.DrugOrderShipmentLineUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.DrugOrderShipmentLineUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderShipmentLinePayload>[]
+          }
+          upsert: {
+            args: Prisma.DrugOrderShipmentLineUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderShipmentLinePayload>
+          }
+          aggregate: {
+            args: Prisma.DrugOrderShipmentLineAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateDrugOrderShipmentLine>
+          }
+          groupBy: {
+            args: Prisma.DrugOrderShipmentLineGroupByArgs<ExtArgs>
+            result: $Utils.Optional<DrugOrderShipmentLineGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.DrugOrderShipmentLineCountArgs<ExtArgs>
+            result: $Utils.Optional<DrugOrderShipmentLineCountAggregateOutputType> | number
+          }
+        }
+      }
+      DrugOrderReceipt: {
+        payload: Prisma.$DrugOrderReceiptPayload<ExtArgs>
+        fields: Prisma.DrugOrderReceiptFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.DrugOrderReceiptFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderReceiptPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.DrugOrderReceiptFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderReceiptPayload>
+          }
+          findFirst: {
+            args: Prisma.DrugOrderReceiptFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderReceiptPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.DrugOrderReceiptFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderReceiptPayload>
+          }
+          findMany: {
+            args: Prisma.DrugOrderReceiptFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderReceiptPayload>[]
+          }
+          create: {
+            args: Prisma.DrugOrderReceiptCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderReceiptPayload>
+          }
+          createMany: {
+            args: Prisma.DrugOrderReceiptCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.DrugOrderReceiptCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderReceiptPayload>[]
+          }
+          delete: {
+            args: Prisma.DrugOrderReceiptDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderReceiptPayload>
+          }
+          update: {
+            args: Prisma.DrugOrderReceiptUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderReceiptPayload>
+          }
+          deleteMany: {
+            args: Prisma.DrugOrderReceiptDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.DrugOrderReceiptUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.DrugOrderReceiptUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderReceiptPayload>[]
+          }
+          upsert: {
+            args: Prisma.DrugOrderReceiptUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderReceiptPayload>
+          }
+          aggregate: {
+            args: Prisma.DrugOrderReceiptAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateDrugOrderReceipt>
+          }
+          groupBy: {
+            args: Prisma.DrugOrderReceiptGroupByArgs<ExtArgs>
+            result: $Utils.Optional<DrugOrderReceiptGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.DrugOrderReceiptCountArgs<ExtArgs>
+            result: $Utils.Optional<DrugOrderReceiptCountAggregateOutputType> | number
+          }
+        }
+      }
+      DrugOrderReceiptLine: {
+        payload: Prisma.$DrugOrderReceiptLinePayload<ExtArgs>
+        fields: Prisma.DrugOrderReceiptLineFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.DrugOrderReceiptLineFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderReceiptLinePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.DrugOrderReceiptLineFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderReceiptLinePayload>
+          }
+          findFirst: {
+            args: Prisma.DrugOrderReceiptLineFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderReceiptLinePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.DrugOrderReceiptLineFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderReceiptLinePayload>
+          }
+          findMany: {
+            args: Prisma.DrugOrderReceiptLineFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderReceiptLinePayload>[]
+          }
+          create: {
+            args: Prisma.DrugOrderReceiptLineCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderReceiptLinePayload>
+          }
+          createMany: {
+            args: Prisma.DrugOrderReceiptLineCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.DrugOrderReceiptLineCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderReceiptLinePayload>[]
+          }
+          delete: {
+            args: Prisma.DrugOrderReceiptLineDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderReceiptLinePayload>
+          }
+          update: {
+            args: Prisma.DrugOrderReceiptLineUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderReceiptLinePayload>
+          }
+          deleteMany: {
+            args: Prisma.DrugOrderReceiptLineDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.DrugOrderReceiptLineUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.DrugOrderReceiptLineUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderReceiptLinePayload>[]
+          }
+          upsert: {
+            args: Prisma.DrugOrderReceiptLineUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DrugOrderReceiptLinePayload>
+          }
+          aggregate: {
+            args: Prisma.DrugOrderReceiptLineAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateDrugOrderReceiptLine>
+          }
+          groupBy: {
+            args: Prisma.DrugOrderReceiptLineGroupByArgs<ExtArgs>
+            result: $Utils.Optional<DrugOrderReceiptLineGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.DrugOrderReceiptLineCountArgs<ExtArgs>
+            result: $Utils.Optional<DrugOrderReceiptLineCountAggregateOutputType> | number
           }
         }
       }
@@ -2177,11 +2955,19 @@ export namespace Prisma {
   }
   export type GlobalOmitConfig = {
     user?: UserOmit
+    company?: CompanyOmit
     therapeuticGroup?: TherapeuticGroupOmit
     masterDrug?: MasterDrugOmit
+    companyDrug?: CompanyDrugOmit
     facilityDrugMap?: FacilityDrugMapOmit
     inventoryReport?: InventoryReportOmit
     facilityReportSubmission?: FacilityReportSubmissionOmit
+    drugOrder?: DrugOrderOmit
+    drugOrderLine?: DrugOrderLineOmit
+    drugOrderShipment?: DrugOrderShipmentOmit
+    drugOrderShipmentLine?: DrugOrderShipmentLineOmit
+    drugOrderReceipt?: DrugOrderReceiptOmit
+    drugOrderReceiptLine?: DrugOrderReceiptLineOmit
     reportReviewLog?: ReportReviewLogOmit
     reportPeriod?: ReportPeriodOmit
     keHoachLCNT?: KeHoachLCNTOmit
@@ -2276,6 +3062,8 @@ export namespace Prisma {
     reports: number
     reportSubmissions: number
     keHoachLCNTs: number
+    drugOrders: number
+    drugOrderReceipts: number
     notifications: number
     activityLogs: number
   }
@@ -2285,6 +3073,8 @@ export namespace Prisma {
     reports?: boolean | UserCountOutputTypeCountReportsArgs
     reportSubmissions?: boolean | UserCountOutputTypeCountReportSubmissionsArgs
     keHoachLCNTs?: boolean | UserCountOutputTypeCountKeHoachLCNTsArgs
+    drugOrders?: boolean | UserCountOutputTypeCountDrugOrdersArgs
+    drugOrderReceipts?: boolean | UserCountOutputTypeCountDrugOrderReceiptsArgs
     notifications?: boolean | UserCountOutputTypeCountNotificationsArgs
     activityLogs?: boolean | UserCountOutputTypeCountActivityLogsArgs
   }
@@ -2331,6 +3121,20 @@ export namespace Prisma {
   /**
    * UserCountOutputType without action
    */
+  export type UserCountOutputTypeCountDrugOrdersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DrugOrderWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountDrugOrderReceiptsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DrugOrderReceiptWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
   export type UserCountOutputTypeCountNotificationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: NotificationWhereInput
   }
@@ -2340,6 +3144,55 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountActivityLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ActivityLogWhereInput
+  }
+
+
+  /**
+   * Count Type CompanyCountOutputType
+   */
+
+  export type CompanyCountOutputType = {
+    users: number
+    companyDrugs: number
+    drugOrders: number
+  }
+
+  export type CompanyCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    users?: boolean | CompanyCountOutputTypeCountUsersArgs
+    companyDrugs?: boolean | CompanyCountOutputTypeCountCompanyDrugsArgs
+    drugOrders?: boolean | CompanyCountOutputTypeCountDrugOrdersArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * CompanyCountOutputType without action
+   */
+  export type CompanyCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CompanyCountOutputType
+     */
+    select?: CompanyCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * CompanyCountOutputType without action
+   */
+  export type CompanyCountOutputTypeCountUsersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: UserWhereInput
+  }
+
+  /**
+   * CompanyCountOutputType without action
+   */
+  export type CompanyCountOutputTypeCountCompanyDrugsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CompanyDrugWhereInput
+  }
+
+  /**
+   * CompanyCountOutputType without action
+   */
+  export type CompanyCountOutputTypeCountDrugOrdersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DrugOrderWhereInput
   }
 
 
@@ -2380,10 +3233,14 @@ export namespace Prisma {
 
   export type MasterDrugCountOutputType = {
     drugMaps: number
+    companyDrugs: number
+    drugOrderLines: number
   }
 
   export type MasterDrugCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     drugMaps?: boolean | MasterDrugCountOutputTypeCountDrugMapsArgs
+    companyDrugs?: boolean | MasterDrugCountOutputTypeCountCompanyDrugsArgs
+    drugOrderLines?: boolean | MasterDrugCountOutputTypeCountDrugOrderLinesArgs
   }
 
   // Custom InputTypes
@@ -2402,6 +3259,51 @@ export namespace Prisma {
    */
   export type MasterDrugCountOutputTypeCountDrugMapsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: FacilityDrugMapWhereInput
+  }
+
+  /**
+   * MasterDrugCountOutputType without action
+   */
+  export type MasterDrugCountOutputTypeCountCompanyDrugsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CompanyDrugWhereInput
+  }
+
+  /**
+   * MasterDrugCountOutputType without action
+   */
+  export type MasterDrugCountOutputTypeCountDrugOrderLinesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DrugOrderLineWhereInput
+  }
+
+
+  /**
+   * Count Type CompanyDrugCountOutputType
+   */
+
+  export type CompanyDrugCountOutputType = {
+    drugOrderLines: number
+  }
+
+  export type CompanyDrugCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    drugOrderLines?: boolean | CompanyDrugCountOutputTypeCountDrugOrderLinesArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * CompanyDrugCountOutputType without action
+   */
+  export type CompanyDrugCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CompanyDrugCountOutputType
+     */
+    select?: CompanyDrugCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * CompanyDrugCountOutputType without action
+   */
+  export type CompanyDrugCountOutputTypeCountDrugOrderLinesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DrugOrderLineWhereInput
   }
 
 
@@ -2433,6 +3335,197 @@ export namespace Prisma {
    */
   export type FacilityDrugMapCountOutputTypeCountReportsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: InventoryReportWhereInput
+  }
+
+
+  /**
+   * Count Type DrugOrderCountOutputType
+   */
+
+  export type DrugOrderCountOutputType = {
+    lines: number
+    shipments: number
+    receipts: number
+  }
+
+  export type DrugOrderCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    lines?: boolean | DrugOrderCountOutputTypeCountLinesArgs
+    shipments?: boolean | DrugOrderCountOutputTypeCountShipmentsArgs
+    receipts?: boolean | DrugOrderCountOutputTypeCountReceiptsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * DrugOrderCountOutputType without action
+   */
+  export type DrugOrderCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderCountOutputType
+     */
+    select?: DrugOrderCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * DrugOrderCountOutputType without action
+   */
+  export type DrugOrderCountOutputTypeCountLinesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DrugOrderLineWhereInput
+  }
+
+  /**
+   * DrugOrderCountOutputType without action
+   */
+  export type DrugOrderCountOutputTypeCountShipmentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DrugOrderShipmentWhereInput
+  }
+
+  /**
+   * DrugOrderCountOutputType without action
+   */
+  export type DrugOrderCountOutputTypeCountReceiptsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DrugOrderReceiptWhereInput
+  }
+
+
+  /**
+   * Count Type DrugOrderLineCountOutputType
+   */
+
+  export type DrugOrderLineCountOutputType = {
+    shipmentLines: number
+    receiptLines: number
+  }
+
+  export type DrugOrderLineCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    shipmentLines?: boolean | DrugOrderLineCountOutputTypeCountShipmentLinesArgs
+    receiptLines?: boolean | DrugOrderLineCountOutputTypeCountReceiptLinesArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * DrugOrderLineCountOutputType without action
+   */
+  export type DrugOrderLineCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderLineCountOutputType
+     */
+    select?: DrugOrderLineCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * DrugOrderLineCountOutputType without action
+   */
+  export type DrugOrderLineCountOutputTypeCountShipmentLinesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DrugOrderShipmentLineWhereInput
+  }
+
+  /**
+   * DrugOrderLineCountOutputType without action
+   */
+  export type DrugOrderLineCountOutputTypeCountReceiptLinesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DrugOrderReceiptLineWhereInput
+  }
+
+
+  /**
+   * Count Type DrugOrderShipmentCountOutputType
+   */
+
+  export type DrugOrderShipmentCountOutputType = {
+    lines: number
+    receipts: number
+  }
+
+  export type DrugOrderShipmentCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    lines?: boolean | DrugOrderShipmentCountOutputTypeCountLinesArgs
+    receipts?: boolean | DrugOrderShipmentCountOutputTypeCountReceiptsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * DrugOrderShipmentCountOutputType without action
+   */
+  export type DrugOrderShipmentCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderShipmentCountOutputType
+     */
+    select?: DrugOrderShipmentCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * DrugOrderShipmentCountOutputType without action
+   */
+  export type DrugOrderShipmentCountOutputTypeCountLinesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DrugOrderShipmentLineWhereInput
+  }
+
+  /**
+   * DrugOrderShipmentCountOutputType without action
+   */
+  export type DrugOrderShipmentCountOutputTypeCountReceiptsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DrugOrderReceiptWhereInput
+  }
+
+
+  /**
+   * Count Type DrugOrderShipmentLineCountOutputType
+   */
+
+  export type DrugOrderShipmentLineCountOutputType = {
+    receiptLines: number
+  }
+
+  export type DrugOrderShipmentLineCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    receiptLines?: boolean | DrugOrderShipmentLineCountOutputTypeCountReceiptLinesArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * DrugOrderShipmentLineCountOutputType without action
+   */
+  export type DrugOrderShipmentLineCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderShipmentLineCountOutputType
+     */
+    select?: DrugOrderShipmentLineCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * DrugOrderShipmentLineCountOutputType without action
+   */
+  export type DrugOrderShipmentLineCountOutputTypeCountReceiptLinesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DrugOrderReceiptLineWhereInput
+  }
+
+
+  /**
+   * Count Type DrugOrderReceiptCountOutputType
+   */
+
+  export type DrugOrderReceiptCountOutputType = {
+    lines: number
+  }
+
+  export type DrugOrderReceiptCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    lines?: boolean | DrugOrderReceiptCountOutputTypeCountLinesArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * DrugOrderReceiptCountOutputType without action
+   */
+  export type DrugOrderReceiptCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderReceiptCountOutputType
+     */
+    select?: DrugOrderReceiptCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * DrugOrderReceiptCountOutputType without action
+   */
+  export type DrugOrderReceiptCountOutputTypeCountLinesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DrugOrderReceiptLineWhereInput
   }
 
 
@@ -2630,6 +3723,7 @@ export namespace Prisma {
     role: $Enums.Role | null
     facilityName: string | null
     facilityCode: string | null
+    companyId: string | null
     isActive: boolean | null
     autonomyGroup: string | null
     facilityType: string | null
@@ -2647,6 +3741,7 @@ export namespace Prisma {
     role: $Enums.Role | null
     facilityName: string | null
     facilityCode: string | null
+    companyId: string | null
     isActive: boolean | null
     autonomyGroup: string | null
     facilityType: string | null
@@ -2664,6 +3759,7 @@ export namespace Prisma {
     role: number
     facilityName: number
     facilityCode: number
+    companyId: number
     isActive: number
     autonomyGroup: number
     facilityType: number
@@ -2683,6 +3779,7 @@ export namespace Prisma {
     role?: true
     facilityName?: true
     facilityCode?: true
+    companyId?: true
     isActive?: true
     autonomyGroup?: true
     facilityType?: true
@@ -2700,6 +3797,7 @@ export namespace Prisma {
     role?: true
     facilityName?: true
     facilityCode?: true
+    companyId?: true
     isActive?: true
     autonomyGroup?: true
     facilityType?: true
@@ -2717,6 +3815,7 @@ export namespace Prisma {
     role?: true
     facilityName?: true
     facilityCode?: true
+    companyId?: true
     isActive?: true
     autonomyGroup?: true
     facilityType?: true
@@ -2807,6 +3906,7 @@ export namespace Prisma {
     role: $Enums.Role
     facilityName: string | null
     facilityCode: string | null
+    companyId: string | null
     isActive: boolean
     autonomyGroup: string | null
     facilityType: string | null
@@ -2841,6 +3941,7 @@ export namespace Prisma {
     role?: boolean
     facilityName?: boolean
     facilityCode?: boolean
+    companyId?: boolean
     isActive?: boolean
     autonomyGroup?: boolean
     facilityType?: boolean
@@ -2849,10 +3950,13 @@ export namespace Prisma {
     address?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    company?: boolean | User$companyArgs<ExtArgs>
     drugMaps?: boolean | User$drugMapsArgs<ExtArgs>
     reports?: boolean | User$reportsArgs<ExtArgs>
     reportSubmissions?: boolean | User$reportSubmissionsArgs<ExtArgs>
     keHoachLCNTs?: boolean | User$keHoachLCNTsArgs<ExtArgs>
+    drugOrders?: boolean | User$drugOrdersArgs<ExtArgs>
+    drugOrderReceipts?: boolean | User$drugOrderReceiptsArgs<ExtArgs>
     notifications?: boolean | User$notificationsArgs<ExtArgs>
     activityLogs?: boolean | User$activityLogsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
@@ -2865,6 +3969,7 @@ export namespace Prisma {
     role?: boolean
     facilityName?: boolean
     facilityCode?: boolean
+    companyId?: boolean
     isActive?: boolean
     autonomyGroup?: boolean
     facilityType?: boolean
@@ -2873,6 +3978,7 @@ export namespace Prisma {
     address?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    company?: boolean | User$companyArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
   export type UserSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -2882,6 +3988,7 @@ export namespace Prisma {
     role?: boolean
     facilityName?: boolean
     facilityCode?: boolean
+    companyId?: boolean
     isActive?: boolean
     autonomyGroup?: boolean
     facilityType?: boolean
@@ -2890,6 +3997,7 @@ export namespace Prisma {
     address?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    company?: boolean | User$companyArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
   export type UserSelectScalar = {
@@ -2899,6 +4007,7 @@ export namespace Prisma {
     role?: boolean
     facilityName?: boolean
     facilityCode?: boolean
+    companyId?: boolean
     isActive?: boolean
     autonomyGroup?: boolean
     facilityType?: boolean
@@ -2909,26 +4018,36 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "username" | "passwordHash" | "role" | "facilityName" | "facilityCode" | "isActive" | "autonomyGroup" | "facilityType" | "contactPerson" | "phoneNumber" | "address" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "username" | "passwordHash" | "role" | "facilityName" | "facilityCode" | "companyId" | "isActive" | "autonomyGroup" | "facilityType" | "contactPerson" | "phoneNumber" | "address" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    company?: boolean | User$companyArgs<ExtArgs>
     drugMaps?: boolean | User$drugMapsArgs<ExtArgs>
     reports?: boolean | User$reportsArgs<ExtArgs>
     reportSubmissions?: boolean | User$reportSubmissionsArgs<ExtArgs>
     keHoachLCNTs?: boolean | User$keHoachLCNTsArgs<ExtArgs>
+    drugOrders?: boolean | User$drugOrdersArgs<ExtArgs>
+    drugOrderReceipts?: boolean | User$drugOrderReceiptsArgs<ExtArgs>
     notifications?: boolean | User$notificationsArgs<ExtArgs>
     activityLogs?: boolean | User$activityLogsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
-  export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
-  export type UserIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    company?: boolean | User$companyArgs<ExtArgs>
+  }
+  export type UserIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    company?: boolean | User$companyArgs<ExtArgs>
+  }
 
   export type $UserPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "User"
     objects: {
+      company: Prisma.$CompanyPayload<ExtArgs> | null
       drugMaps: Prisma.$FacilityDrugMapPayload<ExtArgs>[]
       reports: Prisma.$InventoryReportPayload<ExtArgs>[]
       reportSubmissions: Prisma.$FacilityReportSubmissionPayload<ExtArgs>[]
       keHoachLCNTs: Prisma.$KeHoachLCNTPayload<ExtArgs>[]
+      drugOrders: Prisma.$DrugOrderPayload<ExtArgs>[]
+      drugOrderReceipts: Prisma.$DrugOrderReceiptPayload<ExtArgs>[]
       notifications: Prisma.$NotificationPayload<ExtArgs>[]
       activityLogs: Prisma.$ActivityLogPayload<ExtArgs>[]
     }
@@ -2939,6 +4058,7 @@ export namespace Prisma {
       role: $Enums.Role
       facilityName: string | null
       facilityCode: string | null
+      companyId: string | null
       isActive: boolean
       autonomyGroup: string | null
       facilityType: string | null
@@ -3341,10 +4461,13 @@ export namespace Prisma {
    */
   export interface Prisma__UserClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    company<T extends User$companyArgs<ExtArgs> = {}>(args?: Subset<T, User$companyArgs<ExtArgs>>): Prisma__CompanyClient<$Result.GetResult<Prisma.$CompanyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     drugMaps<T extends User$drugMapsArgs<ExtArgs> = {}>(args?: Subset<T, User$drugMapsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FacilityDrugMapPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     reports<T extends User$reportsArgs<ExtArgs> = {}>(args?: Subset<T, User$reportsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     reportSubmissions<T extends User$reportSubmissionsArgs<ExtArgs> = {}>(args?: Subset<T, User$reportSubmissionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FacilityReportSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     keHoachLCNTs<T extends User$keHoachLCNTsArgs<ExtArgs> = {}>(args?: Subset<T, User$keHoachLCNTsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KeHoachLCNTPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    drugOrders<T extends User$drugOrdersArgs<ExtArgs> = {}>(args?: Subset<T, User$drugOrdersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DrugOrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    drugOrderReceipts<T extends User$drugOrderReceiptsArgs<ExtArgs> = {}>(args?: Subset<T, User$drugOrderReceiptsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DrugOrderReceiptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     notifications<T extends User$notificationsArgs<ExtArgs> = {}>(args?: Subset<T, User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     activityLogs<T extends User$activityLogsArgs<ExtArgs> = {}>(args?: Subset<T, User$activityLogsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ActivityLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
@@ -3382,6 +4505,7 @@ export namespace Prisma {
     readonly role: FieldRef<"User", 'Role'>
     readonly facilityName: FieldRef<"User", 'String'>
     readonly facilityCode: FieldRef<"User", 'String'>
+    readonly companyId: FieldRef<"User", 'String'>
     readonly isActive: FieldRef<"User", 'Boolean'>
     readonly autonomyGroup: FieldRef<"User", 'String'>
     readonly facilityType: FieldRef<"User", 'String'>
@@ -3639,6 +4763,10 @@ export namespace Prisma {
      */
     data: UserCreateManyInput | UserCreateManyInput[]
     skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserIncludeCreateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -3709,6 +4837,10 @@ export namespace Prisma {
      * Limit how many Users to update.
      */
     limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -3775,6 +4907,25 @@ export namespace Prisma {
      * Limit how many Users to delete.
      */
     limit?: number
+  }
+
+  /**
+   * User.company
+   */
+  export type User$companyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Company
+     */
+    select?: CompanySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Company
+     */
+    omit?: CompanyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CompanyInclude<ExtArgs> | null
+    where?: CompanyWhereInput
   }
 
   /**
@@ -3874,6 +5025,54 @@ export namespace Prisma {
   }
 
   /**
+   * User.drugOrders
+   */
+  export type User$drugOrdersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrder
+     */
+    select?: DrugOrderSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrder
+     */
+    omit?: DrugOrderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderInclude<ExtArgs> | null
+    where?: DrugOrderWhereInput
+    orderBy?: DrugOrderOrderByWithRelationInput | DrugOrderOrderByWithRelationInput[]
+    cursor?: DrugOrderWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: DrugOrderScalarFieldEnum | DrugOrderScalarFieldEnum[]
+  }
+
+  /**
+   * User.drugOrderReceipts
+   */
+  export type User$drugOrderReceiptsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderReceipt
+     */
+    select?: DrugOrderReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderReceipt
+     */
+    omit?: DrugOrderReceiptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderReceiptInclude<ExtArgs> | null
+    where?: DrugOrderReceiptWhereInput
+    orderBy?: DrugOrderReceiptOrderByWithRelationInput | DrugOrderReceiptOrderByWithRelationInput[]
+    cursor?: DrugOrderReceiptWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: DrugOrderReceiptScalarFieldEnum | DrugOrderReceiptScalarFieldEnum[]
+  }
+
+  /**
    * User.notifications
    */
   export type User$notificationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -3937,6 +5136,1197 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: UserInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model Company
+   */
+
+  export type AggregateCompany = {
+    _count: CompanyCountAggregateOutputType | null
+    _min: CompanyMinAggregateOutputType | null
+    _max: CompanyMaxAggregateOutputType | null
+  }
+
+  export type CompanyMinAggregateOutputType = {
+    id: string | null
+    code: string | null
+    name: string | null
+    contactPerson: string | null
+    phoneNumber: string | null
+    email: string | null
+    address: string | null
+    isActive: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type CompanyMaxAggregateOutputType = {
+    id: string | null
+    code: string | null
+    name: string | null
+    contactPerson: string | null
+    phoneNumber: string | null
+    email: string | null
+    address: string | null
+    isActive: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type CompanyCountAggregateOutputType = {
+    id: number
+    code: number
+    name: number
+    contactPerson: number
+    phoneNumber: number
+    email: number
+    address: number
+    isActive: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type CompanyMinAggregateInputType = {
+    id?: true
+    code?: true
+    name?: true
+    contactPerson?: true
+    phoneNumber?: true
+    email?: true
+    address?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type CompanyMaxAggregateInputType = {
+    id?: true
+    code?: true
+    name?: true
+    contactPerson?: true
+    phoneNumber?: true
+    email?: true
+    address?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type CompanyCountAggregateInputType = {
+    id?: true
+    code?: true
+    name?: true
+    contactPerson?: true
+    phoneNumber?: true
+    email?: true
+    address?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type CompanyAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Company to aggregate.
+     */
+    where?: CompanyWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Companies to fetch.
+     */
+    orderBy?: CompanyOrderByWithRelationInput | CompanyOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: CompanyWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Companies from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Companies.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Companies
+    **/
+    _count?: true | CompanyCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: CompanyMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: CompanyMaxAggregateInputType
+  }
+
+  export type GetCompanyAggregateType<T extends CompanyAggregateArgs> = {
+        [P in keyof T & keyof AggregateCompany]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateCompany[P]>
+      : GetScalarType<T[P], AggregateCompany[P]>
+  }
+
+
+
+
+  export type CompanyGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CompanyWhereInput
+    orderBy?: CompanyOrderByWithAggregationInput | CompanyOrderByWithAggregationInput[]
+    by: CompanyScalarFieldEnum[] | CompanyScalarFieldEnum
+    having?: CompanyScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: CompanyCountAggregateInputType | true
+    _min?: CompanyMinAggregateInputType
+    _max?: CompanyMaxAggregateInputType
+  }
+
+  export type CompanyGroupByOutputType = {
+    id: string
+    code: string
+    name: string
+    contactPerson: string | null
+    phoneNumber: string | null
+    email: string | null
+    address: string | null
+    isActive: boolean
+    createdAt: Date
+    updatedAt: Date
+    _count: CompanyCountAggregateOutputType | null
+    _min: CompanyMinAggregateOutputType | null
+    _max: CompanyMaxAggregateOutputType | null
+  }
+
+  type GetCompanyGroupByPayload<T extends CompanyGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<CompanyGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof CompanyGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], CompanyGroupByOutputType[P]>
+            : GetScalarType<T[P], CompanyGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type CompanySelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    code?: boolean
+    name?: boolean
+    contactPerson?: boolean
+    phoneNumber?: boolean
+    email?: boolean
+    address?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    users?: boolean | Company$usersArgs<ExtArgs>
+    companyDrugs?: boolean | Company$companyDrugsArgs<ExtArgs>
+    drugOrders?: boolean | Company$drugOrdersArgs<ExtArgs>
+    _count?: boolean | CompanyCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["company"]>
+
+  export type CompanySelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    code?: boolean
+    name?: boolean
+    contactPerson?: boolean
+    phoneNumber?: boolean
+    email?: boolean
+    address?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["company"]>
+
+  export type CompanySelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    code?: boolean
+    name?: boolean
+    contactPerson?: boolean
+    phoneNumber?: boolean
+    email?: boolean
+    address?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["company"]>
+
+  export type CompanySelectScalar = {
+    id?: boolean
+    code?: boolean
+    name?: boolean
+    contactPerson?: boolean
+    phoneNumber?: boolean
+    email?: boolean
+    address?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type CompanyOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "code" | "name" | "contactPerson" | "phoneNumber" | "email" | "address" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["company"]>
+  export type CompanyInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    users?: boolean | Company$usersArgs<ExtArgs>
+    companyDrugs?: boolean | Company$companyDrugsArgs<ExtArgs>
+    drugOrders?: boolean | Company$drugOrdersArgs<ExtArgs>
+    _count?: boolean | CompanyCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type CompanyIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type CompanyIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+
+  export type $CompanyPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Company"
+    objects: {
+      users: Prisma.$UserPayload<ExtArgs>[]
+      companyDrugs: Prisma.$CompanyDrugPayload<ExtArgs>[]
+      drugOrders: Prisma.$DrugOrderPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      code: string
+      name: string
+      contactPerson: string | null
+      phoneNumber: string | null
+      email: string | null
+      address: string | null
+      isActive: boolean
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["company"]>
+    composites: {}
+  }
+
+  type CompanyGetPayload<S extends boolean | null | undefined | CompanyDefaultArgs> = $Result.GetResult<Prisma.$CompanyPayload, S>
+
+  type CompanyCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<CompanyFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: CompanyCountAggregateInputType | true
+    }
+
+  export interface CompanyDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Company'], meta: { name: 'Company' } }
+    /**
+     * Find zero or one Company that matches the filter.
+     * @param {CompanyFindUniqueArgs} args - Arguments to find a Company
+     * @example
+     * // Get one Company
+     * const company = await prisma.company.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends CompanyFindUniqueArgs>(args: SelectSubset<T, CompanyFindUniqueArgs<ExtArgs>>): Prisma__CompanyClient<$Result.GetResult<Prisma.$CompanyPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Company that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {CompanyFindUniqueOrThrowArgs} args - Arguments to find a Company
+     * @example
+     * // Get one Company
+     * const company = await prisma.company.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends CompanyFindUniqueOrThrowArgs>(args: SelectSubset<T, CompanyFindUniqueOrThrowArgs<ExtArgs>>): Prisma__CompanyClient<$Result.GetResult<Prisma.$CompanyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Company that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CompanyFindFirstArgs} args - Arguments to find a Company
+     * @example
+     * // Get one Company
+     * const company = await prisma.company.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends CompanyFindFirstArgs>(args?: SelectSubset<T, CompanyFindFirstArgs<ExtArgs>>): Prisma__CompanyClient<$Result.GetResult<Prisma.$CompanyPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Company that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CompanyFindFirstOrThrowArgs} args - Arguments to find a Company
+     * @example
+     * // Get one Company
+     * const company = await prisma.company.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends CompanyFindFirstOrThrowArgs>(args?: SelectSubset<T, CompanyFindFirstOrThrowArgs<ExtArgs>>): Prisma__CompanyClient<$Result.GetResult<Prisma.$CompanyPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Companies that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CompanyFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Companies
+     * const companies = await prisma.company.findMany()
+     * 
+     * // Get first 10 Companies
+     * const companies = await prisma.company.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const companyWithIdOnly = await prisma.company.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends CompanyFindManyArgs>(args?: SelectSubset<T, CompanyFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CompanyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Company.
+     * @param {CompanyCreateArgs} args - Arguments to create a Company.
+     * @example
+     * // Create one Company
+     * const Company = await prisma.company.create({
+     *   data: {
+     *     // ... data to create a Company
+     *   }
+     * })
+     * 
+     */
+    create<T extends CompanyCreateArgs>(args: SelectSubset<T, CompanyCreateArgs<ExtArgs>>): Prisma__CompanyClient<$Result.GetResult<Prisma.$CompanyPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Companies.
+     * @param {CompanyCreateManyArgs} args - Arguments to create many Companies.
+     * @example
+     * // Create many Companies
+     * const company = await prisma.company.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends CompanyCreateManyArgs>(args?: SelectSubset<T, CompanyCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Companies and returns the data saved in the database.
+     * @param {CompanyCreateManyAndReturnArgs} args - Arguments to create many Companies.
+     * @example
+     * // Create many Companies
+     * const company = await prisma.company.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Companies and only return the `id`
+     * const companyWithIdOnly = await prisma.company.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends CompanyCreateManyAndReturnArgs>(args?: SelectSubset<T, CompanyCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CompanyPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Company.
+     * @param {CompanyDeleteArgs} args - Arguments to delete one Company.
+     * @example
+     * // Delete one Company
+     * const Company = await prisma.company.delete({
+     *   where: {
+     *     // ... filter to delete one Company
+     *   }
+     * })
+     * 
+     */
+    delete<T extends CompanyDeleteArgs>(args: SelectSubset<T, CompanyDeleteArgs<ExtArgs>>): Prisma__CompanyClient<$Result.GetResult<Prisma.$CompanyPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Company.
+     * @param {CompanyUpdateArgs} args - Arguments to update one Company.
+     * @example
+     * // Update one Company
+     * const company = await prisma.company.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends CompanyUpdateArgs>(args: SelectSubset<T, CompanyUpdateArgs<ExtArgs>>): Prisma__CompanyClient<$Result.GetResult<Prisma.$CompanyPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Companies.
+     * @param {CompanyDeleteManyArgs} args - Arguments to filter Companies to delete.
+     * @example
+     * // Delete a few Companies
+     * const { count } = await prisma.company.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends CompanyDeleteManyArgs>(args?: SelectSubset<T, CompanyDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Companies.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CompanyUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Companies
+     * const company = await prisma.company.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends CompanyUpdateManyArgs>(args: SelectSubset<T, CompanyUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Companies and returns the data updated in the database.
+     * @param {CompanyUpdateManyAndReturnArgs} args - Arguments to update many Companies.
+     * @example
+     * // Update many Companies
+     * const company = await prisma.company.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Companies and only return the `id`
+     * const companyWithIdOnly = await prisma.company.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends CompanyUpdateManyAndReturnArgs>(args: SelectSubset<T, CompanyUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CompanyPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Company.
+     * @param {CompanyUpsertArgs} args - Arguments to update or create a Company.
+     * @example
+     * // Update or create a Company
+     * const company = await prisma.company.upsert({
+     *   create: {
+     *     // ... data to create a Company
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Company we want to update
+     *   }
+     * })
+     */
+    upsert<T extends CompanyUpsertArgs>(args: SelectSubset<T, CompanyUpsertArgs<ExtArgs>>): Prisma__CompanyClient<$Result.GetResult<Prisma.$CompanyPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Companies.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CompanyCountArgs} args - Arguments to filter Companies to count.
+     * @example
+     * // Count the number of Companies
+     * const count = await prisma.company.count({
+     *   where: {
+     *     // ... the filter for the Companies we want to count
+     *   }
+     * })
+    **/
+    count<T extends CompanyCountArgs>(
+      args?: Subset<T, CompanyCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], CompanyCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Company.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CompanyAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends CompanyAggregateArgs>(args: Subset<T, CompanyAggregateArgs>): Prisma.PrismaPromise<GetCompanyAggregateType<T>>
+
+    /**
+     * Group by Company.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CompanyGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends CompanyGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: CompanyGroupByArgs['orderBy'] }
+        : { orderBy?: CompanyGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, CompanyGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetCompanyGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Company model
+   */
+  readonly fields: CompanyFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Company.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__CompanyClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    users<T extends Company$usersArgs<ExtArgs> = {}>(args?: Subset<T, Company$usersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    companyDrugs<T extends Company$companyDrugsArgs<ExtArgs> = {}>(args?: Subset<T, Company$companyDrugsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CompanyDrugPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    drugOrders<T extends Company$drugOrdersArgs<ExtArgs> = {}>(args?: Subset<T, Company$drugOrdersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DrugOrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Company model
+   */
+  interface CompanyFieldRefs {
+    readonly id: FieldRef<"Company", 'String'>
+    readonly code: FieldRef<"Company", 'String'>
+    readonly name: FieldRef<"Company", 'String'>
+    readonly contactPerson: FieldRef<"Company", 'String'>
+    readonly phoneNumber: FieldRef<"Company", 'String'>
+    readonly email: FieldRef<"Company", 'String'>
+    readonly address: FieldRef<"Company", 'String'>
+    readonly isActive: FieldRef<"Company", 'Boolean'>
+    readonly createdAt: FieldRef<"Company", 'DateTime'>
+    readonly updatedAt: FieldRef<"Company", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Company findUnique
+   */
+  export type CompanyFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Company
+     */
+    select?: CompanySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Company
+     */
+    omit?: CompanyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CompanyInclude<ExtArgs> | null
+    /**
+     * Filter, which Company to fetch.
+     */
+    where: CompanyWhereUniqueInput
+  }
+
+  /**
+   * Company findUniqueOrThrow
+   */
+  export type CompanyFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Company
+     */
+    select?: CompanySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Company
+     */
+    omit?: CompanyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CompanyInclude<ExtArgs> | null
+    /**
+     * Filter, which Company to fetch.
+     */
+    where: CompanyWhereUniqueInput
+  }
+
+  /**
+   * Company findFirst
+   */
+  export type CompanyFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Company
+     */
+    select?: CompanySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Company
+     */
+    omit?: CompanyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CompanyInclude<ExtArgs> | null
+    /**
+     * Filter, which Company to fetch.
+     */
+    where?: CompanyWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Companies to fetch.
+     */
+    orderBy?: CompanyOrderByWithRelationInput | CompanyOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Companies.
+     */
+    cursor?: CompanyWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Companies from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Companies.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Companies.
+     */
+    distinct?: CompanyScalarFieldEnum | CompanyScalarFieldEnum[]
+  }
+
+  /**
+   * Company findFirstOrThrow
+   */
+  export type CompanyFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Company
+     */
+    select?: CompanySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Company
+     */
+    omit?: CompanyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CompanyInclude<ExtArgs> | null
+    /**
+     * Filter, which Company to fetch.
+     */
+    where?: CompanyWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Companies to fetch.
+     */
+    orderBy?: CompanyOrderByWithRelationInput | CompanyOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Companies.
+     */
+    cursor?: CompanyWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Companies from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Companies.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Companies.
+     */
+    distinct?: CompanyScalarFieldEnum | CompanyScalarFieldEnum[]
+  }
+
+  /**
+   * Company findMany
+   */
+  export type CompanyFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Company
+     */
+    select?: CompanySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Company
+     */
+    omit?: CompanyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CompanyInclude<ExtArgs> | null
+    /**
+     * Filter, which Companies to fetch.
+     */
+    where?: CompanyWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Companies to fetch.
+     */
+    orderBy?: CompanyOrderByWithRelationInput | CompanyOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Companies.
+     */
+    cursor?: CompanyWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Companies from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Companies.
+     */
+    skip?: number
+    distinct?: CompanyScalarFieldEnum | CompanyScalarFieldEnum[]
+  }
+
+  /**
+   * Company create
+   */
+  export type CompanyCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Company
+     */
+    select?: CompanySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Company
+     */
+    omit?: CompanyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CompanyInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Company.
+     */
+    data: XOR<CompanyCreateInput, CompanyUncheckedCreateInput>
+  }
+
+  /**
+   * Company createMany
+   */
+  export type CompanyCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Companies.
+     */
+    data: CompanyCreateManyInput | CompanyCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Company createManyAndReturn
+   */
+  export type CompanyCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Company
+     */
+    select?: CompanySelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Company
+     */
+    omit?: CompanyOmit<ExtArgs> | null
+    /**
+     * The data used to create many Companies.
+     */
+    data: CompanyCreateManyInput | CompanyCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Company update
+   */
+  export type CompanyUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Company
+     */
+    select?: CompanySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Company
+     */
+    omit?: CompanyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CompanyInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Company.
+     */
+    data: XOR<CompanyUpdateInput, CompanyUncheckedUpdateInput>
+    /**
+     * Choose, which Company to update.
+     */
+    where: CompanyWhereUniqueInput
+  }
+
+  /**
+   * Company updateMany
+   */
+  export type CompanyUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Companies.
+     */
+    data: XOR<CompanyUpdateManyMutationInput, CompanyUncheckedUpdateManyInput>
+    /**
+     * Filter which Companies to update
+     */
+    where?: CompanyWhereInput
+    /**
+     * Limit how many Companies to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Company updateManyAndReturn
+   */
+  export type CompanyUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Company
+     */
+    select?: CompanySelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Company
+     */
+    omit?: CompanyOmit<ExtArgs> | null
+    /**
+     * The data used to update Companies.
+     */
+    data: XOR<CompanyUpdateManyMutationInput, CompanyUncheckedUpdateManyInput>
+    /**
+     * Filter which Companies to update
+     */
+    where?: CompanyWhereInput
+    /**
+     * Limit how many Companies to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Company upsert
+   */
+  export type CompanyUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Company
+     */
+    select?: CompanySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Company
+     */
+    omit?: CompanyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CompanyInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Company to update in case it exists.
+     */
+    where: CompanyWhereUniqueInput
+    /**
+     * In case the Company found by the `where` argument doesn't exist, create a new Company with this data.
+     */
+    create: XOR<CompanyCreateInput, CompanyUncheckedCreateInput>
+    /**
+     * In case the Company was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<CompanyUpdateInput, CompanyUncheckedUpdateInput>
+  }
+
+  /**
+   * Company delete
+   */
+  export type CompanyDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Company
+     */
+    select?: CompanySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Company
+     */
+    omit?: CompanyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CompanyInclude<ExtArgs> | null
+    /**
+     * Filter which Company to delete.
+     */
+    where: CompanyWhereUniqueInput
+  }
+
+  /**
+   * Company deleteMany
+   */
+  export type CompanyDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Companies to delete
+     */
+    where?: CompanyWhereInput
+    /**
+     * Limit how many Companies to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Company.users
+   */
+  export type Company$usersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+    orderBy?: UserOrderByWithRelationInput | UserOrderByWithRelationInput[]
+    cursor?: UserWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: UserScalarFieldEnum | UserScalarFieldEnum[]
+  }
+
+  /**
+   * Company.companyDrugs
+   */
+  export type Company$companyDrugsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CompanyDrug
+     */
+    select?: CompanyDrugSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CompanyDrug
+     */
+    omit?: CompanyDrugOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CompanyDrugInclude<ExtArgs> | null
+    where?: CompanyDrugWhereInput
+    orderBy?: CompanyDrugOrderByWithRelationInput | CompanyDrugOrderByWithRelationInput[]
+    cursor?: CompanyDrugWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: CompanyDrugScalarFieldEnum | CompanyDrugScalarFieldEnum[]
+  }
+
+  /**
+   * Company.drugOrders
+   */
+  export type Company$drugOrdersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrder
+     */
+    select?: DrugOrderSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrder
+     */
+    omit?: DrugOrderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderInclude<ExtArgs> | null
+    where?: DrugOrderWhereInput
+    orderBy?: DrugOrderOrderByWithRelationInput | DrugOrderOrderByWithRelationInput[]
+    cursor?: DrugOrderWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: DrugOrderScalarFieldEnum | DrugOrderScalarFieldEnum[]
+  }
+
+  /**
+   * Company without action
+   */
+  export type CompanyDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Company
+     */
+    select?: CompanySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Company
+     */
+    omit?: CompanyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CompanyInclude<ExtArgs> | null
   }
 
 
@@ -5373,6 +7763,8 @@ export namespace Prisma {
     updatedAt?: boolean
     therapeuticGroup?: boolean | MasterDrug$therapeuticGroupArgs<ExtArgs>
     drugMaps?: boolean | MasterDrug$drugMapsArgs<ExtArgs>
+    companyDrugs?: boolean | MasterDrug$companyDrugsArgs<ExtArgs>
+    drugOrderLines?: boolean | MasterDrug$drugOrderLinesArgs<ExtArgs>
     _count?: boolean | MasterDrugCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["masterDrug"]>
 
@@ -5475,6 +7867,8 @@ export namespace Prisma {
   export type MasterDrugInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     therapeuticGroup?: boolean | MasterDrug$therapeuticGroupArgs<ExtArgs>
     drugMaps?: boolean | MasterDrug$drugMapsArgs<ExtArgs>
+    companyDrugs?: boolean | MasterDrug$companyDrugsArgs<ExtArgs>
+    drugOrderLines?: boolean | MasterDrug$drugOrderLinesArgs<ExtArgs>
     _count?: boolean | MasterDrugCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type MasterDrugIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -5489,6 +7883,8 @@ export namespace Prisma {
     objects: {
       therapeuticGroup: Prisma.$TherapeuticGroupPayload<ExtArgs> | null
       drugMaps: Prisma.$FacilityDrugMapPayload<ExtArgs>[]
+      companyDrugs: Prisma.$CompanyDrugPayload<ExtArgs>[]
+      drugOrderLines: Prisma.$DrugOrderLinePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -5915,6 +8311,8 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     therapeuticGroup<T extends MasterDrug$therapeuticGroupArgs<ExtArgs> = {}>(args?: Subset<T, MasterDrug$therapeuticGroupArgs<ExtArgs>>): Prisma__TherapeuticGroupClient<$Result.GetResult<Prisma.$TherapeuticGroupPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     drugMaps<T extends MasterDrug$drugMapsArgs<ExtArgs> = {}>(args?: Subset<T, MasterDrug$drugMapsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FacilityDrugMapPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    companyDrugs<T extends MasterDrug$companyDrugsArgs<ExtArgs> = {}>(args?: Subset<T, MasterDrug$companyDrugsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CompanyDrugPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    drugOrderLines<T extends MasterDrug$drugOrderLinesArgs<ExtArgs> = {}>(args?: Subset<T, MasterDrug$drugOrderLinesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DrugOrderLinePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -6411,6 +8809,54 @@ export namespace Prisma {
   }
 
   /**
+   * MasterDrug.companyDrugs
+   */
+  export type MasterDrug$companyDrugsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CompanyDrug
+     */
+    select?: CompanyDrugSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CompanyDrug
+     */
+    omit?: CompanyDrugOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CompanyDrugInclude<ExtArgs> | null
+    where?: CompanyDrugWhereInput
+    orderBy?: CompanyDrugOrderByWithRelationInput | CompanyDrugOrderByWithRelationInput[]
+    cursor?: CompanyDrugWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: CompanyDrugScalarFieldEnum | CompanyDrugScalarFieldEnum[]
+  }
+
+  /**
+   * MasterDrug.drugOrderLines
+   */
+  export type MasterDrug$drugOrderLinesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderLine
+     */
+    select?: DrugOrderLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderLine
+     */
+    omit?: DrugOrderLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderLineInclude<ExtArgs> | null
+    where?: DrugOrderLineWhereInput
+    orderBy?: DrugOrderLineOrderByWithRelationInput | DrugOrderLineOrderByWithRelationInput[]
+    cursor?: DrugOrderLineWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: DrugOrderLineScalarFieldEnum | DrugOrderLineScalarFieldEnum[]
+  }
+
+  /**
    * MasterDrug without action
    */
   export type MasterDrugDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -6426,6 +8872,1199 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: MasterDrugInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model CompanyDrug
+   */
+
+  export type AggregateCompanyDrug = {
+    _count: CompanyDrugCountAggregateOutputType | null
+    _min: CompanyDrugMinAggregateOutputType | null
+    _max: CompanyDrugMaxAggregateOutputType | null
+  }
+
+  export type CompanyDrugMinAggregateOutputType = {
+    id: string | null
+    companyId: string | null
+    masterDrugId: string | null
+    companyDrugCode: string | null
+    companyDrugName: string | null
+    activeIngredient: string | null
+    quyCach: string | null
+    unit: string | null
+    isActive: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type CompanyDrugMaxAggregateOutputType = {
+    id: string | null
+    companyId: string | null
+    masterDrugId: string | null
+    companyDrugCode: string | null
+    companyDrugName: string | null
+    activeIngredient: string | null
+    quyCach: string | null
+    unit: string | null
+    isActive: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type CompanyDrugCountAggregateOutputType = {
+    id: number
+    companyId: number
+    masterDrugId: number
+    companyDrugCode: number
+    companyDrugName: number
+    activeIngredient: number
+    quyCach: number
+    unit: number
+    isActive: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type CompanyDrugMinAggregateInputType = {
+    id?: true
+    companyId?: true
+    masterDrugId?: true
+    companyDrugCode?: true
+    companyDrugName?: true
+    activeIngredient?: true
+    quyCach?: true
+    unit?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type CompanyDrugMaxAggregateInputType = {
+    id?: true
+    companyId?: true
+    masterDrugId?: true
+    companyDrugCode?: true
+    companyDrugName?: true
+    activeIngredient?: true
+    quyCach?: true
+    unit?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type CompanyDrugCountAggregateInputType = {
+    id?: true
+    companyId?: true
+    masterDrugId?: true
+    companyDrugCode?: true
+    companyDrugName?: true
+    activeIngredient?: true
+    quyCach?: true
+    unit?: true
+    isActive?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type CompanyDrugAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which CompanyDrug to aggregate.
+     */
+    where?: CompanyDrugWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CompanyDrugs to fetch.
+     */
+    orderBy?: CompanyDrugOrderByWithRelationInput | CompanyDrugOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: CompanyDrugWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CompanyDrugs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CompanyDrugs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned CompanyDrugs
+    **/
+    _count?: true | CompanyDrugCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: CompanyDrugMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: CompanyDrugMaxAggregateInputType
+  }
+
+  export type GetCompanyDrugAggregateType<T extends CompanyDrugAggregateArgs> = {
+        [P in keyof T & keyof AggregateCompanyDrug]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateCompanyDrug[P]>
+      : GetScalarType<T[P], AggregateCompanyDrug[P]>
+  }
+
+
+
+
+  export type CompanyDrugGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CompanyDrugWhereInput
+    orderBy?: CompanyDrugOrderByWithAggregationInput | CompanyDrugOrderByWithAggregationInput[]
+    by: CompanyDrugScalarFieldEnum[] | CompanyDrugScalarFieldEnum
+    having?: CompanyDrugScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: CompanyDrugCountAggregateInputType | true
+    _min?: CompanyDrugMinAggregateInputType
+    _max?: CompanyDrugMaxAggregateInputType
+  }
+
+  export type CompanyDrugGroupByOutputType = {
+    id: string
+    companyId: string
+    masterDrugId: string | null
+    companyDrugCode: string
+    companyDrugName: string
+    activeIngredient: string | null
+    quyCach: string | null
+    unit: string | null
+    isActive: boolean
+    createdAt: Date
+    updatedAt: Date
+    _count: CompanyDrugCountAggregateOutputType | null
+    _min: CompanyDrugMinAggregateOutputType | null
+    _max: CompanyDrugMaxAggregateOutputType | null
+  }
+
+  type GetCompanyDrugGroupByPayload<T extends CompanyDrugGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<CompanyDrugGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof CompanyDrugGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], CompanyDrugGroupByOutputType[P]>
+            : GetScalarType<T[P], CompanyDrugGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type CompanyDrugSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    companyId?: boolean
+    masterDrugId?: boolean
+    companyDrugCode?: boolean
+    companyDrugName?: boolean
+    activeIngredient?: boolean
+    quyCach?: boolean
+    unit?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    company?: boolean | CompanyDefaultArgs<ExtArgs>
+    masterDrug?: boolean | CompanyDrug$masterDrugArgs<ExtArgs>
+    drugOrderLines?: boolean | CompanyDrug$drugOrderLinesArgs<ExtArgs>
+    _count?: boolean | CompanyDrugCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["companyDrug"]>
+
+  export type CompanyDrugSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    companyId?: boolean
+    masterDrugId?: boolean
+    companyDrugCode?: boolean
+    companyDrugName?: boolean
+    activeIngredient?: boolean
+    quyCach?: boolean
+    unit?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    company?: boolean | CompanyDefaultArgs<ExtArgs>
+    masterDrug?: boolean | CompanyDrug$masterDrugArgs<ExtArgs>
+  }, ExtArgs["result"]["companyDrug"]>
+
+  export type CompanyDrugSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    companyId?: boolean
+    masterDrugId?: boolean
+    companyDrugCode?: boolean
+    companyDrugName?: boolean
+    activeIngredient?: boolean
+    quyCach?: boolean
+    unit?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    company?: boolean | CompanyDefaultArgs<ExtArgs>
+    masterDrug?: boolean | CompanyDrug$masterDrugArgs<ExtArgs>
+  }, ExtArgs["result"]["companyDrug"]>
+
+  export type CompanyDrugSelectScalar = {
+    id?: boolean
+    companyId?: boolean
+    masterDrugId?: boolean
+    companyDrugCode?: boolean
+    companyDrugName?: boolean
+    activeIngredient?: boolean
+    quyCach?: boolean
+    unit?: boolean
+    isActive?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type CompanyDrugOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "companyId" | "masterDrugId" | "companyDrugCode" | "companyDrugName" | "activeIngredient" | "quyCach" | "unit" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["companyDrug"]>
+  export type CompanyDrugInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    company?: boolean | CompanyDefaultArgs<ExtArgs>
+    masterDrug?: boolean | CompanyDrug$masterDrugArgs<ExtArgs>
+    drugOrderLines?: boolean | CompanyDrug$drugOrderLinesArgs<ExtArgs>
+    _count?: boolean | CompanyDrugCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type CompanyDrugIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    company?: boolean | CompanyDefaultArgs<ExtArgs>
+    masterDrug?: boolean | CompanyDrug$masterDrugArgs<ExtArgs>
+  }
+  export type CompanyDrugIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    company?: boolean | CompanyDefaultArgs<ExtArgs>
+    masterDrug?: boolean | CompanyDrug$masterDrugArgs<ExtArgs>
+  }
+
+  export type $CompanyDrugPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "CompanyDrug"
+    objects: {
+      company: Prisma.$CompanyPayload<ExtArgs>
+      masterDrug: Prisma.$MasterDrugPayload<ExtArgs> | null
+      drugOrderLines: Prisma.$DrugOrderLinePayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      companyId: string
+      masterDrugId: string | null
+      companyDrugCode: string
+      companyDrugName: string
+      activeIngredient: string | null
+      quyCach: string | null
+      unit: string | null
+      isActive: boolean
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["companyDrug"]>
+    composites: {}
+  }
+
+  type CompanyDrugGetPayload<S extends boolean | null | undefined | CompanyDrugDefaultArgs> = $Result.GetResult<Prisma.$CompanyDrugPayload, S>
+
+  type CompanyDrugCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<CompanyDrugFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: CompanyDrugCountAggregateInputType | true
+    }
+
+  export interface CompanyDrugDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['CompanyDrug'], meta: { name: 'CompanyDrug' } }
+    /**
+     * Find zero or one CompanyDrug that matches the filter.
+     * @param {CompanyDrugFindUniqueArgs} args - Arguments to find a CompanyDrug
+     * @example
+     * // Get one CompanyDrug
+     * const companyDrug = await prisma.companyDrug.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends CompanyDrugFindUniqueArgs>(args: SelectSubset<T, CompanyDrugFindUniqueArgs<ExtArgs>>): Prisma__CompanyDrugClient<$Result.GetResult<Prisma.$CompanyDrugPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one CompanyDrug that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {CompanyDrugFindUniqueOrThrowArgs} args - Arguments to find a CompanyDrug
+     * @example
+     * // Get one CompanyDrug
+     * const companyDrug = await prisma.companyDrug.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends CompanyDrugFindUniqueOrThrowArgs>(args: SelectSubset<T, CompanyDrugFindUniqueOrThrowArgs<ExtArgs>>): Prisma__CompanyDrugClient<$Result.GetResult<Prisma.$CompanyDrugPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first CompanyDrug that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CompanyDrugFindFirstArgs} args - Arguments to find a CompanyDrug
+     * @example
+     * // Get one CompanyDrug
+     * const companyDrug = await prisma.companyDrug.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends CompanyDrugFindFirstArgs>(args?: SelectSubset<T, CompanyDrugFindFirstArgs<ExtArgs>>): Prisma__CompanyDrugClient<$Result.GetResult<Prisma.$CompanyDrugPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first CompanyDrug that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CompanyDrugFindFirstOrThrowArgs} args - Arguments to find a CompanyDrug
+     * @example
+     * // Get one CompanyDrug
+     * const companyDrug = await prisma.companyDrug.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends CompanyDrugFindFirstOrThrowArgs>(args?: SelectSubset<T, CompanyDrugFindFirstOrThrowArgs<ExtArgs>>): Prisma__CompanyDrugClient<$Result.GetResult<Prisma.$CompanyDrugPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more CompanyDrugs that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CompanyDrugFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all CompanyDrugs
+     * const companyDrugs = await prisma.companyDrug.findMany()
+     * 
+     * // Get first 10 CompanyDrugs
+     * const companyDrugs = await prisma.companyDrug.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const companyDrugWithIdOnly = await prisma.companyDrug.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends CompanyDrugFindManyArgs>(args?: SelectSubset<T, CompanyDrugFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CompanyDrugPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a CompanyDrug.
+     * @param {CompanyDrugCreateArgs} args - Arguments to create a CompanyDrug.
+     * @example
+     * // Create one CompanyDrug
+     * const CompanyDrug = await prisma.companyDrug.create({
+     *   data: {
+     *     // ... data to create a CompanyDrug
+     *   }
+     * })
+     * 
+     */
+    create<T extends CompanyDrugCreateArgs>(args: SelectSubset<T, CompanyDrugCreateArgs<ExtArgs>>): Prisma__CompanyDrugClient<$Result.GetResult<Prisma.$CompanyDrugPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many CompanyDrugs.
+     * @param {CompanyDrugCreateManyArgs} args - Arguments to create many CompanyDrugs.
+     * @example
+     * // Create many CompanyDrugs
+     * const companyDrug = await prisma.companyDrug.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends CompanyDrugCreateManyArgs>(args?: SelectSubset<T, CompanyDrugCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many CompanyDrugs and returns the data saved in the database.
+     * @param {CompanyDrugCreateManyAndReturnArgs} args - Arguments to create many CompanyDrugs.
+     * @example
+     * // Create many CompanyDrugs
+     * const companyDrug = await prisma.companyDrug.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many CompanyDrugs and only return the `id`
+     * const companyDrugWithIdOnly = await prisma.companyDrug.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends CompanyDrugCreateManyAndReturnArgs>(args?: SelectSubset<T, CompanyDrugCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CompanyDrugPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a CompanyDrug.
+     * @param {CompanyDrugDeleteArgs} args - Arguments to delete one CompanyDrug.
+     * @example
+     * // Delete one CompanyDrug
+     * const CompanyDrug = await prisma.companyDrug.delete({
+     *   where: {
+     *     // ... filter to delete one CompanyDrug
+     *   }
+     * })
+     * 
+     */
+    delete<T extends CompanyDrugDeleteArgs>(args: SelectSubset<T, CompanyDrugDeleteArgs<ExtArgs>>): Prisma__CompanyDrugClient<$Result.GetResult<Prisma.$CompanyDrugPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one CompanyDrug.
+     * @param {CompanyDrugUpdateArgs} args - Arguments to update one CompanyDrug.
+     * @example
+     * // Update one CompanyDrug
+     * const companyDrug = await prisma.companyDrug.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends CompanyDrugUpdateArgs>(args: SelectSubset<T, CompanyDrugUpdateArgs<ExtArgs>>): Prisma__CompanyDrugClient<$Result.GetResult<Prisma.$CompanyDrugPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more CompanyDrugs.
+     * @param {CompanyDrugDeleteManyArgs} args - Arguments to filter CompanyDrugs to delete.
+     * @example
+     * // Delete a few CompanyDrugs
+     * const { count } = await prisma.companyDrug.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends CompanyDrugDeleteManyArgs>(args?: SelectSubset<T, CompanyDrugDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CompanyDrugs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CompanyDrugUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many CompanyDrugs
+     * const companyDrug = await prisma.companyDrug.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends CompanyDrugUpdateManyArgs>(args: SelectSubset<T, CompanyDrugUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CompanyDrugs and returns the data updated in the database.
+     * @param {CompanyDrugUpdateManyAndReturnArgs} args - Arguments to update many CompanyDrugs.
+     * @example
+     * // Update many CompanyDrugs
+     * const companyDrug = await prisma.companyDrug.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more CompanyDrugs and only return the `id`
+     * const companyDrugWithIdOnly = await prisma.companyDrug.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends CompanyDrugUpdateManyAndReturnArgs>(args: SelectSubset<T, CompanyDrugUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CompanyDrugPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one CompanyDrug.
+     * @param {CompanyDrugUpsertArgs} args - Arguments to update or create a CompanyDrug.
+     * @example
+     * // Update or create a CompanyDrug
+     * const companyDrug = await prisma.companyDrug.upsert({
+     *   create: {
+     *     // ... data to create a CompanyDrug
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the CompanyDrug we want to update
+     *   }
+     * })
+     */
+    upsert<T extends CompanyDrugUpsertArgs>(args: SelectSubset<T, CompanyDrugUpsertArgs<ExtArgs>>): Prisma__CompanyDrugClient<$Result.GetResult<Prisma.$CompanyDrugPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of CompanyDrugs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CompanyDrugCountArgs} args - Arguments to filter CompanyDrugs to count.
+     * @example
+     * // Count the number of CompanyDrugs
+     * const count = await prisma.companyDrug.count({
+     *   where: {
+     *     // ... the filter for the CompanyDrugs we want to count
+     *   }
+     * })
+    **/
+    count<T extends CompanyDrugCountArgs>(
+      args?: Subset<T, CompanyDrugCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], CompanyDrugCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a CompanyDrug.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CompanyDrugAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends CompanyDrugAggregateArgs>(args: Subset<T, CompanyDrugAggregateArgs>): Prisma.PrismaPromise<GetCompanyDrugAggregateType<T>>
+
+    /**
+     * Group by CompanyDrug.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CompanyDrugGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends CompanyDrugGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: CompanyDrugGroupByArgs['orderBy'] }
+        : { orderBy?: CompanyDrugGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, CompanyDrugGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetCompanyDrugGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the CompanyDrug model
+   */
+  readonly fields: CompanyDrugFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for CompanyDrug.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__CompanyDrugClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    company<T extends CompanyDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CompanyDefaultArgs<ExtArgs>>): Prisma__CompanyClient<$Result.GetResult<Prisma.$CompanyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    masterDrug<T extends CompanyDrug$masterDrugArgs<ExtArgs> = {}>(args?: Subset<T, CompanyDrug$masterDrugArgs<ExtArgs>>): Prisma__MasterDrugClient<$Result.GetResult<Prisma.$MasterDrugPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    drugOrderLines<T extends CompanyDrug$drugOrderLinesArgs<ExtArgs> = {}>(args?: Subset<T, CompanyDrug$drugOrderLinesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DrugOrderLinePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the CompanyDrug model
+   */
+  interface CompanyDrugFieldRefs {
+    readonly id: FieldRef<"CompanyDrug", 'String'>
+    readonly companyId: FieldRef<"CompanyDrug", 'String'>
+    readonly masterDrugId: FieldRef<"CompanyDrug", 'String'>
+    readonly companyDrugCode: FieldRef<"CompanyDrug", 'String'>
+    readonly companyDrugName: FieldRef<"CompanyDrug", 'String'>
+    readonly activeIngredient: FieldRef<"CompanyDrug", 'String'>
+    readonly quyCach: FieldRef<"CompanyDrug", 'String'>
+    readonly unit: FieldRef<"CompanyDrug", 'String'>
+    readonly isActive: FieldRef<"CompanyDrug", 'Boolean'>
+    readonly createdAt: FieldRef<"CompanyDrug", 'DateTime'>
+    readonly updatedAt: FieldRef<"CompanyDrug", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * CompanyDrug findUnique
+   */
+  export type CompanyDrugFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CompanyDrug
+     */
+    select?: CompanyDrugSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CompanyDrug
+     */
+    omit?: CompanyDrugOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CompanyDrugInclude<ExtArgs> | null
+    /**
+     * Filter, which CompanyDrug to fetch.
+     */
+    where: CompanyDrugWhereUniqueInput
+  }
+
+  /**
+   * CompanyDrug findUniqueOrThrow
+   */
+  export type CompanyDrugFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CompanyDrug
+     */
+    select?: CompanyDrugSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CompanyDrug
+     */
+    omit?: CompanyDrugOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CompanyDrugInclude<ExtArgs> | null
+    /**
+     * Filter, which CompanyDrug to fetch.
+     */
+    where: CompanyDrugWhereUniqueInput
+  }
+
+  /**
+   * CompanyDrug findFirst
+   */
+  export type CompanyDrugFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CompanyDrug
+     */
+    select?: CompanyDrugSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CompanyDrug
+     */
+    omit?: CompanyDrugOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CompanyDrugInclude<ExtArgs> | null
+    /**
+     * Filter, which CompanyDrug to fetch.
+     */
+    where?: CompanyDrugWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CompanyDrugs to fetch.
+     */
+    orderBy?: CompanyDrugOrderByWithRelationInput | CompanyDrugOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for CompanyDrugs.
+     */
+    cursor?: CompanyDrugWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CompanyDrugs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CompanyDrugs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CompanyDrugs.
+     */
+    distinct?: CompanyDrugScalarFieldEnum | CompanyDrugScalarFieldEnum[]
+  }
+
+  /**
+   * CompanyDrug findFirstOrThrow
+   */
+  export type CompanyDrugFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CompanyDrug
+     */
+    select?: CompanyDrugSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CompanyDrug
+     */
+    omit?: CompanyDrugOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CompanyDrugInclude<ExtArgs> | null
+    /**
+     * Filter, which CompanyDrug to fetch.
+     */
+    where?: CompanyDrugWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CompanyDrugs to fetch.
+     */
+    orderBy?: CompanyDrugOrderByWithRelationInput | CompanyDrugOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for CompanyDrugs.
+     */
+    cursor?: CompanyDrugWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CompanyDrugs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CompanyDrugs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CompanyDrugs.
+     */
+    distinct?: CompanyDrugScalarFieldEnum | CompanyDrugScalarFieldEnum[]
+  }
+
+  /**
+   * CompanyDrug findMany
+   */
+  export type CompanyDrugFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CompanyDrug
+     */
+    select?: CompanyDrugSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CompanyDrug
+     */
+    omit?: CompanyDrugOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CompanyDrugInclude<ExtArgs> | null
+    /**
+     * Filter, which CompanyDrugs to fetch.
+     */
+    where?: CompanyDrugWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CompanyDrugs to fetch.
+     */
+    orderBy?: CompanyDrugOrderByWithRelationInput | CompanyDrugOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing CompanyDrugs.
+     */
+    cursor?: CompanyDrugWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CompanyDrugs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CompanyDrugs.
+     */
+    skip?: number
+    distinct?: CompanyDrugScalarFieldEnum | CompanyDrugScalarFieldEnum[]
+  }
+
+  /**
+   * CompanyDrug create
+   */
+  export type CompanyDrugCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CompanyDrug
+     */
+    select?: CompanyDrugSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CompanyDrug
+     */
+    omit?: CompanyDrugOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CompanyDrugInclude<ExtArgs> | null
+    /**
+     * The data needed to create a CompanyDrug.
+     */
+    data: XOR<CompanyDrugCreateInput, CompanyDrugUncheckedCreateInput>
+  }
+
+  /**
+   * CompanyDrug createMany
+   */
+  export type CompanyDrugCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many CompanyDrugs.
+     */
+    data: CompanyDrugCreateManyInput | CompanyDrugCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * CompanyDrug createManyAndReturn
+   */
+  export type CompanyDrugCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CompanyDrug
+     */
+    select?: CompanyDrugSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CompanyDrug
+     */
+    omit?: CompanyDrugOmit<ExtArgs> | null
+    /**
+     * The data used to create many CompanyDrugs.
+     */
+    data: CompanyDrugCreateManyInput | CompanyDrugCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CompanyDrugIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * CompanyDrug update
+   */
+  export type CompanyDrugUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CompanyDrug
+     */
+    select?: CompanyDrugSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CompanyDrug
+     */
+    omit?: CompanyDrugOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CompanyDrugInclude<ExtArgs> | null
+    /**
+     * The data needed to update a CompanyDrug.
+     */
+    data: XOR<CompanyDrugUpdateInput, CompanyDrugUncheckedUpdateInput>
+    /**
+     * Choose, which CompanyDrug to update.
+     */
+    where: CompanyDrugWhereUniqueInput
+  }
+
+  /**
+   * CompanyDrug updateMany
+   */
+  export type CompanyDrugUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update CompanyDrugs.
+     */
+    data: XOR<CompanyDrugUpdateManyMutationInput, CompanyDrugUncheckedUpdateManyInput>
+    /**
+     * Filter which CompanyDrugs to update
+     */
+    where?: CompanyDrugWhereInput
+    /**
+     * Limit how many CompanyDrugs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * CompanyDrug updateManyAndReturn
+   */
+  export type CompanyDrugUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CompanyDrug
+     */
+    select?: CompanyDrugSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CompanyDrug
+     */
+    omit?: CompanyDrugOmit<ExtArgs> | null
+    /**
+     * The data used to update CompanyDrugs.
+     */
+    data: XOR<CompanyDrugUpdateManyMutationInput, CompanyDrugUncheckedUpdateManyInput>
+    /**
+     * Filter which CompanyDrugs to update
+     */
+    where?: CompanyDrugWhereInput
+    /**
+     * Limit how many CompanyDrugs to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CompanyDrugIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * CompanyDrug upsert
+   */
+  export type CompanyDrugUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CompanyDrug
+     */
+    select?: CompanyDrugSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CompanyDrug
+     */
+    omit?: CompanyDrugOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CompanyDrugInclude<ExtArgs> | null
+    /**
+     * The filter to search for the CompanyDrug to update in case it exists.
+     */
+    where: CompanyDrugWhereUniqueInput
+    /**
+     * In case the CompanyDrug found by the `where` argument doesn't exist, create a new CompanyDrug with this data.
+     */
+    create: XOR<CompanyDrugCreateInput, CompanyDrugUncheckedCreateInput>
+    /**
+     * In case the CompanyDrug was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<CompanyDrugUpdateInput, CompanyDrugUncheckedUpdateInput>
+  }
+
+  /**
+   * CompanyDrug delete
+   */
+  export type CompanyDrugDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CompanyDrug
+     */
+    select?: CompanyDrugSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CompanyDrug
+     */
+    omit?: CompanyDrugOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CompanyDrugInclude<ExtArgs> | null
+    /**
+     * Filter which CompanyDrug to delete.
+     */
+    where: CompanyDrugWhereUniqueInput
+  }
+
+  /**
+   * CompanyDrug deleteMany
+   */
+  export type CompanyDrugDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which CompanyDrugs to delete
+     */
+    where?: CompanyDrugWhereInput
+    /**
+     * Limit how many CompanyDrugs to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * CompanyDrug.masterDrug
+   */
+  export type CompanyDrug$masterDrugArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MasterDrug
+     */
+    select?: MasterDrugSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MasterDrug
+     */
+    omit?: MasterDrugOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MasterDrugInclude<ExtArgs> | null
+    where?: MasterDrugWhereInput
+  }
+
+  /**
+   * CompanyDrug.drugOrderLines
+   */
+  export type CompanyDrug$drugOrderLinesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderLine
+     */
+    select?: DrugOrderLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderLine
+     */
+    omit?: DrugOrderLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderLineInclude<ExtArgs> | null
+    where?: DrugOrderLineWhereInput
+    orderBy?: DrugOrderLineOrderByWithRelationInput | DrugOrderLineOrderByWithRelationInput[]
+    cursor?: DrugOrderLineWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: DrugOrderLineScalarFieldEnum | DrugOrderLineScalarFieldEnum[]
+  }
+
+  /**
+   * CompanyDrug without action
+   */
+  export type CompanyDrugDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CompanyDrug
+     */
+    select?: CompanyDrugSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CompanyDrug
+     */
+    omit?: CompanyDrugOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CompanyDrugInclude<ExtArgs> | null
   }
 
 
@@ -10095,6 +13734,7239 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: FacilityReportSubmissionInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model DrugOrder
+   */
+
+  export type AggregateDrugOrder = {
+    _count: DrugOrderCountAggregateOutputType | null
+    _min: DrugOrderMinAggregateOutputType | null
+    _max: DrugOrderMaxAggregateOutputType | null
+  }
+
+  export type DrugOrderMinAggregateOutputType = {
+    id: string | null
+    orderNo: string | null
+    facilityId: string | null
+    companyId: string | null
+    status: $Enums.DrugOrderStatus | null
+    baseReportMonth: string | null
+    note: string | null
+    submittedAt: Date | null
+    closedAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type DrugOrderMaxAggregateOutputType = {
+    id: string | null
+    orderNo: string | null
+    facilityId: string | null
+    companyId: string | null
+    status: $Enums.DrugOrderStatus | null
+    baseReportMonth: string | null
+    note: string | null
+    submittedAt: Date | null
+    closedAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type DrugOrderCountAggregateOutputType = {
+    id: number
+    orderNo: number
+    facilityId: number
+    companyId: number
+    status: number
+    baseReportMonth: number
+    note: number
+    submittedAt: number
+    closedAt: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type DrugOrderMinAggregateInputType = {
+    id?: true
+    orderNo?: true
+    facilityId?: true
+    companyId?: true
+    status?: true
+    baseReportMonth?: true
+    note?: true
+    submittedAt?: true
+    closedAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type DrugOrderMaxAggregateInputType = {
+    id?: true
+    orderNo?: true
+    facilityId?: true
+    companyId?: true
+    status?: true
+    baseReportMonth?: true
+    note?: true
+    submittedAt?: true
+    closedAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type DrugOrderCountAggregateInputType = {
+    id?: true
+    orderNo?: true
+    facilityId?: true
+    companyId?: true
+    status?: true
+    baseReportMonth?: true
+    note?: true
+    submittedAt?: true
+    closedAt?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type DrugOrderAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which DrugOrder to aggregate.
+     */
+    where?: DrugOrderWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DrugOrders to fetch.
+     */
+    orderBy?: DrugOrderOrderByWithRelationInput | DrugOrderOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: DrugOrderWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DrugOrders from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DrugOrders.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned DrugOrders
+    **/
+    _count?: true | DrugOrderCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: DrugOrderMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: DrugOrderMaxAggregateInputType
+  }
+
+  export type GetDrugOrderAggregateType<T extends DrugOrderAggregateArgs> = {
+        [P in keyof T & keyof AggregateDrugOrder]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateDrugOrder[P]>
+      : GetScalarType<T[P], AggregateDrugOrder[P]>
+  }
+
+
+
+
+  export type DrugOrderGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DrugOrderWhereInput
+    orderBy?: DrugOrderOrderByWithAggregationInput | DrugOrderOrderByWithAggregationInput[]
+    by: DrugOrderScalarFieldEnum[] | DrugOrderScalarFieldEnum
+    having?: DrugOrderScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: DrugOrderCountAggregateInputType | true
+    _min?: DrugOrderMinAggregateInputType
+    _max?: DrugOrderMaxAggregateInputType
+  }
+
+  export type DrugOrderGroupByOutputType = {
+    id: string
+    orderNo: string
+    facilityId: string
+    companyId: string
+    status: $Enums.DrugOrderStatus
+    baseReportMonth: string | null
+    note: string | null
+    submittedAt: Date | null
+    closedAt: Date | null
+    createdAt: Date
+    updatedAt: Date
+    _count: DrugOrderCountAggregateOutputType | null
+    _min: DrugOrderMinAggregateOutputType | null
+    _max: DrugOrderMaxAggregateOutputType | null
+  }
+
+  type GetDrugOrderGroupByPayload<T extends DrugOrderGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<DrugOrderGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof DrugOrderGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], DrugOrderGroupByOutputType[P]>
+            : GetScalarType<T[P], DrugOrderGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type DrugOrderSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    orderNo?: boolean
+    facilityId?: boolean
+    companyId?: boolean
+    status?: boolean
+    baseReportMonth?: boolean
+    note?: boolean
+    submittedAt?: boolean
+    closedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    facility?: boolean | UserDefaultArgs<ExtArgs>
+    company?: boolean | CompanyDefaultArgs<ExtArgs>
+    lines?: boolean | DrugOrder$linesArgs<ExtArgs>
+    shipments?: boolean | DrugOrder$shipmentsArgs<ExtArgs>
+    receipts?: boolean | DrugOrder$receiptsArgs<ExtArgs>
+    _count?: boolean | DrugOrderCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["drugOrder"]>
+
+  export type DrugOrderSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    orderNo?: boolean
+    facilityId?: boolean
+    companyId?: boolean
+    status?: boolean
+    baseReportMonth?: boolean
+    note?: boolean
+    submittedAt?: boolean
+    closedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    facility?: boolean | UserDefaultArgs<ExtArgs>
+    company?: boolean | CompanyDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["drugOrder"]>
+
+  export type DrugOrderSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    orderNo?: boolean
+    facilityId?: boolean
+    companyId?: boolean
+    status?: boolean
+    baseReportMonth?: boolean
+    note?: boolean
+    submittedAt?: boolean
+    closedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    facility?: boolean | UserDefaultArgs<ExtArgs>
+    company?: boolean | CompanyDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["drugOrder"]>
+
+  export type DrugOrderSelectScalar = {
+    id?: boolean
+    orderNo?: boolean
+    facilityId?: boolean
+    companyId?: boolean
+    status?: boolean
+    baseReportMonth?: boolean
+    note?: boolean
+    submittedAt?: boolean
+    closedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type DrugOrderOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "orderNo" | "facilityId" | "companyId" | "status" | "baseReportMonth" | "note" | "submittedAt" | "closedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["drugOrder"]>
+  export type DrugOrderInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    facility?: boolean | UserDefaultArgs<ExtArgs>
+    company?: boolean | CompanyDefaultArgs<ExtArgs>
+    lines?: boolean | DrugOrder$linesArgs<ExtArgs>
+    shipments?: boolean | DrugOrder$shipmentsArgs<ExtArgs>
+    receipts?: boolean | DrugOrder$receiptsArgs<ExtArgs>
+    _count?: boolean | DrugOrderCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type DrugOrderIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    facility?: boolean | UserDefaultArgs<ExtArgs>
+    company?: boolean | CompanyDefaultArgs<ExtArgs>
+  }
+  export type DrugOrderIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    facility?: boolean | UserDefaultArgs<ExtArgs>
+    company?: boolean | CompanyDefaultArgs<ExtArgs>
+  }
+
+  export type $DrugOrderPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "DrugOrder"
+    objects: {
+      facility: Prisma.$UserPayload<ExtArgs>
+      company: Prisma.$CompanyPayload<ExtArgs>
+      lines: Prisma.$DrugOrderLinePayload<ExtArgs>[]
+      shipments: Prisma.$DrugOrderShipmentPayload<ExtArgs>[]
+      receipts: Prisma.$DrugOrderReceiptPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      orderNo: string
+      facilityId: string
+      companyId: string
+      status: $Enums.DrugOrderStatus
+      baseReportMonth: string | null
+      note: string | null
+      submittedAt: Date | null
+      closedAt: Date | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["drugOrder"]>
+    composites: {}
+  }
+
+  type DrugOrderGetPayload<S extends boolean | null | undefined | DrugOrderDefaultArgs> = $Result.GetResult<Prisma.$DrugOrderPayload, S>
+
+  type DrugOrderCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<DrugOrderFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: DrugOrderCountAggregateInputType | true
+    }
+
+  export interface DrugOrderDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['DrugOrder'], meta: { name: 'DrugOrder' } }
+    /**
+     * Find zero or one DrugOrder that matches the filter.
+     * @param {DrugOrderFindUniqueArgs} args - Arguments to find a DrugOrder
+     * @example
+     * // Get one DrugOrder
+     * const drugOrder = await prisma.drugOrder.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends DrugOrderFindUniqueArgs>(args: SelectSubset<T, DrugOrderFindUniqueArgs<ExtArgs>>): Prisma__DrugOrderClient<$Result.GetResult<Prisma.$DrugOrderPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one DrugOrder that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {DrugOrderFindUniqueOrThrowArgs} args - Arguments to find a DrugOrder
+     * @example
+     * // Get one DrugOrder
+     * const drugOrder = await prisma.drugOrder.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends DrugOrderFindUniqueOrThrowArgs>(args: SelectSubset<T, DrugOrderFindUniqueOrThrowArgs<ExtArgs>>): Prisma__DrugOrderClient<$Result.GetResult<Prisma.$DrugOrderPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first DrugOrder that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DrugOrderFindFirstArgs} args - Arguments to find a DrugOrder
+     * @example
+     * // Get one DrugOrder
+     * const drugOrder = await prisma.drugOrder.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends DrugOrderFindFirstArgs>(args?: SelectSubset<T, DrugOrderFindFirstArgs<ExtArgs>>): Prisma__DrugOrderClient<$Result.GetResult<Prisma.$DrugOrderPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first DrugOrder that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DrugOrderFindFirstOrThrowArgs} args - Arguments to find a DrugOrder
+     * @example
+     * // Get one DrugOrder
+     * const drugOrder = await prisma.drugOrder.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends DrugOrderFindFirstOrThrowArgs>(args?: SelectSubset<T, DrugOrderFindFirstOrThrowArgs<ExtArgs>>): Prisma__DrugOrderClient<$Result.GetResult<Prisma.$DrugOrderPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more DrugOrders that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DrugOrderFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all DrugOrders
+     * const drugOrders = await prisma.drugOrder.findMany()
+     * 
+     * // Get first 10 DrugOrders
+     * const drugOrders = await prisma.drugOrder.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const drugOrderWithIdOnly = await prisma.drugOrder.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends DrugOrderFindManyArgs>(args?: SelectSubset<T, DrugOrderFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DrugOrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a DrugOrder.
+     * @param {DrugOrderCreateArgs} args - Arguments to create a DrugOrder.
+     * @example
+     * // Create one DrugOrder
+     * const DrugOrder = await prisma.drugOrder.create({
+     *   data: {
+     *     // ... data to create a DrugOrder
+     *   }
+     * })
+     * 
+     */
+    create<T extends DrugOrderCreateArgs>(args: SelectSubset<T, DrugOrderCreateArgs<ExtArgs>>): Prisma__DrugOrderClient<$Result.GetResult<Prisma.$DrugOrderPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many DrugOrders.
+     * @param {DrugOrderCreateManyArgs} args - Arguments to create many DrugOrders.
+     * @example
+     * // Create many DrugOrders
+     * const drugOrder = await prisma.drugOrder.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends DrugOrderCreateManyArgs>(args?: SelectSubset<T, DrugOrderCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many DrugOrders and returns the data saved in the database.
+     * @param {DrugOrderCreateManyAndReturnArgs} args - Arguments to create many DrugOrders.
+     * @example
+     * // Create many DrugOrders
+     * const drugOrder = await prisma.drugOrder.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many DrugOrders and only return the `id`
+     * const drugOrderWithIdOnly = await prisma.drugOrder.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends DrugOrderCreateManyAndReturnArgs>(args?: SelectSubset<T, DrugOrderCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DrugOrderPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a DrugOrder.
+     * @param {DrugOrderDeleteArgs} args - Arguments to delete one DrugOrder.
+     * @example
+     * // Delete one DrugOrder
+     * const DrugOrder = await prisma.drugOrder.delete({
+     *   where: {
+     *     // ... filter to delete one DrugOrder
+     *   }
+     * })
+     * 
+     */
+    delete<T extends DrugOrderDeleteArgs>(args: SelectSubset<T, DrugOrderDeleteArgs<ExtArgs>>): Prisma__DrugOrderClient<$Result.GetResult<Prisma.$DrugOrderPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one DrugOrder.
+     * @param {DrugOrderUpdateArgs} args - Arguments to update one DrugOrder.
+     * @example
+     * // Update one DrugOrder
+     * const drugOrder = await prisma.drugOrder.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends DrugOrderUpdateArgs>(args: SelectSubset<T, DrugOrderUpdateArgs<ExtArgs>>): Prisma__DrugOrderClient<$Result.GetResult<Prisma.$DrugOrderPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more DrugOrders.
+     * @param {DrugOrderDeleteManyArgs} args - Arguments to filter DrugOrders to delete.
+     * @example
+     * // Delete a few DrugOrders
+     * const { count } = await prisma.drugOrder.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends DrugOrderDeleteManyArgs>(args?: SelectSubset<T, DrugOrderDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more DrugOrders.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DrugOrderUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many DrugOrders
+     * const drugOrder = await prisma.drugOrder.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends DrugOrderUpdateManyArgs>(args: SelectSubset<T, DrugOrderUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more DrugOrders and returns the data updated in the database.
+     * @param {DrugOrderUpdateManyAndReturnArgs} args - Arguments to update many DrugOrders.
+     * @example
+     * // Update many DrugOrders
+     * const drugOrder = await prisma.drugOrder.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more DrugOrders and only return the `id`
+     * const drugOrderWithIdOnly = await prisma.drugOrder.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends DrugOrderUpdateManyAndReturnArgs>(args: SelectSubset<T, DrugOrderUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DrugOrderPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one DrugOrder.
+     * @param {DrugOrderUpsertArgs} args - Arguments to update or create a DrugOrder.
+     * @example
+     * // Update or create a DrugOrder
+     * const drugOrder = await prisma.drugOrder.upsert({
+     *   create: {
+     *     // ... data to create a DrugOrder
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the DrugOrder we want to update
+     *   }
+     * })
+     */
+    upsert<T extends DrugOrderUpsertArgs>(args: SelectSubset<T, DrugOrderUpsertArgs<ExtArgs>>): Prisma__DrugOrderClient<$Result.GetResult<Prisma.$DrugOrderPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of DrugOrders.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DrugOrderCountArgs} args - Arguments to filter DrugOrders to count.
+     * @example
+     * // Count the number of DrugOrders
+     * const count = await prisma.drugOrder.count({
+     *   where: {
+     *     // ... the filter for the DrugOrders we want to count
+     *   }
+     * })
+    **/
+    count<T extends DrugOrderCountArgs>(
+      args?: Subset<T, DrugOrderCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], DrugOrderCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a DrugOrder.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DrugOrderAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends DrugOrderAggregateArgs>(args: Subset<T, DrugOrderAggregateArgs>): Prisma.PrismaPromise<GetDrugOrderAggregateType<T>>
+
+    /**
+     * Group by DrugOrder.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DrugOrderGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends DrugOrderGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: DrugOrderGroupByArgs['orderBy'] }
+        : { orderBy?: DrugOrderGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, DrugOrderGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetDrugOrderGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the DrugOrder model
+   */
+  readonly fields: DrugOrderFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for DrugOrder.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__DrugOrderClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    facility<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    company<T extends CompanyDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CompanyDefaultArgs<ExtArgs>>): Prisma__CompanyClient<$Result.GetResult<Prisma.$CompanyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    lines<T extends DrugOrder$linesArgs<ExtArgs> = {}>(args?: Subset<T, DrugOrder$linesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DrugOrderLinePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    shipments<T extends DrugOrder$shipmentsArgs<ExtArgs> = {}>(args?: Subset<T, DrugOrder$shipmentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DrugOrderShipmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    receipts<T extends DrugOrder$receiptsArgs<ExtArgs> = {}>(args?: Subset<T, DrugOrder$receiptsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DrugOrderReceiptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the DrugOrder model
+   */
+  interface DrugOrderFieldRefs {
+    readonly id: FieldRef<"DrugOrder", 'String'>
+    readonly orderNo: FieldRef<"DrugOrder", 'String'>
+    readonly facilityId: FieldRef<"DrugOrder", 'String'>
+    readonly companyId: FieldRef<"DrugOrder", 'String'>
+    readonly status: FieldRef<"DrugOrder", 'DrugOrderStatus'>
+    readonly baseReportMonth: FieldRef<"DrugOrder", 'String'>
+    readonly note: FieldRef<"DrugOrder", 'String'>
+    readonly submittedAt: FieldRef<"DrugOrder", 'DateTime'>
+    readonly closedAt: FieldRef<"DrugOrder", 'DateTime'>
+    readonly createdAt: FieldRef<"DrugOrder", 'DateTime'>
+    readonly updatedAt: FieldRef<"DrugOrder", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * DrugOrder findUnique
+   */
+  export type DrugOrderFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrder
+     */
+    select?: DrugOrderSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrder
+     */
+    omit?: DrugOrderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderInclude<ExtArgs> | null
+    /**
+     * Filter, which DrugOrder to fetch.
+     */
+    where: DrugOrderWhereUniqueInput
+  }
+
+  /**
+   * DrugOrder findUniqueOrThrow
+   */
+  export type DrugOrderFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrder
+     */
+    select?: DrugOrderSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrder
+     */
+    omit?: DrugOrderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderInclude<ExtArgs> | null
+    /**
+     * Filter, which DrugOrder to fetch.
+     */
+    where: DrugOrderWhereUniqueInput
+  }
+
+  /**
+   * DrugOrder findFirst
+   */
+  export type DrugOrderFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrder
+     */
+    select?: DrugOrderSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrder
+     */
+    omit?: DrugOrderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderInclude<ExtArgs> | null
+    /**
+     * Filter, which DrugOrder to fetch.
+     */
+    where?: DrugOrderWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DrugOrders to fetch.
+     */
+    orderBy?: DrugOrderOrderByWithRelationInput | DrugOrderOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for DrugOrders.
+     */
+    cursor?: DrugOrderWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DrugOrders from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DrugOrders.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of DrugOrders.
+     */
+    distinct?: DrugOrderScalarFieldEnum | DrugOrderScalarFieldEnum[]
+  }
+
+  /**
+   * DrugOrder findFirstOrThrow
+   */
+  export type DrugOrderFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrder
+     */
+    select?: DrugOrderSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrder
+     */
+    omit?: DrugOrderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderInclude<ExtArgs> | null
+    /**
+     * Filter, which DrugOrder to fetch.
+     */
+    where?: DrugOrderWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DrugOrders to fetch.
+     */
+    orderBy?: DrugOrderOrderByWithRelationInput | DrugOrderOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for DrugOrders.
+     */
+    cursor?: DrugOrderWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DrugOrders from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DrugOrders.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of DrugOrders.
+     */
+    distinct?: DrugOrderScalarFieldEnum | DrugOrderScalarFieldEnum[]
+  }
+
+  /**
+   * DrugOrder findMany
+   */
+  export type DrugOrderFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrder
+     */
+    select?: DrugOrderSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrder
+     */
+    omit?: DrugOrderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderInclude<ExtArgs> | null
+    /**
+     * Filter, which DrugOrders to fetch.
+     */
+    where?: DrugOrderWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DrugOrders to fetch.
+     */
+    orderBy?: DrugOrderOrderByWithRelationInput | DrugOrderOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing DrugOrders.
+     */
+    cursor?: DrugOrderWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DrugOrders from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DrugOrders.
+     */
+    skip?: number
+    distinct?: DrugOrderScalarFieldEnum | DrugOrderScalarFieldEnum[]
+  }
+
+  /**
+   * DrugOrder create
+   */
+  export type DrugOrderCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrder
+     */
+    select?: DrugOrderSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrder
+     */
+    omit?: DrugOrderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderInclude<ExtArgs> | null
+    /**
+     * The data needed to create a DrugOrder.
+     */
+    data: XOR<DrugOrderCreateInput, DrugOrderUncheckedCreateInput>
+  }
+
+  /**
+   * DrugOrder createMany
+   */
+  export type DrugOrderCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many DrugOrders.
+     */
+    data: DrugOrderCreateManyInput | DrugOrderCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * DrugOrder createManyAndReturn
+   */
+  export type DrugOrderCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrder
+     */
+    select?: DrugOrderSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrder
+     */
+    omit?: DrugOrderOmit<ExtArgs> | null
+    /**
+     * The data used to create many DrugOrders.
+     */
+    data: DrugOrderCreateManyInput | DrugOrderCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * DrugOrder update
+   */
+  export type DrugOrderUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrder
+     */
+    select?: DrugOrderSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrder
+     */
+    omit?: DrugOrderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderInclude<ExtArgs> | null
+    /**
+     * The data needed to update a DrugOrder.
+     */
+    data: XOR<DrugOrderUpdateInput, DrugOrderUncheckedUpdateInput>
+    /**
+     * Choose, which DrugOrder to update.
+     */
+    where: DrugOrderWhereUniqueInput
+  }
+
+  /**
+   * DrugOrder updateMany
+   */
+  export type DrugOrderUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update DrugOrders.
+     */
+    data: XOR<DrugOrderUpdateManyMutationInput, DrugOrderUncheckedUpdateManyInput>
+    /**
+     * Filter which DrugOrders to update
+     */
+    where?: DrugOrderWhereInput
+    /**
+     * Limit how many DrugOrders to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * DrugOrder updateManyAndReturn
+   */
+  export type DrugOrderUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrder
+     */
+    select?: DrugOrderSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrder
+     */
+    omit?: DrugOrderOmit<ExtArgs> | null
+    /**
+     * The data used to update DrugOrders.
+     */
+    data: XOR<DrugOrderUpdateManyMutationInput, DrugOrderUncheckedUpdateManyInput>
+    /**
+     * Filter which DrugOrders to update
+     */
+    where?: DrugOrderWhereInput
+    /**
+     * Limit how many DrugOrders to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * DrugOrder upsert
+   */
+  export type DrugOrderUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrder
+     */
+    select?: DrugOrderSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrder
+     */
+    omit?: DrugOrderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderInclude<ExtArgs> | null
+    /**
+     * The filter to search for the DrugOrder to update in case it exists.
+     */
+    where: DrugOrderWhereUniqueInput
+    /**
+     * In case the DrugOrder found by the `where` argument doesn't exist, create a new DrugOrder with this data.
+     */
+    create: XOR<DrugOrderCreateInput, DrugOrderUncheckedCreateInput>
+    /**
+     * In case the DrugOrder was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<DrugOrderUpdateInput, DrugOrderUncheckedUpdateInput>
+  }
+
+  /**
+   * DrugOrder delete
+   */
+  export type DrugOrderDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrder
+     */
+    select?: DrugOrderSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrder
+     */
+    omit?: DrugOrderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderInclude<ExtArgs> | null
+    /**
+     * Filter which DrugOrder to delete.
+     */
+    where: DrugOrderWhereUniqueInput
+  }
+
+  /**
+   * DrugOrder deleteMany
+   */
+  export type DrugOrderDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which DrugOrders to delete
+     */
+    where?: DrugOrderWhereInput
+    /**
+     * Limit how many DrugOrders to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * DrugOrder.lines
+   */
+  export type DrugOrder$linesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderLine
+     */
+    select?: DrugOrderLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderLine
+     */
+    omit?: DrugOrderLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderLineInclude<ExtArgs> | null
+    where?: DrugOrderLineWhereInput
+    orderBy?: DrugOrderLineOrderByWithRelationInput | DrugOrderLineOrderByWithRelationInput[]
+    cursor?: DrugOrderLineWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: DrugOrderLineScalarFieldEnum | DrugOrderLineScalarFieldEnum[]
+  }
+
+  /**
+   * DrugOrder.shipments
+   */
+  export type DrugOrder$shipmentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderShipment
+     */
+    select?: DrugOrderShipmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderShipment
+     */
+    omit?: DrugOrderShipmentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderShipmentInclude<ExtArgs> | null
+    where?: DrugOrderShipmentWhereInput
+    orderBy?: DrugOrderShipmentOrderByWithRelationInput | DrugOrderShipmentOrderByWithRelationInput[]
+    cursor?: DrugOrderShipmentWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: DrugOrderShipmentScalarFieldEnum | DrugOrderShipmentScalarFieldEnum[]
+  }
+
+  /**
+   * DrugOrder.receipts
+   */
+  export type DrugOrder$receiptsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderReceipt
+     */
+    select?: DrugOrderReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderReceipt
+     */
+    omit?: DrugOrderReceiptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderReceiptInclude<ExtArgs> | null
+    where?: DrugOrderReceiptWhereInput
+    orderBy?: DrugOrderReceiptOrderByWithRelationInput | DrugOrderReceiptOrderByWithRelationInput[]
+    cursor?: DrugOrderReceiptWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: DrugOrderReceiptScalarFieldEnum | DrugOrderReceiptScalarFieldEnum[]
+  }
+
+  /**
+   * DrugOrder without action
+   */
+  export type DrugOrderDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrder
+     */
+    select?: DrugOrderSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrder
+     */
+    omit?: DrugOrderOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model DrugOrderLine
+   */
+
+  export type AggregateDrugOrderLine = {
+    _count: DrugOrderLineCountAggregateOutputType | null
+    _avg: DrugOrderLineAvgAggregateOutputType | null
+    _sum: DrugOrderLineSumAggregateOutputType | null
+    _min: DrugOrderLineMinAggregateOutputType | null
+    _max: DrugOrderLineMaxAggregateOutputType | null
+  }
+
+  export type DrugOrderLineAvgAggregateOutputType = {
+    requestedQty: Decimal | null
+    acceptedQty: Decimal | null
+    suggestedQty: Decimal | null
+  }
+
+  export type DrugOrderLineSumAggregateOutputType = {
+    requestedQty: Decimal | null
+    acceptedQty: Decimal | null
+    suggestedQty: Decimal | null
+  }
+
+  export type DrugOrderLineMinAggregateOutputType = {
+    id: string | null
+    orderId: string | null
+    sourceType: $Enums.DrugOrderLineSourceType | null
+    masterDrugId: string | null
+    companyDrugId: string | null
+    displayName: string | null
+    unit: string | null
+    requestedQty: Decimal | null
+    acceptedQty: Decimal | null
+    suggestedQty: Decimal | null
+    lineStatus: $Enums.DrugOrderLineStatus | null
+    companyResponseReason: string | null
+    suggestionBasis: string | null
+    suggestionReportMonth: string | null
+    suggestionRuleVersion: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type DrugOrderLineMaxAggregateOutputType = {
+    id: string | null
+    orderId: string | null
+    sourceType: $Enums.DrugOrderLineSourceType | null
+    masterDrugId: string | null
+    companyDrugId: string | null
+    displayName: string | null
+    unit: string | null
+    requestedQty: Decimal | null
+    acceptedQty: Decimal | null
+    suggestedQty: Decimal | null
+    lineStatus: $Enums.DrugOrderLineStatus | null
+    companyResponseReason: string | null
+    suggestionBasis: string | null
+    suggestionReportMonth: string | null
+    suggestionRuleVersion: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type DrugOrderLineCountAggregateOutputType = {
+    id: number
+    orderId: number
+    sourceType: number
+    masterDrugId: number
+    companyDrugId: number
+    displayName: number
+    unit: number
+    requestedQty: number
+    acceptedQty: number
+    suggestedQty: number
+    lineStatus: number
+    companyResponseReason: number
+    suggestionBasis: number
+    suggestionReportMonth: number
+    suggestionRuleVersion: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type DrugOrderLineAvgAggregateInputType = {
+    requestedQty?: true
+    acceptedQty?: true
+    suggestedQty?: true
+  }
+
+  export type DrugOrderLineSumAggregateInputType = {
+    requestedQty?: true
+    acceptedQty?: true
+    suggestedQty?: true
+  }
+
+  export type DrugOrderLineMinAggregateInputType = {
+    id?: true
+    orderId?: true
+    sourceType?: true
+    masterDrugId?: true
+    companyDrugId?: true
+    displayName?: true
+    unit?: true
+    requestedQty?: true
+    acceptedQty?: true
+    suggestedQty?: true
+    lineStatus?: true
+    companyResponseReason?: true
+    suggestionBasis?: true
+    suggestionReportMonth?: true
+    suggestionRuleVersion?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type DrugOrderLineMaxAggregateInputType = {
+    id?: true
+    orderId?: true
+    sourceType?: true
+    masterDrugId?: true
+    companyDrugId?: true
+    displayName?: true
+    unit?: true
+    requestedQty?: true
+    acceptedQty?: true
+    suggestedQty?: true
+    lineStatus?: true
+    companyResponseReason?: true
+    suggestionBasis?: true
+    suggestionReportMonth?: true
+    suggestionRuleVersion?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type DrugOrderLineCountAggregateInputType = {
+    id?: true
+    orderId?: true
+    sourceType?: true
+    masterDrugId?: true
+    companyDrugId?: true
+    displayName?: true
+    unit?: true
+    requestedQty?: true
+    acceptedQty?: true
+    suggestedQty?: true
+    lineStatus?: true
+    companyResponseReason?: true
+    suggestionBasis?: true
+    suggestionReportMonth?: true
+    suggestionRuleVersion?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type DrugOrderLineAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which DrugOrderLine to aggregate.
+     */
+    where?: DrugOrderLineWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DrugOrderLines to fetch.
+     */
+    orderBy?: DrugOrderLineOrderByWithRelationInput | DrugOrderLineOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: DrugOrderLineWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DrugOrderLines from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DrugOrderLines.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned DrugOrderLines
+    **/
+    _count?: true | DrugOrderLineCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: DrugOrderLineAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: DrugOrderLineSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: DrugOrderLineMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: DrugOrderLineMaxAggregateInputType
+  }
+
+  export type GetDrugOrderLineAggregateType<T extends DrugOrderLineAggregateArgs> = {
+        [P in keyof T & keyof AggregateDrugOrderLine]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateDrugOrderLine[P]>
+      : GetScalarType<T[P], AggregateDrugOrderLine[P]>
+  }
+
+
+
+
+  export type DrugOrderLineGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DrugOrderLineWhereInput
+    orderBy?: DrugOrderLineOrderByWithAggregationInput | DrugOrderLineOrderByWithAggregationInput[]
+    by: DrugOrderLineScalarFieldEnum[] | DrugOrderLineScalarFieldEnum
+    having?: DrugOrderLineScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: DrugOrderLineCountAggregateInputType | true
+    _avg?: DrugOrderLineAvgAggregateInputType
+    _sum?: DrugOrderLineSumAggregateInputType
+    _min?: DrugOrderLineMinAggregateInputType
+    _max?: DrugOrderLineMaxAggregateInputType
+  }
+
+  export type DrugOrderLineGroupByOutputType = {
+    id: string
+    orderId: string
+    sourceType: $Enums.DrugOrderLineSourceType
+    masterDrugId: string | null
+    companyDrugId: string | null
+    displayName: string
+    unit: string | null
+    requestedQty: Decimal
+    acceptedQty: Decimal
+    suggestedQty: Decimal | null
+    lineStatus: $Enums.DrugOrderLineStatus
+    companyResponseReason: string | null
+    suggestionBasis: string | null
+    suggestionReportMonth: string | null
+    suggestionRuleVersion: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: DrugOrderLineCountAggregateOutputType | null
+    _avg: DrugOrderLineAvgAggregateOutputType | null
+    _sum: DrugOrderLineSumAggregateOutputType | null
+    _min: DrugOrderLineMinAggregateOutputType | null
+    _max: DrugOrderLineMaxAggregateOutputType | null
+  }
+
+  type GetDrugOrderLineGroupByPayload<T extends DrugOrderLineGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<DrugOrderLineGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof DrugOrderLineGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], DrugOrderLineGroupByOutputType[P]>
+            : GetScalarType<T[P], DrugOrderLineGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type DrugOrderLineSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    orderId?: boolean
+    sourceType?: boolean
+    masterDrugId?: boolean
+    companyDrugId?: boolean
+    displayName?: boolean
+    unit?: boolean
+    requestedQty?: boolean
+    acceptedQty?: boolean
+    suggestedQty?: boolean
+    lineStatus?: boolean
+    companyResponseReason?: boolean
+    suggestionBasis?: boolean
+    suggestionReportMonth?: boolean
+    suggestionRuleVersion?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    order?: boolean | DrugOrderDefaultArgs<ExtArgs>
+    masterDrug?: boolean | DrugOrderLine$masterDrugArgs<ExtArgs>
+    companyDrug?: boolean | DrugOrderLine$companyDrugArgs<ExtArgs>
+    shipmentLines?: boolean | DrugOrderLine$shipmentLinesArgs<ExtArgs>
+    receiptLines?: boolean | DrugOrderLine$receiptLinesArgs<ExtArgs>
+    _count?: boolean | DrugOrderLineCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["drugOrderLine"]>
+
+  export type DrugOrderLineSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    orderId?: boolean
+    sourceType?: boolean
+    masterDrugId?: boolean
+    companyDrugId?: boolean
+    displayName?: boolean
+    unit?: boolean
+    requestedQty?: boolean
+    acceptedQty?: boolean
+    suggestedQty?: boolean
+    lineStatus?: boolean
+    companyResponseReason?: boolean
+    suggestionBasis?: boolean
+    suggestionReportMonth?: boolean
+    suggestionRuleVersion?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    order?: boolean | DrugOrderDefaultArgs<ExtArgs>
+    masterDrug?: boolean | DrugOrderLine$masterDrugArgs<ExtArgs>
+    companyDrug?: boolean | DrugOrderLine$companyDrugArgs<ExtArgs>
+  }, ExtArgs["result"]["drugOrderLine"]>
+
+  export type DrugOrderLineSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    orderId?: boolean
+    sourceType?: boolean
+    masterDrugId?: boolean
+    companyDrugId?: boolean
+    displayName?: boolean
+    unit?: boolean
+    requestedQty?: boolean
+    acceptedQty?: boolean
+    suggestedQty?: boolean
+    lineStatus?: boolean
+    companyResponseReason?: boolean
+    suggestionBasis?: boolean
+    suggestionReportMonth?: boolean
+    suggestionRuleVersion?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    order?: boolean | DrugOrderDefaultArgs<ExtArgs>
+    masterDrug?: boolean | DrugOrderLine$masterDrugArgs<ExtArgs>
+    companyDrug?: boolean | DrugOrderLine$companyDrugArgs<ExtArgs>
+  }, ExtArgs["result"]["drugOrderLine"]>
+
+  export type DrugOrderLineSelectScalar = {
+    id?: boolean
+    orderId?: boolean
+    sourceType?: boolean
+    masterDrugId?: boolean
+    companyDrugId?: boolean
+    displayName?: boolean
+    unit?: boolean
+    requestedQty?: boolean
+    acceptedQty?: boolean
+    suggestedQty?: boolean
+    lineStatus?: boolean
+    companyResponseReason?: boolean
+    suggestionBasis?: boolean
+    suggestionReportMonth?: boolean
+    suggestionRuleVersion?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type DrugOrderLineOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "orderId" | "sourceType" | "masterDrugId" | "companyDrugId" | "displayName" | "unit" | "requestedQty" | "acceptedQty" | "suggestedQty" | "lineStatus" | "companyResponseReason" | "suggestionBasis" | "suggestionReportMonth" | "suggestionRuleVersion" | "createdAt" | "updatedAt", ExtArgs["result"]["drugOrderLine"]>
+  export type DrugOrderLineInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    order?: boolean | DrugOrderDefaultArgs<ExtArgs>
+    masterDrug?: boolean | DrugOrderLine$masterDrugArgs<ExtArgs>
+    companyDrug?: boolean | DrugOrderLine$companyDrugArgs<ExtArgs>
+    shipmentLines?: boolean | DrugOrderLine$shipmentLinesArgs<ExtArgs>
+    receiptLines?: boolean | DrugOrderLine$receiptLinesArgs<ExtArgs>
+    _count?: boolean | DrugOrderLineCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type DrugOrderLineIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    order?: boolean | DrugOrderDefaultArgs<ExtArgs>
+    masterDrug?: boolean | DrugOrderLine$masterDrugArgs<ExtArgs>
+    companyDrug?: boolean | DrugOrderLine$companyDrugArgs<ExtArgs>
+  }
+  export type DrugOrderLineIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    order?: boolean | DrugOrderDefaultArgs<ExtArgs>
+    masterDrug?: boolean | DrugOrderLine$masterDrugArgs<ExtArgs>
+    companyDrug?: boolean | DrugOrderLine$companyDrugArgs<ExtArgs>
+  }
+
+  export type $DrugOrderLinePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "DrugOrderLine"
+    objects: {
+      order: Prisma.$DrugOrderPayload<ExtArgs>
+      masterDrug: Prisma.$MasterDrugPayload<ExtArgs> | null
+      companyDrug: Prisma.$CompanyDrugPayload<ExtArgs> | null
+      shipmentLines: Prisma.$DrugOrderShipmentLinePayload<ExtArgs>[]
+      receiptLines: Prisma.$DrugOrderReceiptLinePayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      orderId: string
+      sourceType: $Enums.DrugOrderLineSourceType
+      masterDrugId: string | null
+      companyDrugId: string | null
+      displayName: string
+      unit: string | null
+      requestedQty: Prisma.Decimal
+      acceptedQty: Prisma.Decimal
+      suggestedQty: Prisma.Decimal | null
+      lineStatus: $Enums.DrugOrderLineStatus
+      companyResponseReason: string | null
+      suggestionBasis: string | null
+      suggestionReportMonth: string | null
+      suggestionRuleVersion: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["drugOrderLine"]>
+    composites: {}
+  }
+
+  type DrugOrderLineGetPayload<S extends boolean | null | undefined | DrugOrderLineDefaultArgs> = $Result.GetResult<Prisma.$DrugOrderLinePayload, S>
+
+  type DrugOrderLineCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<DrugOrderLineFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: DrugOrderLineCountAggregateInputType | true
+    }
+
+  export interface DrugOrderLineDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['DrugOrderLine'], meta: { name: 'DrugOrderLine' } }
+    /**
+     * Find zero or one DrugOrderLine that matches the filter.
+     * @param {DrugOrderLineFindUniqueArgs} args - Arguments to find a DrugOrderLine
+     * @example
+     * // Get one DrugOrderLine
+     * const drugOrderLine = await prisma.drugOrderLine.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends DrugOrderLineFindUniqueArgs>(args: SelectSubset<T, DrugOrderLineFindUniqueArgs<ExtArgs>>): Prisma__DrugOrderLineClient<$Result.GetResult<Prisma.$DrugOrderLinePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one DrugOrderLine that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {DrugOrderLineFindUniqueOrThrowArgs} args - Arguments to find a DrugOrderLine
+     * @example
+     * // Get one DrugOrderLine
+     * const drugOrderLine = await prisma.drugOrderLine.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends DrugOrderLineFindUniqueOrThrowArgs>(args: SelectSubset<T, DrugOrderLineFindUniqueOrThrowArgs<ExtArgs>>): Prisma__DrugOrderLineClient<$Result.GetResult<Prisma.$DrugOrderLinePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first DrugOrderLine that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DrugOrderLineFindFirstArgs} args - Arguments to find a DrugOrderLine
+     * @example
+     * // Get one DrugOrderLine
+     * const drugOrderLine = await prisma.drugOrderLine.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends DrugOrderLineFindFirstArgs>(args?: SelectSubset<T, DrugOrderLineFindFirstArgs<ExtArgs>>): Prisma__DrugOrderLineClient<$Result.GetResult<Prisma.$DrugOrderLinePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first DrugOrderLine that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DrugOrderLineFindFirstOrThrowArgs} args - Arguments to find a DrugOrderLine
+     * @example
+     * // Get one DrugOrderLine
+     * const drugOrderLine = await prisma.drugOrderLine.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends DrugOrderLineFindFirstOrThrowArgs>(args?: SelectSubset<T, DrugOrderLineFindFirstOrThrowArgs<ExtArgs>>): Prisma__DrugOrderLineClient<$Result.GetResult<Prisma.$DrugOrderLinePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more DrugOrderLines that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DrugOrderLineFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all DrugOrderLines
+     * const drugOrderLines = await prisma.drugOrderLine.findMany()
+     * 
+     * // Get first 10 DrugOrderLines
+     * const drugOrderLines = await prisma.drugOrderLine.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const drugOrderLineWithIdOnly = await prisma.drugOrderLine.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends DrugOrderLineFindManyArgs>(args?: SelectSubset<T, DrugOrderLineFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DrugOrderLinePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a DrugOrderLine.
+     * @param {DrugOrderLineCreateArgs} args - Arguments to create a DrugOrderLine.
+     * @example
+     * // Create one DrugOrderLine
+     * const DrugOrderLine = await prisma.drugOrderLine.create({
+     *   data: {
+     *     // ... data to create a DrugOrderLine
+     *   }
+     * })
+     * 
+     */
+    create<T extends DrugOrderLineCreateArgs>(args: SelectSubset<T, DrugOrderLineCreateArgs<ExtArgs>>): Prisma__DrugOrderLineClient<$Result.GetResult<Prisma.$DrugOrderLinePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many DrugOrderLines.
+     * @param {DrugOrderLineCreateManyArgs} args - Arguments to create many DrugOrderLines.
+     * @example
+     * // Create many DrugOrderLines
+     * const drugOrderLine = await prisma.drugOrderLine.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends DrugOrderLineCreateManyArgs>(args?: SelectSubset<T, DrugOrderLineCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many DrugOrderLines and returns the data saved in the database.
+     * @param {DrugOrderLineCreateManyAndReturnArgs} args - Arguments to create many DrugOrderLines.
+     * @example
+     * // Create many DrugOrderLines
+     * const drugOrderLine = await prisma.drugOrderLine.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many DrugOrderLines and only return the `id`
+     * const drugOrderLineWithIdOnly = await prisma.drugOrderLine.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends DrugOrderLineCreateManyAndReturnArgs>(args?: SelectSubset<T, DrugOrderLineCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DrugOrderLinePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a DrugOrderLine.
+     * @param {DrugOrderLineDeleteArgs} args - Arguments to delete one DrugOrderLine.
+     * @example
+     * // Delete one DrugOrderLine
+     * const DrugOrderLine = await prisma.drugOrderLine.delete({
+     *   where: {
+     *     // ... filter to delete one DrugOrderLine
+     *   }
+     * })
+     * 
+     */
+    delete<T extends DrugOrderLineDeleteArgs>(args: SelectSubset<T, DrugOrderLineDeleteArgs<ExtArgs>>): Prisma__DrugOrderLineClient<$Result.GetResult<Prisma.$DrugOrderLinePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one DrugOrderLine.
+     * @param {DrugOrderLineUpdateArgs} args - Arguments to update one DrugOrderLine.
+     * @example
+     * // Update one DrugOrderLine
+     * const drugOrderLine = await prisma.drugOrderLine.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends DrugOrderLineUpdateArgs>(args: SelectSubset<T, DrugOrderLineUpdateArgs<ExtArgs>>): Prisma__DrugOrderLineClient<$Result.GetResult<Prisma.$DrugOrderLinePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more DrugOrderLines.
+     * @param {DrugOrderLineDeleteManyArgs} args - Arguments to filter DrugOrderLines to delete.
+     * @example
+     * // Delete a few DrugOrderLines
+     * const { count } = await prisma.drugOrderLine.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends DrugOrderLineDeleteManyArgs>(args?: SelectSubset<T, DrugOrderLineDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more DrugOrderLines.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DrugOrderLineUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many DrugOrderLines
+     * const drugOrderLine = await prisma.drugOrderLine.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends DrugOrderLineUpdateManyArgs>(args: SelectSubset<T, DrugOrderLineUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more DrugOrderLines and returns the data updated in the database.
+     * @param {DrugOrderLineUpdateManyAndReturnArgs} args - Arguments to update many DrugOrderLines.
+     * @example
+     * // Update many DrugOrderLines
+     * const drugOrderLine = await prisma.drugOrderLine.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more DrugOrderLines and only return the `id`
+     * const drugOrderLineWithIdOnly = await prisma.drugOrderLine.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends DrugOrderLineUpdateManyAndReturnArgs>(args: SelectSubset<T, DrugOrderLineUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DrugOrderLinePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one DrugOrderLine.
+     * @param {DrugOrderLineUpsertArgs} args - Arguments to update or create a DrugOrderLine.
+     * @example
+     * // Update or create a DrugOrderLine
+     * const drugOrderLine = await prisma.drugOrderLine.upsert({
+     *   create: {
+     *     // ... data to create a DrugOrderLine
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the DrugOrderLine we want to update
+     *   }
+     * })
+     */
+    upsert<T extends DrugOrderLineUpsertArgs>(args: SelectSubset<T, DrugOrderLineUpsertArgs<ExtArgs>>): Prisma__DrugOrderLineClient<$Result.GetResult<Prisma.$DrugOrderLinePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of DrugOrderLines.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DrugOrderLineCountArgs} args - Arguments to filter DrugOrderLines to count.
+     * @example
+     * // Count the number of DrugOrderLines
+     * const count = await prisma.drugOrderLine.count({
+     *   where: {
+     *     // ... the filter for the DrugOrderLines we want to count
+     *   }
+     * })
+    **/
+    count<T extends DrugOrderLineCountArgs>(
+      args?: Subset<T, DrugOrderLineCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], DrugOrderLineCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a DrugOrderLine.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DrugOrderLineAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends DrugOrderLineAggregateArgs>(args: Subset<T, DrugOrderLineAggregateArgs>): Prisma.PrismaPromise<GetDrugOrderLineAggregateType<T>>
+
+    /**
+     * Group by DrugOrderLine.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DrugOrderLineGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends DrugOrderLineGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: DrugOrderLineGroupByArgs['orderBy'] }
+        : { orderBy?: DrugOrderLineGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, DrugOrderLineGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetDrugOrderLineGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the DrugOrderLine model
+   */
+  readonly fields: DrugOrderLineFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for DrugOrderLine.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__DrugOrderLineClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    order<T extends DrugOrderDefaultArgs<ExtArgs> = {}>(args?: Subset<T, DrugOrderDefaultArgs<ExtArgs>>): Prisma__DrugOrderClient<$Result.GetResult<Prisma.$DrugOrderPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    masterDrug<T extends DrugOrderLine$masterDrugArgs<ExtArgs> = {}>(args?: Subset<T, DrugOrderLine$masterDrugArgs<ExtArgs>>): Prisma__MasterDrugClient<$Result.GetResult<Prisma.$MasterDrugPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    companyDrug<T extends DrugOrderLine$companyDrugArgs<ExtArgs> = {}>(args?: Subset<T, DrugOrderLine$companyDrugArgs<ExtArgs>>): Prisma__CompanyDrugClient<$Result.GetResult<Prisma.$CompanyDrugPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    shipmentLines<T extends DrugOrderLine$shipmentLinesArgs<ExtArgs> = {}>(args?: Subset<T, DrugOrderLine$shipmentLinesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DrugOrderShipmentLinePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    receiptLines<T extends DrugOrderLine$receiptLinesArgs<ExtArgs> = {}>(args?: Subset<T, DrugOrderLine$receiptLinesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DrugOrderReceiptLinePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the DrugOrderLine model
+   */
+  interface DrugOrderLineFieldRefs {
+    readonly id: FieldRef<"DrugOrderLine", 'String'>
+    readonly orderId: FieldRef<"DrugOrderLine", 'String'>
+    readonly sourceType: FieldRef<"DrugOrderLine", 'DrugOrderLineSourceType'>
+    readonly masterDrugId: FieldRef<"DrugOrderLine", 'String'>
+    readonly companyDrugId: FieldRef<"DrugOrderLine", 'String'>
+    readonly displayName: FieldRef<"DrugOrderLine", 'String'>
+    readonly unit: FieldRef<"DrugOrderLine", 'String'>
+    readonly requestedQty: FieldRef<"DrugOrderLine", 'Decimal'>
+    readonly acceptedQty: FieldRef<"DrugOrderLine", 'Decimal'>
+    readonly suggestedQty: FieldRef<"DrugOrderLine", 'Decimal'>
+    readonly lineStatus: FieldRef<"DrugOrderLine", 'DrugOrderLineStatus'>
+    readonly companyResponseReason: FieldRef<"DrugOrderLine", 'String'>
+    readonly suggestionBasis: FieldRef<"DrugOrderLine", 'String'>
+    readonly suggestionReportMonth: FieldRef<"DrugOrderLine", 'String'>
+    readonly suggestionRuleVersion: FieldRef<"DrugOrderLine", 'String'>
+    readonly createdAt: FieldRef<"DrugOrderLine", 'DateTime'>
+    readonly updatedAt: FieldRef<"DrugOrderLine", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * DrugOrderLine findUnique
+   */
+  export type DrugOrderLineFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderLine
+     */
+    select?: DrugOrderLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderLine
+     */
+    omit?: DrugOrderLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderLineInclude<ExtArgs> | null
+    /**
+     * Filter, which DrugOrderLine to fetch.
+     */
+    where: DrugOrderLineWhereUniqueInput
+  }
+
+  /**
+   * DrugOrderLine findUniqueOrThrow
+   */
+  export type DrugOrderLineFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderLine
+     */
+    select?: DrugOrderLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderLine
+     */
+    omit?: DrugOrderLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderLineInclude<ExtArgs> | null
+    /**
+     * Filter, which DrugOrderLine to fetch.
+     */
+    where: DrugOrderLineWhereUniqueInput
+  }
+
+  /**
+   * DrugOrderLine findFirst
+   */
+  export type DrugOrderLineFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderLine
+     */
+    select?: DrugOrderLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderLine
+     */
+    omit?: DrugOrderLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderLineInclude<ExtArgs> | null
+    /**
+     * Filter, which DrugOrderLine to fetch.
+     */
+    where?: DrugOrderLineWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DrugOrderLines to fetch.
+     */
+    orderBy?: DrugOrderLineOrderByWithRelationInput | DrugOrderLineOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for DrugOrderLines.
+     */
+    cursor?: DrugOrderLineWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DrugOrderLines from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DrugOrderLines.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of DrugOrderLines.
+     */
+    distinct?: DrugOrderLineScalarFieldEnum | DrugOrderLineScalarFieldEnum[]
+  }
+
+  /**
+   * DrugOrderLine findFirstOrThrow
+   */
+  export type DrugOrderLineFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderLine
+     */
+    select?: DrugOrderLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderLine
+     */
+    omit?: DrugOrderLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderLineInclude<ExtArgs> | null
+    /**
+     * Filter, which DrugOrderLine to fetch.
+     */
+    where?: DrugOrderLineWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DrugOrderLines to fetch.
+     */
+    orderBy?: DrugOrderLineOrderByWithRelationInput | DrugOrderLineOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for DrugOrderLines.
+     */
+    cursor?: DrugOrderLineWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DrugOrderLines from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DrugOrderLines.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of DrugOrderLines.
+     */
+    distinct?: DrugOrderLineScalarFieldEnum | DrugOrderLineScalarFieldEnum[]
+  }
+
+  /**
+   * DrugOrderLine findMany
+   */
+  export type DrugOrderLineFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderLine
+     */
+    select?: DrugOrderLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderLine
+     */
+    omit?: DrugOrderLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderLineInclude<ExtArgs> | null
+    /**
+     * Filter, which DrugOrderLines to fetch.
+     */
+    where?: DrugOrderLineWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DrugOrderLines to fetch.
+     */
+    orderBy?: DrugOrderLineOrderByWithRelationInput | DrugOrderLineOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing DrugOrderLines.
+     */
+    cursor?: DrugOrderLineWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DrugOrderLines from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DrugOrderLines.
+     */
+    skip?: number
+    distinct?: DrugOrderLineScalarFieldEnum | DrugOrderLineScalarFieldEnum[]
+  }
+
+  /**
+   * DrugOrderLine create
+   */
+  export type DrugOrderLineCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderLine
+     */
+    select?: DrugOrderLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderLine
+     */
+    omit?: DrugOrderLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderLineInclude<ExtArgs> | null
+    /**
+     * The data needed to create a DrugOrderLine.
+     */
+    data: XOR<DrugOrderLineCreateInput, DrugOrderLineUncheckedCreateInput>
+  }
+
+  /**
+   * DrugOrderLine createMany
+   */
+  export type DrugOrderLineCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many DrugOrderLines.
+     */
+    data: DrugOrderLineCreateManyInput | DrugOrderLineCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * DrugOrderLine createManyAndReturn
+   */
+  export type DrugOrderLineCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderLine
+     */
+    select?: DrugOrderLineSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderLine
+     */
+    omit?: DrugOrderLineOmit<ExtArgs> | null
+    /**
+     * The data used to create many DrugOrderLines.
+     */
+    data: DrugOrderLineCreateManyInput | DrugOrderLineCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderLineIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * DrugOrderLine update
+   */
+  export type DrugOrderLineUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderLine
+     */
+    select?: DrugOrderLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderLine
+     */
+    omit?: DrugOrderLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderLineInclude<ExtArgs> | null
+    /**
+     * The data needed to update a DrugOrderLine.
+     */
+    data: XOR<DrugOrderLineUpdateInput, DrugOrderLineUncheckedUpdateInput>
+    /**
+     * Choose, which DrugOrderLine to update.
+     */
+    where: DrugOrderLineWhereUniqueInput
+  }
+
+  /**
+   * DrugOrderLine updateMany
+   */
+  export type DrugOrderLineUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update DrugOrderLines.
+     */
+    data: XOR<DrugOrderLineUpdateManyMutationInput, DrugOrderLineUncheckedUpdateManyInput>
+    /**
+     * Filter which DrugOrderLines to update
+     */
+    where?: DrugOrderLineWhereInput
+    /**
+     * Limit how many DrugOrderLines to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * DrugOrderLine updateManyAndReturn
+   */
+  export type DrugOrderLineUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderLine
+     */
+    select?: DrugOrderLineSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderLine
+     */
+    omit?: DrugOrderLineOmit<ExtArgs> | null
+    /**
+     * The data used to update DrugOrderLines.
+     */
+    data: XOR<DrugOrderLineUpdateManyMutationInput, DrugOrderLineUncheckedUpdateManyInput>
+    /**
+     * Filter which DrugOrderLines to update
+     */
+    where?: DrugOrderLineWhereInput
+    /**
+     * Limit how many DrugOrderLines to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderLineIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * DrugOrderLine upsert
+   */
+  export type DrugOrderLineUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderLine
+     */
+    select?: DrugOrderLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderLine
+     */
+    omit?: DrugOrderLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderLineInclude<ExtArgs> | null
+    /**
+     * The filter to search for the DrugOrderLine to update in case it exists.
+     */
+    where: DrugOrderLineWhereUniqueInput
+    /**
+     * In case the DrugOrderLine found by the `where` argument doesn't exist, create a new DrugOrderLine with this data.
+     */
+    create: XOR<DrugOrderLineCreateInput, DrugOrderLineUncheckedCreateInput>
+    /**
+     * In case the DrugOrderLine was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<DrugOrderLineUpdateInput, DrugOrderLineUncheckedUpdateInput>
+  }
+
+  /**
+   * DrugOrderLine delete
+   */
+  export type DrugOrderLineDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderLine
+     */
+    select?: DrugOrderLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderLine
+     */
+    omit?: DrugOrderLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderLineInclude<ExtArgs> | null
+    /**
+     * Filter which DrugOrderLine to delete.
+     */
+    where: DrugOrderLineWhereUniqueInput
+  }
+
+  /**
+   * DrugOrderLine deleteMany
+   */
+  export type DrugOrderLineDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which DrugOrderLines to delete
+     */
+    where?: DrugOrderLineWhereInput
+    /**
+     * Limit how many DrugOrderLines to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * DrugOrderLine.masterDrug
+   */
+  export type DrugOrderLine$masterDrugArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MasterDrug
+     */
+    select?: MasterDrugSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MasterDrug
+     */
+    omit?: MasterDrugOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MasterDrugInclude<ExtArgs> | null
+    where?: MasterDrugWhereInput
+  }
+
+  /**
+   * DrugOrderLine.companyDrug
+   */
+  export type DrugOrderLine$companyDrugArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CompanyDrug
+     */
+    select?: CompanyDrugSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CompanyDrug
+     */
+    omit?: CompanyDrugOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CompanyDrugInclude<ExtArgs> | null
+    where?: CompanyDrugWhereInput
+  }
+
+  /**
+   * DrugOrderLine.shipmentLines
+   */
+  export type DrugOrderLine$shipmentLinesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderShipmentLine
+     */
+    select?: DrugOrderShipmentLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderShipmentLine
+     */
+    omit?: DrugOrderShipmentLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderShipmentLineInclude<ExtArgs> | null
+    where?: DrugOrderShipmentLineWhereInput
+    orderBy?: DrugOrderShipmentLineOrderByWithRelationInput | DrugOrderShipmentLineOrderByWithRelationInput[]
+    cursor?: DrugOrderShipmentLineWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: DrugOrderShipmentLineScalarFieldEnum | DrugOrderShipmentLineScalarFieldEnum[]
+  }
+
+  /**
+   * DrugOrderLine.receiptLines
+   */
+  export type DrugOrderLine$receiptLinesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderReceiptLine
+     */
+    select?: DrugOrderReceiptLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderReceiptLine
+     */
+    omit?: DrugOrderReceiptLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderReceiptLineInclude<ExtArgs> | null
+    where?: DrugOrderReceiptLineWhereInput
+    orderBy?: DrugOrderReceiptLineOrderByWithRelationInput | DrugOrderReceiptLineOrderByWithRelationInput[]
+    cursor?: DrugOrderReceiptLineWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: DrugOrderReceiptLineScalarFieldEnum | DrugOrderReceiptLineScalarFieldEnum[]
+  }
+
+  /**
+   * DrugOrderLine without action
+   */
+  export type DrugOrderLineDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderLine
+     */
+    select?: DrugOrderLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderLine
+     */
+    omit?: DrugOrderLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderLineInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model DrugOrderShipment
+   */
+
+  export type AggregateDrugOrderShipment = {
+    _count: DrugOrderShipmentCountAggregateOutputType | null
+    _avg: DrugOrderShipmentAvgAggregateOutputType | null
+    _sum: DrugOrderShipmentSumAggregateOutputType | null
+    _min: DrugOrderShipmentMinAggregateOutputType | null
+    _max: DrugOrderShipmentMaxAggregateOutputType | null
+  }
+
+  export type DrugOrderShipmentAvgAggregateOutputType = {
+    shipmentNo: number | null
+  }
+
+  export type DrugOrderShipmentSumAggregateOutputType = {
+    shipmentNo: number | null
+  }
+
+  export type DrugOrderShipmentMinAggregateOutputType = {
+    id: string | null
+    orderId: string | null
+    shipmentNo: number | null
+    status: $Enums.DrugOrderShipmentStatus | null
+    shippedAt: Date | null
+    companyNote: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type DrugOrderShipmentMaxAggregateOutputType = {
+    id: string | null
+    orderId: string | null
+    shipmentNo: number | null
+    status: $Enums.DrugOrderShipmentStatus | null
+    shippedAt: Date | null
+    companyNote: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type DrugOrderShipmentCountAggregateOutputType = {
+    id: number
+    orderId: number
+    shipmentNo: number
+    status: number
+    shippedAt: number
+    companyNote: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type DrugOrderShipmentAvgAggregateInputType = {
+    shipmentNo?: true
+  }
+
+  export type DrugOrderShipmentSumAggregateInputType = {
+    shipmentNo?: true
+  }
+
+  export type DrugOrderShipmentMinAggregateInputType = {
+    id?: true
+    orderId?: true
+    shipmentNo?: true
+    status?: true
+    shippedAt?: true
+    companyNote?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type DrugOrderShipmentMaxAggregateInputType = {
+    id?: true
+    orderId?: true
+    shipmentNo?: true
+    status?: true
+    shippedAt?: true
+    companyNote?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type DrugOrderShipmentCountAggregateInputType = {
+    id?: true
+    orderId?: true
+    shipmentNo?: true
+    status?: true
+    shippedAt?: true
+    companyNote?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type DrugOrderShipmentAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which DrugOrderShipment to aggregate.
+     */
+    where?: DrugOrderShipmentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DrugOrderShipments to fetch.
+     */
+    orderBy?: DrugOrderShipmentOrderByWithRelationInput | DrugOrderShipmentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: DrugOrderShipmentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DrugOrderShipments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DrugOrderShipments.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned DrugOrderShipments
+    **/
+    _count?: true | DrugOrderShipmentCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: DrugOrderShipmentAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: DrugOrderShipmentSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: DrugOrderShipmentMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: DrugOrderShipmentMaxAggregateInputType
+  }
+
+  export type GetDrugOrderShipmentAggregateType<T extends DrugOrderShipmentAggregateArgs> = {
+        [P in keyof T & keyof AggregateDrugOrderShipment]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateDrugOrderShipment[P]>
+      : GetScalarType<T[P], AggregateDrugOrderShipment[P]>
+  }
+
+
+
+
+  export type DrugOrderShipmentGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DrugOrderShipmentWhereInput
+    orderBy?: DrugOrderShipmentOrderByWithAggregationInput | DrugOrderShipmentOrderByWithAggregationInput[]
+    by: DrugOrderShipmentScalarFieldEnum[] | DrugOrderShipmentScalarFieldEnum
+    having?: DrugOrderShipmentScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: DrugOrderShipmentCountAggregateInputType | true
+    _avg?: DrugOrderShipmentAvgAggregateInputType
+    _sum?: DrugOrderShipmentSumAggregateInputType
+    _min?: DrugOrderShipmentMinAggregateInputType
+    _max?: DrugOrderShipmentMaxAggregateInputType
+  }
+
+  export type DrugOrderShipmentGroupByOutputType = {
+    id: string
+    orderId: string
+    shipmentNo: number
+    status: $Enums.DrugOrderShipmentStatus
+    shippedAt: Date | null
+    companyNote: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: DrugOrderShipmentCountAggregateOutputType | null
+    _avg: DrugOrderShipmentAvgAggregateOutputType | null
+    _sum: DrugOrderShipmentSumAggregateOutputType | null
+    _min: DrugOrderShipmentMinAggregateOutputType | null
+    _max: DrugOrderShipmentMaxAggregateOutputType | null
+  }
+
+  type GetDrugOrderShipmentGroupByPayload<T extends DrugOrderShipmentGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<DrugOrderShipmentGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof DrugOrderShipmentGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], DrugOrderShipmentGroupByOutputType[P]>
+            : GetScalarType<T[P], DrugOrderShipmentGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type DrugOrderShipmentSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    orderId?: boolean
+    shipmentNo?: boolean
+    status?: boolean
+    shippedAt?: boolean
+    companyNote?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    order?: boolean | DrugOrderDefaultArgs<ExtArgs>
+    lines?: boolean | DrugOrderShipment$linesArgs<ExtArgs>
+    receipts?: boolean | DrugOrderShipment$receiptsArgs<ExtArgs>
+    _count?: boolean | DrugOrderShipmentCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["drugOrderShipment"]>
+
+  export type DrugOrderShipmentSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    orderId?: boolean
+    shipmentNo?: boolean
+    status?: boolean
+    shippedAt?: boolean
+    companyNote?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    order?: boolean | DrugOrderDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["drugOrderShipment"]>
+
+  export type DrugOrderShipmentSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    orderId?: boolean
+    shipmentNo?: boolean
+    status?: boolean
+    shippedAt?: boolean
+    companyNote?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    order?: boolean | DrugOrderDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["drugOrderShipment"]>
+
+  export type DrugOrderShipmentSelectScalar = {
+    id?: boolean
+    orderId?: boolean
+    shipmentNo?: boolean
+    status?: boolean
+    shippedAt?: boolean
+    companyNote?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type DrugOrderShipmentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "orderId" | "shipmentNo" | "status" | "shippedAt" | "companyNote" | "createdAt" | "updatedAt", ExtArgs["result"]["drugOrderShipment"]>
+  export type DrugOrderShipmentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    order?: boolean | DrugOrderDefaultArgs<ExtArgs>
+    lines?: boolean | DrugOrderShipment$linesArgs<ExtArgs>
+    receipts?: boolean | DrugOrderShipment$receiptsArgs<ExtArgs>
+    _count?: boolean | DrugOrderShipmentCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type DrugOrderShipmentIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    order?: boolean | DrugOrderDefaultArgs<ExtArgs>
+  }
+  export type DrugOrderShipmentIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    order?: boolean | DrugOrderDefaultArgs<ExtArgs>
+  }
+
+  export type $DrugOrderShipmentPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "DrugOrderShipment"
+    objects: {
+      order: Prisma.$DrugOrderPayload<ExtArgs>
+      lines: Prisma.$DrugOrderShipmentLinePayload<ExtArgs>[]
+      receipts: Prisma.$DrugOrderReceiptPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      orderId: string
+      shipmentNo: number
+      status: $Enums.DrugOrderShipmentStatus
+      shippedAt: Date | null
+      companyNote: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["drugOrderShipment"]>
+    composites: {}
+  }
+
+  type DrugOrderShipmentGetPayload<S extends boolean | null | undefined | DrugOrderShipmentDefaultArgs> = $Result.GetResult<Prisma.$DrugOrderShipmentPayload, S>
+
+  type DrugOrderShipmentCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<DrugOrderShipmentFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: DrugOrderShipmentCountAggregateInputType | true
+    }
+
+  export interface DrugOrderShipmentDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['DrugOrderShipment'], meta: { name: 'DrugOrderShipment' } }
+    /**
+     * Find zero or one DrugOrderShipment that matches the filter.
+     * @param {DrugOrderShipmentFindUniqueArgs} args - Arguments to find a DrugOrderShipment
+     * @example
+     * // Get one DrugOrderShipment
+     * const drugOrderShipment = await prisma.drugOrderShipment.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends DrugOrderShipmentFindUniqueArgs>(args: SelectSubset<T, DrugOrderShipmentFindUniqueArgs<ExtArgs>>): Prisma__DrugOrderShipmentClient<$Result.GetResult<Prisma.$DrugOrderShipmentPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one DrugOrderShipment that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {DrugOrderShipmentFindUniqueOrThrowArgs} args - Arguments to find a DrugOrderShipment
+     * @example
+     * // Get one DrugOrderShipment
+     * const drugOrderShipment = await prisma.drugOrderShipment.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends DrugOrderShipmentFindUniqueOrThrowArgs>(args: SelectSubset<T, DrugOrderShipmentFindUniqueOrThrowArgs<ExtArgs>>): Prisma__DrugOrderShipmentClient<$Result.GetResult<Prisma.$DrugOrderShipmentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first DrugOrderShipment that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DrugOrderShipmentFindFirstArgs} args - Arguments to find a DrugOrderShipment
+     * @example
+     * // Get one DrugOrderShipment
+     * const drugOrderShipment = await prisma.drugOrderShipment.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends DrugOrderShipmentFindFirstArgs>(args?: SelectSubset<T, DrugOrderShipmentFindFirstArgs<ExtArgs>>): Prisma__DrugOrderShipmentClient<$Result.GetResult<Prisma.$DrugOrderShipmentPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first DrugOrderShipment that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DrugOrderShipmentFindFirstOrThrowArgs} args - Arguments to find a DrugOrderShipment
+     * @example
+     * // Get one DrugOrderShipment
+     * const drugOrderShipment = await prisma.drugOrderShipment.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends DrugOrderShipmentFindFirstOrThrowArgs>(args?: SelectSubset<T, DrugOrderShipmentFindFirstOrThrowArgs<ExtArgs>>): Prisma__DrugOrderShipmentClient<$Result.GetResult<Prisma.$DrugOrderShipmentPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more DrugOrderShipments that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DrugOrderShipmentFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all DrugOrderShipments
+     * const drugOrderShipments = await prisma.drugOrderShipment.findMany()
+     * 
+     * // Get first 10 DrugOrderShipments
+     * const drugOrderShipments = await prisma.drugOrderShipment.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const drugOrderShipmentWithIdOnly = await prisma.drugOrderShipment.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends DrugOrderShipmentFindManyArgs>(args?: SelectSubset<T, DrugOrderShipmentFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DrugOrderShipmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a DrugOrderShipment.
+     * @param {DrugOrderShipmentCreateArgs} args - Arguments to create a DrugOrderShipment.
+     * @example
+     * // Create one DrugOrderShipment
+     * const DrugOrderShipment = await prisma.drugOrderShipment.create({
+     *   data: {
+     *     // ... data to create a DrugOrderShipment
+     *   }
+     * })
+     * 
+     */
+    create<T extends DrugOrderShipmentCreateArgs>(args: SelectSubset<T, DrugOrderShipmentCreateArgs<ExtArgs>>): Prisma__DrugOrderShipmentClient<$Result.GetResult<Prisma.$DrugOrderShipmentPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many DrugOrderShipments.
+     * @param {DrugOrderShipmentCreateManyArgs} args - Arguments to create many DrugOrderShipments.
+     * @example
+     * // Create many DrugOrderShipments
+     * const drugOrderShipment = await prisma.drugOrderShipment.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends DrugOrderShipmentCreateManyArgs>(args?: SelectSubset<T, DrugOrderShipmentCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many DrugOrderShipments and returns the data saved in the database.
+     * @param {DrugOrderShipmentCreateManyAndReturnArgs} args - Arguments to create many DrugOrderShipments.
+     * @example
+     * // Create many DrugOrderShipments
+     * const drugOrderShipment = await prisma.drugOrderShipment.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many DrugOrderShipments and only return the `id`
+     * const drugOrderShipmentWithIdOnly = await prisma.drugOrderShipment.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends DrugOrderShipmentCreateManyAndReturnArgs>(args?: SelectSubset<T, DrugOrderShipmentCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DrugOrderShipmentPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a DrugOrderShipment.
+     * @param {DrugOrderShipmentDeleteArgs} args - Arguments to delete one DrugOrderShipment.
+     * @example
+     * // Delete one DrugOrderShipment
+     * const DrugOrderShipment = await prisma.drugOrderShipment.delete({
+     *   where: {
+     *     // ... filter to delete one DrugOrderShipment
+     *   }
+     * })
+     * 
+     */
+    delete<T extends DrugOrderShipmentDeleteArgs>(args: SelectSubset<T, DrugOrderShipmentDeleteArgs<ExtArgs>>): Prisma__DrugOrderShipmentClient<$Result.GetResult<Prisma.$DrugOrderShipmentPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one DrugOrderShipment.
+     * @param {DrugOrderShipmentUpdateArgs} args - Arguments to update one DrugOrderShipment.
+     * @example
+     * // Update one DrugOrderShipment
+     * const drugOrderShipment = await prisma.drugOrderShipment.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends DrugOrderShipmentUpdateArgs>(args: SelectSubset<T, DrugOrderShipmentUpdateArgs<ExtArgs>>): Prisma__DrugOrderShipmentClient<$Result.GetResult<Prisma.$DrugOrderShipmentPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more DrugOrderShipments.
+     * @param {DrugOrderShipmentDeleteManyArgs} args - Arguments to filter DrugOrderShipments to delete.
+     * @example
+     * // Delete a few DrugOrderShipments
+     * const { count } = await prisma.drugOrderShipment.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends DrugOrderShipmentDeleteManyArgs>(args?: SelectSubset<T, DrugOrderShipmentDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more DrugOrderShipments.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DrugOrderShipmentUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many DrugOrderShipments
+     * const drugOrderShipment = await prisma.drugOrderShipment.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends DrugOrderShipmentUpdateManyArgs>(args: SelectSubset<T, DrugOrderShipmentUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more DrugOrderShipments and returns the data updated in the database.
+     * @param {DrugOrderShipmentUpdateManyAndReturnArgs} args - Arguments to update many DrugOrderShipments.
+     * @example
+     * // Update many DrugOrderShipments
+     * const drugOrderShipment = await prisma.drugOrderShipment.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more DrugOrderShipments and only return the `id`
+     * const drugOrderShipmentWithIdOnly = await prisma.drugOrderShipment.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends DrugOrderShipmentUpdateManyAndReturnArgs>(args: SelectSubset<T, DrugOrderShipmentUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DrugOrderShipmentPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one DrugOrderShipment.
+     * @param {DrugOrderShipmentUpsertArgs} args - Arguments to update or create a DrugOrderShipment.
+     * @example
+     * // Update or create a DrugOrderShipment
+     * const drugOrderShipment = await prisma.drugOrderShipment.upsert({
+     *   create: {
+     *     // ... data to create a DrugOrderShipment
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the DrugOrderShipment we want to update
+     *   }
+     * })
+     */
+    upsert<T extends DrugOrderShipmentUpsertArgs>(args: SelectSubset<T, DrugOrderShipmentUpsertArgs<ExtArgs>>): Prisma__DrugOrderShipmentClient<$Result.GetResult<Prisma.$DrugOrderShipmentPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of DrugOrderShipments.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DrugOrderShipmentCountArgs} args - Arguments to filter DrugOrderShipments to count.
+     * @example
+     * // Count the number of DrugOrderShipments
+     * const count = await prisma.drugOrderShipment.count({
+     *   where: {
+     *     // ... the filter for the DrugOrderShipments we want to count
+     *   }
+     * })
+    **/
+    count<T extends DrugOrderShipmentCountArgs>(
+      args?: Subset<T, DrugOrderShipmentCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], DrugOrderShipmentCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a DrugOrderShipment.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DrugOrderShipmentAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends DrugOrderShipmentAggregateArgs>(args: Subset<T, DrugOrderShipmentAggregateArgs>): Prisma.PrismaPromise<GetDrugOrderShipmentAggregateType<T>>
+
+    /**
+     * Group by DrugOrderShipment.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DrugOrderShipmentGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends DrugOrderShipmentGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: DrugOrderShipmentGroupByArgs['orderBy'] }
+        : { orderBy?: DrugOrderShipmentGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, DrugOrderShipmentGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetDrugOrderShipmentGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the DrugOrderShipment model
+   */
+  readonly fields: DrugOrderShipmentFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for DrugOrderShipment.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__DrugOrderShipmentClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    order<T extends DrugOrderDefaultArgs<ExtArgs> = {}>(args?: Subset<T, DrugOrderDefaultArgs<ExtArgs>>): Prisma__DrugOrderClient<$Result.GetResult<Prisma.$DrugOrderPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    lines<T extends DrugOrderShipment$linesArgs<ExtArgs> = {}>(args?: Subset<T, DrugOrderShipment$linesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DrugOrderShipmentLinePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    receipts<T extends DrugOrderShipment$receiptsArgs<ExtArgs> = {}>(args?: Subset<T, DrugOrderShipment$receiptsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DrugOrderReceiptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the DrugOrderShipment model
+   */
+  interface DrugOrderShipmentFieldRefs {
+    readonly id: FieldRef<"DrugOrderShipment", 'String'>
+    readonly orderId: FieldRef<"DrugOrderShipment", 'String'>
+    readonly shipmentNo: FieldRef<"DrugOrderShipment", 'Int'>
+    readonly status: FieldRef<"DrugOrderShipment", 'DrugOrderShipmentStatus'>
+    readonly shippedAt: FieldRef<"DrugOrderShipment", 'DateTime'>
+    readonly companyNote: FieldRef<"DrugOrderShipment", 'String'>
+    readonly createdAt: FieldRef<"DrugOrderShipment", 'DateTime'>
+    readonly updatedAt: FieldRef<"DrugOrderShipment", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * DrugOrderShipment findUnique
+   */
+  export type DrugOrderShipmentFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderShipment
+     */
+    select?: DrugOrderShipmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderShipment
+     */
+    omit?: DrugOrderShipmentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderShipmentInclude<ExtArgs> | null
+    /**
+     * Filter, which DrugOrderShipment to fetch.
+     */
+    where: DrugOrderShipmentWhereUniqueInput
+  }
+
+  /**
+   * DrugOrderShipment findUniqueOrThrow
+   */
+  export type DrugOrderShipmentFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderShipment
+     */
+    select?: DrugOrderShipmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderShipment
+     */
+    omit?: DrugOrderShipmentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderShipmentInclude<ExtArgs> | null
+    /**
+     * Filter, which DrugOrderShipment to fetch.
+     */
+    where: DrugOrderShipmentWhereUniqueInput
+  }
+
+  /**
+   * DrugOrderShipment findFirst
+   */
+  export type DrugOrderShipmentFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderShipment
+     */
+    select?: DrugOrderShipmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderShipment
+     */
+    omit?: DrugOrderShipmentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderShipmentInclude<ExtArgs> | null
+    /**
+     * Filter, which DrugOrderShipment to fetch.
+     */
+    where?: DrugOrderShipmentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DrugOrderShipments to fetch.
+     */
+    orderBy?: DrugOrderShipmentOrderByWithRelationInput | DrugOrderShipmentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for DrugOrderShipments.
+     */
+    cursor?: DrugOrderShipmentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DrugOrderShipments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DrugOrderShipments.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of DrugOrderShipments.
+     */
+    distinct?: DrugOrderShipmentScalarFieldEnum | DrugOrderShipmentScalarFieldEnum[]
+  }
+
+  /**
+   * DrugOrderShipment findFirstOrThrow
+   */
+  export type DrugOrderShipmentFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderShipment
+     */
+    select?: DrugOrderShipmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderShipment
+     */
+    omit?: DrugOrderShipmentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderShipmentInclude<ExtArgs> | null
+    /**
+     * Filter, which DrugOrderShipment to fetch.
+     */
+    where?: DrugOrderShipmentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DrugOrderShipments to fetch.
+     */
+    orderBy?: DrugOrderShipmentOrderByWithRelationInput | DrugOrderShipmentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for DrugOrderShipments.
+     */
+    cursor?: DrugOrderShipmentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DrugOrderShipments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DrugOrderShipments.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of DrugOrderShipments.
+     */
+    distinct?: DrugOrderShipmentScalarFieldEnum | DrugOrderShipmentScalarFieldEnum[]
+  }
+
+  /**
+   * DrugOrderShipment findMany
+   */
+  export type DrugOrderShipmentFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderShipment
+     */
+    select?: DrugOrderShipmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderShipment
+     */
+    omit?: DrugOrderShipmentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderShipmentInclude<ExtArgs> | null
+    /**
+     * Filter, which DrugOrderShipments to fetch.
+     */
+    where?: DrugOrderShipmentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DrugOrderShipments to fetch.
+     */
+    orderBy?: DrugOrderShipmentOrderByWithRelationInput | DrugOrderShipmentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing DrugOrderShipments.
+     */
+    cursor?: DrugOrderShipmentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DrugOrderShipments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DrugOrderShipments.
+     */
+    skip?: number
+    distinct?: DrugOrderShipmentScalarFieldEnum | DrugOrderShipmentScalarFieldEnum[]
+  }
+
+  /**
+   * DrugOrderShipment create
+   */
+  export type DrugOrderShipmentCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderShipment
+     */
+    select?: DrugOrderShipmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderShipment
+     */
+    omit?: DrugOrderShipmentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderShipmentInclude<ExtArgs> | null
+    /**
+     * The data needed to create a DrugOrderShipment.
+     */
+    data: XOR<DrugOrderShipmentCreateInput, DrugOrderShipmentUncheckedCreateInput>
+  }
+
+  /**
+   * DrugOrderShipment createMany
+   */
+  export type DrugOrderShipmentCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many DrugOrderShipments.
+     */
+    data: DrugOrderShipmentCreateManyInput | DrugOrderShipmentCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * DrugOrderShipment createManyAndReturn
+   */
+  export type DrugOrderShipmentCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderShipment
+     */
+    select?: DrugOrderShipmentSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderShipment
+     */
+    omit?: DrugOrderShipmentOmit<ExtArgs> | null
+    /**
+     * The data used to create many DrugOrderShipments.
+     */
+    data: DrugOrderShipmentCreateManyInput | DrugOrderShipmentCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderShipmentIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * DrugOrderShipment update
+   */
+  export type DrugOrderShipmentUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderShipment
+     */
+    select?: DrugOrderShipmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderShipment
+     */
+    omit?: DrugOrderShipmentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderShipmentInclude<ExtArgs> | null
+    /**
+     * The data needed to update a DrugOrderShipment.
+     */
+    data: XOR<DrugOrderShipmentUpdateInput, DrugOrderShipmentUncheckedUpdateInput>
+    /**
+     * Choose, which DrugOrderShipment to update.
+     */
+    where: DrugOrderShipmentWhereUniqueInput
+  }
+
+  /**
+   * DrugOrderShipment updateMany
+   */
+  export type DrugOrderShipmentUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update DrugOrderShipments.
+     */
+    data: XOR<DrugOrderShipmentUpdateManyMutationInput, DrugOrderShipmentUncheckedUpdateManyInput>
+    /**
+     * Filter which DrugOrderShipments to update
+     */
+    where?: DrugOrderShipmentWhereInput
+    /**
+     * Limit how many DrugOrderShipments to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * DrugOrderShipment updateManyAndReturn
+   */
+  export type DrugOrderShipmentUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderShipment
+     */
+    select?: DrugOrderShipmentSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderShipment
+     */
+    omit?: DrugOrderShipmentOmit<ExtArgs> | null
+    /**
+     * The data used to update DrugOrderShipments.
+     */
+    data: XOR<DrugOrderShipmentUpdateManyMutationInput, DrugOrderShipmentUncheckedUpdateManyInput>
+    /**
+     * Filter which DrugOrderShipments to update
+     */
+    where?: DrugOrderShipmentWhereInput
+    /**
+     * Limit how many DrugOrderShipments to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderShipmentIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * DrugOrderShipment upsert
+   */
+  export type DrugOrderShipmentUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderShipment
+     */
+    select?: DrugOrderShipmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderShipment
+     */
+    omit?: DrugOrderShipmentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderShipmentInclude<ExtArgs> | null
+    /**
+     * The filter to search for the DrugOrderShipment to update in case it exists.
+     */
+    where: DrugOrderShipmentWhereUniqueInput
+    /**
+     * In case the DrugOrderShipment found by the `where` argument doesn't exist, create a new DrugOrderShipment with this data.
+     */
+    create: XOR<DrugOrderShipmentCreateInput, DrugOrderShipmentUncheckedCreateInput>
+    /**
+     * In case the DrugOrderShipment was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<DrugOrderShipmentUpdateInput, DrugOrderShipmentUncheckedUpdateInput>
+  }
+
+  /**
+   * DrugOrderShipment delete
+   */
+  export type DrugOrderShipmentDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderShipment
+     */
+    select?: DrugOrderShipmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderShipment
+     */
+    omit?: DrugOrderShipmentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderShipmentInclude<ExtArgs> | null
+    /**
+     * Filter which DrugOrderShipment to delete.
+     */
+    where: DrugOrderShipmentWhereUniqueInput
+  }
+
+  /**
+   * DrugOrderShipment deleteMany
+   */
+  export type DrugOrderShipmentDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which DrugOrderShipments to delete
+     */
+    where?: DrugOrderShipmentWhereInput
+    /**
+     * Limit how many DrugOrderShipments to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * DrugOrderShipment.lines
+   */
+  export type DrugOrderShipment$linesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderShipmentLine
+     */
+    select?: DrugOrderShipmentLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderShipmentLine
+     */
+    omit?: DrugOrderShipmentLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderShipmentLineInclude<ExtArgs> | null
+    where?: DrugOrderShipmentLineWhereInput
+    orderBy?: DrugOrderShipmentLineOrderByWithRelationInput | DrugOrderShipmentLineOrderByWithRelationInput[]
+    cursor?: DrugOrderShipmentLineWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: DrugOrderShipmentLineScalarFieldEnum | DrugOrderShipmentLineScalarFieldEnum[]
+  }
+
+  /**
+   * DrugOrderShipment.receipts
+   */
+  export type DrugOrderShipment$receiptsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderReceipt
+     */
+    select?: DrugOrderReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderReceipt
+     */
+    omit?: DrugOrderReceiptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderReceiptInclude<ExtArgs> | null
+    where?: DrugOrderReceiptWhereInput
+    orderBy?: DrugOrderReceiptOrderByWithRelationInput | DrugOrderReceiptOrderByWithRelationInput[]
+    cursor?: DrugOrderReceiptWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: DrugOrderReceiptScalarFieldEnum | DrugOrderReceiptScalarFieldEnum[]
+  }
+
+  /**
+   * DrugOrderShipment without action
+   */
+  export type DrugOrderShipmentDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderShipment
+     */
+    select?: DrugOrderShipmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderShipment
+     */
+    omit?: DrugOrderShipmentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderShipmentInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model DrugOrderShipmentLine
+   */
+
+  export type AggregateDrugOrderShipmentLine = {
+    _count: DrugOrderShipmentLineCountAggregateOutputType | null
+    _avg: DrugOrderShipmentLineAvgAggregateOutputType | null
+    _sum: DrugOrderShipmentLineSumAggregateOutputType | null
+    _min: DrugOrderShipmentLineMinAggregateOutputType | null
+    _max: DrugOrderShipmentLineMaxAggregateOutputType | null
+  }
+
+  export type DrugOrderShipmentLineAvgAggregateOutputType = {
+    shippedQty: Decimal | null
+  }
+
+  export type DrugOrderShipmentLineSumAggregateOutputType = {
+    shippedQty: Decimal | null
+  }
+
+  export type DrugOrderShipmentLineMinAggregateOutputType = {
+    id: string | null
+    shipmentId: string | null
+    orderLineId: string | null
+    shippedQty: Decimal | null
+    reason: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type DrugOrderShipmentLineMaxAggregateOutputType = {
+    id: string | null
+    shipmentId: string | null
+    orderLineId: string | null
+    shippedQty: Decimal | null
+    reason: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type DrugOrderShipmentLineCountAggregateOutputType = {
+    id: number
+    shipmentId: number
+    orderLineId: number
+    shippedQty: number
+    reason: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type DrugOrderShipmentLineAvgAggregateInputType = {
+    shippedQty?: true
+  }
+
+  export type DrugOrderShipmentLineSumAggregateInputType = {
+    shippedQty?: true
+  }
+
+  export type DrugOrderShipmentLineMinAggregateInputType = {
+    id?: true
+    shipmentId?: true
+    orderLineId?: true
+    shippedQty?: true
+    reason?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type DrugOrderShipmentLineMaxAggregateInputType = {
+    id?: true
+    shipmentId?: true
+    orderLineId?: true
+    shippedQty?: true
+    reason?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type DrugOrderShipmentLineCountAggregateInputType = {
+    id?: true
+    shipmentId?: true
+    orderLineId?: true
+    shippedQty?: true
+    reason?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type DrugOrderShipmentLineAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which DrugOrderShipmentLine to aggregate.
+     */
+    where?: DrugOrderShipmentLineWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DrugOrderShipmentLines to fetch.
+     */
+    orderBy?: DrugOrderShipmentLineOrderByWithRelationInput | DrugOrderShipmentLineOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: DrugOrderShipmentLineWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DrugOrderShipmentLines from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DrugOrderShipmentLines.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned DrugOrderShipmentLines
+    **/
+    _count?: true | DrugOrderShipmentLineCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: DrugOrderShipmentLineAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: DrugOrderShipmentLineSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: DrugOrderShipmentLineMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: DrugOrderShipmentLineMaxAggregateInputType
+  }
+
+  export type GetDrugOrderShipmentLineAggregateType<T extends DrugOrderShipmentLineAggregateArgs> = {
+        [P in keyof T & keyof AggregateDrugOrderShipmentLine]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateDrugOrderShipmentLine[P]>
+      : GetScalarType<T[P], AggregateDrugOrderShipmentLine[P]>
+  }
+
+
+
+
+  export type DrugOrderShipmentLineGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DrugOrderShipmentLineWhereInput
+    orderBy?: DrugOrderShipmentLineOrderByWithAggregationInput | DrugOrderShipmentLineOrderByWithAggregationInput[]
+    by: DrugOrderShipmentLineScalarFieldEnum[] | DrugOrderShipmentLineScalarFieldEnum
+    having?: DrugOrderShipmentLineScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: DrugOrderShipmentLineCountAggregateInputType | true
+    _avg?: DrugOrderShipmentLineAvgAggregateInputType
+    _sum?: DrugOrderShipmentLineSumAggregateInputType
+    _min?: DrugOrderShipmentLineMinAggregateInputType
+    _max?: DrugOrderShipmentLineMaxAggregateInputType
+  }
+
+  export type DrugOrderShipmentLineGroupByOutputType = {
+    id: string
+    shipmentId: string
+    orderLineId: string
+    shippedQty: Decimal
+    reason: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: DrugOrderShipmentLineCountAggregateOutputType | null
+    _avg: DrugOrderShipmentLineAvgAggregateOutputType | null
+    _sum: DrugOrderShipmentLineSumAggregateOutputType | null
+    _min: DrugOrderShipmentLineMinAggregateOutputType | null
+    _max: DrugOrderShipmentLineMaxAggregateOutputType | null
+  }
+
+  type GetDrugOrderShipmentLineGroupByPayload<T extends DrugOrderShipmentLineGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<DrugOrderShipmentLineGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof DrugOrderShipmentLineGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], DrugOrderShipmentLineGroupByOutputType[P]>
+            : GetScalarType<T[P], DrugOrderShipmentLineGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type DrugOrderShipmentLineSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    shipmentId?: boolean
+    orderLineId?: boolean
+    shippedQty?: boolean
+    reason?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    shipment?: boolean | DrugOrderShipmentDefaultArgs<ExtArgs>
+    orderLine?: boolean | DrugOrderLineDefaultArgs<ExtArgs>
+    receiptLines?: boolean | DrugOrderShipmentLine$receiptLinesArgs<ExtArgs>
+    _count?: boolean | DrugOrderShipmentLineCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["drugOrderShipmentLine"]>
+
+  export type DrugOrderShipmentLineSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    shipmentId?: boolean
+    orderLineId?: boolean
+    shippedQty?: boolean
+    reason?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    shipment?: boolean | DrugOrderShipmentDefaultArgs<ExtArgs>
+    orderLine?: boolean | DrugOrderLineDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["drugOrderShipmentLine"]>
+
+  export type DrugOrderShipmentLineSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    shipmentId?: boolean
+    orderLineId?: boolean
+    shippedQty?: boolean
+    reason?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    shipment?: boolean | DrugOrderShipmentDefaultArgs<ExtArgs>
+    orderLine?: boolean | DrugOrderLineDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["drugOrderShipmentLine"]>
+
+  export type DrugOrderShipmentLineSelectScalar = {
+    id?: boolean
+    shipmentId?: boolean
+    orderLineId?: boolean
+    shippedQty?: boolean
+    reason?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type DrugOrderShipmentLineOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "shipmentId" | "orderLineId" | "shippedQty" | "reason" | "createdAt" | "updatedAt", ExtArgs["result"]["drugOrderShipmentLine"]>
+  export type DrugOrderShipmentLineInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    shipment?: boolean | DrugOrderShipmentDefaultArgs<ExtArgs>
+    orderLine?: boolean | DrugOrderLineDefaultArgs<ExtArgs>
+    receiptLines?: boolean | DrugOrderShipmentLine$receiptLinesArgs<ExtArgs>
+    _count?: boolean | DrugOrderShipmentLineCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type DrugOrderShipmentLineIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    shipment?: boolean | DrugOrderShipmentDefaultArgs<ExtArgs>
+    orderLine?: boolean | DrugOrderLineDefaultArgs<ExtArgs>
+  }
+  export type DrugOrderShipmentLineIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    shipment?: boolean | DrugOrderShipmentDefaultArgs<ExtArgs>
+    orderLine?: boolean | DrugOrderLineDefaultArgs<ExtArgs>
+  }
+
+  export type $DrugOrderShipmentLinePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "DrugOrderShipmentLine"
+    objects: {
+      shipment: Prisma.$DrugOrderShipmentPayload<ExtArgs>
+      orderLine: Prisma.$DrugOrderLinePayload<ExtArgs>
+      receiptLines: Prisma.$DrugOrderReceiptLinePayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      shipmentId: string
+      orderLineId: string
+      shippedQty: Prisma.Decimal
+      reason: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["drugOrderShipmentLine"]>
+    composites: {}
+  }
+
+  type DrugOrderShipmentLineGetPayload<S extends boolean | null | undefined | DrugOrderShipmentLineDefaultArgs> = $Result.GetResult<Prisma.$DrugOrderShipmentLinePayload, S>
+
+  type DrugOrderShipmentLineCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<DrugOrderShipmentLineFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: DrugOrderShipmentLineCountAggregateInputType | true
+    }
+
+  export interface DrugOrderShipmentLineDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['DrugOrderShipmentLine'], meta: { name: 'DrugOrderShipmentLine' } }
+    /**
+     * Find zero or one DrugOrderShipmentLine that matches the filter.
+     * @param {DrugOrderShipmentLineFindUniqueArgs} args - Arguments to find a DrugOrderShipmentLine
+     * @example
+     * // Get one DrugOrderShipmentLine
+     * const drugOrderShipmentLine = await prisma.drugOrderShipmentLine.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends DrugOrderShipmentLineFindUniqueArgs>(args: SelectSubset<T, DrugOrderShipmentLineFindUniqueArgs<ExtArgs>>): Prisma__DrugOrderShipmentLineClient<$Result.GetResult<Prisma.$DrugOrderShipmentLinePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one DrugOrderShipmentLine that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {DrugOrderShipmentLineFindUniqueOrThrowArgs} args - Arguments to find a DrugOrderShipmentLine
+     * @example
+     * // Get one DrugOrderShipmentLine
+     * const drugOrderShipmentLine = await prisma.drugOrderShipmentLine.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends DrugOrderShipmentLineFindUniqueOrThrowArgs>(args: SelectSubset<T, DrugOrderShipmentLineFindUniqueOrThrowArgs<ExtArgs>>): Prisma__DrugOrderShipmentLineClient<$Result.GetResult<Prisma.$DrugOrderShipmentLinePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first DrugOrderShipmentLine that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DrugOrderShipmentLineFindFirstArgs} args - Arguments to find a DrugOrderShipmentLine
+     * @example
+     * // Get one DrugOrderShipmentLine
+     * const drugOrderShipmentLine = await prisma.drugOrderShipmentLine.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends DrugOrderShipmentLineFindFirstArgs>(args?: SelectSubset<T, DrugOrderShipmentLineFindFirstArgs<ExtArgs>>): Prisma__DrugOrderShipmentLineClient<$Result.GetResult<Prisma.$DrugOrderShipmentLinePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first DrugOrderShipmentLine that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DrugOrderShipmentLineFindFirstOrThrowArgs} args - Arguments to find a DrugOrderShipmentLine
+     * @example
+     * // Get one DrugOrderShipmentLine
+     * const drugOrderShipmentLine = await prisma.drugOrderShipmentLine.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends DrugOrderShipmentLineFindFirstOrThrowArgs>(args?: SelectSubset<T, DrugOrderShipmentLineFindFirstOrThrowArgs<ExtArgs>>): Prisma__DrugOrderShipmentLineClient<$Result.GetResult<Prisma.$DrugOrderShipmentLinePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more DrugOrderShipmentLines that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DrugOrderShipmentLineFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all DrugOrderShipmentLines
+     * const drugOrderShipmentLines = await prisma.drugOrderShipmentLine.findMany()
+     * 
+     * // Get first 10 DrugOrderShipmentLines
+     * const drugOrderShipmentLines = await prisma.drugOrderShipmentLine.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const drugOrderShipmentLineWithIdOnly = await prisma.drugOrderShipmentLine.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends DrugOrderShipmentLineFindManyArgs>(args?: SelectSubset<T, DrugOrderShipmentLineFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DrugOrderShipmentLinePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a DrugOrderShipmentLine.
+     * @param {DrugOrderShipmentLineCreateArgs} args - Arguments to create a DrugOrderShipmentLine.
+     * @example
+     * // Create one DrugOrderShipmentLine
+     * const DrugOrderShipmentLine = await prisma.drugOrderShipmentLine.create({
+     *   data: {
+     *     // ... data to create a DrugOrderShipmentLine
+     *   }
+     * })
+     * 
+     */
+    create<T extends DrugOrderShipmentLineCreateArgs>(args: SelectSubset<T, DrugOrderShipmentLineCreateArgs<ExtArgs>>): Prisma__DrugOrderShipmentLineClient<$Result.GetResult<Prisma.$DrugOrderShipmentLinePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many DrugOrderShipmentLines.
+     * @param {DrugOrderShipmentLineCreateManyArgs} args - Arguments to create many DrugOrderShipmentLines.
+     * @example
+     * // Create many DrugOrderShipmentLines
+     * const drugOrderShipmentLine = await prisma.drugOrderShipmentLine.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends DrugOrderShipmentLineCreateManyArgs>(args?: SelectSubset<T, DrugOrderShipmentLineCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many DrugOrderShipmentLines and returns the data saved in the database.
+     * @param {DrugOrderShipmentLineCreateManyAndReturnArgs} args - Arguments to create many DrugOrderShipmentLines.
+     * @example
+     * // Create many DrugOrderShipmentLines
+     * const drugOrderShipmentLine = await prisma.drugOrderShipmentLine.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many DrugOrderShipmentLines and only return the `id`
+     * const drugOrderShipmentLineWithIdOnly = await prisma.drugOrderShipmentLine.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends DrugOrderShipmentLineCreateManyAndReturnArgs>(args?: SelectSubset<T, DrugOrderShipmentLineCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DrugOrderShipmentLinePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a DrugOrderShipmentLine.
+     * @param {DrugOrderShipmentLineDeleteArgs} args - Arguments to delete one DrugOrderShipmentLine.
+     * @example
+     * // Delete one DrugOrderShipmentLine
+     * const DrugOrderShipmentLine = await prisma.drugOrderShipmentLine.delete({
+     *   where: {
+     *     // ... filter to delete one DrugOrderShipmentLine
+     *   }
+     * })
+     * 
+     */
+    delete<T extends DrugOrderShipmentLineDeleteArgs>(args: SelectSubset<T, DrugOrderShipmentLineDeleteArgs<ExtArgs>>): Prisma__DrugOrderShipmentLineClient<$Result.GetResult<Prisma.$DrugOrderShipmentLinePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one DrugOrderShipmentLine.
+     * @param {DrugOrderShipmentLineUpdateArgs} args - Arguments to update one DrugOrderShipmentLine.
+     * @example
+     * // Update one DrugOrderShipmentLine
+     * const drugOrderShipmentLine = await prisma.drugOrderShipmentLine.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends DrugOrderShipmentLineUpdateArgs>(args: SelectSubset<T, DrugOrderShipmentLineUpdateArgs<ExtArgs>>): Prisma__DrugOrderShipmentLineClient<$Result.GetResult<Prisma.$DrugOrderShipmentLinePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more DrugOrderShipmentLines.
+     * @param {DrugOrderShipmentLineDeleteManyArgs} args - Arguments to filter DrugOrderShipmentLines to delete.
+     * @example
+     * // Delete a few DrugOrderShipmentLines
+     * const { count } = await prisma.drugOrderShipmentLine.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends DrugOrderShipmentLineDeleteManyArgs>(args?: SelectSubset<T, DrugOrderShipmentLineDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more DrugOrderShipmentLines.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DrugOrderShipmentLineUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many DrugOrderShipmentLines
+     * const drugOrderShipmentLine = await prisma.drugOrderShipmentLine.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends DrugOrderShipmentLineUpdateManyArgs>(args: SelectSubset<T, DrugOrderShipmentLineUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more DrugOrderShipmentLines and returns the data updated in the database.
+     * @param {DrugOrderShipmentLineUpdateManyAndReturnArgs} args - Arguments to update many DrugOrderShipmentLines.
+     * @example
+     * // Update many DrugOrderShipmentLines
+     * const drugOrderShipmentLine = await prisma.drugOrderShipmentLine.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more DrugOrderShipmentLines and only return the `id`
+     * const drugOrderShipmentLineWithIdOnly = await prisma.drugOrderShipmentLine.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends DrugOrderShipmentLineUpdateManyAndReturnArgs>(args: SelectSubset<T, DrugOrderShipmentLineUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DrugOrderShipmentLinePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one DrugOrderShipmentLine.
+     * @param {DrugOrderShipmentLineUpsertArgs} args - Arguments to update or create a DrugOrderShipmentLine.
+     * @example
+     * // Update or create a DrugOrderShipmentLine
+     * const drugOrderShipmentLine = await prisma.drugOrderShipmentLine.upsert({
+     *   create: {
+     *     // ... data to create a DrugOrderShipmentLine
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the DrugOrderShipmentLine we want to update
+     *   }
+     * })
+     */
+    upsert<T extends DrugOrderShipmentLineUpsertArgs>(args: SelectSubset<T, DrugOrderShipmentLineUpsertArgs<ExtArgs>>): Prisma__DrugOrderShipmentLineClient<$Result.GetResult<Prisma.$DrugOrderShipmentLinePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of DrugOrderShipmentLines.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DrugOrderShipmentLineCountArgs} args - Arguments to filter DrugOrderShipmentLines to count.
+     * @example
+     * // Count the number of DrugOrderShipmentLines
+     * const count = await prisma.drugOrderShipmentLine.count({
+     *   where: {
+     *     // ... the filter for the DrugOrderShipmentLines we want to count
+     *   }
+     * })
+    **/
+    count<T extends DrugOrderShipmentLineCountArgs>(
+      args?: Subset<T, DrugOrderShipmentLineCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], DrugOrderShipmentLineCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a DrugOrderShipmentLine.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DrugOrderShipmentLineAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends DrugOrderShipmentLineAggregateArgs>(args: Subset<T, DrugOrderShipmentLineAggregateArgs>): Prisma.PrismaPromise<GetDrugOrderShipmentLineAggregateType<T>>
+
+    /**
+     * Group by DrugOrderShipmentLine.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DrugOrderShipmentLineGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends DrugOrderShipmentLineGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: DrugOrderShipmentLineGroupByArgs['orderBy'] }
+        : { orderBy?: DrugOrderShipmentLineGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, DrugOrderShipmentLineGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetDrugOrderShipmentLineGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the DrugOrderShipmentLine model
+   */
+  readonly fields: DrugOrderShipmentLineFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for DrugOrderShipmentLine.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__DrugOrderShipmentLineClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    shipment<T extends DrugOrderShipmentDefaultArgs<ExtArgs> = {}>(args?: Subset<T, DrugOrderShipmentDefaultArgs<ExtArgs>>): Prisma__DrugOrderShipmentClient<$Result.GetResult<Prisma.$DrugOrderShipmentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    orderLine<T extends DrugOrderLineDefaultArgs<ExtArgs> = {}>(args?: Subset<T, DrugOrderLineDefaultArgs<ExtArgs>>): Prisma__DrugOrderLineClient<$Result.GetResult<Prisma.$DrugOrderLinePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    receiptLines<T extends DrugOrderShipmentLine$receiptLinesArgs<ExtArgs> = {}>(args?: Subset<T, DrugOrderShipmentLine$receiptLinesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DrugOrderReceiptLinePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the DrugOrderShipmentLine model
+   */
+  interface DrugOrderShipmentLineFieldRefs {
+    readonly id: FieldRef<"DrugOrderShipmentLine", 'String'>
+    readonly shipmentId: FieldRef<"DrugOrderShipmentLine", 'String'>
+    readonly orderLineId: FieldRef<"DrugOrderShipmentLine", 'String'>
+    readonly shippedQty: FieldRef<"DrugOrderShipmentLine", 'Decimal'>
+    readonly reason: FieldRef<"DrugOrderShipmentLine", 'String'>
+    readonly createdAt: FieldRef<"DrugOrderShipmentLine", 'DateTime'>
+    readonly updatedAt: FieldRef<"DrugOrderShipmentLine", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * DrugOrderShipmentLine findUnique
+   */
+  export type DrugOrderShipmentLineFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderShipmentLine
+     */
+    select?: DrugOrderShipmentLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderShipmentLine
+     */
+    omit?: DrugOrderShipmentLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderShipmentLineInclude<ExtArgs> | null
+    /**
+     * Filter, which DrugOrderShipmentLine to fetch.
+     */
+    where: DrugOrderShipmentLineWhereUniqueInput
+  }
+
+  /**
+   * DrugOrderShipmentLine findUniqueOrThrow
+   */
+  export type DrugOrderShipmentLineFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderShipmentLine
+     */
+    select?: DrugOrderShipmentLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderShipmentLine
+     */
+    omit?: DrugOrderShipmentLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderShipmentLineInclude<ExtArgs> | null
+    /**
+     * Filter, which DrugOrderShipmentLine to fetch.
+     */
+    where: DrugOrderShipmentLineWhereUniqueInput
+  }
+
+  /**
+   * DrugOrderShipmentLine findFirst
+   */
+  export type DrugOrderShipmentLineFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderShipmentLine
+     */
+    select?: DrugOrderShipmentLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderShipmentLine
+     */
+    omit?: DrugOrderShipmentLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderShipmentLineInclude<ExtArgs> | null
+    /**
+     * Filter, which DrugOrderShipmentLine to fetch.
+     */
+    where?: DrugOrderShipmentLineWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DrugOrderShipmentLines to fetch.
+     */
+    orderBy?: DrugOrderShipmentLineOrderByWithRelationInput | DrugOrderShipmentLineOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for DrugOrderShipmentLines.
+     */
+    cursor?: DrugOrderShipmentLineWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DrugOrderShipmentLines from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DrugOrderShipmentLines.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of DrugOrderShipmentLines.
+     */
+    distinct?: DrugOrderShipmentLineScalarFieldEnum | DrugOrderShipmentLineScalarFieldEnum[]
+  }
+
+  /**
+   * DrugOrderShipmentLine findFirstOrThrow
+   */
+  export type DrugOrderShipmentLineFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderShipmentLine
+     */
+    select?: DrugOrderShipmentLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderShipmentLine
+     */
+    omit?: DrugOrderShipmentLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderShipmentLineInclude<ExtArgs> | null
+    /**
+     * Filter, which DrugOrderShipmentLine to fetch.
+     */
+    where?: DrugOrderShipmentLineWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DrugOrderShipmentLines to fetch.
+     */
+    orderBy?: DrugOrderShipmentLineOrderByWithRelationInput | DrugOrderShipmentLineOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for DrugOrderShipmentLines.
+     */
+    cursor?: DrugOrderShipmentLineWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DrugOrderShipmentLines from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DrugOrderShipmentLines.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of DrugOrderShipmentLines.
+     */
+    distinct?: DrugOrderShipmentLineScalarFieldEnum | DrugOrderShipmentLineScalarFieldEnum[]
+  }
+
+  /**
+   * DrugOrderShipmentLine findMany
+   */
+  export type DrugOrderShipmentLineFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderShipmentLine
+     */
+    select?: DrugOrderShipmentLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderShipmentLine
+     */
+    omit?: DrugOrderShipmentLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderShipmentLineInclude<ExtArgs> | null
+    /**
+     * Filter, which DrugOrderShipmentLines to fetch.
+     */
+    where?: DrugOrderShipmentLineWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DrugOrderShipmentLines to fetch.
+     */
+    orderBy?: DrugOrderShipmentLineOrderByWithRelationInput | DrugOrderShipmentLineOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing DrugOrderShipmentLines.
+     */
+    cursor?: DrugOrderShipmentLineWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DrugOrderShipmentLines from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DrugOrderShipmentLines.
+     */
+    skip?: number
+    distinct?: DrugOrderShipmentLineScalarFieldEnum | DrugOrderShipmentLineScalarFieldEnum[]
+  }
+
+  /**
+   * DrugOrderShipmentLine create
+   */
+  export type DrugOrderShipmentLineCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderShipmentLine
+     */
+    select?: DrugOrderShipmentLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderShipmentLine
+     */
+    omit?: DrugOrderShipmentLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderShipmentLineInclude<ExtArgs> | null
+    /**
+     * The data needed to create a DrugOrderShipmentLine.
+     */
+    data: XOR<DrugOrderShipmentLineCreateInput, DrugOrderShipmentLineUncheckedCreateInput>
+  }
+
+  /**
+   * DrugOrderShipmentLine createMany
+   */
+  export type DrugOrderShipmentLineCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many DrugOrderShipmentLines.
+     */
+    data: DrugOrderShipmentLineCreateManyInput | DrugOrderShipmentLineCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * DrugOrderShipmentLine createManyAndReturn
+   */
+  export type DrugOrderShipmentLineCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderShipmentLine
+     */
+    select?: DrugOrderShipmentLineSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderShipmentLine
+     */
+    omit?: DrugOrderShipmentLineOmit<ExtArgs> | null
+    /**
+     * The data used to create many DrugOrderShipmentLines.
+     */
+    data: DrugOrderShipmentLineCreateManyInput | DrugOrderShipmentLineCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderShipmentLineIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * DrugOrderShipmentLine update
+   */
+  export type DrugOrderShipmentLineUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderShipmentLine
+     */
+    select?: DrugOrderShipmentLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderShipmentLine
+     */
+    omit?: DrugOrderShipmentLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderShipmentLineInclude<ExtArgs> | null
+    /**
+     * The data needed to update a DrugOrderShipmentLine.
+     */
+    data: XOR<DrugOrderShipmentLineUpdateInput, DrugOrderShipmentLineUncheckedUpdateInput>
+    /**
+     * Choose, which DrugOrderShipmentLine to update.
+     */
+    where: DrugOrderShipmentLineWhereUniqueInput
+  }
+
+  /**
+   * DrugOrderShipmentLine updateMany
+   */
+  export type DrugOrderShipmentLineUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update DrugOrderShipmentLines.
+     */
+    data: XOR<DrugOrderShipmentLineUpdateManyMutationInput, DrugOrderShipmentLineUncheckedUpdateManyInput>
+    /**
+     * Filter which DrugOrderShipmentLines to update
+     */
+    where?: DrugOrderShipmentLineWhereInput
+    /**
+     * Limit how many DrugOrderShipmentLines to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * DrugOrderShipmentLine updateManyAndReturn
+   */
+  export type DrugOrderShipmentLineUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderShipmentLine
+     */
+    select?: DrugOrderShipmentLineSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderShipmentLine
+     */
+    omit?: DrugOrderShipmentLineOmit<ExtArgs> | null
+    /**
+     * The data used to update DrugOrderShipmentLines.
+     */
+    data: XOR<DrugOrderShipmentLineUpdateManyMutationInput, DrugOrderShipmentLineUncheckedUpdateManyInput>
+    /**
+     * Filter which DrugOrderShipmentLines to update
+     */
+    where?: DrugOrderShipmentLineWhereInput
+    /**
+     * Limit how many DrugOrderShipmentLines to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderShipmentLineIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * DrugOrderShipmentLine upsert
+   */
+  export type DrugOrderShipmentLineUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderShipmentLine
+     */
+    select?: DrugOrderShipmentLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderShipmentLine
+     */
+    omit?: DrugOrderShipmentLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderShipmentLineInclude<ExtArgs> | null
+    /**
+     * The filter to search for the DrugOrderShipmentLine to update in case it exists.
+     */
+    where: DrugOrderShipmentLineWhereUniqueInput
+    /**
+     * In case the DrugOrderShipmentLine found by the `where` argument doesn't exist, create a new DrugOrderShipmentLine with this data.
+     */
+    create: XOR<DrugOrderShipmentLineCreateInput, DrugOrderShipmentLineUncheckedCreateInput>
+    /**
+     * In case the DrugOrderShipmentLine was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<DrugOrderShipmentLineUpdateInput, DrugOrderShipmentLineUncheckedUpdateInput>
+  }
+
+  /**
+   * DrugOrderShipmentLine delete
+   */
+  export type DrugOrderShipmentLineDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderShipmentLine
+     */
+    select?: DrugOrderShipmentLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderShipmentLine
+     */
+    omit?: DrugOrderShipmentLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderShipmentLineInclude<ExtArgs> | null
+    /**
+     * Filter which DrugOrderShipmentLine to delete.
+     */
+    where: DrugOrderShipmentLineWhereUniqueInput
+  }
+
+  /**
+   * DrugOrderShipmentLine deleteMany
+   */
+  export type DrugOrderShipmentLineDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which DrugOrderShipmentLines to delete
+     */
+    where?: DrugOrderShipmentLineWhereInput
+    /**
+     * Limit how many DrugOrderShipmentLines to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * DrugOrderShipmentLine.receiptLines
+   */
+  export type DrugOrderShipmentLine$receiptLinesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderReceiptLine
+     */
+    select?: DrugOrderReceiptLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderReceiptLine
+     */
+    omit?: DrugOrderReceiptLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderReceiptLineInclude<ExtArgs> | null
+    where?: DrugOrderReceiptLineWhereInput
+    orderBy?: DrugOrderReceiptLineOrderByWithRelationInput | DrugOrderReceiptLineOrderByWithRelationInput[]
+    cursor?: DrugOrderReceiptLineWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: DrugOrderReceiptLineScalarFieldEnum | DrugOrderReceiptLineScalarFieldEnum[]
+  }
+
+  /**
+   * DrugOrderShipmentLine without action
+   */
+  export type DrugOrderShipmentLineDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderShipmentLine
+     */
+    select?: DrugOrderShipmentLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderShipmentLine
+     */
+    omit?: DrugOrderShipmentLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderShipmentLineInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model DrugOrderReceipt
+   */
+
+  export type AggregateDrugOrderReceipt = {
+    _count: DrugOrderReceiptCountAggregateOutputType | null
+    _min: DrugOrderReceiptMinAggregateOutputType | null
+    _max: DrugOrderReceiptMaxAggregateOutputType | null
+  }
+
+  export type DrugOrderReceiptMinAggregateOutputType = {
+    id: string | null
+    orderId: string | null
+    shipmentId: string | null
+    facilityId: string | null
+    confirmedAt: Date | null
+    note: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type DrugOrderReceiptMaxAggregateOutputType = {
+    id: string | null
+    orderId: string | null
+    shipmentId: string | null
+    facilityId: string | null
+    confirmedAt: Date | null
+    note: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type DrugOrderReceiptCountAggregateOutputType = {
+    id: number
+    orderId: number
+    shipmentId: number
+    facilityId: number
+    confirmedAt: number
+    note: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type DrugOrderReceiptMinAggregateInputType = {
+    id?: true
+    orderId?: true
+    shipmentId?: true
+    facilityId?: true
+    confirmedAt?: true
+    note?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type DrugOrderReceiptMaxAggregateInputType = {
+    id?: true
+    orderId?: true
+    shipmentId?: true
+    facilityId?: true
+    confirmedAt?: true
+    note?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type DrugOrderReceiptCountAggregateInputType = {
+    id?: true
+    orderId?: true
+    shipmentId?: true
+    facilityId?: true
+    confirmedAt?: true
+    note?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type DrugOrderReceiptAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which DrugOrderReceipt to aggregate.
+     */
+    where?: DrugOrderReceiptWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DrugOrderReceipts to fetch.
+     */
+    orderBy?: DrugOrderReceiptOrderByWithRelationInput | DrugOrderReceiptOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: DrugOrderReceiptWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DrugOrderReceipts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DrugOrderReceipts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned DrugOrderReceipts
+    **/
+    _count?: true | DrugOrderReceiptCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: DrugOrderReceiptMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: DrugOrderReceiptMaxAggregateInputType
+  }
+
+  export type GetDrugOrderReceiptAggregateType<T extends DrugOrderReceiptAggregateArgs> = {
+        [P in keyof T & keyof AggregateDrugOrderReceipt]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateDrugOrderReceipt[P]>
+      : GetScalarType<T[P], AggregateDrugOrderReceipt[P]>
+  }
+
+
+
+
+  export type DrugOrderReceiptGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DrugOrderReceiptWhereInput
+    orderBy?: DrugOrderReceiptOrderByWithAggregationInput | DrugOrderReceiptOrderByWithAggregationInput[]
+    by: DrugOrderReceiptScalarFieldEnum[] | DrugOrderReceiptScalarFieldEnum
+    having?: DrugOrderReceiptScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: DrugOrderReceiptCountAggregateInputType | true
+    _min?: DrugOrderReceiptMinAggregateInputType
+    _max?: DrugOrderReceiptMaxAggregateInputType
+  }
+
+  export type DrugOrderReceiptGroupByOutputType = {
+    id: string
+    orderId: string
+    shipmentId: string
+    facilityId: string
+    confirmedAt: Date
+    note: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: DrugOrderReceiptCountAggregateOutputType | null
+    _min: DrugOrderReceiptMinAggregateOutputType | null
+    _max: DrugOrderReceiptMaxAggregateOutputType | null
+  }
+
+  type GetDrugOrderReceiptGroupByPayload<T extends DrugOrderReceiptGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<DrugOrderReceiptGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof DrugOrderReceiptGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], DrugOrderReceiptGroupByOutputType[P]>
+            : GetScalarType<T[P], DrugOrderReceiptGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type DrugOrderReceiptSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    orderId?: boolean
+    shipmentId?: boolean
+    facilityId?: boolean
+    confirmedAt?: boolean
+    note?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    order?: boolean | DrugOrderDefaultArgs<ExtArgs>
+    shipment?: boolean | DrugOrderShipmentDefaultArgs<ExtArgs>
+    facility?: boolean | UserDefaultArgs<ExtArgs>
+    lines?: boolean | DrugOrderReceipt$linesArgs<ExtArgs>
+    _count?: boolean | DrugOrderReceiptCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["drugOrderReceipt"]>
+
+  export type DrugOrderReceiptSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    orderId?: boolean
+    shipmentId?: boolean
+    facilityId?: boolean
+    confirmedAt?: boolean
+    note?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    order?: boolean | DrugOrderDefaultArgs<ExtArgs>
+    shipment?: boolean | DrugOrderShipmentDefaultArgs<ExtArgs>
+    facility?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["drugOrderReceipt"]>
+
+  export type DrugOrderReceiptSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    orderId?: boolean
+    shipmentId?: boolean
+    facilityId?: boolean
+    confirmedAt?: boolean
+    note?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    order?: boolean | DrugOrderDefaultArgs<ExtArgs>
+    shipment?: boolean | DrugOrderShipmentDefaultArgs<ExtArgs>
+    facility?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["drugOrderReceipt"]>
+
+  export type DrugOrderReceiptSelectScalar = {
+    id?: boolean
+    orderId?: boolean
+    shipmentId?: boolean
+    facilityId?: boolean
+    confirmedAt?: boolean
+    note?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type DrugOrderReceiptOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "orderId" | "shipmentId" | "facilityId" | "confirmedAt" | "note" | "createdAt" | "updatedAt", ExtArgs["result"]["drugOrderReceipt"]>
+  export type DrugOrderReceiptInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    order?: boolean | DrugOrderDefaultArgs<ExtArgs>
+    shipment?: boolean | DrugOrderShipmentDefaultArgs<ExtArgs>
+    facility?: boolean | UserDefaultArgs<ExtArgs>
+    lines?: boolean | DrugOrderReceipt$linesArgs<ExtArgs>
+    _count?: boolean | DrugOrderReceiptCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type DrugOrderReceiptIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    order?: boolean | DrugOrderDefaultArgs<ExtArgs>
+    shipment?: boolean | DrugOrderShipmentDefaultArgs<ExtArgs>
+    facility?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type DrugOrderReceiptIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    order?: boolean | DrugOrderDefaultArgs<ExtArgs>
+    shipment?: boolean | DrugOrderShipmentDefaultArgs<ExtArgs>
+    facility?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $DrugOrderReceiptPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "DrugOrderReceipt"
+    objects: {
+      order: Prisma.$DrugOrderPayload<ExtArgs>
+      shipment: Prisma.$DrugOrderShipmentPayload<ExtArgs>
+      facility: Prisma.$UserPayload<ExtArgs>
+      lines: Prisma.$DrugOrderReceiptLinePayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      orderId: string
+      shipmentId: string
+      facilityId: string
+      confirmedAt: Date
+      note: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["drugOrderReceipt"]>
+    composites: {}
+  }
+
+  type DrugOrderReceiptGetPayload<S extends boolean | null | undefined | DrugOrderReceiptDefaultArgs> = $Result.GetResult<Prisma.$DrugOrderReceiptPayload, S>
+
+  type DrugOrderReceiptCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<DrugOrderReceiptFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: DrugOrderReceiptCountAggregateInputType | true
+    }
+
+  export interface DrugOrderReceiptDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['DrugOrderReceipt'], meta: { name: 'DrugOrderReceipt' } }
+    /**
+     * Find zero or one DrugOrderReceipt that matches the filter.
+     * @param {DrugOrderReceiptFindUniqueArgs} args - Arguments to find a DrugOrderReceipt
+     * @example
+     * // Get one DrugOrderReceipt
+     * const drugOrderReceipt = await prisma.drugOrderReceipt.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends DrugOrderReceiptFindUniqueArgs>(args: SelectSubset<T, DrugOrderReceiptFindUniqueArgs<ExtArgs>>): Prisma__DrugOrderReceiptClient<$Result.GetResult<Prisma.$DrugOrderReceiptPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one DrugOrderReceipt that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {DrugOrderReceiptFindUniqueOrThrowArgs} args - Arguments to find a DrugOrderReceipt
+     * @example
+     * // Get one DrugOrderReceipt
+     * const drugOrderReceipt = await prisma.drugOrderReceipt.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends DrugOrderReceiptFindUniqueOrThrowArgs>(args: SelectSubset<T, DrugOrderReceiptFindUniqueOrThrowArgs<ExtArgs>>): Prisma__DrugOrderReceiptClient<$Result.GetResult<Prisma.$DrugOrderReceiptPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first DrugOrderReceipt that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DrugOrderReceiptFindFirstArgs} args - Arguments to find a DrugOrderReceipt
+     * @example
+     * // Get one DrugOrderReceipt
+     * const drugOrderReceipt = await prisma.drugOrderReceipt.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends DrugOrderReceiptFindFirstArgs>(args?: SelectSubset<T, DrugOrderReceiptFindFirstArgs<ExtArgs>>): Prisma__DrugOrderReceiptClient<$Result.GetResult<Prisma.$DrugOrderReceiptPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first DrugOrderReceipt that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DrugOrderReceiptFindFirstOrThrowArgs} args - Arguments to find a DrugOrderReceipt
+     * @example
+     * // Get one DrugOrderReceipt
+     * const drugOrderReceipt = await prisma.drugOrderReceipt.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends DrugOrderReceiptFindFirstOrThrowArgs>(args?: SelectSubset<T, DrugOrderReceiptFindFirstOrThrowArgs<ExtArgs>>): Prisma__DrugOrderReceiptClient<$Result.GetResult<Prisma.$DrugOrderReceiptPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more DrugOrderReceipts that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DrugOrderReceiptFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all DrugOrderReceipts
+     * const drugOrderReceipts = await prisma.drugOrderReceipt.findMany()
+     * 
+     * // Get first 10 DrugOrderReceipts
+     * const drugOrderReceipts = await prisma.drugOrderReceipt.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const drugOrderReceiptWithIdOnly = await prisma.drugOrderReceipt.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends DrugOrderReceiptFindManyArgs>(args?: SelectSubset<T, DrugOrderReceiptFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DrugOrderReceiptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a DrugOrderReceipt.
+     * @param {DrugOrderReceiptCreateArgs} args - Arguments to create a DrugOrderReceipt.
+     * @example
+     * // Create one DrugOrderReceipt
+     * const DrugOrderReceipt = await prisma.drugOrderReceipt.create({
+     *   data: {
+     *     // ... data to create a DrugOrderReceipt
+     *   }
+     * })
+     * 
+     */
+    create<T extends DrugOrderReceiptCreateArgs>(args: SelectSubset<T, DrugOrderReceiptCreateArgs<ExtArgs>>): Prisma__DrugOrderReceiptClient<$Result.GetResult<Prisma.$DrugOrderReceiptPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many DrugOrderReceipts.
+     * @param {DrugOrderReceiptCreateManyArgs} args - Arguments to create many DrugOrderReceipts.
+     * @example
+     * // Create many DrugOrderReceipts
+     * const drugOrderReceipt = await prisma.drugOrderReceipt.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends DrugOrderReceiptCreateManyArgs>(args?: SelectSubset<T, DrugOrderReceiptCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many DrugOrderReceipts and returns the data saved in the database.
+     * @param {DrugOrderReceiptCreateManyAndReturnArgs} args - Arguments to create many DrugOrderReceipts.
+     * @example
+     * // Create many DrugOrderReceipts
+     * const drugOrderReceipt = await prisma.drugOrderReceipt.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many DrugOrderReceipts and only return the `id`
+     * const drugOrderReceiptWithIdOnly = await prisma.drugOrderReceipt.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends DrugOrderReceiptCreateManyAndReturnArgs>(args?: SelectSubset<T, DrugOrderReceiptCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DrugOrderReceiptPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a DrugOrderReceipt.
+     * @param {DrugOrderReceiptDeleteArgs} args - Arguments to delete one DrugOrderReceipt.
+     * @example
+     * // Delete one DrugOrderReceipt
+     * const DrugOrderReceipt = await prisma.drugOrderReceipt.delete({
+     *   where: {
+     *     // ... filter to delete one DrugOrderReceipt
+     *   }
+     * })
+     * 
+     */
+    delete<T extends DrugOrderReceiptDeleteArgs>(args: SelectSubset<T, DrugOrderReceiptDeleteArgs<ExtArgs>>): Prisma__DrugOrderReceiptClient<$Result.GetResult<Prisma.$DrugOrderReceiptPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one DrugOrderReceipt.
+     * @param {DrugOrderReceiptUpdateArgs} args - Arguments to update one DrugOrderReceipt.
+     * @example
+     * // Update one DrugOrderReceipt
+     * const drugOrderReceipt = await prisma.drugOrderReceipt.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends DrugOrderReceiptUpdateArgs>(args: SelectSubset<T, DrugOrderReceiptUpdateArgs<ExtArgs>>): Prisma__DrugOrderReceiptClient<$Result.GetResult<Prisma.$DrugOrderReceiptPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more DrugOrderReceipts.
+     * @param {DrugOrderReceiptDeleteManyArgs} args - Arguments to filter DrugOrderReceipts to delete.
+     * @example
+     * // Delete a few DrugOrderReceipts
+     * const { count } = await prisma.drugOrderReceipt.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends DrugOrderReceiptDeleteManyArgs>(args?: SelectSubset<T, DrugOrderReceiptDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more DrugOrderReceipts.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DrugOrderReceiptUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many DrugOrderReceipts
+     * const drugOrderReceipt = await prisma.drugOrderReceipt.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends DrugOrderReceiptUpdateManyArgs>(args: SelectSubset<T, DrugOrderReceiptUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more DrugOrderReceipts and returns the data updated in the database.
+     * @param {DrugOrderReceiptUpdateManyAndReturnArgs} args - Arguments to update many DrugOrderReceipts.
+     * @example
+     * // Update many DrugOrderReceipts
+     * const drugOrderReceipt = await prisma.drugOrderReceipt.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more DrugOrderReceipts and only return the `id`
+     * const drugOrderReceiptWithIdOnly = await prisma.drugOrderReceipt.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends DrugOrderReceiptUpdateManyAndReturnArgs>(args: SelectSubset<T, DrugOrderReceiptUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DrugOrderReceiptPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one DrugOrderReceipt.
+     * @param {DrugOrderReceiptUpsertArgs} args - Arguments to update or create a DrugOrderReceipt.
+     * @example
+     * // Update or create a DrugOrderReceipt
+     * const drugOrderReceipt = await prisma.drugOrderReceipt.upsert({
+     *   create: {
+     *     // ... data to create a DrugOrderReceipt
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the DrugOrderReceipt we want to update
+     *   }
+     * })
+     */
+    upsert<T extends DrugOrderReceiptUpsertArgs>(args: SelectSubset<T, DrugOrderReceiptUpsertArgs<ExtArgs>>): Prisma__DrugOrderReceiptClient<$Result.GetResult<Prisma.$DrugOrderReceiptPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of DrugOrderReceipts.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DrugOrderReceiptCountArgs} args - Arguments to filter DrugOrderReceipts to count.
+     * @example
+     * // Count the number of DrugOrderReceipts
+     * const count = await prisma.drugOrderReceipt.count({
+     *   where: {
+     *     // ... the filter for the DrugOrderReceipts we want to count
+     *   }
+     * })
+    **/
+    count<T extends DrugOrderReceiptCountArgs>(
+      args?: Subset<T, DrugOrderReceiptCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], DrugOrderReceiptCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a DrugOrderReceipt.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DrugOrderReceiptAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends DrugOrderReceiptAggregateArgs>(args: Subset<T, DrugOrderReceiptAggregateArgs>): Prisma.PrismaPromise<GetDrugOrderReceiptAggregateType<T>>
+
+    /**
+     * Group by DrugOrderReceipt.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DrugOrderReceiptGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends DrugOrderReceiptGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: DrugOrderReceiptGroupByArgs['orderBy'] }
+        : { orderBy?: DrugOrderReceiptGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, DrugOrderReceiptGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetDrugOrderReceiptGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the DrugOrderReceipt model
+   */
+  readonly fields: DrugOrderReceiptFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for DrugOrderReceipt.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__DrugOrderReceiptClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    order<T extends DrugOrderDefaultArgs<ExtArgs> = {}>(args?: Subset<T, DrugOrderDefaultArgs<ExtArgs>>): Prisma__DrugOrderClient<$Result.GetResult<Prisma.$DrugOrderPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    shipment<T extends DrugOrderShipmentDefaultArgs<ExtArgs> = {}>(args?: Subset<T, DrugOrderShipmentDefaultArgs<ExtArgs>>): Prisma__DrugOrderShipmentClient<$Result.GetResult<Prisma.$DrugOrderShipmentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    facility<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    lines<T extends DrugOrderReceipt$linesArgs<ExtArgs> = {}>(args?: Subset<T, DrugOrderReceipt$linesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DrugOrderReceiptLinePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the DrugOrderReceipt model
+   */
+  interface DrugOrderReceiptFieldRefs {
+    readonly id: FieldRef<"DrugOrderReceipt", 'String'>
+    readonly orderId: FieldRef<"DrugOrderReceipt", 'String'>
+    readonly shipmentId: FieldRef<"DrugOrderReceipt", 'String'>
+    readonly facilityId: FieldRef<"DrugOrderReceipt", 'String'>
+    readonly confirmedAt: FieldRef<"DrugOrderReceipt", 'DateTime'>
+    readonly note: FieldRef<"DrugOrderReceipt", 'String'>
+    readonly createdAt: FieldRef<"DrugOrderReceipt", 'DateTime'>
+    readonly updatedAt: FieldRef<"DrugOrderReceipt", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * DrugOrderReceipt findUnique
+   */
+  export type DrugOrderReceiptFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderReceipt
+     */
+    select?: DrugOrderReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderReceipt
+     */
+    omit?: DrugOrderReceiptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderReceiptInclude<ExtArgs> | null
+    /**
+     * Filter, which DrugOrderReceipt to fetch.
+     */
+    where: DrugOrderReceiptWhereUniqueInput
+  }
+
+  /**
+   * DrugOrderReceipt findUniqueOrThrow
+   */
+  export type DrugOrderReceiptFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderReceipt
+     */
+    select?: DrugOrderReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderReceipt
+     */
+    omit?: DrugOrderReceiptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderReceiptInclude<ExtArgs> | null
+    /**
+     * Filter, which DrugOrderReceipt to fetch.
+     */
+    where: DrugOrderReceiptWhereUniqueInput
+  }
+
+  /**
+   * DrugOrderReceipt findFirst
+   */
+  export type DrugOrderReceiptFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderReceipt
+     */
+    select?: DrugOrderReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderReceipt
+     */
+    omit?: DrugOrderReceiptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderReceiptInclude<ExtArgs> | null
+    /**
+     * Filter, which DrugOrderReceipt to fetch.
+     */
+    where?: DrugOrderReceiptWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DrugOrderReceipts to fetch.
+     */
+    orderBy?: DrugOrderReceiptOrderByWithRelationInput | DrugOrderReceiptOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for DrugOrderReceipts.
+     */
+    cursor?: DrugOrderReceiptWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DrugOrderReceipts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DrugOrderReceipts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of DrugOrderReceipts.
+     */
+    distinct?: DrugOrderReceiptScalarFieldEnum | DrugOrderReceiptScalarFieldEnum[]
+  }
+
+  /**
+   * DrugOrderReceipt findFirstOrThrow
+   */
+  export type DrugOrderReceiptFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderReceipt
+     */
+    select?: DrugOrderReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderReceipt
+     */
+    omit?: DrugOrderReceiptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderReceiptInclude<ExtArgs> | null
+    /**
+     * Filter, which DrugOrderReceipt to fetch.
+     */
+    where?: DrugOrderReceiptWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DrugOrderReceipts to fetch.
+     */
+    orderBy?: DrugOrderReceiptOrderByWithRelationInput | DrugOrderReceiptOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for DrugOrderReceipts.
+     */
+    cursor?: DrugOrderReceiptWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DrugOrderReceipts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DrugOrderReceipts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of DrugOrderReceipts.
+     */
+    distinct?: DrugOrderReceiptScalarFieldEnum | DrugOrderReceiptScalarFieldEnum[]
+  }
+
+  /**
+   * DrugOrderReceipt findMany
+   */
+  export type DrugOrderReceiptFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderReceipt
+     */
+    select?: DrugOrderReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderReceipt
+     */
+    omit?: DrugOrderReceiptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderReceiptInclude<ExtArgs> | null
+    /**
+     * Filter, which DrugOrderReceipts to fetch.
+     */
+    where?: DrugOrderReceiptWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DrugOrderReceipts to fetch.
+     */
+    orderBy?: DrugOrderReceiptOrderByWithRelationInput | DrugOrderReceiptOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing DrugOrderReceipts.
+     */
+    cursor?: DrugOrderReceiptWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DrugOrderReceipts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DrugOrderReceipts.
+     */
+    skip?: number
+    distinct?: DrugOrderReceiptScalarFieldEnum | DrugOrderReceiptScalarFieldEnum[]
+  }
+
+  /**
+   * DrugOrderReceipt create
+   */
+  export type DrugOrderReceiptCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderReceipt
+     */
+    select?: DrugOrderReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderReceipt
+     */
+    omit?: DrugOrderReceiptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderReceiptInclude<ExtArgs> | null
+    /**
+     * The data needed to create a DrugOrderReceipt.
+     */
+    data: XOR<DrugOrderReceiptCreateInput, DrugOrderReceiptUncheckedCreateInput>
+  }
+
+  /**
+   * DrugOrderReceipt createMany
+   */
+  export type DrugOrderReceiptCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many DrugOrderReceipts.
+     */
+    data: DrugOrderReceiptCreateManyInput | DrugOrderReceiptCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * DrugOrderReceipt createManyAndReturn
+   */
+  export type DrugOrderReceiptCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderReceipt
+     */
+    select?: DrugOrderReceiptSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderReceipt
+     */
+    omit?: DrugOrderReceiptOmit<ExtArgs> | null
+    /**
+     * The data used to create many DrugOrderReceipts.
+     */
+    data: DrugOrderReceiptCreateManyInput | DrugOrderReceiptCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderReceiptIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * DrugOrderReceipt update
+   */
+  export type DrugOrderReceiptUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderReceipt
+     */
+    select?: DrugOrderReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderReceipt
+     */
+    omit?: DrugOrderReceiptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderReceiptInclude<ExtArgs> | null
+    /**
+     * The data needed to update a DrugOrderReceipt.
+     */
+    data: XOR<DrugOrderReceiptUpdateInput, DrugOrderReceiptUncheckedUpdateInput>
+    /**
+     * Choose, which DrugOrderReceipt to update.
+     */
+    where: DrugOrderReceiptWhereUniqueInput
+  }
+
+  /**
+   * DrugOrderReceipt updateMany
+   */
+  export type DrugOrderReceiptUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update DrugOrderReceipts.
+     */
+    data: XOR<DrugOrderReceiptUpdateManyMutationInput, DrugOrderReceiptUncheckedUpdateManyInput>
+    /**
+     * Filter which DrugOrderReceipts to update
+     */
+    where?: DrugOrderReceiptWhereInput
+    /**
+     * Limit how many DrugOrderReceipts to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * DrugOrderReceipt updateManyAndReturn
+   */
+  export type DrugOrderReceiptUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderReceipt
+     */
+    select?: DrugOrderReceiptSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderReceipt
+     */
+    omit?: DrugOrderReceiptOmit<ExtArgs> | null
+    /**
+     * The data used to update DrugOrderReceipts.
+     */
+    data: XOR<DrugOrderReceiptUpdateManyMutationInput, DrugOrderReceiptUncheckedUpdateManyInput>
+    /**
+     * Filter which DrugOrderReceipts to update
+     */
+    where?: DrugOrderReceiptWhereInput
+    /**
+     * Limit how many DrugOrderReceipts to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderReceiptIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * DrugOrderReceipt upsert
+   */
+  export type DrugOrderReceiptUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderReceipt
+     */
+    select?: DrugOrderReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderReceipt
+     */
+    omit?: DrugOrderReceiptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderReceiptInclude<ExtArgs> | null
+    /**
+     * The filter to search for the DrugOrderReceipt to update in case it exists.
+     */
+    where: DrugOrderReceiptWhereUniqueInput
+    /**
+     * In case the DrugOrderReceipt found by the `where` argument doesn't exist, create a new DrugOrderReceipt with this data.
+     */
+    create: XOR<DrugOrderReceiptCreateInput, DrugOrderReceiptUncheckedCreateInput>
+    /**
+     * In case the DrugOrderReceipt was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<DrugOrderReceiptUpdateInput, DrugOrderReceiptUncheckedUpdateInput>
+  }
+
+  /**
+   * DrugOrderReceipt delete
+   */
+  export type DrugOrderReceiptDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderReceipt
+     */
+    select?: DrugOrderReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderReceipt
+     */
+    omit?: DrugOrderReceiptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderReceiptInclude<ExtArgs> | null
+    /**
+     * Filter which DrugOrderReceipt to delete.
+     */
+    where: DrugOrderReceiptWhereUniqueInput
+  }
+
+  /**
+   * DrugOrderReceipt deleteMany
+   */
+  export type DrugOrderReceiptDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which DrugOrderReceipts to delete
+     */
+    where?: DrugOrderReceiptWhereInput
+    /**
+     * Limit how many DrugOrderReceipts to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * DrugOrderReceipt.lines
+   */
+  export type DrugOrderReceipt$linesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderReceiptLine
+     */
+    select?: DrugOrderReceiptLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderReceiptLine
+     */
+    omit?: DrugOrderReceiptLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderReceiptLineInclude<ExtArgs> | null
+    where?: DrugOrderReceiptLineWhereInput
+    orderBy?: DrugOrderReceiptLineOrderByWithRelationInput | DrugOrderReceiptLineOrderByWithRelationInput[]
+    cursor?: DrugOrderReceiptLineWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: DrugOrderReceiptLineScalarFieldEnum | DrugOrderReceiptLineScalarFieldEnum[]
+  }
+
+  /**
+   * DrugOrderReceipt without action
+   */
+  export type DrugOrderReceiptDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderReceipt
+     */
+    select?: DrugOrderReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderReceipt
+     */
+    omit?: DrugOrderReceiptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderReceiptInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model DrugOrderReceiptLine
+   */
+
+  export type AggregateDrugOrderReceiptLine = {
+    _count: DrugOrderReceiptLineCountAggregateOutputType | null
+    _avg: DrugOrderReceiptLineAvgAggregateOutputType | null
+    _sum: DrugOrderReceiptLineSumAggregateOutputType | null
+    _min: DrugOrderReceiptLineMinAggregateOutputType | null
+    _max: DrugOrderReceiptLineMaxAggregateOutputType | null
+  }
+
+  export type DrugOrderReceiptLineAvgAggregateOutputType = {
+    receivedQty: Decimal | null
+  }
+
+  export type DrugOrderReceiptLineSumAggregateOutputType = {
+    receivedQty: Decimal | null
+  }
+
+  export type DrugOrderReceiptLineMinAggregateOutputType = {
+    id: string | null
+    receiptId: string | null
+    shipmentLineId: string | null
+    orderLineId: string | null
+    receivedQty: Decimal | null
+    differenceReason: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type DrugOrderReceiptLineMaxAggregateOutputType = {
+    id: string | null
+    receiptId: string | null
+    shipmentLineId: string | null
+    orderLineId: string | null
+    receivedQty: Decimal | null
+    differenceReason: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type DrugOrderReceiptLineCountAggregateOutputType = {
+    id: number
+    receiptId: number
+    shipmentLineId: number
+    orderLineId: number
+    receivedQty: number
+    differenceReason: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type DrugOrderReceiptLineAvgAggregateInputType = {
+    receivedQty?: true
+  }
+
+  export type DrugOrderReceiptLineSumAggregateInputType = {
+    receivedQty?: true
+  }
+
+  export type DrugOrderReceiptLineMinAggregateInputType = {
+    id?: true
+    receiptId?: true
+    shipmentLineId?: true
+    orderLineId?: true
+    receivedQty?: true
+    differenceReason?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type DrugOrderReceiptLineMaxAggregateInputType = {
+    id?: true
+    receiptId?: true
+    shipmentLineId?: true
+    orderLineId?: true
+    receivedQty?: true
+    differenceReason?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type DrugOrderReceiptLineCountAggregateInputType = {
+    id?: true
+    receiptId?: true
+    shipmentLineId?: true
+    orderLineId?: true
+    receivedQty?: true
+    differenceReason?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type DrugOrderReceiptLineAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which DrugOrderReceiptLine to aggregate.
+     */
+    where?: DrugOrderReceiptLineWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DrugOrderReceiptLines to fetch.
+     */
+    orderBy?: DrugOrderReceiptLineOrderByWithRelationInput | DrugOrderReceiptLineOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: DrugOrderReceiptLineWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DrugOrderReceiptLines from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DrugOrderReceiptLines.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned DrugOrderReceiptLines
+    **/
+    _count?: true | DrugOrderReceiptLineCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: DrugOrderReceiptLineAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: DrugOrderReceiptLineSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: DrugOrderReceiptLineMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: DrugOrderReceiptLineMaxAggregateInputType
+  }
+
+  export type GetDrugOrderReceiptLineAggregateType<T extends DrugOrderReceiptLineAggregateArgs> = {
+        [P in keyof T & keyof AggregateDrugOrderReceiptLine]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateDrugOrderReceiptLine[P]>
+      : GetScalarType<T[P], AggregateDrugOrderReceiptLine[P]>
+  }
+
+
+
+
+  export type DrugOrderReceiptLineGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DrugOrderReceiptLineWhereInput
+    orderBy?: DrugOrderReceiptLineOrderByWithAggregationInput | DrugOrderReceiptLineOrderByWithAggregationInput[]
+    by: DrugOrderReceiptLineScalarFieldEnum[] | DrugOrderReceiptLineScalarFieldEnum
+    having?: DrugOrderReceiptLineScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: DrugOrderReceiptLineCountAggregateInputType | true
+    _avg?: DrugOrderReceiptLineAvgAggregateInputType
+    _sum?: DrugOrderReceiptLineSumAggregateInputType
+    _min?: DrugOrderReceiptLineMinAggregateInputType
+    _max?: DrugOrderReceiptLineMaxAggregateInputType
+  }
+
+  export type DrugOrderReceiptLineGroupByOutputType = {
+    id: string
+    receiptId: string
+    shipmentLineId: string
+    orderLineId: string
+    receivedQty: Decimal
+    differenceReason: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: DrugOrderReceiptLineCountAggregateOutputType | null
+    _avg: DrugOrderReceiptLineAvgAggregateOutputType | null
+    _sum: DrugOrderReceiptLineSumAggregateOutputType | null
+    _min: DrugOrderReceiptLineMinAggregateOutputType | null
+    _max: DrugOrderReceiptLineMaxAggregateOutputType | null
+  }
+
+  type GetDrugOrderReceiptLineGroupByPayload<T extends DrugOrderReceiptLineGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<DrugOrderReceiptLineGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof DrugOrderReceiptLineGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], DrugOrderReceiptLineGroupByOutputType[P]>
+            : GetScalarType<T[P], DrugOrderReceiptLineGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type DrugOrderReceiptLineSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    receiptId?: boolean
+    shipmentLineId?: boolean
+    orderLineId?: boolean
+    receivedQty?: boolean
+    differenceReason?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    receipt?: boolean | DrugOrderReceiptDefaultArgs<ExtArgs>
+    shipmentLine?: boolean | DrugOrderShipmentLineDefaultArgs<ExtArgs>
+    orderLine?: boolean | DrugOrderLineDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["drugOrderReceiptLine"]>
+
+  export type DrugOrderReceiptLineSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    receiptId?: boolean
+    shipmentLineId?: boolean
+    orderLineId?: boolean
+    receivedQty?: boolean
+    differenceReason?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    receipt?: boolean | DrugOrderReceiptDefaultArgs<ExtArgs>
+    shipmentLine?: boolean | DrugOrderShipmentLineDefaultArgs<ExtArgs>
+    orderLine?: boolean | DrugOrderLineDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["drugOrderReceiptLine"]>
+
+  export type DrugOrderReceiptLineSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    receiptId?: boolean
+    shipmentLineId?: boolean
+    orderLineId?: boolean
+    receivedQty?: boolean
+    differenceReason?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    receipt?: boolean | DrugOrderReceiptDefaultArgs<ExtArgs>
+    shipmentLine?: boolean | DrugOrderShipmentLineDefaultArgs<ExtArgs>
+    orderLine?: boolean | DrugOrderLineDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["drugOrderReceiptLine"]>
+
+  export type DrugOrderReceiptLineSelectScalar = {
+    id?: boolean
+    receiptId?: boolean
+    shipmentLineId?: boolean
+    orderLineId?: boolean
+    receivedQty?: boolean
+    differenceReason?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type DrugOrderReceiptLineOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "receiptId" | "shipmentLineId" | "orderLineId" | "receivedQty" | "differenceReason" | "createdAt" | "updatedAt", ExtArgs["result"]["drugOrderReceiptLine"]>
+  export type DrugOrderReceiptLineInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    receipt?: boolean | DrugOrderReceiptDefaultArgs<ExtArgs>
+    shipmentLine?: boolean | DrugOrderShipmentLineDefaultArgs<ExtArgs>
+    orderLine?: boolean | DrugOrderLineDefaultArgs<ExtArgs>
+  }
+  export type DrugOrderReceiptLineIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    receipt?: boolean | DrugOrderReceiptDefaultArgs<ExtArgs>
+    shipmentLine?: boolean | DrugOrderShipmentLineDefaultArgs<ExtArgs>
+    orderLine?: boolean | DrugOrderLineDefaultArgs<ExtArgs>
+  }
+  export type DrugOrderReceiptLineIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    receipt?: boolean | DrugOrderReceiptDefaultArgs<ExtArgs>
+    shipmentLine?: boolean | DrugOrderShipmentLineDefaultArgs<ExtArgs>
+    orderLine?: boolean | DrugOrderLineDefaultArgs<ExtArgs>
+  }
+
+  export type $DrugOrderReceiptLinePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "DrugOrderReceiptLine"
+    objects: {
+      receipt: Prisma.$DrugOrderReceiptPayload<ExtArgs>
+      shipmentLine: Prisma.$DrugOrderShipmentLinePayload<ExtArgs>
+      orderLine: Prisma.$DrugOrderLinePayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      receiptId: string
+      shipmentLineId: string
+      orderLineId: string
+      receivedQty: Prisma.Decimal
+      differenceReason: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["drugOrderReceiptLine"]>
+    composites: {}
+  }
+
+  type DrugOrderReceiptLineGetPayload<S extends boolean | null | undefined | DrugOrderReceiptLineDefaultArgs> = $Result.GetResult<Prisma.$DrugOrderReceiptLinePayload, S>
+
+  type DrugOrderReceiptLineCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<DrugOrderReceiptLineFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: DrugOrderReceiptLineCountAggregateInputType | true
+    }
+
+  export interface DrugOrderReceiptLineDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['DrugOrderReceiptLine'], meta: { name: 'DrugOrderReceiptLine' } }
+    /**
+     * Find zero or one DrugOrderReceiptLine that matches the filter.
+     * @param {DrugOrderReceiptLineFindUniqueArgs} args - Arguments to find a DrugOrderReceiptLine
+     * @example
+     * // Get one DrugOrderReceiptLine
+     * const drugOrderReceiptLine = await prisma.drugOrderReceiptLine.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends DrugOrderReceiptLineFindUniqueArgs>(args: SelectSubset<T, DrugOrderReceiptLineFindUniqueArgs<ExtArgs>>): Prisma__DrugOrderReceiptLineClient<$Result.GetResult<Prisma.$DrugOrderReceiptLinePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one DrugOrderReceiptLine that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {DrugOrderReceiptLineFindUniqueOrThrowArgs} args - Arguments to find a DrugOrderReceiptLine
+     * @example
+     * // Get one DrugOrderReceiptLine
+     * const drugOrderReceiptLine = await prisma.drugOrderReceiptLine.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends DrugOrderReceiptLineFindUniqueOrThrowArgs>(args: SelectSubset<T, DrugOrderReceiptLineFindUniqueOrThrowArgs<ExtArgs>>): Prisma__DrugOrderReceiptLineClient<$Result.GetResult<Prisma.$DrugOrderReceiptLinePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first DrugOrderReceiptLine that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DrugOrderReceiptLineFindFirstArgs} args - Arguments to find a DrugOrderReceiptLine
+     * @example
+     * // Get one DrugOrderReceiptLine
+     * const drugOrderReceiptLine = await prisma.drugOrderReceiptLine.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends DrugOrderReceiptLineFindFirstArgs>(args?: SelectSubset<T, DrugOrderReceiptLineFindFirstArgs<ExtArgs>>): Prisma__DrugOrderReceiptLineClient<$Result.GetResult<Prisma.$DrugOrderReceiptLinePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first DrugOrderReceiptLine that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DrugOrderReceiptLineFindFirstOrThrowArgs} args - Arguments to find a DrugOrderReceiptLine
+     * @example
+     * // Get one DrugOrderReceiptLine
+     * const drugOrderReceiptLine = await prisma.drugOrderReceiptLine.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends DrugOrderReceiptLineFindFirstOrThrowArgs>(args?: SelectSubset<T, DrugOrderReceiptLineFindFirstOrThrowArgs<ExtArgs>>): Prisma__DrugOrderReceiptLineClient<$Result.GetResult<Prisma.$DrugOrderReceiptLinePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more DrugOrderReceiptLines that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DrugOrderReceiptLineFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all DrugOrderReceiptLines
+     * const drugOrderReceiptLines = await prisma.drugOrderReceiptLine.findMany()
+     * 
+     * // Get first 10 DrugOrderReceiptLines
+     * const drugOrderReceiptLines = await prisma.drugOrderReceiptLine.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const drugOrderReceiptLineWithIdOnly = await prisma.drugOrderReceiptLine.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends DrugOrderReceiptLineFindManyArgs>(args?: SelectSubset<T, DrugOrderReceiptLineFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DrugOrderReceiptLinePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a DrugOrderReceiptLine.
+     * @param {DrugOrderReceiptLineCreateArgs} args - Arguments to create a DrugOrderReceiptLine.
+     * @example
+     * // Create one DrugOrderReceiptLine
+     * const DrugOrderReceiptLine = await prisma.drugOrderReceiptLine.create({
+     *   data: {
+     *     // ... data to create a DrugOrderReceiptLine
+     *   }
+     * })
+     * 
+     */
+    create<T extends DrugOrderReceiptLineCreateArgs>(args: SelectSubset<T, DrugOrderReceiptLineCreateArgs<ExtArgs>>): Prisma__DrugOrderReceiptLineClient<$Result.GetResult<Prisma.$DrugOrderReceiptLinePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many DrugOrderReceiptLines.
+     * @param {DrugOrderReceiptLineCreateManyArgs} args - Arguments to create many DrugOrderReceiptLines.
+     * @example
+     * // Create many DrugOrderReceiptLines
+     * const drugOrderReceiptLine = await prisma.drugOrderReceiptLine.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends DrugOrderReceiptLineCreateManyArgs>(args?: SelectSubset<T, DrugOrderReceiptLineCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many DrugOrderReceiptLines and returns the data saved in the database.
+     * @param {DrugOrderReceiptLineCreateManyAndReturnArgs} args - Arguments to create many DrugOrderReceiptLines.
+     * @example
+     * // Create many DrugOrderReceiptLines
+     * const drugOrderReceiptLine = await prisma.drugOrderReceiptLine.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many DrugOrderReceiptLines and only return the `id`
+     * const drugOrderReceiptLineWithIdOnly = await prisma.drugOrderReceiptLine.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends DrugOrderReceiptLineCreateManyAndReturnArgs>(args?: SelectSubset<T, DrugOrderReceiptLineCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DrugOrderReceiptLinePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a DrugOrderReceiptLine.
+     * @param {DrugOrderReceiptLineDeleteArgs} args - Arguments to delete one DrugOrderReceiptLine.
+     * @example
+     * // Delete one DrugOrderReceiptLine
+     * const DrugOrderReceiptLine = await prisma.drugOrderReceiptLine.delete({
+     *   where: {
+     *     // ... filter to delete one DrugOrderReceiptLine
+     *   }
+     * })
+     * 
+     */
+    delete<T extends DrugOrderReceiptLineDeleteArgs>(args: SelectSubset<T, DrugOrderReceiptLineDeleteArgs<ExtArgs>>): Prisma__DrugOrderReceiptLineClient<$Result.GetResult<Prisma.$DrugOrderReceiptLinePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one DrugOrderReceiptLine.
+     * @param {DrugOrderReceiptLineUpdateArgs} args - Arguments to update one DrugOrderReceiptLine.
+     * @example
+     * // Update one DrugOrderReceiptLine
+     * const drugOrderReceiptLine = await prisma.drugOrderReceiptLine.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends DrugOrderReceiptLineUpdateArgs>(args: SelectSubset<T, DrugOrderReceiptLineUpdateArgs<ExtArgs>>): Prisma__DrugOrderReceiptLineClient<$Result.GetResult<Prisma.$DrugOrderReceiptLinePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more DrugOrderReceiptLines.
+     * @param {DrugOrderReceiptLineDeleteManyArgs} args - Arguments to filter DrugOrderReceiptLines to delete.
+     * @example
+     * // Delete a few DrugOrderReceiptLines
+     * const { count } = await prisma.drugOrderReceiptLine.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends DrugOrderReceiptLineDeleteManyArgs>(args?: SelectSubset<T, DrugOrderReceiptLineDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more DrugOrderReceiptLines.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DrugOrderReceiptLineUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many DrugOrderReceiptLines
+     * const drugOrderReceiptLine = await prisma.drugOrderReceiptLine.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends DrugOrderReceiptLineUpdateManyArgs>(args: SelectSubset<T, DrugOrderReceiptLineUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more DrugOrderReceiptLines and returns the data updated in the database.
+     * @param {DrugOrderReceiptLineUpdateManyAndReturnArgs} args - Arguments to update many DrugOrderReceiptLines.
+     * @example
+     * // Update many DrugOrderReceiptLines
+     * const drugOrderReceiptLine = await prisma.drugOrderReceiptLine.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more DrugOrderReceiptLines and only return the `id`
+     * const drugOrderReceiptLineWithIdOnly = await prisma.drugOrderReceiptLine.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends DrugOrderReceiptLineUpdateManyAndReturnArgs>(args: SelectSubset<T, DrugOrderReceiptLineUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DrugOrderReceiptLinePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one DrugOrderReceiptLine.
+     * @param {DrugOrderReceiptLineUpsertArgs} args - Arguments to update or create a DrugOrderReceiptLine.
+     * @example
+     * // Update or create a DrugOrderReceiptLine
+     * const drugOrderReceiptLine = await prisma.drugOrderReceiptLine.upsert({
+     *   create: {
+     *     // ... data to create a DrugOrderReceiptLine
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the DrugOrderReceiptLine we want to update
+     *   }
+     * })
+     */
+    upsert<T extends DrugOrderReceiptLineUpsertArgs>(args: SelectSubset<T, DrugOrderReceiptLineUpsertArgs<ExtArgs>>): Prisma__DrugOrderReceiptLineClient<$Result.GetResult<Prisma.$DrugOrderReceiptLinePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of DrugOrderReceiptLines.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DrugOrderReceiptLineCountArgs} args - Arguments to filter DrugOrderReceiptLines to count.
+     * @example
+     * // Count the number of DrugOrderReceiptLines
+     * const count = await prisma.drugOrderReceiptLine.count({
+     *   where: {
+     *     // ... the filter for the DrugOrderReceiptLines we want to count
+     *   }
+     * })
+    **/
+    count<T extends DrugOrderReceiptLineCountArgs>(
+      args?: Subset<T, DrugOrderReceiptLineCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], DrugOrderReceiptLineCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a DrugOrderReceiptLine.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DrugOrderReceiptLineAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends DrugOrderReceiptLineAggregateArgs>(args: Subset<T, DrugOrderReceiptLineAggregateArgs>): Prisma.PrismaPromise<GetDrugOrderReceiptLineAggregateType<T>>
+
+    /**
+     * Group by DrugOrderReceiptLine.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DrugOrderReceiptLineGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends DrugOrderReceiptLineGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: DrugOrderReceiptLineGroupByArgs['orderBy'] }
+        : { orderBy?: DrugOrderReceiptLineGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, DrugOrderReceiptLineGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetDrugOrderReceiptLineGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the DrugOrderReceiptLine model
+   */
+  readonly fields: DrugOrderReceiptLineFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for DrugOrderReceiptLine.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__DrugOrderReceiptLineClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    receipt<T extends DrugOrderReceiptDefaultArgs<ExtArgs> = {}>(args?: Subset<T, DrugOrderReceiptDefaultArgs<ExtArgs>>): Prisma__DrugOrderReceiptClient<$Result.GetResult<Prisma.$DrugOrderReceiptPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    shipmentLine<T extends DrugOrderShipmentLineDefaultArgs<ExtArgs> = {}>(args?: Subset<T, DrugOrderShipmentLineDefaultArgs<ExtArgs>>): Prisma__DrugOrderShipmentLineClient<$Result.GetResult<Prisma.$DrugOrderShipmentLinePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    orderLine<T extends DrugOrderLineDefaultArgs<ExtArgs> = {}>(args?: Subset<T, DrugOrderLineDefaultArgs<ExtArgs>>): Prisma__DrugOrderLineClient<$Result.GetResult<Prisma.$DrugOrderLinePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the DrugOrderReceiptLine model
+   */
+  interface DrugOrderReceiptLineFieldRefs {
+    readonly id: FieldRef<"DrugOrderReceiptLine", 'String'>
+    readonly receiptId: FieldRef<"DrugOrderReceiptLine", 'String'>
+    readonly shipmentLineId: FieldRef<"DrugOrderReceiptLine", 'String'>
+    readonly orderLineId: FieldRef<"DrugOrderReceiptLine", 'String'>
+    readonly receivedQty: FieldRef<"DrugOrderReceiptLine", 'Decimal'>
+    readonly differenceReason: FieldRef<"DrugOrderReceiptLine", 'String'>
+    readonly createdAt: FieldRef<"DrugOrderReceiptLine", 'DateTime'>
+    readonly updatedAt: FieldRef<"DrugOrderReceiptLine", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * DrugOrderReceiptLine findUnique
+   */
+  export type DrugOrderReceiptLineFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderReceiptLine
+     */
+    select?: DrugOrderReceiptLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderReceiptLine
+     */
+    omit?: DrugOrderReceiptLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderReceiptLineInclude<ExtArgs> | null
+    /**
+     * Filter, which DrugOrderReceiptLine to fetch.
+     */
+    where: DrugOrderReceiptLineWhereUniqueInput
+  }
+
+  /**
+   * DrugOrderReceiptLine findUniqueOrThrow
+   */
+  export type DrugOrderReceiptLineFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderReceiptLine
+     */
+    select?: DrugOrderReceiptLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderReceiptLine
+     */
+    omit?: DrugOrderReceiptLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderReceiptLineInclude<ExtArgs> | null
+    /**
+     * Filter, which DrugOrderReceiptLine to fetch.
+     */
+    where: DrugOrderReceiptLineWhereUniqueInput
+  }
+
+  /**
+   * DrugOrderReceiptLine findFirst
+   */
+  export type DrugOrderReceiptLineFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderReceiptLine
+     */
+    select?: DrugOrderReceiptLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderReceiptLine
+     */
+    omit?: DrugOrderReceiptLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderReceiptLineInclude<ExtArgs> | null
+    /**
+     * Filter, which DrugOrderReceiptLine to fetch.
+     */
+    where?: DrugOrderReceiptLineWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DrugOrderReceiptLines to fetch.
+     */
+    orderBy?: DrugOrderReceiptLineOrderByWithRelationInput | DrugOrderReceiptLineOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for DrugOrderReceiptLines.
+     */
+    cursor?: DrugOrderReceiptLineWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DrugOrderReceiptLines from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DrugOrderReceiptLines.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of DrugOrderReceiptLines.
+     */
+    distinct?: DrugOrderReceiptLineScalarFieldEnum | DrugOrderReceiptLineScalarFieldEnum[]
+  }
+
+  /**
+   * DrugOrderReceiptLine findFirstOrThrow
+   */
+  export type DrugOrderReceiptLineFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderReceiptLine
+     */
+    select?: DrugOrderReceiptLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderReceiptLine
+     */
+    omit?: DrugOrderReceiptLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderReceiptLineInclude<ExtArgs> | null
+    /**
+     * Filter, which DrugOrderReceiptLine to fetch.
+     */
+    where?: DrugOrderReceiptLineWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DrugOrderReceiptLines to fetch.
+     */
+    orderBy?: DrugOrderReceiptLineOrderByWithRelationInput | DrugOrderReceiptLineOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for DrugOrderReceiptLines.
+     */
+    cursor?: DrugOrderReceiptLineWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DrugOrderReceiptLines from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DrugOrderReceiptLines.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of DrugOrderReceiptLines.
+     */
+    distinct?: DrugOrderReceiptLineScalarFieldEnum | DrugOrderReceiptLineScalarFieldEnum[]
+  }
+
+  /**
+   * DrugOrderReceiptLine findMany
+   */
+  export type DrugOrderReceiptLineFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderReceiptLine
+     */
+    select?: DrugOrderReceiptLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderReceiptLine
+     */
+    omit?: DrugOrderReceiptLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderReceiptLineInclude<ExtArgs> | null
+    /**
+     * Filter, which DrugOrderReceiptLines to fetch.
+     */
+    where?: DrugOrderReceiptLineWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DrugOrderReceiptLines to fetch.
+     */
+    orderBy?: DrugOrderReceiptLineOrderByWithRelationInput | DrugOrderReceiptLineOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing DrugOrderReceiptLines.
+     */
+    cursor?: DrugOrderReceiptLineWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DrugOrderReceiptLines from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DrugOrderReceiptLines.
+     */
+    skip?: number
+    distinct?: DrugOrderReceiptLineScalarFieldEnum | DrugOrderReceiptLineScalarFieldEnum[]
+  }
+
+  /**
+   * DrugOrderReceiptLine create
+   */
+  export type DrugOrderReceiptLineCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderReceiptLine
+     */
+    select?: DrugOrderReceiptLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderReceiptLine
+     */
+    omit?: DrugOrderReceiptLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderReceiptLineInclude<ExtArgs> | null
+    /**
+     * The data needed to create a DrugOrderReceiptLine.
+     */
+    data: XOR<DrugOrderReceiptLineCreateInput, DrugOrderReceiptLineUncheckedCreateInput>
+  }
+
+  /**
+   * DrugOrderReceiptLine createMany
+   */
+  export type DrugOrderReceiptLineCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many DrugOrderReceiptLines.
+     */
+    data: DrugOrderReceiptLineCreateManyInput | DrugOrderReceiptLineCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * DrugOrderReceiptLine createManyAndReturn
+   */
+  export type DrugOrderReceiptLineCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderReceiptLine
+     */
+    select?: DrugOrderReceiptLineSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderReceiptLine
+     */
+    omit?: DrugOrderReceiptLineOmit<ExtArgs> | null
+    /**
+     * The data used to create many DrugOrderReceiptLines.
+     */
+    data: DrugOrderReceiptLineCreateManyInput | DrugOrderReceiptLineCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderReceiptLineIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * DrugOrderReceiptLine update
+   */
+  export type DrugOrderReceiptLineUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderReceiptLine
+     */
+    select?: DrugOrderReceiptLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderReceiptLine
+     */
+    omit?: DrugOrderReceiptLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderReceiptLineInclude<ExtArgs> | null
+    /**
+     * The data needed to update a DrugOrderReceiptLine.
+     */
+    data: XOR<DrugOrderReceiptLineUpdateInput, DrugOrderReceiptLineUncheckedUpdateInput>
+    /**
+     * Choose, which DrugOrderReceiptLine to update.
+     */
+    where: DrugOrderReceiptLineWhereUniqueInput
+  }
+
+  /**
+   * DrugOrderReceiptLine updateMany
+   */
+  export type DrugOrderReceiptLineUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update DrugOrderReceiptLines.
+     */
+    data: XOR<DrugOrderReceiptLineUpdateManyMutationInput, DrugOrderReceiptLineUncheckedUpdateManyInput>
+    /**
+     * Filter which DrugOrderReceiptLines to update
+     */
+    where?: DrugOrderReceiptLineWhereInput
+    /**
+     * Limit how many DrugOrderReceiptLines to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * DrugOrderReceiptLine updateManyAndReturn
+   */
+  export type DrugOrderReceiptLineUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderReceiptLine
+     */
+    select?: DrugOrderReceiptLineSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderReceiptLine
+     */
+    omit?: DrugOrderReceiptLineOmit<ExtArgs> | null
+    /**
+     * The data used to update DrugOrderReceiptLines.
+     */
+    data: XOR<DrugOrderReceiptLineUpdateManyMutationInput, DrugOrderReceiptLineUncheckedUpdateManyInput>
+    /**
+     * Filter which DrugOrderReceiptLines to update
+     */
+    where?: DrugOrderReceiptLineWhereInput
+    /**
+     * Limit how many DrugOrderReceiptLines to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderReceiptLineIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * DrugOrderReceiptLine upsert
+   */
+  export type DrugOrderReceiptLineUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderReceiptLine
+     */
+    select?: DrugOrderReceiptLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderReceiptLine
+     */
+    omit?: DrugOrderReceiptLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderReceiptLineInclude<ExtArgs> | null
+    /**
+     * The filter to search for the DrugOrderReceiptLine to update in case it exists.
+     */
+    where: DrugOrderReceiptLineWhereUniqueInput
+    /**
+     * In case the DrugOrderReceiptLine found by the `where` argument doesn't exist, create a new DrugOrderReceiptLine with this data.
+     */
+    create: XOR<DrugOrderReceiptLineCreateInput, DrugOrderReceiptLineUncheckedCreateInput>
+    /**
+     * In case the DrugOrderReceiptLine was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<DrugOrderReceiptLineUpdateInput, DrugOrderReceiptLineUncheckedUpdateInput>
+  }
+
+  /**
+   * DrugOrderReceiptLine delete
+   */
+  export type DrugOrderReceiptLineDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderReceiptLine
+     */
+    select?: DrugOrderReceiptLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderReceiptLine
+     */
+    omit?: DrugOrderReceiptLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderReceiptLineInclude<ExtArgs> | null
+    /**
+     * Filter which DrugOrderReceiptLine to delete.
+     */
+    where: DrugOrderReceiptLineWhereUniqueInput
+  }
+
+  /**
+   * DrugOrderReceiptLine deleteMany
+   */
+  export type DrugOrderReceiptLineDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which DrugOrderReceiptLines to delete
+     */
+    where?: DrugOrderReceiptLineWhereInput
+    /**
+     * Limit how many DrugOrderReceiptLines to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * DrugOrderReceiptLine without action
+   */
+  export type DrugOrderReceiptLineDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DrugOrderReceiptLine
+     */
+    select?: DrugOrderReceiptLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DrugOrderReceiptLine
+     */
+    omit?: DrugOrderReceiptLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DrugOrderReceiptLineInclude<ExtArgs> | null
   }
 
 
@@ -21772,6 +32644,7 @@ export namespace Prisma {
     role: 'role',
     facilityName: 'facilityName',
     facilityCode: 'facilityCode',
+    companyId: 'companyId',
     isActive: 'isActive',
     autonomyGroup: 'autonomyGroup',
     facilityType: 'facilityType',
@@ -21783,6 +32656,22 @@ export namespace Prisma {
   };
 
   export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+  export const CompanyScalarFieldEnum: {
+    id: 'id',
+    code: 'code',
+    name: 'name',
+    contactPerson: 'contactPerson',
+    phoneNumber: 'phoneNumber',
+    email: 'email',
+    address: 'address',
+    isActive: 'isActive',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type CompanyScalarFieldEnum = (typeof CompanyScalarFieldEnum)[keyof typeof CompanyScalarFieldEnum]
 
 
   export const TherapeuticGroupScalarFieldEnum: {
@@ -21829,6 +32718,23 @@ export namespace Prisma {
   };
 
   export type MasterDrugScalarFieldEnum = (typeof MasterDrugScalarFieldEnum)[keyof typeof MasterDrugScalarFieldEnum]
+
+
+  export const CompanyDrugScalarFieldEnum: {
+    id: 'id',
+    companyId: 'companyId',
+    masterDrugId: 'masterDrugId',
+    companyDrugCode: 'companyDrugCode',
+    companyDrugName: 'companyDrugName',
+    activeIngredient: 'activeIngredient',
+    quyCach: 'quyCach',
+    unit: 'unit',
+    isActive: 'isActive',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type CompanyDrugScalarFieldEnum = (typeof CompanyDrugScalarFieldEnum)[keyof typeof CompanyDrugScalarFieldEnum]
 
 
   export const FacilityDrugMapScalarFieldEnum: {
@@ -21888,6 +32794,101 @@ export namespace Prisma {
   };
 
   export type FacilityReportSubmissionScalarFieldEnum = (typeof FacilityReportSubmissionScalarFieldEnum)[keyof typeof FacilityReportSubmissionScalarFieldEnum]
+
+
+  export const DrugOrderScalarFieldEnum: {
+    id: 'id',
+    orderNo: 'orderNo',
+    facilityId: 'facilityId',
+    companyId: 'companyId',
+    status: 'status',
+    baseReportMonth: 'baseReportMonth',
+    note: 'note',
+    submittedAt: 'submittedAt',
+    closedAt: 'closedAt',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type DrugOrderScalarFieldEnum = (typeof DrugOrderScalarFieldEnum)[keyof typeof DrugOrderScalarFieldEnum]
+
+
+  export const DrugOrderLineScalarFieldEnum: {
+    id: 'id',
+    orderId: 'orderId',
+    sourceType: 'sourceType',
+    masterDrugId: 'masterDrugId',
+    companyDrugId: 'companyDrugId',
+    displayName: 'displayName',
+    unit: 'unit',
+    requestedQty: 'requestedQty',
+    acceptedQty: 'acceptedQty',
+    suggestedQty: 'suggestedQty',
+    lineStatus: 'lineStatus',
+    companyResponseReason: 'companyResponseReason',
+    suggestionBasis: 'suggestionBasis',
+    suggestionReportMonth: 'suggestionReportMonth',
+    suggestionRuleVersion: 'suggestionRuleVersion',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type DrugOrderLineScalarFieldEnum = (typeof DrugOrderLineScalarFieldEnum)[keyof typeof DrugOrderLineScalarFieldEnum]
+
+
+  export const DrugOrderShipmentScalarFieldEnum: {
+    id: 'id',
+    orderId: 'orderId',
+    shipmentNo: 'shipmentNo',
+    status: 'status',
+    shippedAt: 'shippedAt',
+    companyNote: 'companyNote',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type DrugOrderShipmentScalarFieldEnum = (typeof DrugOrderShipmentScalarFieldEnum)[keyof typeof DrugOrderShipmentScalarFieldEnum]
+
+
+  export const DrugOrderShipmentLineScalarFieldEnum: {
+    id: 'id',
+    shipmentId: 'shipmentId',
+    orderLineId: 'orderLineId',
+    shippedQty: 'shippedQty',
+    reason: 'reason',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type DrugOrderShipmentLineScalarFieldEnum = (typeof DrugOrderShipmentLineScalarFieldEnum)[keyof typeof DrugOrderShipmentLineScalarFieldEnum]
+
+
+  export const DrugOrderReceiptScalarFieldEnum: {
+    id: 'id',
+    orderId: 'orderId',
+    shipmentId: 'shipmentId',
+    facilityId: 'facilityId',
+    confirmedAt: 'confirmedAt',
+    note: 'note',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type DrugOrderReceiptScalarFieldEnum = (typeof DrugOrderReceiptScalarFieldEnum)[keyof typeof DrugOrderReceiptScalarFieldEnum]
+
+
+  export const DrugOrderReceiptLineScalarFieldEnum: {
+    id: 'id',
+    receiptId: 'receiptId',
+    shipmentLineId: 'shipmentLineId',
+    orderLineId: 'orderLineId',
+    receivedQty: 'receivedQty',
+    differenceReason: 'differenceReason',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type DrugOrderReceiptLineScalarFieldEnum = (typeof DrugOrderReceiptLineScalarFieldEnum)[keyof typeof DrugOrderReceiptLineScalarFieldEnum]
 
 
   export const ReportReviewLogScalarFieldEnum: {
@@ -22192,6 +33193,62 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'DrugOrderStatus'
+   */
+  export type EnumDrugOrderStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DrugOrderStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'DrugOrderStatus[]'
+   */
+  export type ListEnumDrugOrderStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DrugOrderStatus[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'DrugOrderLineSourceType'
+   */
+  export type EnumDrugOrderLineSourceTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DrugOrderLineSourceType'>
+    
+
+
+  /**
+   * Reference to a field of type 'DrugOrderLineSourceType[]'
+   */
+  export type ListEnumDrugOrderLineSourceTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DrugOrderLineSourceType[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'DrugOrderLineStatus'
+   */
+  export type EnumDrugOrderLineStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DrugOrderLineStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'DrugOrderLineStatus[]'
+   */
+  export type ListEnumDrugOrderLineStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DrugOrderLineStatus[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'DrugOrderShipmentStatus'
+   */
+  export type EnumDrugOrderShipmentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DrugOrderShipmentStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'DrugOrderShipmentStatus[]'
+   */
+  export type ListEnumDrugOrderShipmentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DrugOrderShipmentStatus[]'>
+    
+
+
+  /**
    * Reference to a field of type 'Float'
    */
   export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -22218,6 +33275,7 @@ export namespace Prisma {
     role?: EnumRoleFilter<"User"> | $Enums.Role
     facilityName?: StringNullableFilter<"User"> | string | null
     facilityCode?: StringNullableFilter<"User"> | string | null
+    companyId?: StringNullableFilter<"User"> | string | null
     isActive?: BoolFilter<"User"> | boolean
     autonomyGroup?: StringNullableFilter<"User"> | string | null
     facilityType?: StringNullableFilter<"User"> | string | null
@@ -22226,10 +33284,13 @@ export namespace Prisma {
     address?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
+    company?: XOR<CompanyNullableScalarRelationFilter, CompanyWhereInput> | null
     drugMaps?: FacilityDrugMapListRelationFilter
     reports?: InventoryReportListRelationFilter
     reportSubmissions?: FacilityReportSubmissionListRelationFilter
     keHoachLCNTs?: KeHoachLCNTListRelationFilter
+    drugOrders?: DrugOrderListRelationFilter
+    drugOrderReceipts?: DrugOrderReceiptListRelationFilter
     notifications?: NotificationListRelationFilter
     activityLogs?: ActivityLogListRelationFilter
   }
@@ -22241,6 +33302,7 @@ export namespace Prisma {
     role?: SortOrder
     facilityName?: SortOrderInput | SortOrder
     facilityCode?: SortOrderInput | SortOrder
+    companyId?: SortOrderInput | SortOrder
     isActive?: SortOrder
     autonomyGroup?: SortOrderInput | SortOrder
     facilityType?: SortOrderInput | SortOrder
@@ -22249,10 +33311,13 @@ export namespace Prisma {
     address?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    company?: CompanyOrderByWithRelationInput
     drugMaps?: FacilityDrugMapOrderByRelationAggregateInput
     reports?: InventoryReportOrderByRelationAggregateInput
     reportSubmissions?: FacilityReportSubmissionOrderByRelationAggregateInput
     keHoachLCNTs?: KeHoachLCNTOrderByRelationAggregateInput
+    drugOrders?: DrugOrderOrderByRelationAggregateInput
+    drugOrderReceipts?: DrugOrderReceiptOrderByRelationAggregateInput
     notifications?: NotificationOrderByRelationAggregateInput
     activityLogs?: ActivityLogOrderByRelationAggregateInput
   }
@@ -22267,6 +33332,7 @@ export namespace Prisma {
     passwordHash?: StringFilter<"User"> | string
     role?: EnumRoleFilter<"User"> | $Enums.Role
     facilityName?: StringNullableFilter<"User"> | string | null
+    companyId?: StringNullableFilter<"User"> | string | null
     isActive?: BoolFilter<"User"> | boolean
     autonomyGroup?: StringNullableFilter<"User"> | string | null
     facilityType?: StringNullableFilter<"User"> | string | null
@@ -22275,10 +33341,13 @@ export namespace Prisma {
     address?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
+    company?: XOR<CompanyNullableScalarRelationFilter, CompanyWhereInput> | null
     drugMaps?: FacilityDrugMapListRelationFilter
     reports?: InventoryReportListRelationFilter
     reportSubmissions?: FacilityReportSubmissionListRelationFilter
     keHoachLCNTs?: KeHoachLCNTListRelationFilter
+    drugOrders?: DrugOrderListRelationFilter
+    drugOrderReceipts?: DrugOrderReceiptListRelationFilter
     notifications?: NotificationListRelationFilter
     activityLogs?: ActivityLogListRelationFilter
   }, "id" | "username" | "facilityCode">
@@ -22290,6 +33359,7 @@ export namespace Prisma {
     role?: SortOrder
     facilityName?: SortOrderInput | SortOrder
     facilityCode?: SortOrderInput | SortOrder
+    companyId?: SortOrderInput | SortOrder
     isActive?: SortOrder
     autonomyGroup?: SortOrderInput | SortOrder
     facilityType?: SortOrderInput | SortOrder
@@ -22313,6 +33383,7 @@ export namespace Prisma {
     role?: EnumRoleWithAggregatesFilter<"User"> | $Enums.Role
     facilityName?: StringNullableWithAggregatesFilter<"User"> | string | null
     facilityCode?: StringNullableWithAggregatesFilter<"User"> | string | null
+    companyId?: StringNullableWithAggregatesFilter<"User"> | string | null
     isActive?: BoolWithAggregatesFilter<"User"> | boolean
     autonomyGroup?: StringNullableWithAggregatesFilter<"User"> | string | null
     facilityType?: StringNullableWithAggregatesFilter<"User"> | string | null
@@ -22321,6 +33392,92 @@ export namespace Prisma {
     address?: StringNullableWithAggregatesFilter<"User"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
+  }
+
+  export type CompanyWhereInput = {
+    AND?: CompanyWhereInput | CompanyWhereInput[]
+    OR?: CompanyWhereInput[]
+    NOT?: CompanyWhereInput | CompanyWhereInput[]
+    id?: StringFilter<"Company"> | string
+    code?: StringFilter<"Company"> | string
+    name?: StringFilter<"Company"> | string
+    contactPerson?: StringNullableFilter<"Company"> | string | null
+    phoneNumber?: StringNullableFilter<"Company"> | string | null
+    email?: StringNullableFilter<"Company"> | string | null
+    address?: StringNullableFilter<"Company"> | string | null
+    isActive?: BoolFilter<"Company"> | boolean
+    createdAt?: DateTimeFilter<"Company"> | Date | string
+    updatedAt?: DateTimeFilter<"Company"> | Date | string
+    users?: UserListRelationFilter
+    companyDrugs?: CompanyDrugListRelationFilter
+    drugOrders?: DrugOrderListRelationFilter
+  }
+
+  export type CompanyOrderByWithRelationInput = {
+    id?: SortOrder
+    code?: SortOrder
+    name?: SortOrder
+    contactPerson?: SortOrderInput | SortOrder
+    phoneNumber?: SortOrderInput | SortOrder
+    email?: SortOrderInput | SortOrder
+    address?: SortOrderInput | SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    users?: UserOrderByRelationAggregateInput
+    companyDrugs?: CompanyDrugOrderByRelationAggregateInput
+    drugOrders?: DrugOrderOrderByRelationAggregateInput
+  }
+
+  export type CompanyWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    code?: string
+    AND?: CompanyWhereInput | CompanyWhereInput[]
+    OR?: CompanyWhereInput[]
+    NOT?: CompanyWhereInput | CompanyWhereInput[]
+    name?: StringFilter<"Company"> | string
+    contactPerson?: StringNullableFilter<"Company"> | string | null
+    phoneNumber?: StringNullableFilter<"Company"> | string | null
+    email?: StringNullableFilter<"Company"> | string | null
+    address?: StringNullableFilter<"Company"> | string | null
+    isActive?: BoolFilter<"Company"> | boolean
+    createdAt?: DateTimeFilter<"Company"> | Date | string
+    updatedAt?: DateTimeFilter<"Company"> | Date | string
+    users?: UserListRelationFilter
+    companyDrugs?: CompanyDrugListRelationFilter
+    drugOrders?: DrugOrderListRelationFilter
+  }, "id" | "code">
+
+  export type CompanyOrderByWithAggregationInput = {
+    id?: SortOrder
+    code?: SortOrder
+    name?: SortOrder
+    contactPerson?: SortOrderInput | SortOrder
+    phoneNumber?: SortOrderInput | SortOrder
+    email?: SortOrderInput | SortOrder
+    address?: SortOrderInput | SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: CompanyCountOrderByAggregateInput
+    _max?: CompanyMaxOrderByAggregateInput
+    _min?: CompanyMinOrderByAggregateInput
+  }
+
+  export type CompanyScalarWhereWithAggregatesInput = {
+    AND?: CompanyScalarWhereWithAggregatesInput | CompanyScalarWhereWithAggregatesInput[]
+    OR?: CompanyScalarWhereWithAggregatesInput[]
+    NOT?: CompanyScalarWhereWithAggregatesInput | CompanyScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Company"> | string
+    code?: StringWithAggregatesFilter<"Company"> | string
+    name?: StringWithAggregatesFilter<"Company"> | string
+    contactPerson?: StringNullableWithAggregatesFilter<"Company"> | string | null
+    phoneNumber?: StringNullableWithAggregatesFilter<"Company"> | string | null
+    email?: StringNullableWithAggregatesFilter<"Company"> | string | null
+    address?: StringNullableWithAggregatesFilter<"Company"> | string | null
+    isActive?: BoolWithAggregatesFilter<"Company"> | boolean
+    createdAt?: DateTimeWithAggregatesFilter<"Company"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Company"> | Date | string
   }
 
   export type TherapeuticGroupWhereInput = {
@@ -22417,6 +33574,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"MasterDrug"> | Date | string
     therapeuticGroup?: XOR<TherapeuticGroupNullableScalarRelationFilter, TherapeuticGroupWhereInput> | null
     drugMaps?: FacilityDrugMapListRelationFilter
+    companyDrugs?: CompanyDrugListRelationFilter
+    drugOrderLines?: DrugOrderLineListRelationFilter
   }
 
   export type MasterDrugOrderByWithRelationInput = {
@@ -22450,6 +33609,8 @@ export namespace Prisma {
     updatedAt?: SortOrder
     therapeuticGroup?: TherapeuticGroupOrderByWithRelationInput
     drugMaps?: FacilityDrugMapOrderByRelationAggregateInput
+    companyDrugs?: CompanyDrugOrderByRelationAggregateInput
+    drugOrderLines?: DrugOrderLineOrderByRelationAggregateInput
   }
 
   export type MasterDrugWhereUniqueInput = Prisma.AtLeast<{
@@ -22486,6 +33647,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"MasterDrug"> | Date | string
     therapeuticGroup?: XOR<TherapeuticGroupNullableScalarRelationFilter, TherapeuticGroupWhereInput> | null
     drugMaps?: FacilityDrugMapListRelationFilter
+    companyDrugs?: CompanyDrugListRelationFilter
+    drugOrderLines?: DrugOrderLineListRelationFilter
   }, "id" | "maChung">
 
   export type MasterDrugOrderByWithAggregationInput = {
@@ -22554,6 +33717,98 @@ export namespace Prisma {
     isActive?: BoolWithAggregatesFilter<"MasterDrug"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"MasterDrug"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"MasterDrug"> | Date | string
+  }
+
+  export type CompanyDrugWhereInput = {
+    AND?: CompanyDrugWhereInput | CompanyDrugWhereInput[]
+    OR?: CompanyDrugWhereInput[]
+    NOT?: CompanyDrugWhereInput | CompanyDrugWhereInput[]
+    id?: StringFilter<"CompanyDrug"> | string
+    companyId?: StringFilter<"CompanyDrug"> | string
+    masterDrugId?: StringNullableFilter<"CompanyDrug"> | string | null
+    companyDrugCode?: StringFilter<"CompanyDrug"> | string
+    companyDrugName?: StringFilter<"CompanyDrug"> | string
+    activeIngredient?: StringNullableFilter<"CompanyDrug"> | string | null
+    quyCach?: StringNullableFilter<"CompanyDrug"> | string | null
+    unit?: StringNullableFilter<"CompanyDrug"> | string | null
+    isActive?: BoolFilter<"CompanyDrug"> | boolean
+    createdAt?: DateTimeFilter<"CompanyDrug"> | Date | string
+    updatedAt?: DateTimeFilter<"CompanyDrug"> | Date | string
+    company?: XOR<CompanyScalarRelationFilter, CompanyWhereInput>
+    masterDrug?: XOR<MasterDrugNullableScalarRelationFilter, MasterDrugWhereInput> | null
+    drugOrderLines?: DrugOrderLineListRelationFilter
+  }
+
+  export type CompanyDrugOrderByWithRelationInput = {
+    id?: SortOrder
+    companyId?: SortOrder
+    masterDrugId?: SortOrderInput | SortOrder
+    companyDrugCode?: SortOrder
+    companyDrugName?: SortOrder
+    activeIngredient?: SortOrderInput | SortOrder
+    quyCach?: SortOrderInput | SortOrder
+    unit?: SortOrderInput | SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    company?: CompanyOrderByWithRelationInput
+    masterDrug?: MasterDrugOrderByWithRelationInput
+    drugOrderLines?: DrugOrderLineOrderByRelationAggregateInput
+  }
+
+  export type CompanyDrugWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    companyId_companyDrugCode?: CompanyDrugCompanyIdCompanyDrugCodeCompoundUniqueInput
+    AND?: CompanyDrugWhereInput | CompanyDrugWhereInput[]
+    OR?: CompanyDrugWhereInput[]
+    NOT?: CompanyDrugWhereInput | CompanyDrugWhereInput[]
+    companyId?: StringFilter<"CompanyDrug"> | string
+    masterDrugId?: StringNullableFilter<"CompanyDrug"> | string | null
+    companyDrugCode?: StringFilter<"CompanyDrug"> | string
+    companyDrugName?: StringFilter<"CompanyDrug"> | string
+    activeIngredient?: StringNullableFilter<"CompanyDrug"> | string | null
+    quyCach?: StringNullableFilter<"CompanyDrug"> | string | null
+    unit?: StringNullableFilter<"CompanyDrug"> | string | null
+    isActive?: BoolFilter<"CompanyDrug"> | boolean
+    createdAt?: DateTimeFilter<"CompanyDrug"> | Date | string
+    updatedAt?: DateTimeFilter<"CompanyDrug"> | Date | string
+    company?: XOR<CompanyScalarRelationFilter, CompanyWhereInput>
+    masterDrug?: XOR<MasterDrugNullableScalarRelationFilter, MasterDrugWhereInput> | null
+    drugOrderLines?: DrugOrderLineListRelationFilter
+  }, "id" | "companyId_companyDrugCode">
+
+  export type CompanyDrugOrderByWithAggregationInput = {
+    id?: SortOrder
+    companyId?: SortOrder
+    masterDrugId?: SortOrderInput | SortOrder
+    companyDrugCode?: SortOrder
+    companyDrugName?: SortOrder
+    activeIngredient?: SortOrderInput | SortOrder
+    quyCach?: SortOrderInput | SortOrder
+    unit?: SortOrderInput | SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: CompanyDrugCountOrderByAggregateInput
+    _max?: CompanyDrugMaxOrderByAggregateInput
+    _min?: CompanyDrugMinOrderByAggregateInput
+  }
+
+  export type CompanyDrugScalarWhereWithAggregatesInput = {
+    AND?: CompanyDrugScalarWhereWithAggregatesInput | CompanyDrugScalarWhereWithAggregatesInput[]
+    OR?: CompanyDrugScalarWhereWithAggregatesInput[]
+    NOT?: CompanyDrugScalarWhereWithAggregatesInput | CompanyDrugScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"CompanyDrug"> | string
+    companyId?: StringWithAggregatesFilter<"CompanyDrug"> | string
+    masterDrugId?: StringNullableWithAggregatesFilter<"CompanyDrug"> | string | null
+    companyDrugCode?: StringWithAggregatesFilter<"CompanyDrug"> | string
+    companyDrugName?: StringWithAggregatesFilter<"CompanyDrug"> | string
+    activeIngredient?: StringNullableWithAggregatesFilter<"CompanyDrug"> | string | null
+    quyCach?: StringNullableWithAggregatesFilter<"CompanyDrug"> | string | null
+    unit?: StringNullableWithAggregatesFilter<"CompanyDrug"> | string | null
+    isActive?: BoolWithAggregatesFilter<"CompanyDrug"> | boolean
+    createdAt?: DateTimeWithAggregatesFilter<"CompanyDrug"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"CompanyDrug"> | Date | string
   }
 
   export type FacilityDrugMapWhereInput = {
@@ -22865,6 +34120,543 @@ export namespace Prisma {
     skippedRowCount?: IntWithAggregatesFilter<"FacilityReportSubmission"> | number
     createdAt?: DateTimeWithAggregatesFilter<"FacilityReportSubmission"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"FacilityReportSubmission"> | Date | string
+  }
+
+  export type DrugOrderWhereInput = {
+    AND?: DrugOrderWhereInput | DrugOrderWhereInput[]
+    OR?: DrugOrderWhereInput[]
+    NOT?: DrugOrderWhereInput | DrugOrderWhereInput[]
+    id?: StringFilter<"DrugOrder"> | string
+    orderNo?: StringFilter<"DrugOrder"> | string
+    facilityId?: StringFilter<"DrugOrder"> | string
+    companyId?: StringFilter<"DrugOrder"> | string
+    status?: EnumDrugOrderStatusFilter<"DrugOrder"> | $Enums.DrugOrderStatus
+    baseReportMonth?: StringNullableFilter<"DrugOrder"> | string | null
+    note?: StringNullableFilter<"DrugOrder"> | string | null
+    submittedAt?: DateTimeNullableFilter<"DrugOrder"> | Date | string | null
+    closedAt?: DateTimeNullableFilter<"DrugOrder"> | Date | string | null
+    createdAt?: DateTimeFilter<"DrugOrder"> | Date | string
+    updatedAt?: DateTimeFilter<"DrugOrder"> | Date | string
+    facility?: XOR<UserScalarRelationFilter, UserWhereInput>
+    company?: XOR<CompanyScalarRelationFilter, CompanyWhereInput>
+    lines?: DrugOrderLineListRelationFilter
+    shipments?: DrugOrderShipmentListRelationFilter
+    receipts?: DrugOrderReceiptListRelationFilter
+  }
+
+  export type DrugOrderOrderByWithRelationInput = {
+    id?: SortOrder
+    orderNo?: SortOrder
+    facilityId?: SortOrder
+    companyId?: SortOrder
+    status?: SortOrder
+    baseReportMonth?: SortOrderInput | SortOrder
+    note?: SortOrderInput | SortOrder
+    submittedAt?: SortOrderInput | SortOrder
+    closedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    facility?: UserOrderByWithRelationInput
+    company?: CompanyOrderByWithRelationInput
+    lines?: DrugOrderLineOrderByRelationAggregateInput
+    shipments?: DrugOrderShipmentOrderByRelationAggregateInput
+    receipts?: DrugOrderReceiptOrderByRelationAggregateInput
+  }
+
+  export type DrugOrderWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    orderNo?: string
+    AND?: DrugOrderWhereInput | DrugOrderWhereInput[]
+    OR?: DrugOrderWhereInput[]
+    NOT?: DrugOrderWhereInput | DrugOrderWhereInput[]
+    facilityId?: StringFilter<"DrugOrder"> | string
+    companyId?: StringFilter<"DrugOrder"> | string
+    status?: EnumDrugOrderStatusFilter<"DrugOrder"> | $Enums.DrugOrderStatus
+    baseReportMonth?: StringNullableFilter<"DrugOrder"> | string | null
+    note?: StringNullableFilter<"DrugOrder"> | string | null
+    submittedAt?: DateTimeNullableFilter<"DrugOrder"> | Date | string | null
+    closedAt?: DateTimeNullableFilter<"DrugOrder"> | Date | string | null
+    createdAt?: DateTimeFilter<"DrugOrder"> | Date | string
+    updatedAt?: DateTimeFilter<"DrugOrder"> | Date | string
+    facility?: XOR<UserScalarRelationFilter, UserWhereInput>
+    company?: XOR<CompanyScalarRelationFilter, CompanyWhereInput>
+    lines?: DrugOrderLineListRelationFilter
+    shipments?: DrugOrderShipmentListRelationFilter
+    receipts?: DrugOrderReceiptListRelationFilter
+  }, "id" | "orderNo">
+
+  export type DrugOrderOrderByWithAggregationInput = {
+    id?: SortOrder
+    orderNo?: SortOrder
+    facilityId?: SortOrder
+    companyId?: SortOrder
+    status?: SortOrder
+    baseReportMonth?: SortOrderInput | SortOrder
+    note?: SortOrderInput | SortOrder
+    submittedAt?: SortOrderInput | SortOrder
+    closedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: DrugOrderCountOrderByAggregateInput
+    _max?: DrugOrderMaxOrderByAggregateInput
+    _min?: DrugOrderMinOrderByAggregateInput
+  }
+
+  export type DrugOrderScalarWhereWithAggregatesInput = {
+    AND?: DrugOrderScalarWhereWithAggregatesInput | DrugOrderScalarWhereWithAggregatesInput[]
+    OR?: DrugOrderScalarWhereWithAggregatesInput[]
+    NOT?: DrugOrderScalarWhereWithAggregatesInput | DrugOrderScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"DrugOrder"> | string
+    orderNo?: StringWithAggregatesFilter<"DrugOrder"> | string
+    facilityId?: StringWithAggregatesFilter<"DrugOrder"> | string
+    companyId?: StringWithAggregatesFilter<"DrugOrder"> | string
+    status?: EnumDrugOrderStatusWithAggregatesFilter<"DrugOrder"> | $Enums.DrugOrderStatus
+    baseReportMonth?: StringNullableWithAggregatesFilter<"DrugOrder"> | string | null
+    note?: StringNullableWithAggregatesFilter<"DrugOrder"> | string | null
+    submittedAt?: DateTimeNullableWithAggregatesFilter<"DrugOrder"> | Date | string | null
+    closedAt?: DateTimeNullableWithAggregatesFilter<"DrugOrder"> | Date | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"DrugOrder"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"DrugOrder"> | Date | string
+  }
+
+  export type DrugOrderLineWhereInput = {
+    AND?: DrugOrderLineWhereInput | DrugOrderLineWhereInput[]
+    OR?: DrugOrderLineWhereInput[]
+    NOT?: DrugOrderLineWhereInput | DrugOrderLineWhereInput[]
+    id?: StringFilter<"DrugOrderLine"> | string
+    orderId?: StringFilter<"DrugOrderLine"> | string
+    sourceType?: EnumDrugOrderLineSourceTypeFilter<"DrugOrderLine"> | $Enums.DrugOrderLineSourceType
+    masterDrugId?: StringNullableFilter<"DrugOrderLine"> | string | null
+    companyDrugId?: StringNullableFilter<"DrugOrderLine"> | string | null
+    displayName?: StringFilter<"DrugOrderLine"> | string
+    unit?: StringNullableFilter<"DrugOrderLine"> | string | null
+    requestedQty?: DecimalFilter<"DrugOrderLine"> | Decimal | DecimalJsLike | number | string
+    acceptedQty?: DecimalFilter<"DrugOrderLine"> | Decimal | DecimalJsLike | number | string
+    suggestedQty?: DecimalNullableFilter<"DrugOrderLine"> | Decimal | DecimalJsLike | number | string | null
+    lineStatus?: EnumDrugOrderLineStatusFilter<"DrugOrderLine"> | $Enums.DrugOrderLineStatus
+    companyResponseReason?: StringNullableFilter<"DrugOrderLine"> | string | null
+    suggestionBasis?: StringNullableFilter<"DrugOrderLine"> | string | null
+    suggestionReportMonth?: StringNullableFilter<"DrugOrderLine"> | string | null
+    suggestionRuleVersion?: StringNullableFilter<"DrugOrderLine"> | string | null
+    createdAt?: DateTimeFilter<"DrugOrderLine"> | Date | string
+    updatedAt?: DateTimeFilter<"DrugOrderLine"> | Date | string
+    order?: XOR<DrugOrderScalarRelationFilter, DrugOrderWhereInput>
+    masterDrug?: XOR<MasterDrugNullableScalarRelationFilter, MasterDrugWhereInput> | null
+    companyDrug?: XOR<CompanyDrugNullableScalarRelationFilter, CompanyDrugWhereInput> | null
+    shipmentLines?: DrugOrderShipmentLineListRelationFilter
+    receiptLines?: DrugOrderReceiptLineListRelationFilter
+  }
+
+  export type DrugOrderLineOrderByWithRelationInput = {
+    id?: SortOrder
+    orderId?: SortOrder
+    sourceType?: SortOrder
+    masterDrugId?: SortOrderInput | SortOrder
+    companyDrugId?: SortOrderInput | SortOrder
+    displayName?: SortOrder
+    unit?: SortOrderInput | SortOrder
+    requestedQty?: SortOrder
+    acceptedQty?: SortOrder
+    suggestedQty?: SortOrderInput | SortOrder
+    lineStatus?: SortOrder
+    companyResponseReason?: SortOrderInput | SortOrder
+    suggestionBasis?: SortOrderInput | SortOrder
+    suggestionReportMonth?: SortOrderInput | SortOrder
+    suggestionRuleVersion?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    order?: DrugOrderOrderByWithRelationInput
+    masterDrug?: MasterDrugOrderByWithRelationInput
+    companyDrug?: CompanyDrugOrderByWithRelationInput
+    shipmentLines?: DrugOrderShipmentLineOrderByRelationAggregateInput
+    receiptLines?: DrugOrderReceiptLineOrderByRelationAggregateInput
+  }
+
+  export type DrugOrderLineWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: DrugOrderLineWhereInput | DrugOrderLineWhereInput[]
+    OR?: DrugOrderLineWhereInput[]
+    NOT?: DrugOrderLineWhereInput | DrugOrderLineWhereInput[]
+    orderId?: StringFilter<"DrugOrderLine"> | string
+    sourceType?: EnumDrugOrderLineSourceTypeFilter<"DrugOrderLine"> | $Enums.DrugOrderLineSourceType
+    masterDrugId?: StringNullableFilter<"DrugOrderLine"> | string | null
+    companyDrugId?: StringNullableFilter<"DrugOrderLine"> | string | null
+    displayName?: StringFilter<"DrugOrderLine"> | string
+    unit?: StringNullableFilter<"DrugOrderLine"> | string | null
+    requestedQty?: DecimalFilter<"DrugOrderLine"> | Decimal | DecimalJsLike | number | string
+    acceptedQty?: DecimalFilter<"DrugOrderLine"> | Decimal | DecimalJsLike | number | string
+    suggestedQty?: DecimalNullableFilter<"DrugOrderLine"> | Decimal | DecimalJsLike | number | string | null
+    lineStatus?: EnumDrugOrderLineStatusFilter<"DrugOrderLine"> | $Enums.DrugOrderLineStatus
+    companyResponseReason?: StringNullableFilter<"DrugOrderLine"> | string | null
+    suggestionBasis?: StringNullableFilter<"DrugOrderLine"> | string | null
+    suggestionReportMonth?: StringNullableFilter<"DrugOrderLine"> | string | null
+    suggestionRuleVersion?: StringNullableFilter<"DrugOrderLine"> | string | null
+    createdAt?: DateTimeFilter<"DrugOrderLine"> | Date | string
+    updatedAt?: DateTimeFilter<"DrugOrderLine"> | Date | string
+    order?: XOR<DrugOrderScalarRelationFilter, DrugOrderWhereInput>
+    masterDrug?: XOR<MasterDrugNullableScalarRelationFilter, MasterDrugWhereInput> | null
+    companyDrug?: XOR<CompanyDrugNullableScalarRelationFilter, CompanyDrugWhereInput> | null
+    shipmentLines?: DrugOrderShipmentLineListRelationFilter
+    receiptLines?: DrugOrderReceiptLineListRelationFilter
+  }, "id">
+
+  export type DrugOrderLineOrderByWithAggregationInput = {
+    id?: SortOrder
+    orderId?: SortOrder
+    sourceType?: SortOrder
+    masterDrugId?: SortOrderInput | SortOrder
+    companyDrugId?: SortOrderInput | SortOrder
+    displayName?: SortOrder
+    unit?: SortOrderInput | SortOrder
+    requestedQty?: SortOrder
+    acceptedQty?: SortOrder
+    suggestedQty?: SortOrderInput | SortOrder
+    lineStatus?: SortOrder
+    companyResponseReason?: SortOrderInput | SortOrder
+    suggestionBasis?: SortOrderInput | SortOrder
+    suggestionReportMonth?: SortOrderInput | SortOrder
+    suggestionRuleVersion?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: DrugOrderLineCountOrderByAggregateInput
+    _avg?: DrugOrderLineAvgOrderByAggregateInput
+    _max?: DrugOrderLineMaxOrderByAggregateInput
+    _min?: DrugOrderLineMinOrderByAggregateInput
+    _sum?: DrugOrderLineSumOrderByAggregateInput
+  }
+
+  export type DrugOrderLineScalarWhereWithAggregatesInput = {
+    AND?: DrugOrderLineScalarWhereWithAggregatesInput | DrugOrderLineScalarWhereWithAggregatesInput[]
+    OR?: DrugOrderLineScalarWhereWithAggregatesInput[]
+    NOT?: DrugOrderLineScalarWhereWithAggregatesInput | DrugOrderLineScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"DrugOrderLine"> | string
+    orderId?: StringWithAggregatesFilter<"DrugOrderLine"> | string
+    sourceType?: EnumDrugOrderLineSourceTypeWithAggregatesFilter<"DrugOrderLine"> | $Enums.DrugOrderLineSourceType
+    masterDrugId?: StringNullableWithAggregatesFilter<"DrugOrderLine"> | string | null
+    companyDrugId?: StringNullableWithAggregatesFilter<"DrugOrderLine"> | string | null
+    displayName?: StringWithAggregatesFilter<"DrugOrderLine"> | string
+    unit?: StringNullableWithAggregatesFilter<"DrugOrderLine"> | string | null
+    requestedQty?: DecimalWithAggregatesFilter<"DrugOrderLine"> | Decimal | DecimalJsLike | number | string
+    acceptedQty?: DecimalWithAggregatesFilter<"DrugOrderLine"> | Decimal | DecimalJsLike | number | string
+    suggestedQty?: DecimalNullableWithAggregatesFilter<"DrugOrderLine"> | Decimal | DecimalJsLike | number | string | null
+    lineStatus?: EnumDrugOrderLineStatusWithAggregatesFilter<"DrugOrderLine"> | $Enums.DrugOrderLineStatus
+    companyResponseReason?: StringNullableWithAggregatesFilter<"DrugOrderLine"> | string | null
+    suggestionBasis?: StringNullableWithAggregatesFilter<"DrugOrderLine"> | string | null
+    suggestionReportMonth?: StringNullableWithAggregatesFilter<"DrugOrderLine"> | string | null
+    suggestionRuleVersion?: StringNullableWithAggregatesFilter<"DrugOrderLine"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"DrugOrderLine"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"DrugOrderLine"> | Date | string
+  }
+
+  export type DrugOrderShipmentWhereInput = {
+    AND?: DrugOrderShipmentWhereInput | DrugOrderShipmentWhereInput[]
+    OR?: DrugOrderShipmentWhereInput[]
+    NOT?: DrugOrderShipmentWhereInput | DrugOrderShipmentWhereInput[]
+    id?: StringFilter<"DrugOrderShipment"> | string
+    orderId?: StringFilter<"DrugOrderShipment"> | string
+    shipmentNo?: IntFilter<"DrugOrderShipment"> | number
+    status?: EnumDrugOrderShipmentStatusFilter<"DrugOrderShipment"> | $Enums.DrugOrderShipmentStatus
+    shippedAt?: DateTimeNullableFilter<"DrugOrderShipment"> | Date | string | null
+    companyNote?: StringNullableFilter<"DrugOrderShipment"> | string | null
+    createdAt?: DateTimeFilter<"DrugOrderShipment"> | Date | string
+    updatedAt?: DateTimeFilter<"DrugOrderShipment"> | Date | string
+    order?: XOR<DrugOrderScalarRelationFilter, DrugOrderWhereInput>
+    lines?: DrugOrderShipmentLineListRelationFilter
+    receipts?: DrugOrderReceiptListRelationFilter
+  }
+
+  export type DrugOrderShipmentOrderByWithRelationInput = {
+    id?: SortOrder
+    orderId?: SortOrder
+    shipmentNo?: SortOrder
+    status?: SortOrder
+    shippedAt?: SortOrderInput | SortOrder
+    companyNote?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    order?: DrugOrderOrderByWithRelationInput
+    lines?: DrugOrderShipmentLineOrderByRelationAggregateInput
+    receipts?: DrugOrderReceiptOrderByRelationAggregateInput
+  }
+
+  export type DrugOrderShipmentWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    orderId_shipmentNo?: DrugOrderShipmentOrderIdShipmentNoCompoundUniqueInput
+    AND?: DrugOrderShipmentWhereInput | DrugOrderShipmentWhereInput[]
+    OR?: DrugOrderShipmentWhereInput[]
+    NOT?: DrugOrderShipmentWhereInput | DrugOrderShipmentWhereInput[]
+    orderId?: StringFilter<"DrugOrderShipment"> | string
+    shipmentNo?: IntFilter<"DrugOrderShipment"> | number
+    status?: EnumDrugOrderShipmentStatusFilter<"DrugOrderShipment"> | $Enums.DrugOrderShipmentStatus
+    shippedAt?: DateTimeNullableFilter<"DrugOrderShipment"> | Date | string | null
+    companyNote?: StringNullableFilter<"DrugOrderShipment"> | string | null
+    createdAt?: DateTimeFilter<"DrugOrderShipment"> | Date | string
+    updatedAt?: DateTimeFilter<"DrugOrderShipment"> | Date | string
+    order?: XOR<DrugOrderScalarRelationFilter, DrugOrderWhereInput>
+    lines?: DrugOrderShipmentLineListRelationFilter
+    receipts?: DrugOrderReceiptListRelationFilter
+  }, "id" | "orderId_shipmentNo">
+
+  export type DrugOrderShipmentOrderByWithAggregationInput = {
+    id?: SortOrder
+    orderId?: SortOrder
+    shipmentNo?: SortOrder
+    status?: SortOrder
+    shippedAt?: SortOrderInput | SortOrder
+    companyNote?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: DrugOrderShipmentCountOrderByAggregateInput
+    _avg?: DrugOrderShipmentAvgOrderByAggregateInput
+    _max?: DrugOrderShipmentMaxOrderByAggregateInput
+    _min?: DrugOrderShipmentMinOrderByAggregateInput
+    _sum?: DrugOrderShipmentSumOrderByAggregateInput
+  }
+
+  export type DrugOrderShipmentScalarWhereWithAggregatesInput = {
+    AND?: DrugOrderShipmentScalarWhereWithAggregatesInput | DrugOrderShipmentScalarWhereWithAggregatesInput[]
+    OR?: DrugOrderShipmentScalarWhereWithAggregatesInput[]
+    NOT?: DrugOrderShipmentScalarWhereWithAggregatesInput | DrugOrderShipmentScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"DrugOrderShipment"> | string
+    orderId?: StringWithAggregatesFilter<"DrugOrderShipment"> | string
+    shipmentNo?: IntWithAggregatesFilter<"DrugOrderShipment"> | number
+    status?: EnumDrugOrderShipmentStatusWithAggregatesFilter<"DrugOrderShipment"> | $Enums.DrugOrderShipmentStatus
+    shippedAt?: DateTimeNullableWithAggregatesFilter<"DrugOrderShipment"> | Date | string | null
+    companyNote?: StringNullableWithAggregatesFilter<"DrugOrderShipment"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"DrugOrderShipment"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"DrugOrderShipment"> | Date | string
+  }
+
+  export type DrugOrderShipmentLineWhereInput = {
+    AND?: DrugOrderShipmentLineWhereInput | DrugOrderShipmentLineWhereInput[]
+    OR?: DrugOrderShipmentLineWhereInput[]
+    NOT?: DrugOrderShipmentLineWhereInput | DrugOrderShipmentLineWhereInput[]
+    id?: StringFilter<"DrugOrderShipmentLine"> | string
+    shipmentId?: StringFilter<"DrugOrderShipmentLine"> | string
+    orderLineId?: StringFilter<"DrugOrderShipmentLine"> | string
+    shippedQty?: DecimalFilter<"DrugOrderShipmentLine"> | Decimal | DecimalJsLike | number | string
+    reason?: StringNullableFilter<"DrugOrderShipmentLine"> | string | null
+    createdAt?: DateTimeFilter<"DrugOrderShipmentLine"> | Date | string
+    updatedAt?: DateTimeFilter<"DrugOrderShipmentLine"> | Date | string
+    shipment?: XOR<DrugOrderShipmentScalarRelationFilter, DrugOrderShipmentWhereInput>
+    orderLine?: XOR<DrugOrderLineScalarRelationFilter, DrugOrderLineWhereInput>
+    receiptLines?: DrugOrderReceiptLineListRelationFilter
+  }
+
+  export type DrugOrderShipmentLineOrderByWithRelationInput = {
+    id?: SortOrder
+    shipmentId?: SortOrder
+    orderLineId?: SortOrder
+    shippedQty?: SortOrder
+    reason?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    shipment?: DrugOrderShipmentOrderByWithRelationInput
+    orderLine?: DrugOrderLineOrderByWithRelationInput
+    receiptLines?: DrugOrderReceiptLineOrderByRelationAggregateInput
+  }
+
+  export type DrugOrderShipmentLineWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    shipmentId_orderLineId?: DrugOrderShipmentLineShipmentIdOrderLineIdCompoundUniqueInput
+    AND?: DrugOrderShipmentLineWhereInput | DrugOrderShipmentLineWhereInput[]
+    OR?: DrugOrderShipmentLineWhereInput[]
+    NOT?: DrugOrderShipmentLineWhereInput | DrugOrderShipmentLineWhereInput[]
+    shipmentId?: StringFilter<"DrugOrderShipmentLine"> | string
+    orderLineId?: StringFilter<"DrugOrderShipmentLine"> | string
+    shippedQty?: DecimalFilter<"DrugOrderShipmentLine"> | Decimal | DecimalJsLike | number | string
+    reason?: StringNullableFilter<"DrugOrderShipmentLine"> | string | null
+    createdAt?: DateTimeFilter<"DrugOrderShipmentLine"> | Date | string
+    updatedAt?: DateTimeFilter<"DrugOrderShipmentLine"> | Date | string
+    shipment?: XOR<DrugOrderShipmentScalarRelationFilter, DrugOrderShipmentWhereInput>
+    orderLine?: XOR<DrugOrderLineScalarRelationFilter, DrugOrderLineWhereInput>
+    receiptLines?: DrugOrderReceiptLineListRelationFilter
+  }, "id" | "shipmentId_orderLineId">
+
+  export type DrugOrderShipmentLineOrderByWithAggregationInput = {
+    id?: SortOrder
+    shipmentId?: SortOrder
+    orderLineId?: SortOrder
+    shippedQty?: SortOrder
+    reason?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: DrugOrderShipmentLineCountOrderByAggregateInput
+    _avg?: DrugOrderShipmentLineAvgOrderByAggregateInput
+    _max?: DrugOrderShipmentLineMaxOrderByAggregateInput
+    _min?: DrugOrderShipmentLineMinOrderByAggregateInput
+    _sum?: DrugOrderShipmentLineSumOrderByAggregateInput
+  }
+
+  export type DrugOrderShipmentLineScalarWhereWithAggregatesInput = {
+    AND?: DrugOrderShipmentLineScalarWhereWithAggregatesInput | DrugOrderShipmentLineScalarWhereWithAggregatesInput[]
+    OR?: DrugOrderShipmentLineScalarWhereWithAggregatesInput[]
+    NOT?: DrugOrderShipmentLineScalarWhereWithAggregatesInput | DrugOrderShipmentLineScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"DrugOrderShipmentLine"> | string
+    shipmentId?: StringWithAggregatesFilter<"DrugOrderShipmentLine"> | string
+    orderLineId?: StringWithAggregatesFilter<"DrugOrderShipmentLine"> | string
+    shippedQty?: DecimalWithAggregatesFilter<"DrugOrderShipmentLine"> | Decimal | DecimalJsLike | number | string
+    reason?: StringNullableWithAggregatesFilter<"DrugOrderShipmentLine"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"DrugOrderShipmentLine"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"DrugOrderShipmentLine"> | Date | string
+  }
+
+  export type DrugOrderReceiptWhereInput = {
+    AND?: DrugOrderReceiptWhereInput | DrugOrderReceiptWhereInput[]
+    OR?: DrugOrderReceiptWhereInput[]
+    NOT?: DrugOrderReceiptWhereInput | DrugOrderReceiptWhereInput[]
+    id?: StringFilter<"DrugOrderReceipt"> | string
+    orderId?: StringFilter<"DrugOrderReceipt"> | string
+    shipmentId?: StringFilter<"DrugOrderReceipt"> | string
+    facilityId?: StringFilter<"DrugOrderReceipt"> | string
+    confirmedAt?: DateTimeFilter<"DrugOrderReceipt"> | Date | string
+    note?: StringNullableFilter<"DrugOrderReceipt"> | string | null
+    createdAt?: DateTimeFilter<"DrugOrderReceipt"> | Date | string
+    updatedAt?: DateTimeFilter<"DrugOrderReceipt"> | Date | string
+    order?: XOR<DrugOrderScalarRelationFilter, DrugOrderWhereInput>
+    shipment?: XOR<DrugOrderShipmentScalarRelationFilter, DrugOrderShipmentWhereInput>
+    facility?: XOR<UserScalarRelationFilter, UserWhereInput>
+    lines?: DrugOrderReceiptLineListRelationFilter
+  }
+
+  export type DrugOrderReceiptOrderByWithRelationInput = {
+    id?: SortOrder
+    orderId?: SortOrder
+    shipmentId?: SortOrder
+    facilityId?: SortOrder
+    confirmedAt?: SortOrder
+    note?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    order?: DrugOrderOrderByWithRelationInput
+    shipment?: DrugOrderShipmentOrderByWithRelationInput
+    facility?: UserOrderByWithRelationInput
+    lines?: DrugOrderReceiptLineOrderByRelationAggregateInput
+  }
+
+  export type DrugOrderReceiptWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    shipmentId?: string
+    AND?: DrugOrderReceiptWhereInput | DrugOrderReceiptWhereInput[]
+    OR?: DrugOrderReceiptWhereInput[]
+    NOT?: DrugOrderReceiptWhereInput | DrugOrderReceiptWhereInput[]
+    orderId?: StringFilter<"DrugOrderReceipt"> | string
+    facilityId?: StringFilter<"DrugOrderReceipt"> | string
+    confirmedAt?: DateTimeFilter<"DrugOrderReceipt"> | Date | string
+    note?: StringNullableFilter<"DrugOrderReceipt"> | string | null
+    createdAt?: DateTimeFilter<"DrugOrderReceipt"> | Date | string
+    updatedAt?: DateTimeFilter<"DrugOrderReceipt"> | Date | string
+    order?: XOR<DrugOrderScalarRelationFilter, DrugOrderWhereInput>
+    shipment?: XOR<DrugOrderShipmentScalarRelationFilter, DrugOrderShipmentWhereInput>
+    facility?: XOR<UserScalarRelationFilter, UserWhereInput>
+    lines?: DrugOrderReceiptLineListRelationFilter
+  }, "id" | "shipmentId">
+
+  export type DrugOrderReceiptOrderByWithAggregationInput = {
+    id?: SortOrder
+    orderId?: SortOrder
+    shipmentId?: SortOrder
+    facilityId?: SortOrder
+    confirmedAt?: SortOrder
+    note?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: DrugOrderReceiptCountOrderByAggregateInput
+    _max?: DrugOrderReceiptMaxOrderByAggregateInput
+    _min?: DrugOrderReceiptMinOrderByAggregateInput
+  }
+
+  export type DrugOrderReceiptScalarWhereWithAggregatesInput = {
+    AND?: DrugOrderReceiptScalarWhereWithAggregatesInput | DrugOrderReceiptScalarWhereWithAggregatesInput[]
+    OR?: DrugOrderReceiptScalarWhereWithAggregatesInput[]
+    NOT?: DrugOrderReceiptScalarWhereWithAggregatesInput | DrugOrderReceiptScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"DrugOrderReceipt"> | string
+    orderId?: StringWithAggregatesFilter<"DrugOrderReceipt"> | string
+    shipmentId?: StringWithAggregatesFilter<"DrugOrderReceipt"> | string
+    facilityId?: StringWithAggregatesFilter<"DrugOrderReceipt"> | string
+    confirmedAt?: DateTimeWithAggregatesFilter<"DrugOrderReceipt"> | Date | string
+    note?: StringNullableWithAggregatesFilter<"DrugOrderReceipt"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"DrugOrderReceipt"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"DrugOrderReceipt"> | Date | string
+  }
+
+  export type DrugOrderReceiptLineWhereInput = {
+    AND?: DrugOrderReceiptLineWhereInput | DrugOrderReceiptLineWhereInput[]
+    OR?: DrugOrderReceiptLineWhereInput[]
+    NOT?: DrugOrderReceiptLineWhereInput | DrugOrderReceiptLineWhereInput[]
+    id?: StringFilter<"DrugOrderReceiptLine"> | string
+    receiptId?: StringFilter<"DrugOrderReceiptLine"> | string
+    shipmentLineId?: StringFilter<"DrugOrderReceiptLine"> | string
+    orderLineId?: StringFilter<"DrugOrderReceiptLine"> | string
+    receivedQty?: DecimalFilter<"DrugOrderReceiptLine"> | Decimal | DecimalJsLike | number | string
+    differenceReason?: StringNullableFilter<"DrugOrderReceiptLine"> | string | null
+    createdAt?: DateTimeFilter<"DrugOrderReceiptLine"> | Date | string
+    updatedAt?: DateTimeFilter<"DrugOrderReceiptLine"> | Date | string
+    receipt?: XOR<DrugOrderReceiptScalarRelationFilter, DrugOrderReceiptWhereInput>
+    shipmentLine?: XOR<DrugOrderShipmentLineScalarRelationFilter, DrugOrderShipmentLineWhereInput>
+    orderLine?: XOR<DrugOrderLineScalarRelationFilter, DrugOrderLineWhereInput>
+  }
+
+  export type DrugOrderReceiptLineOrderByWithRelationInput = {
+    id?: SortOrder
+    receiptId?: SortOrder
+    shipmentLineId?: SortOrder
+    orderLineId?: SortOrder
+    receivedQty?: SortOrder
+    differenceReason?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    receipt?: DrugOrderReceiptOrderByWithRelationInput
+    shipmentLine?: DrugOrderShipmentLineOrderByWithRelationInput
+    orderLine?: DrugOrderLineOrderByWithRelationInput
+  }
+
+  export type DrugOrderReceiptLineWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    receiptId_shipmentLineId?: DrugOrderReceiptLineReceiptIdShipmentLineIdCompoundUniqueInput
+    AND?: DrugOrderReceiptLineWhereInput | DrugOrderReceiptLineWhereInput[]
+    OR?: DrugOrderReceiptLineWhereInput[]
+    NOT?: DrugOrderReceiptLineWhereInput | DrugOrderReceiptLineWhereInput[]
+    receiptId?: StringFilter<"DrugOrderReceiptLine"> | string
+    shipmentLineId?: StringFilter<"DrugOrderReceiptLine"> | string
+    orderLineId?: StringFilter<"DrugOrderReceiptLine"> | string
+    receivedQty?: DecimalFilter<"DrugOrderReceiptLine"> | Decimal | DecimalJsLike | number | string
+    differenceReason?: StringNullableFilter<"DrugOrderReceiptLine"> | string | null
+    createdAt?: DateTimeFilter<"DrugOrderReceiptLine"> | Date | string
+    updatedAt?: DateTimeFilter<"DrugOrderReceiptLine"> | Date | string
+    receipt?: XOR<DrugOrderReceiptScalarRelationFilter, DrugOrderReceiptWhereInput>
+    shipmentLine?: XOR<DrugOrderShipmentLineScalarRelationFilter, DrugOrderShipmentLineWhereInput>
+    orderLine?: XOR<DrugOrderLineScalarRelationFilter, DrugOrderLineWhereInput>
+  }, "id" | "receiptId_shipmentLineId">
+
+  export type DrugOrderReceiptLineOrderByWithAggregationInput = {
+    id?: SortOrder
+    receiptId?: SortOrder
+    shipmentLineId?: SortOrder
+    orderLineId?: SortOrder
+    receivedQty?: SortOrder
+    differenceReason?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: DrugOrderReceiptLineCountOrderByAggregateInput
+    _avg?: DrugOrderReceiptLineAvgOrderByAggregateInput
+    _max?: DrugOrderReceiptLineMaxOrderByAggregateInput
+    _min?: DrugOrderReceiptLineMinOrderByAggregateInput
+    _sum?: DrugOrderReceiptLineSumOrderByAggregateInput
+  }
+
+  export type DrugOrderReceiptLineScalarWhereWithAggregatesInput = {
+    AND?: DrugOrderReceiptLineScalarWhereWithAggregatesInput | DrugOrderReceiptLineScalarWhereWithAggregatesInput[]
+    OR?: DrugOrderReceiptLineScalarWhereWithAggregatesInput[]
+    NOT?: DrugOrderReceiptLineScalarWhereWithAggregatesInput | DrugOrderReceiptLineScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"DrugOrderReceiptLine"> | string
+    receiptId?: StringWithAggregatesFilter<"DrugOrderReceiptLine"> | string
+    shipmentLineId?: StringWithAggregatesFilter<"DrugOrderReceiptLine"> | string
+    orderLineId?: StringWithAggregatesFilter<"DrugOrderReceiptLine"> | string
+    receivedQty?: DecimalWithAggregatesFilter<"DrugOrderReceiptLine"> | Decimal | DecimalJsLike | number | string
+    differenceReason?: StringNullableWithAggregatesFilter<"DrugOrderReceiptLine"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"DrugOrderReceiptLine"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"DrugOrderReceiptLine"> | Date | string
   }
 
   export type ReportReviewLogWhereInput = {
@@ -23750,10 +35542,13 @@ export namespace Prisma {
     address?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    company?: CompanyCreateNestedOneWithoutUsersInput
     drugMaps?: FacilityDrugMapCreateNestedManyWithoutFacilityInput
     reports?: InventoryReportCreateNestedManyWithoutFacilityInput
     reportSubmissions?: FacilityReportSubmissionCreateNestedManyWithoutFacilityInput
     keHoachLCNTs?: KeHoachLCNTCreateNestedManyWithoutFacilityInput
+    drugOrders?: DrugOrderCreateNestedManyWithoutFacilityInput
+    drugOrderReceipts?: DrugOrderReceiptCreateNestedManyWithoutFacilityInput
     notifications?: NotificationCreateNestedManyWithoutUserInput
     activityLogs?: ActivityLogCreateNestedManyWithoutUserInput
   }
@@ -23765,6 +35560,7 @@ export namespace Prisma {
     role?: $Enums.Role
     facilityName?: string | null
     facilityCode?: string | null
+    companyId?: string | null
     isActive?: boolean
     autonomyGroup?: string | null
     facilityType?: string | null
@@ -23777,6 +35573,8 @@ export namespace Prisma {
     reports?: InventoryReportUncheckedCreateNestedManyWithoutFacilityInput
     reportSubmissions?: FacilityReportSubmissionUncheckedCreateNestedManyWithoutFacilityInput
     keHoachLCNTs?: KeHoachLCNTUncheckedCreateNestedManyWithoutFacilityInput
+    drugOrders?: DrugOrderUncheckedCreateNestedManyWithoutFacilityInput
+    drugOrderReceipts?: DrugOrderReceiptUncheckedCreateNestedManyWithoutFacilityInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
     activityLogs?: ActivityLogUncheckedCreateNestedManyWithoutUserInput
   }
@@ -23796,10 +35594,13 @@ export namespace Prisma {
     address?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    company?: CompanyUpdateOneWithoutUsersNestedInput
     drugMaps?: FacilityDrugMapUpdateManyWithoutFacilityNestedInput
     reports?: InventoryReportUpdateManyWithoutFacilityNestedInput
     reportSubmissions?: FacilityReportSubmissionUpdateManyWithoutFacilityNestedInput
     keHoachLCNTs?: KeHoachLCNTUpdateManyWithoutFacilityNestedInput
+    drugOrders?: DrugOrderUpdateManyWithoutFacilityNestedInput
+    drugOrderReceipts?: DrugOrderReceiptUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUpdateManyWithoutUserNestedInput
     activityLogs?: ActivityLogUpdateManyWithoutUserNestedInput
   }
@@ -23811,6 +35612,7 @@ export namespace Prisma {
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     facilityName?: NullableStringFieldUpdateOperationsInput | string | null
     facilityCode?: NullableStringFieldUpdateOperationsInput | string | null
+    companyId?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     autonomyGroup?: NullableStringFieldUpdateOperationsInput | string | null
     facilityType?: NullableStringFieldUpdateOperationsInput | string | null
@@ -23823,6 +35625,8 @@ export namespace Prisma {
     reports?: InventoryReportUncheckedUpdateManyWithoutFacilityNestedInput
     reportSubmissions?: FacilityReportSubmissionUncheckedUpdateManyWithoutFacilityNestedInput
     keHoachLCNTs?: KeHoachLCNTUncheckedUpdateManyWithoutFacilityNestedInput
+    drugOrders?: DrugOrderUncheckedUpdateManyWithoutFacilityNestedInput
+    drugOrderReceipts?: DrugOrderReceiptUncheckedUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
     activityLogs?: ActivityLogUncheckedUpdateManyWithoutUserNestedInput
   }
@@ -23834,6 +35638,7 @@ export namespace Prisma {
     role?: $Enums.Role
     facilityName?: string | null
     facilityCode?: string | null
+    companyId?: string | null
     isActive?: boolean
     autonomyGroup?: string | null
     facilityType?: string | null
@@ -23868,12 +35673,116 @@ export namespace Prisma {
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     facilityName?: NullableStringFieldUpdateOperationsInput | string | null
     facilityCode?: NullableStringFieldUpdateOperationsInput | string | null
+    companyId?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     autonomyGroup?: NullableStringFieldUpdateOperationsInput | string | null
     facilityType?: NullableStringFieldUpdateOperationsInput | string | null
     contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CompanyCreateInput = {
+    id?: string
+    code: string
+    name: string
+    contactPerson?: string | null
+    phoneNumber?: string | null
+    email?: string | null
+    address?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    users?: UserCreateNestedManyWithoutCompanyInput
+    companyDrugs?: CompanyDrugCreateNestedManyWithoutCompanyInput
+    drugOrders?: DrugOrderCreateNestedManyWithoutCompanyInput
+  }
+
+  export type CompanyUncheckedCreateInput = {
+    id?: string
+    code: string
+    name: string
+    contactPerson?: string | null
+    phoneNumber?: string | null
+    email?: string | null
+    address?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    users?: UserUncheckedCreateNestedManyWithoutCompanyInput
+    companyDrugs?: CompanyDrugUncheckedCreateNestedManyWithoutCompanyInput
+    drugOrders?: DrugOrderUncheckedCreateNestedManyWithoutCompanyInput
+  }
+
+  export type CompanyUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    users?: UserUpdateManyWithoutCompanyNestedInput
+    companyDrugs?: CompanyDrugUpdateManyWithoutCompanyNestedInput
+    drugOrders?: DrugOrderUpdateManyWithoutCompanyNestedInput
+  }
+
+  export type CompanyUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    users?: UserUncheckedUpdateManyWithoutCompanyNestedInput
+    companyDrugs?: CompanyDrugUncheckedUpdateManyWithoutCompanyNestedInput
+    drugOrders?: DrugOrderUncheckedUpdateManyWithoutCompanyNestedInput
+  }
+
+  export type CompanyCreateManyInput = {
+    id?: string
+    code: string
+    name: string
+    contactPerson?: string | null
+    phoneNumber?: string | null
+    email?: string | null
+    address?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type CompanyUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CompanyUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -23975,6 +35884,8 @@ export namespace Prisma {
     updatedAt?: Date | string
     therapeuticGroup?: TherapeuticGroupCreateNestedOneWithoutMasterDrugsInput
     drugMaps?: FacilityDrugMapCreateNestedManyWithoutMasterDrugInput
+    companyDrugs?: CompanyDrugCreateNestedManyWithoutMasterDrugInput
+    drugOrderLines?: DrugOrderLineCreateNestedManyWithoutMasterDrugInput
   }
 
   export type MasterDrugUncheckedCreateInput = {
@@ -24007,6 +35918,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     drugMaps?: FacilityDrugMapUncheckedCreateNestedManyWithoutMasterDrugInput
+    companyDrugs?: CompanyDrugUncheckedCreateNestedManyWithoutMasterDrugInput
+    drugOrderLines?: DrugOrderLineUncheckedCreateNestedManyWithoutMasterDrugInput
   }
 
   export type MasterDrugUpdateInput = {
@@ -24039,6 +35952,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     therapeuticGroup?: TherapeuticGroupUpdateOneWithoutMasterDrugsNestedInput
     drugMaps?: FacilityDrugMapUpdateManyWithoutMasterDrugNestedInput
+    companyDrugs?: CompanyDrugUpdateManyWithoutMasterDrugNestedInput
+    drugOrderLines?: DrugOrderLineUpdateManyWithoutMasterDrugNestedInput
   }
 
   export type MasterDrugUncheckedUpdateInput = {
@@ -24071,6 +35986,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     drugMaps?: FacilityDrugMapUncheckedUpdateManyWithoutMasterDrugNestedInput
+    companyDrugs?: CompanyDrugUncheckedUpdateManyWithoutMasterDrugNestedInput
+    drugOrderLines?: DrugOrderLineUncheckedUpdateManyWithoutMasterDrugNestedInput
   }
 
   export type MasterDrugCreateManyInput = {
@@ -24160,6 +36077,106 @@ export namespace Prisma {
     isKeDon?: NullableStringFieldUpdateOperationsInput | string | null
     kiemSoatDacBiet?: NullableStringFieldUpdateOperationsInput | string | null
     isTrongNuoc?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CompanyDrugCreateInput = {
+    id?: string
+    companyDrugCode: string
+    companyDrugName: string
+    activeIngredient?: string | null
+    quyCach?: string | null
+    unit?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    company: CompanyCreateNestedOneWithoutCompanyDrugsInput
+    masterDrug?: MasterDrugCreateNestedOneWithoutCompanyDrugsInput
+    drugOrderLines?: DrugOrderLineCreateNestedManyWithoutCompanyDrugInput
+  }
+
+  export type CompanyDrugUncheckedCreateInput = {
+    id?: string
+    companyId: string
+    masterDrugId?: string | null
+    companyDrugCode: string
+    companyDrugName: string
+    activeIngredient?: string | null
+    quyCach?: string | null
+    unit?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    drugOrderLines?: DrugOrderLineUncheckedCreateNestedManyWithoutCompanyDrugInput
+  }
+
+  export type CompanyDrugUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    companyDrugCode?: StringFieldUpdateOperationsInput | string
+    companyDrugName?: StringFieldUpdateOperationsInput | string
+    activeIngredient?: NullableStringFieldUpdateOperationsInput | string | null
+    quyCach?: NullableStringFieldUpdateOperationsInput | string | null
+    unit?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    company?: CompanyUpdateOneRequiredWithoutCompanyDrugsNestedInput
+    masterDrug?: MasterDrugUpdateOneWithoutCompanyDrugsNestedInput
+    drugOrderLines?: DrugOrderLineUpdateManyWithoutCompanyDrugNestedInput
+  }
+
+  export type CompanyDrugUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    companyId?: StringFieldUpdateOperationsInput | string
+    masterDrugId?: NullableStringFieldUpdateOperationsInput | string | null
+    companyDrugCode?: StringFieldUpdateOperationsInput | string
+    companyDrugName?: StringFieldUpdateOperationsInput | string
+    activeIngredient?: NullableStringFieldUpdateOperationsInput | string | null
+    quyCach?: NullableStringFieldUpdateOperationsInput | string | null
+    unit?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    drugOrderLines?: DrugOrderLineUncheckedUpdateManyWithoutCompanyDrugNestedInput
+  }
+
+  export type CompanyDrugCreateManyInput = {
+    id?: string
+    companyId: string
+    masterDrugId?: string | null
+    companyDrugCode: string
+    companyDrugName: string
+    activeIngredient?: string | null
+    quyCach?: string | null
+    unit?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type CompanyDrugUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    companyDrugCode?: StringFieldUpdateOperationsInput | string
+    companyDrugName?: StringFieldUpdateOperationsInput | string
+    activeIngredient?: NullableStringFieldUpdateOperationsInput | string | null
+    quyCach?: NullableStringFieldUpdateOperationsInput | string | null
+    unit?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CompanyDrugUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    companyId?: StringFieldUpdateOperationsInput | string
+    masterDrugId?: NullableStringFieldUpdateOperationsInput | string | null
+    companyDrugCode?: StringFieldUpdateOperationsInput | string
+    companyDrugName?: StringFieldUpdateOperationsInput | string
+    activeIngredient?: NullableStringFieldUpdateOperationsInput | string | null
+    quyCach?: NullableStringFieldUpdateOperationsInput | string | null
+    unit?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -24510,6 +36527,567 @@ export namespace Prisma {
     submittedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     reportedRowCount?: IntFieldUpdateOperationsInput | number
     skippedRowCount?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DrugOrderCreateInput = {
+    id?: string
+    orderNo: string
+    status?: $Enums.DrugOrderStatus
+    baseReportMonth?: string | null
+    note?: string | null
+    submittedAt?: Date | string | null
+    closedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    facility: UserCreateNestedOneWithoutDrugOrdersInput
+    company: CompanyCreateNestedOneWithoutDrugOrdersInput
+    lines?: DrugOrderLineCreateNestedManyWithoutOrderInput
+    shipments?: DrugOrderShipmentCreateNestedManyWithoutOrderInput
+    receipts?: DrugOrderReceiptCreateNestedManyWithoutOrderInput
+  }
+
+  export type DrugOrderUncheckedCreateInput = {
+    id?: string
+    orderNo: string
+    facilityId: string
+    companyId: string
+    status?: $Enums.DrugOrderStatus
+    baseReportMonth?: string | null
+    note?: string | null
+    submittedAt?: Date | string | null
+    closedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    lines?: DrugOrderLineUncheckedCreateNestedManyWithoutOrderInput
+    shipments?: DrugOrderShipmentUncheckedCreateNestedManyWithoutOrderInput
+    receipts?: DrugOrderReceiptUncheckedCreateNestedManyWithoutOrderInput
+  }
+
+  export type DrugOrderUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderNo?: StringFieldUpdateOperationsInput | string
+    status?: EnumDrugOrderStatusFieldUpdateOperationsInput | $Enums.DrugOrderStatus
+    baseReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    facility?: UserUpdateOneRequiredWithoutDrugOrdersNestedInput
+    company?: CompanyUpdateOneRequiredWithoutDrugOrdersNestedInput
+    lines?: DrugOrderLineUpdateManyWithoutOrderNestedInput
+    shipments?: DrugOrderShipmentUpdateManyWithoutOrderNestedInput
+    receipts?: DrugOrderReceiptUpdateManyWithoutOrderNestedInput
+  }
+
+  export type DrugOrderUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderNo?: StringFieldUpdateOperationsInput | string
+    facilityId?: StringFieldUpdateOperationsInput | string
+    companyId?: StringFieldUpdateOperationsInput | string
+    status?: EnumDrugOrderStatusFieldUpdateOperationsInput | $Enums.DrugOrderStatus
+    baseReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lines?: DrugOrderLineUncheckedUpdateManyWithoutOrderNestedInput
+    shipments?: DrugOrderShipmentUncheckedUpdateManyWithoutOrderNestedInput
+    receipts?: DrugOrderReceiptUncheckedUpdateManyWithoutOrderNestedInput
+  }
+
+  export type DrugOrderCreateManyInput = {
+    id?: string
+    orderNo: string
+    facilityId: string
+    companyId: string
+    status?: $Enums.DrugOrderStatus
+    baseReportMonth?: string | null
+    note?: string | null
+    submittedAt?: Date | string | null
+    closedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DrugOrderUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderNo?: StringFieldUpdateOperationsInput | string
+    status?: EnumDrugOrderStatusFieldUpdateOperationsInput | $Enums.DrugOrderStatus
+    baseReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DrugOrderUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderNo?: StringFieldUpdateOperationsInput | string
+    facilityId?: StringFieldUpdateOperationsInput | string
+    companyId?: StringFieldUpdateOperationsInput | string
+    status?: EnumDrugOrderStatusFieldUpdateOperationsInput | $Enums.DrugOrderStatus
+    baseReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DrugOrderLineCreateInput = {
+    id?: string
+    sourceType: $Enums.DrugOrderLineSourceType
+    displayName: string
+    unit?: string | null
+    requestedQty?: Decimal | DecimalJsLike | number | string
+    acceptedQty?: Decimal | DecimalJsLike | number | string
+    suggestedQty?: Decimal | DecimalJsLike | number | string | null
+    lineStatus?: $Enums.DrugOrderLineStatus
+    companyResponseReason?: string | null
+    suggestionBasis?: string | null
+    suggestionReportMonth?: string | null
+    suggestionRuleVersion?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    order: DrugOrderCreateNestedOneWithoutLinesInput
+    masterDrug?: MasterDrugCreateNestedOneWithoutDrugOrderLinesInput
+    companyDrug?: CompanyDrugCreateNestedOneWithoutDrugOrderLinesInput
+    shipmentLines?: DrugOrderShipmentLineCreateNestedManyWithoutOrderLineInput
+    receiptLines?: DrugOrderReceiptLineCreateNestedManyWithoutOrderLineInput
+  }
+
+  export type DrugOrderLineUncheckedCreateInput = {
+    id?: string
+    orderId: string
+    sourceType: $Enums.DrugOrderLineSourceType
+    masterDrugId?: string | null
+    companyDrugId?: string | null
+    displayName: string
+    unit?: string | null
+    requestedQty?: Decimal | DecimalJsLike | number | string
+    acceptedQty?: Decimal | DecimalJsLike | number | string
+    suggestedQty?: Decimal | DecimalJsLike | number | string | null
+    lineStatus?: $Enums.DrugOrderLineStatus
+    companyResponseReason?: string | null
+    suggestionBasis?: string | null
+    suggestionReportMonth?: string | null
+    suggestionRuleVersion?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    shipmentLines?: DrugOrderShipmentLineUncheckedCreateNestedManyWithoutOrderLineInput
+    receiptLines?: DrugOrderReceiptLineUncheckedCreateNestedManyWithoutOrderLineInput
+  }
+
+  export type DrugOrderLineUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    sourceType?: EnumDrugOrderLineSourceTypeFieldUpdateOperationsInput | $Enums.DrugOrderLineSourceType
+    displayName?: StringFieldUpdateOperationsInput | string
+    unit?: NullableStringFieldUpdateOperationsInput | string | null
+    requestedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    acceptedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    suggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    lineStatus?: EnumDrugOrderLineStatusFieldUpdateOperationsInput | $Enums.DrugOrderLineStatus
+    companyResponseReason?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionBasis?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionRuleVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    order?: DrugOrderUpdateOneRequiredWithoutLinesNestedInput
+    masterDrug?: MasterDrugUpdateOneWithoutDrugOrderLinesNestedInput
+    companyDrug?: CompanyDrugUpdateOneWithoutDrugOrderLinesNestedInput
+    shipmentLines?: DrugOrderShipmentLineUpdateManyWithoutOrderLineNestedInput
+    receiptLines?: DrugOrderReceiptLineUpdateManyWithoutOrderLineNestedInput
+  }
+
+  export type DrugOrderLineUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderId?: StringFieldUpdateOperationsInput | string
+    sourceType?: EnumDrugOrderLineSourceTypeFieldUpdateOperationsInput | $Enums.DrugOrderLineSourceType
+    masterDrugId?: NullableStringFieldUpdateOperationsInput | string | null
+    companyDrugId?: NullableStringFieldUpdateOperationsInput | string | null
+    displayName?: StringFieldUpdateOperationsInput | string
+    unit?: NullableStringFieldUpdateOperationsInput | string | null
+    requestedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    acceptedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    suggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    lineStatus?: EnumDrugOrderLineStatusFieldUpdateOperationsInput | $Enums.DrugOrderLineStatus
+    companyResponseReason?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionBasis?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionRuleVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    shipmentLines?: DrugOrderShipmentLineUncheckedUpdateManyWithoutOrderLineNestedInput
+    receiptLines?: DrugOrderReceiptLineUncheckedUpdateManyWithoutOrderLineNestedInput
+  }
+
+  export type DrugOrderLineCreateManyInput = {
+    id?: string
+    orderId: string
+    sourceType: $Enums.DrugOrderLineSourceType
+    masterDrugId?: string | null
+    companyDrugId?: string | null
+    displayName: string
+    unit?: string | null
+    requestedQty?: Decimal | DecimalJsLike | number | string
+    acceptedQty?: Decimal | DecimalJsLike | number | string
+    suggestedQty?: Decimal | DecimalJsLike | number | string | null
+    lineStatus?: $Enums.DrugOrderLineStatus
+    companyResponseReason?: string | null
+    suggestionBasis?: string | null
+    suggestionReportMonth?: string | null
+    suggestionRuleVersion?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DrugOrderLineUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    sourceType?: EnumDrugOrderLineSourceTypeFieldUpdateOperationsInput | $Enums.DrugOrderLineSourceType
+    displayName?: StringFieldUpdateOperationsInput | string
+    unit?: NullableStringFieldUpdateOperationsInput | string | null
+    requestedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    acceptedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    suggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    lineStatus?: EnumDrugOrderLineStatusFieldUpdateOperationsInput | $Enums.DrugOrderLineStatus
+    companyResponseReason?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionBasis?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionRuleVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DrugOrderLineUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderId?: StringFieldUpdateOperationsInput | string
+    sourceType?: EnumDrugOrderLineSourceTypeFieldUpdateOperationsInput | $Enums.DrugOrderLineSourceType
+    masterDrugId?: NullableStringFieldUpdateOperationsInput | string | null
+    companyDrugId?: NullableStringFieldUpdateOperationsInput | string | null
+    displayName?: StringFieldUpdateOperationsInput | string
+    unit?: NullableStringFieldUpdateOperationsInput | string | null
+    requestedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    acceptedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    suggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    lineStatus?: EnumDrugOrderLineStatusFieldUpdateOperationsInput | $Enums.DrugOrderLineStatus
+    companyResponseReason?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionBasis?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionRuleVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DrugOrderShipmentCreateInput = {
+    id?: string
+    shipmentNo: number
+    status?: $Enums.DrugOrderShipmentStatus
+    shippedAt?: Date | string | null
+    companyNote?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    order: DrugOrderCreateNestedOneWithoutShipmentsInput
+    lines?: DrugOrderShipmentLineCreateNestedManyWithoutShipmentInput
+    receipts?: DrugOrderReceiptCreateNestedManyWithoutShipmentInput
+  }
+
+  export type DrugOrderShipmentUncheckedCreateInput = {
+    id?: string
+    orderId: string
+    shipmentNo: number
+    status?: $Enums.DrugOrderShipmentStatus
+    shippedAt?: Date | string | null
+    companyNote?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    lines?: DrugOrderShipmentLineUncheckedCreateNestedManyWithoutShipmentInput
+    receipts?: DrugOrderReceiptUncheckedCreateNestedManyWithoutShipmentInput
+  }
+
+  export type DrugOrderShipmentUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    shipmentNo?: IntFieldUpdateOperationsInput | number
+    status?: EnumDrugOrderShipmentStatusFieldUpdateOperationsInput | $Enums.DrugOrderShipmentStatus
+    shippedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    companyNote?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    order?: DrugOrderUpdateOneRequiredWithoutShipmentsNestedInput
+    lines?: DrugOrderShipmentLineUpdateManyWithoutShipmentNestedInput
+    receipts?: DrugOrderReceiptUpdateManyWithoutShipmentNestedInput
+  }
+
+  export type DrugOrderShipmentUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderId?: StringFieldUpdateOperationsInput | string
+    shipmentNo?: IntFieldUpdateOperationsInput | number
+    status?: EnumDrugOrderShipmentStatusFieldUpdateOperationsInput | $Enums.DrugOrderShipmentStatus
+    shippedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    companyNote?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lines?: DrugOrderShipmentLineUncheckedUpdateManyWithoutShipmentNestedInput
+    receipts?: DrugOrderReceiptUncheckedUpdateManyWithoutShipmentNestedInput
+  }
+
+  export type DrugOrderShipmentCreateManyInput = {
+    id?: string
+    orderId: string
+    shipmentNo: number
+    status?: $Enums.DrugOrderShipmentStatus
+    shippedAt?: Date | string | null
+    companyNote?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DrugOrderShipmentUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    shipmentNo?: IntFieldUpdateOperationsInput | number
+    status?: EnumDrugOrderShipmentStatusFieldUpdateOperationsInput | $Enums.DrugOrderShipmentStatus
+    shippedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    companyNote?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DrugOrderShipmentUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderId?: StringFieldUpdateOperationsInput | string
+    shipmentNo?: IntFieldUpdateOperationsInput | number
+    status?: EnumDrugOrderShipmentStatusFieldUpdateOperationsInput | $Enums.DrugOrderShipmentStatus
+    shippedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    companyNote?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DrugOrderShipmentLineCreateInput = {
+    id?: string
+    shippedQty?: Decimal | DecimalJsLike | number | string
+    reason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    shipment: DrugOrderShipmentCreateNestedOneWithoutLinesInput
+    orderLine: DrugOrderLineCreateNestedOneWithoutShipmentLinesInput
+    receiptLines?: DrugOrderReceiptLineCreateNestedManyWithoutShipmentLineInput
+  }
+
+  export type DrugOrderShipmentLineUncheckedCreateInput = {
+    id?: string
+    shipmentId: string
+    orderLineId: string
+    shippedQty?: Decimal | DecimalJsLike | number | string
+    reason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    receiptLines?: DrugOrderReceiptLineUncheckedCreateNestedManyWithoutShipmentLineInput
+  }
+
+  export type DrugOrderShipmentLineUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    shippedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    shipment?: DrugOrderShipmentUpdateOneRequiredWithoutLinesNestedInput
+    orderLine?: DrugOrderLineUpdateOneRequiredWithoutShipmentLinesNestedInput
+    receiptLines?: DrugOrderReceiptLineUpdateManyWithoutShipmentLineNestedInput
+  }
+
+  export type DrugOrderShipmentLineUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    shipmentId?: StringFieldUpdateOperationsInput | string
+    orderLineId?: StringFieldUpdateOperationsInput | string
+    shippedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    receiptLines?: DrugOrderReceiptLineUncheckedUpdateManyWithoutShipmentLineNestedInput
+  }
+
+  export type DrugOrderShipmentLineCreateManyInput = {
+    id?: string
+    shipmentId: string
+    orderLineId: string
+    shippedQty?: Decimal | DecimalJsLike | number | string
+    reason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DrugOrderShipmentLineUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    shippedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DrugOrderShipmentLineUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    shipmentId?: StringFieldUpdateOperationsInput | string
+    orderLineId?: StringFieldUpdateOperationsInput | string
+    shippedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DrugOrderReceiptCreateInput = {
+    id?: string
+    confirmedAt?: Date | string
+    note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    order: DrugOrderCreateNestedOneWithoutReceiptsInput
+    shipment: DrugOrderShipmentCreateNestedOneWithoutReceiptsInput
+    facility: UserCreateNestedOneWithoutDrugOrderReceiptsInput
+    lines?: DrugOrderReceiptLineCreateNestedManyWithoutReceiptInput
+  }
+
+  export type DrugOrderReceiptUncheckedCreateInput = {
+    id?: string
+    orderId: string
+    shipmentId: string
+    facilityId: string
+    confirmedAt?: Date | string
+    note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    lines?: DrugOrderReceiptLineUncheckedCreateNestedManyWithoutReceiptInput
+  }
+
+  export type DrugOrderReceiptUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    confirmedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    order?: DrugOrderUpdateOneRequiredWithoutReceiptsNestedInput
+    shipment?: DrugOrderShipmentUpdateOneRequiredWithoutReceiptsNestedInput
+    facility?: UserUpdateOneRequiredWithoutDrugOrderReceiptsNestedInput
+    lines?: DrugOrderReceiptLineUpdateManyWithoutReceiptNestedInput
+  }
+
+  export type DrugOrderReceiptUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderId?: StringFieldUpdateOperationsInput | string
+    shipmentId?: StringFieldUpdateOperationsInput | string
+    facilityId?: StringFieldUpdateOperationsInput | string
+    confirmedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lines?: DrugOrderReceiptLineUncheckedUpdateManyWithoutReceiptNestedInput
+  }
+
+  export type DrugOrderReceiptCreateManyInput = {
+    id?: string
+    orderId: string
+    shipmentId: string
+    facilityId: string
+    confirmedAt?: Date | string
+    note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DrugOrderReceiptUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    confirmedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DrugOrderReceiptUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderId?: StringFieldUpdateOperationsInput | string
+    shipmentId?: StringFieldUpdateOperationsInput | string
+    facilityId?: StringFieldUpdateOperationsInput | string
+    confirmedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DrugOrderReceiptLineCreateInput = {
+    id?: string
+    receivedQty?: Decimal | DecimalJsLike | number | string
+    differenceReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    receipt: DrugOrderReceiptCreateNestedOneWithoutLinesInput
+    shipmentLine: DrugOrderShipmentLineCreateNestedOneWithoutReceiptLinesInput
+    orderLine: DrugOrderLineCreateNestedOneWithoutReceiptLinesInput
+  }
+
+  export type DrugOrderReceiptLineUncheckedCreateInput = {
+    id?: string
+    receiptId: string
+    shipmentLineId: string
+    orderLineId: string
+    receivedQty?: Decimal | DecimalJsLike | number | string
+    differenceReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DrugOrderReceiptLineUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    receivedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    differenceReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    receipt?: DrugOrderReceiptUpdateOneRequiredWithoutLinesNestedInput
+    shipmentLine?: DrugOrderShipmentLineUpdateOneRequiredWithoutReceiptLinesNestedInput
+    orderLine?: DrugOrderLineUpdateOneRequiredWithoutReceiptLinesNestedInput
+  }
+
+  export type DrugOrderReceiptLineUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    receiptId?: StringFieldUpdateOperationsInput | string
+    shipmentLineId?: StringFieldUpdateOperationsInput | string
+    orderLineId?: StringFieldUpdateOperationsInput | string
+    receivedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    differenceReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DrugOrderReceiptLineCreateManyInput = {
+    id?: string
+    receiptId: string
+    shipmentLineId: string
+    orderLineId: string
+    receivedQty?: Decimal | DecimalJsLike | number | string
+    differenceReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DrugOrderReceiptLineUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    receivedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    differenceReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DrugOrderReceiptLineUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    receiptId?: StringFieldUpdateOperationsInput | string
+    shipmentLineId?: StringFieldUpdateOperationsInput | string
+    orderLineId?: StringFieldUpdateOperationsInput | string
+    receivedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    differenceReason?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -25544,6 +38122,11 @@ export namespace Prisma {
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
 
+  export type CompanyNullableScalarRelationFilter = {
+    is?: CompanyWhereInput | null
+    isNot?: CompanyWhereInput | null
+  }
+
   export type FacilityDrugMapListRelationFilter = {
     every?: FacilityDrugMapWhereInput
     some?: FacilityDrugMapWhereInput
@@ -25566,6 +38149,18 @@ export namespace Prisma {
     every?: KeHoachLCNTWhereInput
     some?: KeHoachLCNTWhereInput
     none?: KeHoachLCNTWhereInput
+  }
+
+  export type DrugOrderListRelationFilter = {
+    every?: DrugOrderWhereInput
+    some?: DrugOrderWhereInput
+    none?: DrugOrderWhereInput
+  }
+
+  export type DrugOrderReceiptListRelationFilter = {
+    every?: DrugOrderReceiptWhereInput
+    some?: DrugOrderReceiptWhereInput
+    none?: DrugOrderReceiptWhereInput
   }
 
   export type NotificationListRelationFilter = {
@@ -25601,6 +38196,14 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
+  export type DrugOrderOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type DrugOrderReceiptOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type NotificationOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -25616,6 +38219,7 @@ export namespace Prisma {
     role?: SortOrder
     facilityName?: SortOrder
     facilityCode?: SortOrder
+    companyId?: SortOrder
     isActive?: SortOrder
     autonomyGroup?: SortOrder
     facilityType?: SortOrder
@@ -25633,6 +38237,7 @@ export namespace Prisma {
     role?: SortOrder
     facilityName?: SortOrder
     facilityCode?: SortOrder
+    companyId?: SortOrder
     isActive?: SortOrder
     autonomyGroup?: SortOrder
     facilityType?: SortOrder
@@ -25650,6 +38255,7 @@ export namespace Prisma {
     role?: SortOrder
     facilityName?: SortOrder
     facilityCode?: SortOrder
+    companyId?: SortOrder
     isActive?: SortOrder
     autonomyGroup?: SortOrder
     facilityType?: SortOrder
@@ -25728,6 +38334,65 @@ export namespace Prisma {
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
+  export type UserListRelationFilter = {
+    every?: UserWhereInput
+    some?: UserWhereInput
+    none?: UserWhereInput
+  }
+
+  export type CompanyDrugListRelationFilter = {
+    every?: CompanyDrugWhereInput
+    some?: CompanyDrugWhereInput
+    none?: CompanyDrugWhereInput
+  }
+
+  export type UserOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type CompanyDrugOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type CompanyCountOrderByAggregateInput = {
+    id?: SortOrder
+    code?: SortOrder
+    name?: SortOrder
+    contactPerson?: SortOrder
+    phoneNumber?: SortOrder
+    email?: SortOrder
+    address?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type CompanyMaxOrderByAggregateInput = {
+    id?: SortOrder
+    code?: SortOrder
+    name?: SortOrder
+    contactPerson?: SortOrder
+    phoneNumber?: SortOrder
+    email?: SortOrder
+    address?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type CompanyMinOrderByAggregateInput = {
+    id?: SortOrder
+    code?: SortOrder
+    name?: SortOrder
+    contactPerson?: SortOrder
+    phoneNumber?: SortOrder
+    email?: SortOrder
+    address?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
   export type MasterDrugListRelationFilter = {
     every?: MasterDrugWhereInput
     some?: MasterDrugWhereInput
@@ -25768,6 +38433,16 @@ export namespace Prisma {
   export type TherapeuticGroupNullableScalarRelationFilter = {
     is?: TherapeuticGroupWhereInput | null
     isNot?: TherapeuticGroupWhereInput | null
+  }
+
+  export type DrugOrderLineListRelationFilter = {
+    every?: DrugOrderLineWhereInput
+    some?: DrugOrderLineWhereInput
+    none?: DrugOrderLineWhereInput
+  }
+
+  export type DrugOrderLineOrderByRelationAggregateInput = {
+    _count?: SortOrder
   }
 
   export type MasterDrugCountOrderByAggregateInput = {
@@ -25863,6 +38538,63 @@ export namespace Prisma {
     updatedAt?: SortOrder
   }
 
+  export type CompanyScalarRelationFilter = {
+    is?: CompanyWhereInput
+    isNot?: CompanyWhereInput
+  }
+
+  export type MasterDrugNullableScalarRelationFilter = {
+    is?: MasterDrugWhereInput | null
+    isNot?: MasterDrugWhereInput | null
+  }
+
+  export type CompanyDrugCompanyIdCompanyDrugCodeCompoundUniqueInput = {
+    companyId: string
+    companyDrugCode: string
+  }
+
+  export type CompanyDrugCountOrderByAggregateInput = {
+    id?: SortOrder
+    companyId?: SortOrder
+    masterDrugId?: SortOrder
+    companyDrugCode?: SortOrder
+    companyDrugName?: SortOrder
+    activeIngredient?: SortOrder
+    quyCach?: SortOrder
+    unit?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type CompanyDrugMaxOrderByAggregateInput = {
+    id?: SortOrder
+    companyId?: SortOrder
+    masterDrugId?: SortOrder
+    companyDrugCode?: SortOrder
+    companyDrugName?: SortOrder
+    activeIngredient?: SortOrder
+    quyCach?: SortOrder
+    unit?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type CompanyDrugMinOrderByAggregateInput = {
+    id?: SortOrder
+    companyId?: SortOrder
+    masterDrugId?: SortOrder
+    companyDrugCode?: SortOrder
+    companyDrugName?: SortOrder
+    activeIngredient?: SortOrder
+    quyCach?: SortOrder
+    unit?: SortOrder
+    isActive?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
   export type EnumMappingStatusFilter<$PrismaModel = never> = {
     equals?: $Enums.MappingStatus | EnumMappingStatusFieldRefInput<$PrismaModel>
     in?: $Enums.MappingStatus[] | ListEnumMappingStatusFieldRefInput<$PrismaModel>
@@ -25873,11 +38605,6 @@ export namespace Prisma {
   export type UserScalarRelationFilter = {
     is?: UserWhereInput
     isNot?: UserWhereInput
-  }
-
-  export type MasterDrugNullableScalarRelationFilter = {
-    is?: MasterDrugWhereInput | null
-    isNot?: MasterDrugWhereInput | null
   }
 
   export type FacilityDrugMapFacilityIdMaNoiBoCompoundUniqueInput = {
@@ -26160,6 +38887,468 @@ export namespace Prisma {
     _max?: NestedIntFilter<$PrismaModel>
   }
 
+  export type EnumDrugOrderStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.DrugOrderStatus | EnumDrugOrderStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.DrugOrderStatus[] | ListEnumDrugOrderStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.DrugOrderStatus[] | ListEnumDrugOrderStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumDrugOrderStatusFilter<$PrismaModel> | $Enums.DrugOrderStatus
+  }
+
+  export type DateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
+  export type DrugOrderShipmentListRelationFilter = {
+    every?: DrugOrderShipmentWhereInput
+    some?: DrugOrderShipmentWhereInput
+    none?: DrugOrderShipmentWhereInput
+  }
+
+  export type DrugOrderShipmentOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type DrugOrderCountOrderByAggregateInput = {
+    id?: SortOrder
+    orderNo?: SortOrder
+    facilityId?: SortOrder
+    companyId?: SortOrder
+    status?: SortOrder
+    baseReportMonth?: SortOrder
+    note?: SortOrder
+    submittedAt?: SortOrder
+    closedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type DrugOrderMaxOrderByAggregateInput = {
+    id?: SortOrder
+    orderNo?: SortOrder
+    facilityId?: SortOrder
+    companyId?: SortOrder
+    status?: SortOrder
+    baseReportMonth?: SortOrder
+    note?: SortOrder
+    submittedAt?: SortOrder
+    closedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type DrugOrderMinOrderByAggregateInput = {
+    id?: SortOrder
+    orderNo?: SortOrder
+    facilityId?: SortOrder
+    companyId?: SortOrder
+    status?: SortOrder
+    baseReportMonth?: SortOrder
+    note?: SortOrder
+    submittedAt?: SortOrder
+    closedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type EnumDrugOrderStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.DrugOrderStatus | EnumDrugOrderStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.DrugOrderStatus[] | ListEnumDrugOrderStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.DrugOrderStatus[] | ListEnumDrugOrderStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumDrugOrderStatusWithAggregatesFilter<$PrismaModel> | $Enums.DrugOrderStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumDrugOrderStatusFilter<$PrismaModel>
+    _max?: NestedEnumDrugOrderStatusFilter<$PrismaModel>
+  }
+
+  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
+  export type EnumDrugOrderLineSourceTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.DrugOrderLineSourceType | EnumDrugOrderLineSourceTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.DrugOrderLineSourceType[] | ListEnumDrugOrderLineSourceTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.DrugOrderLineSourceType[] | ListEnumDrugOrderLineSourceTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumDrugOrderLineSourceTypeFilter<$PrismaModel> | $Enums.DrugOrderLineSourceType
+  }
+
+  export type DecimalNullableFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalNullableFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
+  }
+
+  export type EnumDrugOrderLineStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.DrugOrderLineStatus | EnumDrugOrderLineStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.DrugOrderLineStatus[] | ListEnumDrugOrderLineStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.DrugOrderLineStatus[] | ListEnumDrugOrderLineStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumDrugOrderLineStatusFilter<$PrismaModel> | $Enums.DrugOrderLineStatus
+  }
+
+  export type DrugOrderScalarRelationFilter = {
+    is?: DrugOrderWhereInput
+    isNot?: DrugOrderWhereInput
+  }
+
+  export type CompanyDrugNullableScalarRelationFilter = {
+    is?: CompanyDrugWhereInput | null
+    isNot?: CompanyDrugWhereInput | null
+  }
+
+  export type DrugOrderShipmentLineListRelationFilter = {
+    every?: DrugOrderShipmentLineWhereInput
+    some?: DrugOrderShipmentLineWhereInput
+    none?: DrugOrderShipmentLineWhereInput
+  }
+
+  export type DrugOrderReceiptLineListRelationFilter = {
+    every?: DrugOrderReceiptLineWhereInput
+    some?: DrugOrderReceiptLineWhereInput
+    none?: DrugOrderReceiptLineWhereInput
+  }
+
+  export type DrugOrderShipmentLineOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type DrugOrderReceiptLineOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type DrugOrderLineCountOrderByAggregateInput = {
+    id?: SortOrder
+    orderId?: SortOrder
+    sourceType?: SortOrder
+    masterDrugId?: SortOrder
+    companyDrugId?: SortOrder
+    displayName?: SortOrder
+    unit?: SortOrder
+    requestedQty?: SortOrder
+    acceptedQty?: SortOrder
+    suggestedQty?: SortOrder
+    lineStatus?: SortOrder
+    companyResponseReason?: SortOrder
+    suggestionBasis?: SortOrder
+    suggestionReportMonth?: SortOrder
+    suggestionRuleVersion?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type DrugOrderLineAvgOrderByAggregateInput = {
+    requestedQty?: SortOrder
+    acceptedQty?: SortOrder
+    suggestedQty?: SortOrder
+  }
+
+  export type DrugOrderLineMaxOrderByAggregateInput = {
+    id?: SortOrder
+    orderId?: SortOrder
+    sourceType?: SortOrder
+    masterDrugId?: SortOrder
+    companyDrugId?: SortOrder
+    displayName?: SortOrder
+    unit?: SortOrder
+    requestedQty?: SortOrder
+    acceptedQty?: SortOrder
+    suggestedQty?: SortOrder
+    lineStatus?: SortOrder
+    companyResponseReason?: SortOrder
+    suggestionBasis?: SortOrder
+    suggestionReportMonth?: SortOrder
+    suggestionRuleVersion?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type DrugOrderLineMinOrderByAggregateInput = {
+    id?: SortOrder
+    orderId?: SortOrder
+    sourceType?: SortOrder
+    masterDrugId?: SortOrder
+    companyDrugId?: SortOrder
+    displayName?: SortOrder
+    unit?: SortOrder
+    requestedQty?: SortOrder
+    acceptedQty?: SortOrder
+    suggestedQty?: SortOrder
+    lineStatus?: SortOrder
+    companyResponseReason?: SortOrder
+    suggestionBasis?: SortOrder
+    suggestionReportMonth?: SortOrder
+    suggestionRuleVersion?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type DrugOrderLineSumOrderByAggregateInput = {
+    requestedQty?: SortOrder
+    acceptedQty?: SortOrder
+    suggestedQty?: SortOrder
+  }
+
+  export type EnumDrugOrderLineSourceTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.DrugOrderLineSourceType | EnumDrugOrderLineSourceTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.DrugOrderLineSourceType[] | ListEnumDrugOrderLineSourceTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.DrugOrderLineSourceType[] | ListEnumDrugOrderLineSourceTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumDrugOrderLineSourceTypeWithAggregatesFilter<$PrismaModel> | $Enums.DrugOrderLineSourceType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumDrugOrderLineSourceTypeFilter<$PrismaModel>
+    _max?: NestedEnumDrugOrderLineSourceTypeFilter<$PrismaModel>
+  }
+
+  export type DecimalNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalNullableWithAggregatesFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedDecimalNullableFilter<$PrismaModel>
+    _sum?: NestedDecimalNullableFilter<$PrismaModel>
+    _min?: NestedDecimalNullableFilter<$PrismaModel>
+    _max?: NestedDecimalNullableFilter<$PrismaModel>
+  }
+
+  export type EnumDrugOrderLineStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.DrugOrderLineStatus | EnumDrugOrderLineStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.DrugOrderLineStatus[] | ListEnumDrugOrderLineStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.DrugOrderLineStatus[] | ListEnumDrugOrderLineStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumDrugOrderLineStatusWithAggregatesFilter<$PrismaModel> | $Enums.DrugOrderLineStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumDrugOrderLineStatusFilter<$PrismaModel>
+    _max?: NestedEnumDrugOrderLineStatusFilter<$PrismaModel>
+  }
+
+  export type EnumDrugOrderShipmentStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.DrugOrderShipmentStatus | EnumDrugOrderShipmentStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.DrugOrderShipmentStatus[] | ListEnumDrugOrderShipmentStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.DrugOrderShipmentStatus[] | ListEnumDrugOrderShipmentStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumDrugOrderShipmentStatusFilter<$PrismaModel> | $Enums.DrugOrderShipmentStatus
+  }
+
+  export type DrugOrderShipmentOrderIdShipmentNoCompoundUniqueInput = {
+    orderId: string
+    shipmentNo: number
+  }
+
+  export type DrugOrderShipmentCountOrderByAggregateInput = {
+    id?: SortOrder
+    orderId?: SortOrder
+    shipmentNo?: SortOrder
+    status?: SortOrder
+    shippedAt?: SortOrder
+    companyNote?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type DrugOrderShipmentAvgOrderByAggregateInput = {
+    shipmentNo?: SortOrder
+  }
+
+  export type DrugOrderShipmentMaxOrderByAggregateInput = {
+    id?: SortOrder
+    orderId?: SortOrder
+    shipmentNo?: SortOrder
+    status?: SortOrder
+    shippedAt?: SortOrder
+    companyNote?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type DrugOrderShipmentMinOrderByAggregateInput = {
+    id?: SortOrder
+    orderId?: SortOrder
+    shipmentNo?: SortOrder
+    status?: SortOrder
+    shippedAt?: SortOrder
+    companyNote?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type DrugOrderShipmentSumOrderByAggregateInput = {
+    shipmentNo?: SortOrder
+  }
+
+  export type EnumDrugOrderShipmentStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.DrugOrderShipmentStatus | EnumDrugOrderShipmentStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.DrugOrderShipmentStatus[] | ListEnumDrugOrderShipmentStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.DrugOrderShipmentStatus[] | ListEnumDrugOrderShipmentStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumDrugOrderShipmentStatusWithAggregatesFilter<$PrismaModel> | $Enums.DrugOrderShipmentStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumDrugOrderShipmentStatusFilter<$PrismaModel>
+    _max?: NestedEnumDrugOrderShipmentStatusFilter<$PrismaModel>
+  }
+
+  export type DrugOrderShipmentScalarRelationFilter = {
+    is?: DrugOrderShipmentWhereInput
+    isNot?: DrugOrderShipmentWhereInput
+  }
+
+  export type DrugOrderLineScalarRelationFilter = {
+    is?: DrugOrderLineWhereInput
+    isNot?: DrugOrderLineWhereInput
+  }
+
+  export type DrugOrderShipmentLineShipmentIdOrderLineIdCompoundUniqueInput = {
+    shipmentId: string
+    orderLineId: string
+  }
+
+  export type DrugOrderShipmentLineCountOrderByAggregateInput = {
+    id?: SortOrder
+    shipmentId?: SortOrder
+    orderLineId?: SortOrder
+    shippedQty?: SortOrder
+    reason?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type DrugOrderShipmentLineAvgOrderByAggregateInput = {
+    shippedQty?: SortOrder
+  }
+
+  export type DrugOrderShipmentLineMaxOrderByAggregateInput = {
+    id?: SortOrder
+    shipmentId?: SortOrder
+    orderLineId?: SortOrder
+    shippedQty?: SortOrder
+    reason?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type DrugOrderShipmentLineMinOrderByAggregateInput = {
+    id?: SortOrder
+    shipmentId?: SortOrder
+    orderLineId?: SortOrder
+    shippedQty?: SortOrder
+    reason?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type DrugOrderShipmentLineSumOrderByAggregateInput = {
+    shippedQty?: SortOrder
+  }
+
+  export type DrugOrderReceiptCountOrderByAggregateInput = {
+    id?: SortOrder
+    orderId?: SortOrder
+    shipmentId?: SortOrder
+    facilityId?: SortOrder
+    confirmedAt?: SortOrder
+    note?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type DrugOrderReceiptMaxOrderByAggregateInput = {
+    id?: SortOrder
+    orderId?: SortOrder
+    shipmentId?: SortOrder
+    facilityId?: SortOrder
+    confirmedAt?: SortOrder
+    note?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type DrugOrderReceiptMinOrderByAggregateInput = {
+    id?: SortOrder
+    orderId?: SortOrder
+    shipmentId?: SortOrder
+    facilityId?: SortOrder
+    confirmedAt?: SortOrder
+    note?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type DrugOrderReceiptScalarRelationFilter = {
+    is?: DrugOrderReceiptWhereInput
+    isNot?: DrugOrderReceiptWhereInput
+  }
+
+  export type DrugOrderShipmentLineScalarRelationFilter = {
+    is?: DrugOrderShipmentLineWhereInput
+    isNot?: DrugOrderShipmentLineWhereInput
+  }
+
+  export type DrugOrderReceiptLineReceiptIdShipmentLineIdCompoundUniqueInput = {
+    receiptId: string
+    shipmentLineId: string
+  }
+
+  export type DrugOrderReceiptLineCountOrderByAggregateInput = {
+    id?: SortOrder
+    receiptId?: SortOrder
+    shipmentLineId?: SortOrder
+    orderLineId?: SortOrder
+    receivedQty?: SortOrder
+    differenceReason?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type DrugOrderReceiptLineAvgOrderByAggregateInput = {
+    receivedQty?: SortOrder
+  }
+
+  export type DrugOrderReceiptLineMaxOrderByAggregateInput = {
+    id?: SortOrder
+    receiptId?: SortOrder
+    shipmentLineId?: SortOrder
+    orderLineId?: SortOrder
+    receivedQty?: SortOrder
+    differenceReason?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type DrugOrderReceiptLineMinOrderByAggregateInput = {
+    id?: SortOrder
+    receiptId?: SortOrder
+    shipmentLineId?: SortOrder
+    orderLineId?: SortOrder
+    receivedQty?: SortOrder
+    differenceReason?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type DrugOrderReceiptLineSumOrderByAggregateInput = {
+    receivedQty?: SortOrder
+  }
+
   export type ReportReviewLogCountOrderByAggregateInput = {
     id?: SortOrder
     facilityId?: SortOrder
@@ -26188,17 +39377,6 @@ export namespace Prisma {
     adminNote?: SortOrder
     adminId?: SortOrder
     createdAt?: SortOrder
-  }
-
-  export type DateTimeNullableFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
   }
 
   export type ReportPeriodCountOrderByAggregateInput = {
@@ -26245,20 +39423,6 @@ export namespace Prisma {
   export type ReportPeriodSumOrderByAggregateInput = {
     year?: SortOrder
     periodMonth?: SortOrder
-  }
-
-  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedDateTimeNullableFilter<$PrismaModel>
-    _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
   export type IntNullableFilter<$PrismaModel = never> = {
@@ -26368,17 +39532,6 @@ export namespace Prisma {
     _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
-  export type DecimalNullableFilter<$PrismaModel = never> = {
-    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
-    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
-    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
-    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    not?: NestedDecimalNullableFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
-  }
-
   export type KeHoachLCNTScalarRelationFilter = {
     is?: KeHoachLCNTWhereInput
     isNot?: KeHoachLCNTWhereInput
@@ -26485,22 +39638,6 @@ export namespace Prisma {
   export type GoiThauSumOrderByAggregateInput = {
     giaGoiThau?: SortOrder
     soLuongPhanLo?: SortOrder
-  }
-
-  export type DecimalNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
-    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
-    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
-    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    not?: NestedDecimalNullableWithAggregatesFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedDecimalNullableFilter<$PrismaModel>
-    _sum?: NestedDecimalNullableFilter<$PrismaModel>
-    _min?: NestedDecimalNullableFilter<$PrismaModel>
-    _max?: NestedDecimalNullableFilter<$PrismaModel>
   }
 
   export type GoiThauScalarRelationFilter = {
@@ -26789,6 +39926,12 @@ export namespace Prisma {
     createdAt?: SortOrder
   }
 
+  export type CompanyCreateNestedOneWithoutUsersInput = {
+    create?: XOR<CompanyCreateWithoutUsersInput, CompanyUncheckedCreateWithoutUsersInput>
+    connectOrCreate?: CompanyCreateOrConnectWithoutUsersInput
+    connect?: CompanyWhereUniqueInput
+  }
+
   export type FacilityDrugMapCreateNestedManyWithoutFacilityInput = {
     create?: XOR<FacilityDrugMapCreateWithoutFacilityInput, FacilityDrugMapUncheckedCreateWithoutFacilityInput> | FacilityDrugMapCreateWithoutFacilityInput[] | FacilityDrugMapUncheckedCreateWithoutFacilityInput[]
     connectOrCreate?: FacilityDrugMapCreateOrConnectWithoutFacilityInput | FacilityDrugMapCreateOrConnectWithoutFacilityInput[]
@@ -26815,6 +39958,20 @@ export namespace Prisma {
     connectOrCreate?: KeHoachLCNTCreateOrConnectWithoutFacilityInput | KeHoachLCNTCreateOrConnectWithoutFacilityInput[]
     createMany?: KeHoachLCNTCreateManyFacilityInputEnvelope
     connect?: KeHoachLCNTWhereUniqueInput | KeHoachLCNTWhereUniqueInput[]
+  }
+
+  export type DrugOrderCreateNestedManyWithoutFacilityInput = {
+    create?: XOR<DrugOrderCreateWithoutFacilityInput, DrugOrderUncheckedCreateWithoutFacilityInput> | DrugOrderCreateWithoutFacilityInput[] | DrugOrderUncheckedCreateWithoutFacilityInput[]
+    connectOrCreate?: DrugOrderCreateOrConnectWithoutFacilityInput | DrugOrderCreateOrConnectWithoutFacilityInput[]
+    createMany?: DrugOrderCreateManyFacilityInputEnvelope
+    connect?: DrugOrderWhereUniqueInput | DrugOrderWhereUniqueInput[]
+  }
+
+  export type DrugOrderReceiptCreateNestedManyWithoutFacilityInput = {
+    create?: XOR<DrugOrderReceiptCreateWithoutFacilityInput, DrugOrderReceiptUncheckedCreateWithoutFacilityInput> | DrugOrderReceiptCreateWithoutFacilityInput[] | DrugOrderReceiptUncheckedCreateWithoutFacilityInput[]
+    connectOrCreate?: DrugOrderReceiptCreateOrConnectWithoutFacilityInput | DrugOrderReceiptCreateOrConnectWithoutFacilityInput[]
+    createMany?: DrugOrderReceiptCreateManyFacilityInputEnvelope
+    connect?: DrugOrderReceiptWhereUniqueInput | DrugOrderReceiptWhereUniqueInput[]
   }
 
   export type NotificationCreateNestedManyWithoutUserInput = {
@@ -26859,6 +40016,20 @@ export namespace Prisma {
     connect?: KeHoachLCNTWhereUniqueInput | KeHoachLCNTWhereUniqueInput[]
   }
 
+  export type DrugOrderUncheckedCreateNestedManyWithoutFacilityInput = {
+    create?: XOR<DrugOrderCreateWithoutFacilityInput, DrugOrderUncheckedCreateWithoutFacilityInput> | DrugOrderCreateWithoutFacilityInput[] | DrugOrderUncheckedCreateWithoutFacilityInput[]
+    connectOrCreate?: DrugOrderCreateOrConnectWithoutFacilityInput | DrugOrderCreateOrConnectWithoutFacilityInput[]
+    createMany?: DrugOrderCreateManyFacilityInputEnvelope
+    connect?: DrugOrderWhereUniqueInput | DrugOrderWhereUniqueInput[]
+  }
+
+  export type DrugOrderReceiptUncheckedCreateNestedManyWithoutFacilityInput = {
+    create?: XOR<DrugOrderReceiptCreateWithoutFacilityInput, DrugOrderReceiptUncheckedCreateWithoutFacilityInput> | DrugOrderReceiptCreateWithoutFacilityInput[] | DrugOrderReceiptUncheckedCreateWithoutFacilityInput[]
+    connectOrCreate?: DrugOrderReceiptCreateOrConnectWithoutFacilityInput | DrugOrderReceiptCreateOrConnectWithoutFacilityInput[]
+    createMany?: DrugOrderReceiptCreateManyFacilityInputEnvelope
+    connect?: DrugOrderReceiptWhereUniqueInput | DrugOrderReceiptWhereUniqueInput[]
+  }
+
   export type NotificationUncheckedCreateNestedManyWithoutUserInput = {
     create?: XOR<NotificationCreateWithoutUserInput, NotificationUncheckedCreateWithoutUserInput> | NotificationCreateWithoutUserInput[] | NotificationUncheckedCreateWithoutUserInput[]
     connectOrCreate?: NotificationCreateOrConnectWithoutUserInput | NotificationCreateOrConnectWithoutUserInput[]
@@ -26891,6 +40062,16 @@ export namespace Prisma {
 
   export type DateTimeFieldUpdateOperationsInput = {
     set?: Date | string
+  }
+
+  export type CompanyUpdateOneWithoutUsersNestedInput = {
+    create?: XOR<CompanyCreateWithoutUsersInput, CompanyUncheckedCreateWithoutUsersInput>
+    connectOrCreate?: CompanyCreateOrConnectWithoutUsersInput
+    upsert?: CompanyUpsertWithoutUsersInput
+    disconnect?: CompanyWhereInput | boolean
+    delete?: CompanyWhereInput | boolean
+    connect?: CompanyWhereUniqueInput
+    update?: XOR<XOR<CompanyUpdateToOneWithWhereWithoutUsersInput, CompanyUpdateWithoutUsersInput>, CompanyUncheckedUpdateWithoutUsersInput>
   }
 
   export type FacilityDrugMapUpdateManyWithoutFacilityNestedInput = {
@@ -26947,6 +40128,34 @@ export namespace Prisma {
     update?: KeHoachLCNTUpdateWithWhereUniqueWithoutFacilityInput | KeHoachLCNTUpdateWithWhereUniqueWithoutFacilityInput[]
     updateMany?: KeHoachLCNTUpdateManyWithWhereWithoutFacilityInput | KeHoachLCNTUpdateManyWithWhereWithoutFacilityInput[]
     deleteMany?: KeHoachLCNTScalarWhereInput | KeHoachLCNTScalarWhereInput[]
+  }
+
+  export type DrugOrderUpdateManyWithoutFacilityNestedInput = {
+    create?: XOR<DrugOrderCreateWithoutFacilityInput, DrugOrderUncheckedCreateWithoutFacilityInput> | DrugOrderCreateWithoutFacilityInput[] | DrugOrderUncheckedCreateWithoutFacilityInput[]
+    connectOrCreate?: DrugOrderCreateOrConnectWithoutFacilityInput | DrugOrderCreateOrConnectWithoutFacilityInput[]
+    upsert?: DrugOrderUpsertWithWhereUniqueWithoutFacilityInput | DrugOrderUpsertWithWhereUniqueWithoutFacilityInput[]
+    createMany?: DrugOrderCreateManyFacilityInputEnvelope
+    set?: DrugOrderWhereUniqueInput | DrugOrderWhereUniqueInput[]
+    disconnect?: DrugOrderWhereUniqueInput | DrugOrderWhereUniqueInput[]
+    delete?: DrugOrderWhereUniqueInput | DrugOrderWhereUniqueInput[]
+    connect?: DrugOrderWhereUniqueInput | DrugOrderWhereUniqueInput[]
+    update?: DrugOrderUpdateWithWhereUniqueWithoutFacilityInput | DrugOrderUpdateWithWhereUniqueWithoutFacilityInput[]
+    updateMany?: DrugOrderUpdateManyWithWhereWithoutFacilityInput | DrugOrderUpdateManyWithWhereWithoutFacilityInput[]
+    deleteMany?: DrugOrderScalarWhereInput | DrugOrderScalarWhereInput[]
+  }
+
+  export type DrugOrderReceiptUpdateManyWithoutFacilityNestedInput = {
+    create?: XOR<DrugOrderReceiptCreateWithoutFacilityInput, DrugOrderReceiptUncheckedCreateWithoutFacilityInput> | DrugOrderReceiptCreateWithoutFacilityInput[] | DrugOrderReceiptUncheckedCreateWithoutFacilityInput[]
+    connectOrCreate?: DrugOrderReceiptCreateOrConnectWithoutFacilityInput | DrugOrderReceiptCreateOrConnectWithoutFacilityInput[]
+    upsert?: DrugOrderReceiptUpsertWithWhereUniqueWithoutFacilityInput | DrugOrderReceiptUpsertWithWhereUniqueWithoutFacilityInput[]
+    createMany?: DrugOrderReceiptCreateManyFacilityInputEnvelope
+    set?: DrugOrderReceiptWhereUniqueInput | DrugOrderReceiptWhereUniqueInput[]
+    disconnect?: DrugOrderReceiptWhereUniqueInput | DrugOrderReceiptWhereUniqueInput[]
+    delete?: DrugOrderReceiptWhereUniqueInput | DrugOrderReceiptWhereUniqueInput[]
+    connect?: DrugOrderReceiptWhereUniqueInput | DrugOrderReceiptWhereUniqueInput[]
+    update?: DrugOrderReceiptUpdateWithWhereUniqueWithoutFacilityInput | DrugOrderReceiptUpdateWithWhereUniqueWithoutFacilityInput[]
+    updateMany?: DrugOrderReceiptUpdateManyWithWhereWithoutFacilityInput | DrugOrderReceiptUpdateManyWithWhereWithoutFacilityInput[]
+    deleteMany?: DrugOrderReceiptScalarWhereInput | DrugOrderReceiptScalarWhereInput[]
   }
 
   export type NotificationUpdateManyWithoutUserNestedInput = {
@@ -27033,6 +40242,34 @@ export namespace Prisma {
     deleteMany?: KeHoachLCNTScalarWhereInput | KeHoachLCNTScalarWhereInput[]
   }
 
+  export type DrugOrderUncheckedUpdateManyWithoutFacilityNestedInput = {
+    create?: XOR<DrugOrderCreateWithoutFacilityInput, DrugOrderUncheckedCreateWithoutFacilityInput> | DrugOrderCreateWithoutFacilityInput[] | DrugOrderUncheckedCreateWithoutFacilityInput[]
+    connectOrCreate?: DrugOrderCreateOrConnectWithoutFacilityInput | DrugOrderCreateOrConnectWithoutFacilityInput[]
+    upsert?: DrugOrderUpsertWithWhereUniqueWithoutFacilityInput | DrugOrderUpsertWithWhereUniqueWithoutFacilityInput[]
+    createMany?: DrugOrderCreateManyFacilityInputEnvelope
+    set?: DrugOrderWhereUniqueInput | DrugOrderWhereUniqueInput[]
+    disconnect?: DrugOrderWhereUniqueInput | DrugOrderWhereUniqueInput[]
+    delete?: DrugOrderWhereUniqueInput | DrugOrderWhereUniqueInput[]
+    connect?: DrugOrderWhereUniqueInput | DrugOrderWhereUniqueInput[]
+    update?: DrugOrderUpdateWithWhereUniqueWithoutFacilityInput | DrugOrderUpdateWithWhereUniqueWithoutFacilityInput[]
+    updateMany?: DrugOrderUpdateManyWithWhereWithoutFacilityInput | DrugOrderUpdateManyWithWhereWithoutFacilityInput[]
+    deleteMany?: DrugOrderScalarWhereInput | DrugOrderScalarWhereInput[]
+  }
+
+  export type DrugOrderReceiptUncheckedUpdateManyWithoutFacilityNestedInput = {
+    create?: XOR<DrugOrderReceiptCreateWithoutFacilityInput, DrugOrderReceiptUncheckedCreateWithoutFacilityInput> | DrugOrderReceiptCreateWithoutFacilityInput[] | DrugOrderReceiptUncheckedCreateWithoutFacilityInput[]
+    connectOrCreate?: DrugOrderReceiptCreateOrConnectWithoutFacilityInput | DrugOrderReceiptCreateOrConnectWithoutFacilityInput[]
+    upsert?: DrugOrderReceiptUpsertWithWhereUniqueWithoutFacilityInput | DrugOrderReceiptUpsertWithWhereUniqueWithoutFacilityInput[]
+    createMany?: DrugOrderReceiptCreateManyFacilityInputEnvelope
+    set?: DrugOrderReceiptWhereUniqueInput | DrugOrderReceiptWhereUniqueInput[]
+    disconnect?: DrugOrderReceiptWhereUniqueInput | DrugOrderReceiptWhereUniqueInput[]
+    delete?: DrugOrderReceiptWhereUniqueInput | DrugOrderReceiptWhereUniqueInput[]
+    connect?: DrugOrderReceiptWhereUniqueInput | DrugOrderReceiptWhereUniqueInput[]
+    update?: DrugOrderReceiptUpdateWithWhereUniqueWithoutFacilityInput | DrugOrderReceiptUpdateWithWhereUniqueWithoutFacilityInput[]
+    updateMany?: DrugOrderReceiptUpdateManyWithWhereWithoutFacilityInput | DrugOrderReceiptUpdateManyWithWhereWithoutFacilityInput[]
+    deleteMany?: DrugOrderReceiptScalarWhereInput | DrugOrderReceiptScalarWhereInput[]
+  }
+
   export type NotificationUncheckedUpdateManyWithoutUserNestedInput = {
     create?: XOR<NotificationCreateWithoutUserInput, NotificationUncheckedCreateWithoutUserInput> | NotificationCreateWithoutUserInput[] | NotificationUncheckedCreateWithoutUserInput[]
     connectOrCreate?: NotificationCreateOrConnectWithoutUserInput | NotificationCreateOrConnectWithoutUserInput[]
@@ -27059,6 +40296,132 @@ export namespace Prisma {
     update?: ActivityLogUpdateWithWhereUniqueWithoutUserInput | ActivityLogUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: ActivityLogUpdateManyWithWhereWithoutUserInput | ActivityLogUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: ActivityLogScalarWhereInput | ActivityLogScalarWhereInput[]
+  }
+
+  export type UserCreateNestedManyWithoutCompanyInput = {
+    create?: XOR<UserCreateWithoutCompanyInput, UserUncheckedCreateWithoutCompanyInput> | UserCreateWithoutCompanyInput[] | UserUncheckedCreateWithoutCompanyInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutCompanyInput | UserCreateOrConnectWithoutCompanyInput[]
+    createMany?: UserCreateManyCompanyInputEnvelope
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+  }
+
+  export type CompanyDrugCreateNestedManyWithoutCompanyInput = {
+    create?: XOR<CompanyDrugCreateWithoutCompanyInput, CompanyDrugUncheckedCreateWithoutCompanyInput> | CompanyDrugCreateWithoutCompanyInput[] | CompanyDrugUncheckedCreateWithoutCompanyInput[]
+    connectOrCreate?: CompanyDrugCreateOrConnectWithoutCompanyInput | CompanyDrugCreateOrConnectWithoutCompanyInput[]
+    createMany?: CompanyDrugCreateManyCompanyInputEnvelope
+    connect?: CompanyDrugWhereUniqueInput | CompanyDrugWhereUniqueInput[]
+  }
+
+  export type DrugOrderCreateNestedManyWithoutCompanyInput = {
+    create?: XOR<DrugOrderCreateWithoutCompanyInput, DrugOrderUncheckedCreateWithoutCompanyInput> | DrugOrderCreateWithoutCompanyInput[] | DrugOrderUncheckedCreateWithoutCompanyInput[]
+    connectOrCreate?: DrugOrderCreateOrConnectWithoutCompanyInput | DrugOrderCreateOrConnectWithoutCompanyInput[]
+    createMany?: DrugOrderCreateManyCompanyInputEnvelope
+    connect?: DrugOrderWhereUniqueInput | DrugOrderWhereUniqueInput[]
+  }
+
+  export type UserUncheckedCreateNestedManyWithoutCompanyInput = {
+    create?: XOR<UserCreateWithoutCompanyInput, UserUncheckedCreateWithoutCompanyInput> | UserCreateWithoutCompanyInput[] | UserUncheckedCreateWithoutCompanyInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutCompanyInput | UserCreateOrConnectWithoutCompanyInput[]
+    createMany?: UserCreateManyCompanyInputEnvelope
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+  }
+
+  export type CompanyDrugUncheckedCreateNestedManyWithoutCompanyInput = {
+    create?: XOR<CompanyDrugCreateWithoutCompanyInput, CompanyDrugUncheckedCreateWithoutCompanyInput> | CompanyDrugCreateWithoutCompanyInput[] | CompanyDrugUncheckedCreateWithoutCompanyInput[]
+    connectOrCreate?: CompanyDrugCreateOrConnectWithoutCompanyInput | CompanyDrugCreateOrConnectWithoutCompanyInput[]
+    createMany?: CompanyDrugCreateManyCompanyInputEnvelope
+    connect?: CompanyDrugWhereUniqueInput | CompanyDrugWhereUniqueInput[]
+  }
+
+  export type DrugOrderUncheckedCreateNestedManyWithoutCompanyInput = {
+    create?: XOR<DrugOrderCreateWithoutCompanyInput, DrugOrderUncheckedCreateWithoutCompanyInput> | DrugOrderCreateWithoutCompanyInput[] | DrugOrderUncheckedCreateWithoutCompanyInput[]
+    connectOrCreate?: DrugOrderCreateOrConnectWithoutCompanyInput | DrugOrderCreateOrConnectWithoutCompanyInput[]
+    createMany?: DrugOrderCreateManyCompanyInputEnvelope
+    connect?: DrugOrderWhereUniqueInput | DrugOrderWhereUniqueInput[]
+  }
+
+  export type UserUpdateManyWithoutCompanyNestedInput = {
+    create?: XOR<UserCreateWithoutCompanyInput, UserUncheckedCreateWithoutCompanyInput> | UserCreateWithoutCompanyInput[] | UserUncheckedCreateWithoutCompanyInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutCompanyInput | UserCreateOrConnectWithoutCompanyInput[]
+    upsert?: UserUpsertWithWhereUniqueWithoutCompanyInput | UserUpsertWithWhereUniqueWithoutCompanyInput[]
+    createMany?: UserCreateManyCompanyInputEnvelope
+    set?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    disconnect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    delete?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    update?: UserUpdateWithWhereUniqueWithoutCompanyInput | UserUpdateWithWhereUniqueWithoutCompanyInput[]
+    updateMany?: UserUpdateManyWithWhereWithoutCompanyInput | UserUpdateManyWithWhereWithoutCompanyInput[]
+    deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
+  }
+
+  export type CompanyDrugUpdateManyWithoutCompanyNestedInput = {
+    create?: XOR<CompanyDrugCreateWithoutCompanyInput, CompanyDrugUncheckedCreateWithoutCompanyInput> | CompanyDrugCreateWithoutCompanyInput[] | CompanyDrugUncheckedCreateWithoutCompanyInput[]
+    connectOrCreate?: CompanyDrugCreateOrConnectWithoutCompanyInput | CompanyDrugCreateOrConnectWithoutCompanyInput[]
+    upsert?: CompanyDrugUpsertWithWhereUniqueWithoutCompanyInput | CompanyDrugUpsertWithWhereUniqueWithoutCompanyInput[]
+    createMany?: CompanyDrugCreateManyCompanyInputEnvelope
+    set?: CompanyDrugWhereUniqueInput | CompanyDrugWhereUniqueInput[]
+    disconnect?: CompanyDrugWhereUniqueInput | CompanyDrugWhereUniqueInput[]
+    delete?: CompanyDrugWhereUniqueInput | CompanyDrugWhereUniqueInput[]
+    connect?: CompanyDrugWhereUniqueInput | CompanyDrugWhereUniqueInput[]
+    update?: CompanyDrugUpdateWithWhereUniqueWithoutCompanyInput | CompanyDrugUpdateWithWhereUniqueWithoutCompanyInput[]
+    updateMany?: CompanyDrugUpdateManyWithWhereWithoutCompanyInput | CompanyDrugUpdateManyWithWhereWithoutCompanyInput[]
+    deleteMany?: CompanyDrugScalarWhereInput | CompanyDrugScalarWhereInput[]
+  }
+
+  export type DrugOrderUpdateManyWithoutCompanyNestedInput = {
+    create?: XOR<DrugOrderCreateWithoutCompanyInput, DrugOrderUncheckedCreateWithoutCompanyInput> | DrugOrderCreateWithoutCompanyInput[] | DrugOrderUncheckedCreateWithoutCompanyInput[]
+    connectOrCreate?: DrugOrderCreateOrConnectWithoutCompanyInput | DrugOrderCreateOrConnectWithoutCompanyInput[]
+    upsert?: DrugOrderUpsertWithWhereUniqueWithoutCompanyInput | DrugOrderUpsertWithWhereUniqueWithoutCompanyInput[]
+    createMany?: DrugOrderCreateManyCompanyInputEnvelope
+    set?: DrugOrderWhereUniqueInput | DrugOrderWhereUniqueInput[]
+    disconnect?: DrugOrderWhereUniqueInput | DrugOrderWhereUniqueInput[]
+    delete?: DrugOrderWhereUniqueInput | DrugOrderWhereUniqueInput[]
+    connect?: DrugOrderWhereUniqueInput | DrugOrderWhereUniqueInput[]
+    update?: DrugOrderUpdateWithWhereUniqueWithoutCompanyInput | DrugOrderUpdateWithWhereUniqueWithoutCompanyInput[]
+    updateMany?: DrugOrderUpdateManyWithWhereWithoutCompanyInput | DrugOrderUpdateManyWithWhereWithoutCompanyInput[]
+    deleteMany?: DrugOrderScalarWhereInput | DrugOrderScalarWhereInput[]
+  }
+
+  export type UserUncheckedUpdateManyWithoutCompanyNestedInput = {
+    create?: XOR<UserCreateWithoutCompanyInput, UserUncheckedCreateWithoutCompanyInput> | UserCreateWithoutCompanyInput[] | UserUncheckedCreateWithoutCompanyInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutCompanyInput | UserCreateOrConnectWithoutCompanyInput[]
+    upsert?: UserUpsertWithWhereUniqueWithoutCompanyInput | UserUpsertWithWhereUniqueWithoutCompanyInput[]
+    createMany?: UserCreateManyCompanyInputEnvelope
+    set?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    disconnect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    delete?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    update?: UserUpdateWithWhereUniqueWithoutCompanyInput | UserUpdateWithWhereUniqueWithoutCompanyInput[]
+    updateMany?: UserUpdateManyWithWhereWithoutCompanyInput | UserUpdateManyWithWhereWithoutCompanyInput[]
+    deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
+  }
+
+  export type CompanyDrugUncheckedUpdateManyWithoutCompanyNestedInput = {
+    create?: XOR<CompanyDrugCreateWithoutCompanyInput, CompanyDrugUncheckedCreateWithoutCompanyInput> | CompanyDrugCreateWithoutCompanyInput[] | CompanyDrugUncheckedCreateWithoutCompanyInput[]
+    connectOrCreate?: CompanyDrugCreateOrConnectWithoutCompanyInput | CompanyDrugCreateOrConnectWithoutCompanyInput[]
+    upsert?: CompanyDrugUpsertWithWhereUniqueWithoutCompanyInput | CompanyDrugUpsertWithWhereUniqueWithoutCompanyInput[]
+    createMany?: CompanyDrugCreateManyCompanyInputEnvelope
+    set?: CompanyDrugWhereUniqueInput | CompanyDrugWhereUniqueInput[]
+    disconnect?: CompanyDrugWhereUniqueInput | CompanyDrugWhereUniqueInput[]
+    delete?: CompanyDrugWhereUniqueInput | CompanyDrugWhereUniqueInput[]
+    connect?: CompanyDrugWhereUniqueInput | CompanyDrugWhereUniqueInput[]
+    update?: CompanyDrugUpdateWithWhereUniqueWithoutCompanyInput | CompanyDrugUpdateWithWhereUniqueWithoutCompanyInput[]
+    updateMany?: CompanyDrugUpdateManyWithWhereWithoutCompanyInput | CompanyDrugUpdateManyWithWhereWithoutCompanyInput[]
+    deleteMany?: CompanyDrugScalarWhereInput | CompanyDrugScalarWhereInput[]
+  }
+
+  export type DrugOrderUncheckedUpdateManyWithoutCompanyNestedInput = {
+    create?: XOR<DrugOrderCreateWithoutCompanyInput, DrugOrderUncheckedCreateWithoutCompanyInput> | DrugOrderCreateWithoutCompanyInput[] | DrugOrderUncheckedCreateWithoutCompanyInput[]
+    connectOrCreate?: DrugOrderCreateOrConnectWithoutCompanyInput | DrugOrderCreateOrConnectWithoutCompanyInput[]
+    upsert?: DrugOrderUpsertWithWhereUniqueWithoutCompanyInput | DrugOrderUpsertWithWhereUniqueWithoutCompanyInput[]
+    createMany?: DrugOrderCreateManyCompanyInputEnvelope
+    set?: DrugOrderWhereUniqueInput | DrugOrderWhereUniqueInput[]
+    disconnect?: DrugOrderWhereUniqueInput | DrugOrderWhereUniqueInput[]
+    delete?: DrugOrderWhereUniqueInput | DrugOrderWhereUniqueInput[]
+    connect?: DrugOrderWhereUniqueInput | DrugOrderWhereUniqueInput[]
+    update?: DrugOrderUpdateWithWhereUniqueWithoutCompanyInput | DrugOrderUpdateWithWhereUniqueWithoutCompanyInput[]
+    updateMany?: DrugOrderUpdateManyWithWhereWithoutCompanyInput | DrugOrderUpdateManyWithWhereWithoutCompanyInput[]
+    deleteMany?: DrugOrderScalarWhereInput | DrugOrderScalarWhereInput[]
   }
 
   export type MasterDrugCreateNestedManyWithoutTherapeuticGroupInput = {
@@ -27116,11 +40479,39 @@ export namespace Prisma {
     connect?: FacilityDrugMapWhereUniqueInput | FacilityDrugMapWhereUniqueInput[]
   }
 
+  export type CompanyDrugCreateNestedManyWithoutMasterDrugInput = {
+    create?: XOR<CompanyDrugCreateWithoutMasterDrugInput, CompanyDrugUncheckedCreateWithoutMasterDrugInput> | CompanyDrugCreateWithoutMasterDrugInput[] | CompanyDrugUncheckedCreateWithoutMasterDrugInput[]
+    connectOrCreate?: CompanyDrugCreateOrConnectWithoutMasterDrugInput | CompanyDrugCreateOrConnectWithoutMasterDrugInput[]
+    createMany?: CompanyDrugCreateManyMasterDrugInputEnvelope
+    connect?: CompanyDrugWhereUniqueInput | CompanyDrugWhereUniqueInput[]
+  }
+
+  export type DrugOrderLineCreateNestedManyWithoutMasterDrugInput = {
+    create?: XOR<DrugOrderLineCreateWithoutMasterDrugInput, DrugOrderLineUncheckedCreateWithoutMasterDrugInput> | DrugOrderLineCreateWithoutMasterDrugInput[] | DrugOrderLineUncheckedCreateWithoutMasterDrugInput[]
+    connectOrCreate?: DrugOrderLineCreateOrConnectWithoutMasterDrugInput | DrugOrderLineCreateOrConnectWithoutMasterDrugInput[]
+    createMany?: DrugOrderLineCreateManyMasterDrugInputEnvelope
+    connect?: DrugOrderLineWhereUniqueInput | DrugOrderLineWhereUniqueInput[]
+  }
+
   export type FacilityDrugMapUncheckedCreateNestedManyWithoutMasterDrugInput = {
     create?: XOR<FacilityDrugMapCreateWithoutMasterDrugInput, FacilityDrugMapUncheckedCreateWithoutMasterDrugInput> | FacilityDrugMapCreateWithoutMasterDrugInput[] | FacilityDrugMapUncheckedCreateWithoutMasterDrugInput[]
     connectOrCreate?: FacilityDrugMapCreateOrConnectWithoutMasterDrugInput | FacilityDrugMapCreateOrConnectWithoutMasterDrugInput[]
     createMany?: FacilityDrugMapCreateManyMasterDrugInputEnvelope
     connect?: FacilityDrugMapWhereUniqueInput | FacilityDrugMapWhereUniqueInput[]
+  }
+
+  export type CompanyDrugUncheckedCreateNestedManyWithoutMasterDrugInput = {
+    create?: XOR<CompanyDrugCreateWithoutMasterDrugInput, CompanyDrugUncheckedCreateWithoutMasterDrugInput> | CompanyDrugCreateWithoutMasterDrugInput[] | CompanyDrugUncheckedCreateWithoutMasterDrugInput[]
+    connectOrCreate?: CompanyDrugCreateOrConnectWithoutMasterDrugInput | CompanyDrugCreateOrConnectWithoutMasterDrugInput[]
+    createMany?: CompanyDrugCreateManyMasterDrugInputEnvelope
+    connect?: CompanyDrugWhereUniqueInput | CompanyDrugWhereUniqueInput[]
+  }
+
+  export type DrugOrderLineUncheckedCreateNestedManyWithoutMasterDrugInput = {
+    create?: XOR<DrugOrderLineCreateWithoutMasterDrugInput, DrugOrderLineUncheckedCreateWithoutMasterDrugInput> | DrugOrderLineCreateWithoutMasterDrugInput[] | DrugOrderLineUncheckedCreateWithoutMasterDrugInput[]
+    connectOrCreate?: DrugOrderLineCreateOrConnectWithoutMasterDrugInput | DrugOrderLineCreateOrConnectWithoutMasterDrugInput[]
+    createMany?: DrugOrderLineCreateManyMasterDrugInputEnvelope
+    connect?: DrugOrderLineWhereUniqueInput | DrugOrderLineWhereUniqueInput[]
   }
 
   export type TherapeuticGroupUpdateOneWithoutMasterDrugsNestedInput = {
@@ -27147,6 +40538,34 @@ export namespace Prisma {
     deleteMany?: FacilityDrugMapScalarWhereInput | FacilityDrugMapScalarWhereInput[]
   }
 
+  export type CompanyDrugUpdateManyWithoutMasterDrugNestedInput = {
+    create?: XOR<CompanyDrugCreateWithoutMasterDrugInput, CompanyDrugUncheckedCreateWithoutMasterDrugInput> | CompanyDrugCreateWithoutMasterDrugInput[] | CompanyDrugUncheckedCreateWithoutMasterDrugInput[]
+    connectOrCreate?: CompanyDrugCreateOrConnectWithoutMasterDrugInput | CompanyDrugCreateOrConnectWithoutMasterDrugInput[]
+    upsert?: CompanyDrugUpsertWithWhereUniqueWithoutMasterDrugInput | CompanyDrugUpsertWithWhereUniqueWithoutMasterDrugInput[]
+    createMany?: CompanyDrugCreateManyMasterDrugInputEnvelope
+    set?: CompanyDrugWhereUniqueInput | CompanyDrugWhereUniqueInput[]
+    disconnect?: CompanyDrugWhereUniqueInput | CompanyDrugWhereUniqueInput[]
+    delete?: CompanyDrugWhereUniqueInput | CompanyDrugWhereUniqueInput[]
+    connect?: CompanyDrugWhereUniqueInput | CompanyDrugWhereUniqueInput[]
+    update?: CompanyDrugUpdateWithWhereUniqueWithoutMasterDrugInput | CompanyDrugUpdateWithWhereUniqueWithoutMasterDrugInput[]
+    updateMany?: CompanyDrugUpdateManyWithWhereWithoutMasterDrugInput | CompanyDrugUpdateManyWithWhereWithoutMasterDrugInput[]
+    deleteMany?: CompanyDrugScalarWhereInput | CompanyDrugScalarWhereInput[]
+  }
+
+  export type DrugOrderLineUpdateManyWithoutMasterDrugNestedInput = {
+    create?: XOR<DrugOrderLineCreateWithoutMasterDrugInput, DrugOrderLineUncheckedCreateWithoutMasterDrugInput> | DrugOrderLineCreateWithoutMasterDrugInput[] | DrugOrderLineUncheckedCreateWithoutMasterDrugInput[]
+    connectOrCreate?: DrugOrderLineCreateOrConnectWithoutMasterDrugInput | DrugOrderLineCreateOrConnectWithoutMasterDrugInput[]
+    upsert?: DrugOrderLineUpsertWithWhereUniqueWithoutMasterDrugInput | DrugOrderLineUpsertWithWhereUniqueWithoutMasterDrugInput[]
+    createMany?: DrugOrderLineCreateManyMasterDrugInputEnvelope
+    set?: DrugOrderLineWhereUniqueInput | DrugOrderLineWhereUniqueInput[]
+    disconnect?: DrugOrderLineWhereUniqueInput | DrugOrderLineWhereUniqueInput[]
+    delete?: DrugOrderLineWhereUniqueInput | DrugOrderLineWhereUniqueInput[]
+    connect?: DrugOrderLineWhereUniqueInput | DrugOrderLineWhereUniqueInput[]
+    update?: DrugOrderLineUpdateWithWhereUniqueWithoutMasterDrugInput | DrugOrderLineUpdateWithWhereUniqueWithoutMasterDrugInput[]
+    updateMany?: DrugOrderLineUpdateManyWithWhereWithoutMasterDrugInput | DrugOrderLineUpdateManyWithWhereWithoutMasterDrugInput[]
+    deleteMany?: DrugOrderLineScalarWhereInput | DrugOrderLineScalarWhereInput[]
+  }
+
   export type FacilityDrugMapUncheckedUpdateManyWithoutMasterDrugNestedInput = {
     create?: XOR<FacilityDrugMapCreateWithoutMasterDrugInput, FacilityDrugMapUncheckedCreateWithoutMasterDrugInput> | FacilityDrugMapCreateWithoutMasterDrugInput[] | FacilityDrugMapUncheckedCreateWithoutMasterDrugInput[]
     connectOrCreate?: FacilityDrugMapCreateOrConnectWithoutMasterDrugInput | FacilityDrugMapCreateOrConnectWithoutMasterDrugInput[]
@@ -27159,6 +40578,106 @@ export namespace Prisma {
     update?: FacilityDrugMapUpdateWithWhereUniqueWithoutMasterDrugInput | FacilityDrugMapUpdateWithWhereUniqueWithoutMasterDrugInput[]
     updateMany?: FacilityDrugMapUpdateManyWithWhereWithoutMasterDrugInput | FacilityDrugMapUpdateManyWithWhereWithoutMasterDrugInput[]
     deleteMany?: FacilityDrugMapScalarWhereInput | FacilityDrugMapScalarWhereInput[]
+  }
+
+  export type CompanyDrugUncheckedUpdateManyWithoutMasterDrugNestedInput = {
+    create?: XOR<CompanyDrugCreateWithoutMasterDrugInput, CompanyDrugUncheckedCreateWithoutMasterDrugInput> | CompanyDrugCreateWithoutMasterDrugInput[] | CompanyDrugUncheckedCreateWithoutMasterDrugInput[]
+    connectOrCreate?: CompanyDrugCreateOrConnectWithoutMasterDrugInput | CompanyDrugCreateOrConnectWithoutMasterDrugInput[]
+    upsert?: CompanyDrugUpsertWithWhereUniqueWithoutMasterDrugInput | CompanyDrugUpsertWithWhereUniqueWithoutMasterDrugInput[]
+    createMany?: CompanyDrugCreateManyMasterDrugInputEnvelope
+    set?: CompanyDrugWhereUniqueInput | CompanyDrugWhereUniqueInput[]
+    disconnect?: CompanyDrugWhereUniqueInput | CompanyDrugWhereUniqueInput[]
+    delete?: CompanyDrugWhereUniqueInput | CompanyDrugWhereUniqueInput[]
+    connect?: CompanyDrugWhereUniqueInput | CompanyDrugWhereUniqueInput[]
+    update?: CompanyDrugUpdateWithWhereUniqueWithoutMasterDrugInput | CompanyDrugUpdateWithWhereUniqueWithoutMasterDrugInput[]
+    updateMany?: CompanyDrugUpdateManyWithWhereWithoutMasterDrugInput | CompanyDrugUpdateManyWithWhereWithoutMasterDrugInput[]
+    deleteMany?: CompanyDrugScalarWhereInput | CompanyDrugScalarWhereInput[]
+  }
+
+  export type DrugOrderLineUncheckedUpdateManyWithoutMasterDrugNestedInput = {
+    create?: XOR<DrugOrderLineCreateWithoutMasterDrugInput, DrugOrderLineUncheckedCreateWithoutMasterDrugInput> | DrugOrderLineCreateWithoutMasterDrugInput[] | DrugOrderLineUncheckedCreateWithoutMasterDrugInput[]
+    connectOrCreate?: DrugOrderLineCreateOrConnectWithoutMasterDrugInput | DrugOrderLineCreateOrConnectWithoutMasterDrugInput[]
+    upsert?: DrugOrderLineUpsertWithWhereUniqueWithoutMasterDrugInput | DrugOrderLineUpsertWithWhereUniqueWithoutMasterDrugInput[]
+    createMany?: DrugOrderLineCreateManyMasterDrugInputEnvelope
+    set?: DrugOrderLineWhereUniqueInput | DrugOrderLineWhereUniqueInput[]
+    disconnect?: DrugOrderLineWhereUniqueInput | DrugOrderLineWhereUniqueInput[]
+    delete?: DrugOrderLineWhereUniqueInput | DrugOrderLineWhereUniqueInput[]
+    connect?: DrugOrderLineWhereUniqueInput | DrugOrderLineWhereUniqueInput[]
+    update?: DrugOrderLineUpdateWithWhereUniqueWithoutMasterDrugInput | DrugOrderLineUpdateWithWhereUniqueWithoutMasterDrugInput[]
+    updateMany?: DrugOrderLineUpdateManyWithWhereWithoutMasterDrugInput | DrugOrderLineUpdateManyWithWhereWithoutMasterDrugInput[]
+    deleteMany?: DrugOrderLineScalarWhereInput | DrugOrderLineScalarWhereInput[]
+  }
+
+  export type CompanyCreateNestedOneWithoutCompanyDrugsInput = {
+    create?: XOR<CompanyCreateWithoutCompanyDrugsInput, CompanyUncheckedCreateWithoutCompanyDrugsInput>
+    connectOrCreate?: CompanyCreateOrConnectWithoutCompanyDrugsInput
+    connect?: CompanyWhereUniqueInput
+  }
+
+  export type MasterDrugCreateNestedOneWithoutCompanyDrugsInput = {
+    create?: XOR<MasterDrugCreateWithoutCompanyDrugsInput, MasterDrugUncheckedCreateWithoutCompanyDrugsInput>
+    connectOrCreate?: MasterDrugCreateOrConnectWithoutCompanyDrugsInput
+    connect?: MasterDrugWhereUniqueInput
+  }
+
+  export type DrugOrderLineCreateNestedManyWithoutCompanyDrugInput = {
+    create?: XOR<DrugOrderLineCreateWithoutCompanyDrugInput, DrugOrderLineUncheckedCreateWithoutCompanyDrugInput> | DrugOrderLineCreateWithoutCompanyDrugInput[] | DrugOrderLineUncheckedCreateWithoutCompanyDrugInput[]
+    connectOrCreate?: DrugOrderLineCreateOrConnectWithoutCompanyDrugInput | DrugOrderLineCreateOrConnectWithoutCompanyDrugInput[]
+    createMany?: DrugOrderLineCreateManyCompanyDrugInputEnvelope
+    connect?: DrugOrderLineWhereUniqueInput | DrugOrderLineWhereUniqueInput[]
+  }
+
+  export type DrugOrderLineUncheckedCreateNestedManyWithoutCompanyDrugInput = {
+    create?: XOR<DrugOrderLineCreateWithoutCompanyDrugInput, DrugOrderLineUncheckedCreateWithoutCompanyDrugInput> | DrugOrderLineCreateWithoutCompanyDrugInput[] | DrugOrderLineUncheckedCreateWithoutCompanyDrugInput[]
+    connectOrCreate?: DrugOrderLineCreateOrConnectWithoutCompanyDrugInput | DrugOrderLineCreateOrConnectWithoutCompanyDrugInput[]
+    createMany?: DrugOrderLineCreateManyCompanyDrugInputEnvelope
+    connect?: DrugOrderLineWhereUniqueInput | DrugOrderLineWhereUniqueInput[]
+  }
+
+  export type CompanyUpdateOneRequiredWithoutCompanyDrugsNestedInput = {
+    create?: XOR<CompanyCreateWithoutCompanyDrugsInput, CompanyUncheckedCreateWithoutCompanyDrugsInput>
+    connectOrCreate?: CompanyCreateOrConnectWithoutCompanyDrugsInput
+    upsert?: CompanyUpsertWithoutCompanyDrugsInput
+    connect?: CompanyWhereUniqueInput
+    update?: XOR<XOR<CompanyUpdateToOneWithWhereWithoutCompanyDrugsInput, CompanyUpdateWithoutCompanyDrugsInput>, CompanyUncheckedUpdateWithoutCompanyDrugsInput>
+  }
+
+  export type MasterDrugUpdateOneWithoutCompanyDrugsNestedInput = {
+    create?: XOR<MasterDrugCreateWithoutCompanyDrugsInput, MasterDrugUncheckedCreateWithoutCompanyDrugsInput>
+    connectOrCreate?: MasterDrugCreateOrConnectWithoutCompanyDrugsInput
+    upsert?: MasterDrugUpsertWithoutCompanyDrugsInput
+    disconnect?: MasterDrugWhereInput | boolean
+    delete?: MasterDrugWhereInput | boolean
+    connect?: MasterDrugWhereUniqueInput
+    update?: XOR<XOR<MasterDrugUpdateToOneWithWhereWithoutCompanyDrugsInput, MasterDrugUpdateWithoutCompanyDrugsInput>, MasterDrugUncheckedUpdateWithoutCompanyDrugsInput>
+  }
+
+  export type DrugOrderLineUpdateManyWithoutCompanyDrugNestedInput = {
+    create?: XOR<DrugOrderLineCreateWithoutCompanyDrugInput, DrugOrderLineUncheckedCreateWithoutCompanyDrugInput> | DrugOrderLineCreateWithoutCompanyDrugInput[] | DrugOrderLineUncheckedCreateWithoutCompanyDrugInput[]
+    connectOrCreate?: DrugOrderLineCreateOrConnectWithoutCompanyDrugInput | DrugOrderLineCreateOrConnectWithoutCompanyDrugInput[]
+    upsert?: DrugOrderLineUpsertWithWhereUniqueWithoutCompanyDrugInput | DrugOrderLineUpsertWithWhereUniqueWithoutCompanyDrugInput[]
+    createMany?: DrugOrderLineCreateManyCompanyDrugInputEnvelope
+    set?: DrugOrderLineWhereUniqueInput | DrugOrderLineWhereUniqueInput[]
+    disconnect?: DrugOrderLineWhereUniqueInput | DrugOrderLineWhereUniqueInput[]
+    delete?: DrugOrderLineWhereUniqueInput | DrugOrderLineWhereUniqueInput[]
+    connect?: DrugOrderLineWhereUniqueInput | DrugOrderLineWhereUniqueInput[]
+    update?: DrugOrderLineUpdateWithWhereUniqueWithoutCompanyDrugInput | DrugOrderLineUpdateWithWhereUniqueWithoutCompanyDrugInput[]
+    updateMany?: DrugOrderLineUpdateManyWithWhereWithoutCompanyDrugInput | DrugOrderLineUpdateManyWithWhereWithoutCompanyDrugInput[]
+    deleteMany?: DrugOrderLineScalarWhereInput | DrugOrderLineScalarWhereInput[]
+  }
+
+  export type DrugOrderLineUncheckedUpdateManyWithoutCompanyDrugNestedInput = {
+    create?: XOR<DrugOrderLineCreateWithoutCompanyDrugInput, DrugOrderLineUncheckedCreateWithoutCompanyDrugInput> | DrugOrderLineCreateWithoutCompanyDrugInput[] | DrugOrderLineUncheckedCreateWithoutCompanyDrugInput[]
+    connectOrCreate?: DrugOrderLineCreateOrConnectWithoutCompanyDrugInput | DrugOrderLineCreateOrConnectWithoutCompanyDrugInput[]
+    upsert?: DrugOrderLineUpsertWithWhereUniqueWithoutCompanyDrugInput | DrugOrderLineUpsertWithWhereUniqueWithoutCompanyDrugInput[]
+    createMany?: DrugOrderLineCreateManyCompanyDrugInputEnvelope
+    set?: DrugOrderLineWhereUniqueInput | DrugOrderLineWhereUniqueInput[]
+    disconnect?: DrugOrderLineWhereUniqueInput | DrugOrderLineWhereUniqueInput[]
+    delete?: DrugOrderLineWhereUniqueInput | DrugOrderLineWhereUniqueInput[]
+    connect?: DrugOrderLineWhereUniqueInput | DrugOrderLineWhereUniqueInput[]
+    update?: DrugOrderLineUpdateWithWhereUniqueWithoutCompanyDrugInput | DrugOrderLineUpdateWithWhereUniqueWithoutCompanyDrugInput[]
+    updateMany?: DrugOrderLineUpdateManyWithWhereWithoutCompanyDrugInput | DrugOrderLineUpdateManyWithWhereWithoutCompanyDrugInput[]
+    deleteMany?: DrugOrderLineScalarWhereInput | DrugOrderLineScalarWhereInput[]
   }
 
   export type UserCreateNestedOneWithoutDrugMapsInput = {
@@ -27299,8 +40818,610 @@ export namespace Prisma {
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutReportSubmissionsInput, UserUpdateWithoutReportSubmissionsInput>, UserUncheckedUpdateWithoutReportSubmissionsInput>
   }
 
+  export type UserCreateNestedOneWithoutDrugOrdersInput = {
+    create?: XOR<UserCreateWithoutDrugOrdersInput, UserUncheckedCreateWithoutDrugOrdersInput>
+    connectOrCreate?: UserCreateOrConnectWithoutDrugOrdersInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type CompanyCreateNestedOneWithoutDrugOrdersInput = {
+    create?: XOR<CompanyCreateWithoutDrugOrdersInput, CompanyUncheckedCreateWithoutDrugOrdersInput>
+    connectOrCreate?: CompanyCreateOrConnectWithoutDrugOrdersInput
+    connect?: CompanyWhereUniqueInput
+  }
+
+  export type DrugOrderLineCreateNestedManyWithoutOrderInput = {
+    create?: XOR<DrugOrderLineCreateWithoutOrderInput, DrugOrderLineUncheckedCreateWithoutOrderInput> | DrugOrderLineCreateWithoutOrderInput[] | DrugOrderLineUncheckedCreateWithoutOrderInput[]
+    connectOrCreate?: DrugOrderLineCreateOrConnectWithoutOrderInput | DrugOrderLineCreateOrConnectWithoutOrderInput[]
+    createMany?: DrugOrderLineCreateManyOrderInputEnvelope
+    connect?: DrugOrderLineWhereUniqueInput | DrugOrderLineWhereUniqueInput[]
+  }
+
+  export type DrugOrderShipmentCreateNestedManyWithoutOrderInput = {
+    create?: XOR<DrugOrderShipmentCreateWithoutOrderInput, DrugOrderShipmentUncheckedCreateWithoutOrderInput> | DrugOrderShipmentCreateWithoutOrderInput[] | DrugOrderShipmentUncheckedCreateWithoutOrderInput[]
+    connectOrCreate?: DrugOrderShipmentCreateOrConnectWithoutOrderInput | DrugOrderShipmentCreateOrConnectWithoutOrderInput[]
+    createMany?: DrugOrderShipmentCreateManyOrderInputEnvelope
+    connect?: DrugOrderShipmentWhereUniqueInput | DrugOrderShipmentWhereUniqueInput[]
+  }
+
+  export type DrugOrderReceiptCreateNestedManyWithoutOrderInput = {
+    create?: XOR<DrugOrderReceiptCreateWithoutOrderInput, DrugOrderReceiptUncheckedCreateWithoutOrderInput> | DrugOrderReceiptCreateWithoutOrderInput[] | DrugOrderReceiptUncheckedCreateWithoutOrderInput[]
+    connectOrCreate?: DrugOrderReceiptCreateOrConnectWithoutOrderInput | DrugOrderReceiptCreateOrConnectWithoutOrderInput[]
+    createMany?: DrugOrderReceiptCreateManyOrderInputEnvelope
+    connect?: DrugOrderReceiptWhereUniqueInput | DrugOrderReceiptWhereUniqueInput[]
+  }
+
+  export type DrugOrderLineUncheckedCreateNestedManyWithoutOrderInput = {
+    create?: XOR<DrugOrderLineCreateWithoutOrderInput, DrugOrderLineUncheckedCreateWithoutOrderInput> | DrugOrderLineCreateWithoutOrderInput[] | DrugOrderLineUncheckedCreateWithoutOrderInput[]
+    connectOrCreate?: DrugOrderLineCreateOrConnectWithoutOrderInput | DrugOrderLineCreateOrConnectWithoutOrderInput[]
+    createMany?: DrugOrderLineCreateManyOrderInputEnvelope
+    connect?: DrugOrderLineWhereUniqueInput | DrugOrderLineWhereUniqueInput[]
+  }
+
+  export type DrugOrderShipmentUncheckedCreateNestedManyWithoutOrderInput = {
+    create?: XOR<DrugOrderShipmentCreateWithoutOrderInput, DrugOrderShipmentUncheckedCreateWithoutOrderInput> | DrugOrderShipmentCreateWithoutOrderInput[] | DrugOrderShipmentUncheckedCreateWithoutOrderInput[]
+    connectOrCreate?: DrugOrderShipmentCreateOrConnectWithoutOrderInput | DrugOrderShipmentCreateOrConnectWithoutOrderInput[]
+    createMany?: DrugOrderShipmentCreateManyOrderInputEnvelope
+    connect?: DrugOrderShipmentWhereUniqueInput | DrugOrderShipmentWhereUniqueInput[]
+  }
+
+  export type DrugOrderReceiptUncheckedCreateNestedManyWithoutOrderInput = {
+    create?: XOR<DrugOrderReceiptCreateWithoutOrderInput, DrugOrderReceiptUncheckedCreateWithoutOrderInput> | DrugOrderReceiptCreateWithoutOrderInput[] | DrugOrderReceiptUncheckedCreateWithoutOrderInput[]
+    connectOrCreate?: DrugOrderReceiptCreateOrConnectWithoutOrderInput | DrugOrderReceiptCreateOrConnectWithoutOrderInput[]
+    createMany?: DrugOrderReceiptCreateManyOrderInputEnvelope
+    connect?: DrugOrderReceiptWhereUniqueInput | DrugOrderReceiptWhereUniqueInput[]
+  }
+
+  export type EnumDrugOrderStatusFieldUpdateOperationsInput = {
+    set?: $Enums.DrugOrderStatus
+  }
+
   export type NullableDateTimeFieldUpdateOperationsInput = {
     set?: Date | string | null
+  }
+
+  export type UserUpdateOneRequiredWithoutDrugOrdersNestedInput = {
+    create?: XOR<UserCreateWithoutDrugOrdersInput, UserUncheckedCreateWithoutDrugOrdersInput>
+    connectOrCreate?: UserCreateOrConnectWithoutDrugOrdersInput
+    upsert?: UserUpsertWithoutDrugOrdersInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutDrugOrdersInput, UserUpdateWithoutDrugOrdersInput>, UserUncheckedUpdateWithoutDrugOrdersInput>
+  }
+
+  export type CompanyUpdateOneRequiredWithoutDrugOrdersNestedInput = {
+    create?: XOR<CompanyCreateWithoutDrugOrdersInput, CompanyUncheckedCreateWithoutDrugOrdersInput>
+    connectOrCreate?: CompanyCreateOrConnectWithoutDrugOrdersInput
+    upsert?: CompanyUpsertWithoutDrugOrdersInput
+    connect?: CompanyWhereUniqueInput
+    update?: XOR<XOR<CompanyUpdateToOneWithWhereWithoutDrugOrdersInput, CompanyUpdateWithoutDrugOrdersInput>, CompanyUncheckedUpdateWithoutDrugOrdersInput>
+  }
+
+  export type DrugOrderLineUpdateManyWithoutOrderNestedInput = {
+    create?: XOR<DrugOrderLineCreateWithoutOrderInput, DrugOrderLineUncheckedCreateWithoutOrderInput> | DrugOrderLineCreateWithoutOrderInput[] | DrugOrderLineUncheckedCreateWithoutOrderInput[]
+    connectOrCreate?: DrugOrderLineCreateOrConnectWithoutOrderInput | DrugOrderLineCreateOrConnectWithoutOrderInput[]
+    upsert?: DrugOrderLineUpsertWithWhereUniqueWithoutOrderInput | DrugOrderLineUpsertWithWhereUniqueWithoutOrderInput[]
+    createMany?: DrugOrderLineCreateManyOrderInputEnvelope
+    set?: DrugOrderLineWhereUniqueInput | DrugOrderLineWhereUniqueInput[]
+    disconnect?: DrugOrderLineWhereUniqueInput | DrugOrderLineWhereUniqueInput[]
+    delete?: DrugOrderLineWhereUniqueInput | DrugOrderLineWhereUniqueInput[]
+    connect?: DrugOrderLineWhereUniqueInput | DrugOrderLineWhereUniqueInput[]
+    update?: DrugOrderLineUpdateWithWhereUniqueWithoutOrderInput | DrugOrderLineUpdateWithWhereUniqueWithoutOrderInput[]
+    updateMany?: DrugOrderLineUpdateManyWithWhereWithoutOrderInput | DrugOrderLineUpdateManyWithWhereWithoutOrderInput[]
+    deleteMany?: DrugOrderLineScalarWhereInput | DrugOrderLineScalarWhereInput[]
+  }
+
+  export type DrugOrderShipmentUpdateManyWithoutOrderNestedInput = {
+    create?: XOR<DrugOrderShipmentCreateWithoutOrderInput, DrugOrderShipmentUncheckedCreateWithoutOrderInput> | DrugOrderShipmentCreateWithoutOrderInput[] | DrugOrderShipmentUncheckedCreateWithoutOrderInput[]
+    connectOrCreate?: DrugOrderShipmentCreateOrConnectWithoutOrderInput | DrugOrderShipmentCreateOrConnectWithoutOrderInput[]
+    upsert?: DrugOrderShipmentUpsertWithWhereUniqueWithoutOrderInput | DrugOrderShipmentUpsertWithWhereUniqueWithoutOrderInput[]
+    createMany?: DrugOrderShipmentCreateManyOrderInputEnvelope
+    set?: DrugOrderShipmentWhereUniqueInput | DrugOrderShipmentWhereUniqueInput[]
+    disconnect?: DrugOrderShipmentWhereUniqueInput | DrugOrderShipmentWhereUniqueInput[]
+    delete?: DrugOrderShipmentWhereUniqueInput | DrugOrderShipmentWhereUniqueInput[]
+    connect?: DrugOrderShipmentWhereUniqueInput | DrugOrderShipmentWhereUniqueInput[]
+    update?: DrugOrderShipmentUpdateWithWhereUniqueWithoutOrderInput | DrugOrderShipmentUpdateWithWhereUniqueWithoutOrderInput[]
+    updateMany?: DrugOrderShipmentUpdateManyWithWhereWithoutOrderInput | DrugOrderShipmentUpdateManyWithWhereWithoutOrderInput[]
+    deleteMany?: DrugOrderShipmentScalarWhereInput | DrugOrderShipmentScalarWhereInput[]
+  }
+
+  export type DrugOrderReceiptUpdateManyWithoutOrderNestedInput = {
+    create?: XOR<DrugOrderReceiptCreateWithoutOrderInput, DrugOrderReceiptUncheckedCreateWithoutOrderInput> | DrugOrderReceiptCreateWithoutOrderInput[] | DrugOrderReceiptUncheckedCreateWithoutOrderInput[]
+    connectOrCreate?: DrugOrderReceiptCreateOrConnectWithoutOrderInput | DrugOrderReceiptCreateOrConnectWithoutOrderInput[]
+    upsert?: DrugOrderReceiptUpsertWithWhereUniqueWithoutOrderInput | DrugOrderReceiptUpsertWithWhereUniqueWithoutOrderInput[]
+    createMany?: DrugOrderReceiptCreateManyOrderInputEnvelope
+    set?: DrugOrderReceiptWhereUniqueInput | DrugOrderReceiptWhereUniqueInput[]
+    disconnect?: DrugOrderReceiptWhereUniqueInput | DrugOrderReceiptWhereUniqueInput[]
+    delete?: DrugOrderReceiptWhereUniqueInput | DrugOrderReceiptWhereUniqueInput[]
+    connect?: DrugOrderReceiptWhereUniqueInput | DrugOrderReceiptWhereUniqueInput[]
+    update?: DrugOrderReceiptUpdateWithWhereUniqueWithoutOrderInput | DrugOrderReceiptUpdateWithWhereUniqueWithoutOrderInput[]
+    updateMany?: DrugOrderReceiptUpdateManyWithWhereWithoutOrderInput | DrugOrderReceiptUpdateManyWithWhereWithoutOrderInput[]
+    deleteMany?: DrugOrderReceiptScalarWhereInput | DrugOrderReceiptScalarWhereInput[]
+  }
+
+  export type DrugOrderLineUncheckedUpdateManyWithoutOrderNestedInput = {
+    create?: XOR<DrugOrderLineCreateWithoutOrderInput, DrugOrderLineUncheckedCreateWithoutOrderInput> | DrugOrderLineCreateWithoutOrderInput[] | DrugOrderLineUncheckedCreateWithoutOrderInput[]
+    connectOrCreate?: DrugOrderLineCreateOrConnectWithoutOrderInput | DrugOrderLineCreateOrConnectWithoutOrderInput[]
+    upsert?: DrugOrderLineUpsertWithWhereUniqueWithoutOrderInput | DrugOrderLineUpsertWithWhereUniqueWithoutOrderInput[]
+    createMany?: DrugOrderLineCreateManyOrderInputEnvelope
+    set?: DrugOrderLineWhereUniqueInput | DrugOrderLineWhereUniqueInput[]
+    disconnect?: DrugOrderLineWhereUniqueInput | DrugOrderLineWhereUniqueInput[]
+    delete?: DrugOrderLineWhereUniqueInput | DrugOrderLineWhereUniqueInput[]
+    connect?: DrugOrderLineWhereUniqueInput | DrugOrderLineWhereUniqueInput[]
+    update?: DrugOrderLineUpdateWithWhereUniqueWithoutOrderInput | DrugOrderLineUpdateWithWhereUniqueWithoutOrderInput[]
+    updateMany?: DrugOrderLineUpdateManyWithWhereWithoutOrderInput | DrugOrderLineUpdateManyWithWhereWithoutOrderInput[]
+    deleteMany?: DrugOrderLineScalarWhereInput | DrugOrderLineScalarWhereInput[]
+  }
+
+  export type DrugOrderShipmentUncheckedUpdateManyWithoutOrderNestedInput = {
+    create?: XOR<DrugOrderShipmentCreateWithoutOrderInput, DrugOrderShipmentUncheckedCreateWithoutOrderInput> | DrugOrderShipmentCreateWithoutOrderInput[] | DrugOrderShipmentUncheckedCreateWithoutOrderInput[]
+    connectOrCreate?: DrugOrderShipmentCreateOrConnectWithoutOrderInput | DrugOrderShipmentCreateOrConnectWithoutOrderInput[]
+    upsert?: DrugOrderShipmentUpsertWithWhereUniqueWithoutOrderInput | DrugOrderShipmentUpsertWithWhereUniqueWithoutOrderInput[]
+    createMany?: DrugOrderShipmentCreateManyOrderInputEnvelope
+    set?: DrugOrderShipmentWhereUniqueInput | DrugOrderShipmentWhereUniqueInput[]
+    disconnect?: DrugOrderShipmentWhereUniqueInput | DrugOrderShipmentWhereUniqueInput[]
+    delete?: DrugOrderShipmentWhereUniqueInput | DrugOrderShipmentWhereUniqueInput[]
+    connect?: DrugOrderShipmentWhereUniqueInput | DrugOrderShipmentWhereUniqueInput[]
+    update?: DrugOrderShipmentUpdateWithWhereUniqueWithoutOrderInput | DrugOrderShipmentUpdateWithWhereUniqueWithoutOrderInput[]
+    updateMany?: DrugOrderShipmentUpdateManyWithWhereWithoutOrderInput | DrugOrderShipmentUpdateManyWithWhereWithoutOrderInput[]
+    deleteMany?: DrugOrderShipmentScalarWhereInput | DrugOrderShipmentScalarWhereInput[]
+  }
+
+  export type DrugOrderReceiptUncheckedUpdateManyWithoutOrderNestedInput = {
+    create?: XOR<DrugOrderReceiptCreateWithoutOrderInput, DrugOrderReceiptUncheckedCreateWithoutOrderInput> | DrugOrderReceiptCreateWithoutOrderInput[] | DrugOrderReceiptUncheckedCreateWithoutOrderInput[]
+    connectOrCreate?: DrugOrderReceiptCreateOrConnectWithoutOrderInput | DrugOrderReceiptCreateOrConnectWithoutOrderInput[]
+    upsert?: DrugOrderReceiptUpsertWithWhereUniqueWithoutOrderInput | DrugOrderReceiptUpsertWithWhereUniqueWithoutOrderInput[]
+    createMany?: DrugOrderReceiptCreateManyOrderInputEnvelope
+    set?: DrugOrderReceiptWhereUniqueInput | DrugOrderReceiptWhereUniqueInput[]
+    disconnect?: DrugOrderReceiptWhereUniqueInput | DrugOrderReceiptWhereUniqueInput[]
+    delete?: DrugOrderReceiptWhereUniqueInput | DrugOrderReceiptWhereUniqueInput[]
+    connect?: DrugOrderReceiptWhereUniqueInput | DrugOrderReceiptWhereUniqueInput[]
+    update?: DrugOrderReceiptUpdateWithWhereUniqueWithoutOrderInput | DrugOrderReceiptUpdateWithWhereUniqueWithoutOrderInput[]
+    updateMany?: DrugOrderReceiptUpdateManyWithWhereWithoutOrderInput | DrugOrderReceiptUpdateManyWithWhereWithoutOrderInput[]
+    deleteMany?: DrugOrderReceiptScalarWhereInput | DrugOrderReceiptScalarWhereInput[]
+  }
+
+  export type DrugOrderCreateNestedOneWithoutLinesInput = {
+    create?: XOR<DrugOrderCreateWithoutLinesInput, DrugOrderUncheckedCreateWithoutLinesInput>
+    connectOrCreate?: DrugOrderCreateOrConnectWithoutLinesInput
+    connect?: DrugOrderWhereUniqueInput
+  }
+
+  export type MasterDrugCreateNestedOneWithoutDrugOrderLinesInput = {
+    create?: XOR<MasterDrugCreateWithoutDrugOrderLinesInput, MasterDrugUncheckedCreateWithoutDrugOrderLinesInput>
+    connectOrCreate?: MasterDrugCreateOrConnectWithoutDrugOrderLinesInput
+    connect?: MasterDrugWhereUniqueInput
+  }
+
+  export type CompanyDrugCreateNestedOneWithoutDrugOrderLinesInput = {
+    create?: XOR<CompanyDrugCreateWithoutDrugOrderLinesInput, CompanyDrugUncheckedCreateWithoutDrugOrderLinesInput>
+    connectOrCreate?: CompanyDrugCreateOrConnectWithoutDrugOrderLinesInput
+    connect?: CompanyDrugWhereUniqueInput
+  }
+
+  export type DrugOrderShipmentLineCreateNestedManyWithoutOrderLineInput = {
+    create?: XOR<DrugOrderShipmentLineCreateWithoutOrderLineInput, DrugOrderShipmentLineUncheckedCreateWithoutOrderLineInput> | DrugOrderShipmentLineCreateWithoutOrderLineInput[] | DrugOrderShipmentLineUncheckedCreateWithoutOrderLineInput[]
+    connectOrCreate?: DrugOrderShipmentLineCreateOrConnectWithoutOrderLineInput | DrugOrderShipmentLineCreateOrConnectWithoutOrderLineInput[]
+    createMany?: DrugOrderShipmentLineCreateManyOrderLineInputEnvelope
+    connect?: DrugOrderShipmentLineWhereUniqueInput | DrugOrderShipmentLineWhereUniqueInput[]
+  }
+
+  export type DrugOrderReceiptLineCreateNestedManyWithoutOrderLineInput = {
+    create?: XOR<DrugOrderReceiptLineCreateWithoutOrderLineInput, DrugOrderReceiptLineUncheckedCreateWithoutOrderLineInput> | DrugOrderReceiptLineCreateWithoutOrderLineInput[] | DrugOrderReceiptLineUncheckedCreateWithoutOrderLineInput[]
+    connectOrCreate?: DrugOrderReceiptLineCreateOrConnectWithoutOrderLineInput | DrugOrderReceiptLineCreateOrConnectWithoutOrderLineInput[]
+    createMany?: DrugOrderReceiptLineCreateManyOrderLineInputEnvelope
+    connect?: DrugOrderReceiptLineWhereUniqueInput | DrugOrderReceiptLineWhereUniqueInput[]
+  }
+
+  export type DrugOrderShipmentLineUncheckedCreateNestedManyWithoutOrderLineInput = {
+    create?: XOR<DrugOrderShipmentLineCreateWithoutOrderLineInput, DrugOrderShipmentLineUncheckedCreateWithoutOrderLineInput> | DrugOrderShipmentLineCreateWithoutOrderLineInput[] | DrugOrderShipmentLineUncheckedCreateWithoutOrderLineInput[]
+    connectOrCreate?: DrugOrderShipmentLineCreateOrConnectWithoutOrderLineInput | DrugOrderShipmentLineCreateOrConnectWithoutOrderLineInput[]
+    createMany?: DrugOrderShipmentLineCreateManyOrderLineInputEnvelope
+    connect?: DrugOrderShipmentLineWhereUniqueInput | DrugOrderShipmentLineWhereUniqueInput[]
+  }
+
+  export type DrugOrderReceiptLineUncheckedCreateNestedManyWithoutOrderLineInput = {
+    create?: XOR<DrugOrderReceiptLineCreateWithoutOrderLineInput, DrugOrderReceiptLineUncheckedCreateWithoutOrderLineInput> | DrugOrderReceiptLineCreateWithoutOrderLineInput[] | DrugOrderReceiptLineUncheckedCreateWithoutOrderLineInput[]
+    connectOrCreate?: DrugOrderReceiptLineCreateOrConnectWithoutOrderLineInput | DrugOrderReceiptLineCreateOrConnectWithoutOrderLineInput[]
+    createMany?: DrugOrderReceiptLineCreateManyOrderLineInputEnvelope
+    connect?: DrugOrderReceiptLineWhereUniqueInput | DrugOrderReceiptLineWhereUniqueInput[]
+  }
+
+  export type EnumDrugOrderLineSourceTypeFieldUpdateOperationsInput = {
+    set?: $Enums.DrugOrderLineSourceType
+  }
+
+  export type NullableDecimalFieldUpdateOperationsInput = {
+    set?: Decimal | DecimalJsLike | number | string | null
+    increment?: Decimal | DecimalJsLike | number | string
+    decrement?: Decimal | DecimalJsLike | number | string
+    multiply?: Decimal | DecimalJsLike | number | string
+    divide?: Decimal | DecimalJsLike | number | string
+  }
+
+  export type EnumDrugOrderLineStatusFieldUpdateOperationsInput = {
+    set?: $Enums.DrugOrderLineStatus
+  }
+
+  export type DrugOrderUpdateOneRequiredWithoutLinesNestedInput = {
+    create?: XOR<DrugOrderCreateWithoutLinesInput, DrugOrderUncheckedCreateWithoutLinesInput>
+    connectOrCreate?: DrugOrderCreateOrConnectWithoutLinesInput
+    upsert?: DrugOrderUpsertWithoutLinesInput
+    connect?: DrugOrderWhereUniqueInput
+    update?: XOR<XOR<DrugOrderUpdateToOneWithWhereWithoutLinesInput, DrugOrderUpdateWithoutLinesInput>, DrugOrderUncheckedUpdateWithoutLinesInput>
+  }
+
+  export type MasterDrugUpdateOneWithoutDrugOrderLinesNestedInput = {
+    create?: XOR<MasterDrugCreateWithoutDrugOrderLinesInput, MasterDrugUncheckedCreateWithoutDrugOrderLinesInput>
+    connectOrCreate?: MasterDrugCreateOrConnectWithoutDrugOrderLinesInput
+    upsert?: MasterDrugUpsertWithoutDrugOrderLinesInput
+    disconnect?: MasterDrugWhereInput | boolean
+    delete?: MasterDrugWhereInput | boolean
+    connect?: MasterDrugWhereUniqueInput
+    update?: XOR<XOR<MasterDrugUpdateToOneWithWhereWithoutDrugOrderLinesInput, MasterDrugUpdateWithoutDrugOrderLinesInput>, MasterDrugUncheckedUpdateWithoutDrugOrderLinesInput>
+  }
+
+  export type CompanyDrugUpdateOneWithoutDrugOrderLinesNestedInput = {
+    create?: XOR<CompanyDrugCreateWithoutDrugOrderLinesInput, CompanyDrugUncheckedCreateWithoutDrugOrderLinesInput>
+    connectOrCreate?: CompanyDrugCreateOrConnectWithoutDrugOrderLinesInput
+    upsert?: CompanyDrugUpsertWithoutDrugOrderLinesInput
+    disconnect?: CompanyDrugWhereInput | boolean
+    delete?: CompanyDrugWhereInput | boolean
+    connect?: CompanyDrugWhereUniqueInput
+    update?: XOR<XOR<CompanyDrugUpdateToOneWithWhereWithoutDrugOrderLinesInput, CompanyDrugUpdateWithoutDrugOrderLinesInput>, CompanyDrugUncheckedUpdateWithoutDrugOrderLinesInput>
+  }
+
+  export type DrugOrderShipmentLineUpdateManyWithoutOrderLineNestedInput = {
+    create?: XOR<DrugOrderShipmentLineCreateWithoutOrderLineInput, DrugOrderShipmentLineUncheckedCreateWithoutOrderLineInput> | DrugOrderShipmentLineCreateWithoutOrderLineInput[] | DrugOrderShipmentLineUncheckedCreateWithoutOrderLineInput[]
+    connectOrCreate?: DrugOrderShipmentLineCreateOrConnectWithoutOrderLineInput | DrugOrderShipmentLineCreateOrConnectWithoutOrderLineInput[]
+    upsert?: DrugOrderShipmentLineUpsertWithWhereUniqueWithoutOrderLineInput | DrugOrderShipmentLineUpsertWithWhereUniqueWithoutOrderLineInput[]
+    createMany?: DrugOrderShipmentLineCreateManyOrderLineInputEnvelope
+    set?: DrugOrderShipmentLineWhereUniqueInput | DrugOrderShipmentLineWhereUniqueInput[]
+    disconnect?: DrugOrderShipmentLineWhereUniqueInput | DrugOrderShipmentLineWhereUniqueInput[]
+    delete?: DrugOrderShipmentLineWhereUniqueInput | DrugOrderShipmentLineWhereUniqueInput[]
+    connect?: DrugOrderShipmentLineWhereUniqueInput | DrugOrderShipmentLineWhereUniqueInput[]
+    update?: DrugOrderShipmentLineUpdateWithWhereUniqueWithoutOrderLineInput | DrugOrderShipmentLineUpdateWithWhereUniqueWithoutOrderLineInput[]
+    updateMany?: DrugOrderShipmentLineUpdateManyWithWhereWithoutOrderLineInput | DrugOrderShipmentLineUpdateManyWithWhereWithoutOrderLineInput[]
+    deleteMany?: DrugOrderShipmentLineScalarWhereInput | DrugOrderShipmentLineScalarWhereInput[]
+  }
+
+  export type DrugOrderReceiptLineUpdateManyWithoutOrderLineNestedInput = {
+    create?: XOR<DrugOrderReceiptLineCreateWithoutOrderLineInput, DrugOrderReceiptLineUncheckedCreateWithoutOrderLineInput> | DrugOrderReceiptLineCreateWithoutOrderLineInput[] | DrugOrderReceiptLineUncheckedCreateWithoutOrderLineInput[]
+    connectOrCreate?: DrugOrderReceiptLineCreateOrConnectWithoutOrderLineInput | DrugOrderReceiptLineCreateOrConnectWithoutOrderLineInput[]
+    upsert?: DrugOrderReceiptLineUpsertWithWhereUniqueWithoutOrderLineInput | DrugOrderReceiptLineUpsertWithWhereUniqueWithoutOrderLineInput[]
+    createMany?: DrugOrderReceiptLineCreateManyOrderLineInputEnvelope
+    set?: DrugOrderReceiptLineWhereUniqueInput | DrugOrderReceiptLineWhereUniqueInput[]
+    disconnect?: DrugOrderReceiptLineWhereUniqueInput | DrugOrderReceiptLineWhereUniqueInput[]
+    delete?: DrugOrderReceiptLineWhereUniqueInput | DrugOrderReceiptLineWhereUniqueInput[]
+    connect?: DrugOrderReceiptLineWhereUniqueInput | DrugOrderReceiptLineWhereUniqueInput[]
+    update?: DrugOrderReceiptLineUpdateWithWhereUniqueWithoutOrderLineInput | DrugOrderReceiptLineUpdateWithWhereUniqueWithoutOrderLineInput[]
+    updateMany?: DrugOrderReceiptLineUpdateManyWithWhereWithoutOrderLineInput | DrugOrderReceiptLineUpdateManyWithWhereWithoutOrderLineInput[]
+    deleteMany?: DrugOrderReceiptLineScalarWhereInput | DrugOrderReceiptLineScalarWhereInput[]
+  }
+
+  export type DrugOrderShipmentLineUncheckedUpdateManyWithoutOrderLineNestedInput = {
+    create?: XOR<DrugOrderShipmentLineCreateWithoutOrderLineInput, DrugOrderShipmentLineUncheckedCreateWithoutOrderLineInput> | DrugOrderShipmentLineCreateWithoutOrderLineInput[] | DrugOrderShipmentLineUncheckedCreateWithoutOrderLineInput[]
+    connectOrCreate?: DrugOrderShipmentLineCreateOrConnectWithoutOrderLineInput | DrugOrderShipmentLineCreateOrConnectWithoutOrderLineInput[]
+    upsert?: DrugOrderShipmentLineUpsertWithWhereUniqueWithoutOrderLineInput | DrugOrderShipmentLineUpsertWithWhereUniqueWithoutOrderLineInput[]
+    createMany?: DrugOrderShipmentLineCreateManyOrderLineInputEnvelope
+    set?: DrugOrderShipmentLineWhereUniqueInput | DrugOrderShipmentLineWhereUniqueInput[]
+    disconnect?: DrugOrderShipmentLineWhereUniqueInput | DrugOrderShipmentLineWhereUniqueInput[]
+    delete?: DrugOrderShipmentLineWhereUniqueInput | DrugOrderShipmentLineWhereUniqueInput[]
+    connect?: DrugOrderShipmentLineWhereUniqueInput | DrugOrderShipmentLineWhereUniqueInput[]
+    update?: DrugOrderShipmentLineUpdateWithWhereUniqueWithoutOrderLineInput | DrugOrderShipmentLineUpdateWithWhereUniqueWithoutOrderLineInput[]
+    updateMany?: DrugOrderShipmentLineUpdateManyWithWhereWithoutOrderLineInput | DrugOrderShipmentLineUpdateManyWithWhereWithoutOrderLineInput[]
+    deleteMany?: DrugOrderShipmentLineScalarWhereInput | DrugOrderShipmentLineScalarWhereInput[]
+  }
+
+  export type DrugOrderReceiptLineUncheckedUpdateManyWithoutOrderLineNestedInput = {
+    create?: XOR<DrugOrderReceiptLineCreateWithoutOrderLineInput, DrugOrderReceiptLineUncheckedCreateWithoutOrderLineInput> | DrugOrderReceiptLineCreateWithoutOrderLineInput[] | DrugOrderReceiptLineUncheckedCreateWithoutOrderLineInput[]
+    connectOrCreate?: DrugOrderReceiptLineCreateOrConnectWithoutOrderLineInput | DrugOrderReceiptLineCreateOrConnectWithoutOrderLineInput[]
+    upsert?: DrugOrderReceiptLineUpsertWithWhereUniqueWithoutOrderLineInput | DrugOrderReceiptLineUpsertWithWhereUniqueWithoutOrderLineInput[]
+    createMany?: DrugOrderReceiptLineCreateManyOrderLineInputEnvelope
+    set?: DrugOrderReceiptLineWhereUniqueInput | DrugOrderReceiptLineWhereUniqueInput[]
+    disconnect?: DrugOrderReceiptLineWhereUniqueInput | DrugOrderReceiptLineWhereUniqueInput[]
+    delete?: DrugOrderReceiptLineWhereUniqueInput | DrugOrderReceiptLineWhereUniqueInput[]
+    connect?: DrugOrderReceiptLineWhereUniqueInput | DrugOrderReceiptLineWhereUniqueInput[]
+    update?: DrugOrderReceiptLineUpdateWithWhereUniqueWithoutOrderLineInput | DrugOrderReceiptLineUpdateWithWhereUniqueWithoutOrderLineInput[]
+    updateMany?: DrugOrderReceiptLineUpdateManyWithWhereWithoutOrderLineInput | DrugOrderReceiptLineUpdateManyWithWhereWithoutOrderLineInput[]
+    deleteMany?: DrugOrderReceiptLineScalarWhereInput | DrugOrderReceiptLineScalarWhereInput[]
+  }
+
+  export type DrugOrderCreateNestedOneWithoutShipmentsInput = {
+    create?: XOR<DrugOrderCreateWithoutShipmentsInput, DrugOrderUncheckedCreateWithoutShipmentsInput>
+    connectOrCreate?: DrugOrderCreateOrConnectWithoutShipmentsInput
+    connect?: DrugOrderWhereUniqueInput
+  }
+
+  export type DrugOrderShipmentLineCreateNestedManyWithoutShipmentInput = {
+    create?: XOR<DrugOrderShipmentLineCreateWithoutShipmentInput, DrugOrderShipmentLineUncheckedCreateWithoutShipmentInput> | DrugOrderShipmentLineCreateWithoutShipmentInput[] | DrugOrderShipmentLineUncheckedCreateWithoutShipmentInput[]
+    connectOrCreate?: DrugOrderShipmentLineCreateOrConnectWithoutShipmentInput | DrugOrderShipmentLineCreateOrConnectWithoutShipmentInput[]
+    createMany?: DrugOrderShipmentLineCreateManyShipmentInputEnvelope
+    connect?: DrugOrderShipmentLineWhereUniqueInput | DrugOrderShipmentLineWhereUniqueInput[]
+  }
+
+  export type DrugOrderReceiptCreateNestedManyWithoutShipmentInput = {
+    create?: XOR<DrugOrderReceiptCreateWithoutShipmentInput, DrugOrderReceiptUncheckedCreateWithoutShipmentInput> | DrugOrderReceiptCreateWithoutShipmentInput[] | DrugOrderReceiptUncheckedCreateWithoutShipmentInput[]
+    connectOrCreate?: DrugOrderReceiptCreateOrConnectWithoutShipmentInput | DrugOrderReceiptCreateOrConnectWithoutShipmentInput[]
+    createMany?: DrugOrderReceiptCreateManyShipmentInputEnvelope
+    connect?: DrugOrderReceiptWhereUniqueInput | DrugOrderReceiptWhereUniqueInput[]
+  }
+
+  export type DrugOrderShipmentLineUncheckedCreateNestedManyWithoutShipmentInput = {
+    create?: XOR<DrugOrderShipmentLineCreateWithoutShipmentInput, DrugOrderShipmentLineUncheckedCreateWithoutShipmentInput> | DrugOrderShipmentLineCreateWithoutShipmentInput[] | DrugOrderShipmentLineUncheckedCreateWithoutShipmentInput[]
+    connectOrCreate?: DrugOrderShipmentLineCreateOrConnectWithoutShipmentInput | DrugOrderShipmentLineCreateOrConnectWithoutShipmentInput[]
+    createMany?: DrugOrderShipmentLineCreateManyShipmentInputEnvelope
+    connect?: DrugOrderShipmentLineWhereUniqueInput | DrugOrderShipmentLineWhereUniqueInput[]
+  }
+
+  export type DrugOrderReceiptUncheckedCreateNestedManyWithoutShipmentInput = {
+    create?: XOR<DrugOrderReceiptCreateWithoutShipmentInput, DrugOrderReceiptUncheckedCreateWithoutShipmentInput> | DrugOrderReceiptCreateWithoutShipmentInput[] | DrugOrderReceiptUncheckedCreateWithoutShipmentInput[]
+    connectOrCreate?: DrugOrderReceiptCreateOrConnectWithoutShipmentInput | DrugOrderReceiptCreateOrConnectWithoutShipmentInput[]
+    createMany?: DrugOrderReceiptCreateManyShipmentInputEnvelope
+    connect?: DrugOrderReceiptWhereUniqueInput | DrugOrderReceiptWhereUniqueInput[]
+  }
+
+  export type EnumDrugOrderShipmentStatusFieldUpdateOperationsInput = {
+    set?: $Enums.DrugOrderShipmentStatus
+  }
+
+  export type DrugOrderUpdateOneRequiredWithoutShipmentsNestedInput = {
+    create?: XOR<DrugOrderCreateWithoutShipmentsInput, DrugOrderUncheckedCreateWithoutShipmentsInput>
+    connectOrCreate?: DrugOrderCreateOrConnectWithoutShipmentsInput
+    upsert?: DrugOrderUpsertWithoutShipmentsInput
+    connect?: DrugOrderWhereUniqueInput
+    update?: XOR<XOR<DrugOrderUpdateToOneWithWhereWithoutShipmentsInput, DrugOrderUpdateWithoutShipmentsInput>, DrugOrderUncheckedUpdateWithoutShipmentsInput>
+  }
+
+  export type DrugOrderShipmentLineUpdateManyWithoutShipmentNestedInput = {
+    create?: XOR<DrugOrderShipmentLineCreateWithoutShipmentInput, DrugOrderShipmentLineUncheckedCreateWithoutShipmentInput> | DrugOrderShipmentLineCreateWithoutShipmentInput[] | DrugOrderShipmentLineUncheckedCreateWithoutShipmentInput[]
+    connectOrCreate?: DrugOrderShipmentLineCreateOrConnectWithoutShipmentInput | DrugOrderShipmentLineCreateOrConnectWithoutShipmentInput[]
+    upsert?: DrugOrderShipmentLineUpsertWithWhereUniqueWithoutShipmentInput | DrugOrderShipmentLineUpsertWithWhereUniqueWithoutShipmentInput[]
+    createMany?: DrugOrderShipmentLineCreateManyShipmentInputEnvelope
+    set?: DrugOrderShipmentLineWhereUniqueInput | DrugOrderShipmentLineWhereUniqueInput[]
+    disconnect?: DrugOrderShipmentLineWhereUniqueInput | DrugOrderShipmentLineWhereUniqueInput[]
+    delete?: DrugOrderShipmentLineWhereUniqueInput | DrugOrderShipmentLineWhereUniqueInput[]
+    connect?: DrugOrderShipmentLineWhereUniqueInput | DrugOrderShipmentLineWhereUniqueInput[]
+    update?: DrugOrderShipmentLineUpdateWithWhereUniqueWithoutShipmentInput | DrugOrderShipmentLineUpdateWithWhereUniqueWithoutShipmentInput[]
+    updateMany?: DrugOrderShipmentLineUpdateManyWithWhereWithoutShipmentInput | DrugOrderShipmentLineUpdateManyWithWhereWithoutShipmentInput[]
+    deleteMany?: DrugOrderShipmentLineScalarWhereInput | DrugOrderShipmentLineScalarWhereInput[]
+  }
+
+  export type DrugOrderReceiptUpdateManyWithoutShipmentNestedInput = {
+    create?: XOR<DrugOrderReceiptCreateWithoutShipmentInput, DrugOrderReceiptUncheckedCreateWithoutShipmentInput> | DrugOrderReceiptCreateWithoutShipmentInput[] | DrugOrderReceiptUncheckedCreateWithoutShipmentInput[]
+    connectOrCreate?: DrugOrderReceiptCreateOrConnectWithoutShipmentInput | DrugOrderReceiptCreateOrConnectWithoutShipmentInput[]
+    upsert?: DrugOrderReceiptUpsertWithWhereUniqueWithoutShipmentInput | DrugOrderReceiptUpsertWithWhereUniqueWithoutShipmentInput[]
+    createMany?: DrugOrderReceiptCreateManyShipmentInputEnvelope
+    set?: DrugOrderReceiptWhereUniqueInput | DrugOrderReceiptWhereUniqueInput[]
+    disconnect?: DrugOrderReceiptWhereUniqueInput | DrugOrderReceiptWhereUniqueInput[]
+    delete?: DrugOrderReceiptWhereUniqueInput | DrugOrderReceiptWhereUniqueInput[]
+    connect?: DrugOrderReceiptWhereUniqueInput | DrugOrderReceiptWhereUniqueInput[]
+    update?: DrugOrderReceiptUpdateWithWhereUniqueWithoutShipmentInput | DrugOrderReceiptUpdateWithWhereUniqueWithoutShipmentInput[]
+    updateMany?: DrugOrderReceiptUpdateManyWithWhereWithoutShipmentInput | DrugOrderReceiptUpdateManyWithWhereWithoutShipmentInput[]
+    deleteMany?: DrugOrderReceiptScalarWhereInput | DrugOrderReceiptScalarWhereInput[]
+  }
+
+  export type DrugOrderShipmentLineUncheckedUpdateManyWithoutShipmentNestedInput = {
+    create?: XOR<DrugOrderShipmentLineCreateWithoutShipmentInput, DrugOrderShipmentLineUncheckedCreateWithoutShipmentInput> | DrugOrderShipmentLineCreateWithoutShipmentInput[] | DrugOrderShipmentLineUncheckedCreateWithoutShipmentInput[]
+    connectOrCreate?: DrugOrderShipmentLineCreateOrConnectWithoutShipmentInput | DrugOrderShipmentLineCreateOrConnectWithoutShipmentInput[]
+    upsert?: DrugOrderShipmentLineUpsertWithWhereUniqueWithoutShipmentInput | DrugOrderShipmentLineUpsertWithWhereUniqueWithoutShipmentInput[]
+    createMany?: DrugOrderShipmentLineCreateManyShipmentInputEnvelope
+    set?: DrugOrderShipmentLineWhereUniqueInput | DrugOrderShipmentLineWhereUniqueInput[]
+    disconnect?: DrugOrderShipmentLineWhereUniqueInput | DrugOrderShipmentLineWhereUniqueInput[]
+    delete?: DrugOrderShipmentLineWhereUniqueInput | DrugOrderShipmentLineWhereUniqueInput[]
+    connect?: DrugOrderShipmentLineWhereUniqueInput | DrugOrderShipmentLineWhereUniqueInput[]
+    update?: DrugOrderShipmentLineUpdateWithWhereUniqueWithoutShipmentInput | DrugOrderShipmentLineUpdateWithWhereUniqueWithoutShipmentInput[]
+    updateMany?: DrugOrderShipmentLineUpdateManyWithWhereWithoutShipmentInput | DrugOrderShipmentLineUpdateManyWithWhereWithoutShipmentInput[]
+    deleteMany?: DrugOrderShipmentLineScalarWhereInput | DrugOrderShipmentLineScalarWhereInput[]
+  }
+
+  export type DrugOrderReceiptUncheckedUpdateManyWithoutShipmentNestedInput = {
+    create?: XOR<DrugOrderReceiptCreateWithoutShipmentInput, DrugOrderReceiptUncheckedCreateWithoutShipmentInput> | DrugOrderReceiptCreateWithoutShipmentInput[] | DrugOrderReceiptUncheckedCreateWithoutShipmentInput[]
+    connectOrCreate?: DrugOrderReceiptCreateOrConnectWithoutShipmentInput | DrugOrderReceiptCreateOrConnectWithoutShipmentInput[]
+    upsert?: DrugOrderReceiptUpsertWithWhereUniqueWithoutShipmentInput | DrugOrderReceiptUpsertWithWhereUniqueWithoutShipmentInput[]
+    createMany?: DrugOrderReceiptCreateManyShipmentInputEnvelope
+    set?: DrugOrderReceiptWhereUniqueInput | DrugOrderReceiptWhereUniqueInput[]
+    disconnect?: DrugOrderReceiptWhereUniqueInput | DrugOrderReceiptWhereUniqueInput[]
+    delete?: DrugOrderReceiptWhereUniqueInput | DrugOrderReceiptWhereUniqueInput[]
+    connect?: DrugOrderReceiptWhereUniqueInput | DrugOrderReceiptWhereUniqueInput[]
+    update?: DrugOrderReceiptUpdateWithWhereUniqueWithoutShipmentInput | DrugOrderReceiptUpdateWithWhereUniqueWithoutShipmentInput[]
+    updateMany?: DrugOrderReceiptUpdateManyWithWhereWithoutShipmentInput | DrugOrderReceiptUpdateManyWithWhereWithoutShipmentInput[]
+    deleteMany?: DrugOrderReceiptScalarWhereInput | DrugOrderReceiptScalarWhereInput[]
+  }
+
+  export type DrugOrderShipmentCreateNestedOneWithoutLinesInput = {
+    create?: XOR<DrugOrderShipmentCreateWithoutLinesInput, DrugOrderShipmentUncheckedCreateWithoutLinesInput>
+    connectOrCreate?: DrugOrderShipmentCreateOrConnectWithoutLinesInput
+    connect?: DrugOrderShipmentWhereUniqueInput
+  }
+
+  export type DrugOrderLineCreateNestedOneWithoutShipmentLinesInput = {
+    create?: XOR<DrugOrderLineCreateWithoutShipmentLinesInput, DrugOrderLineUncheckedCreateWithoutShipmentLinesInput>
+    connectOrCreate?: DrugOrderLineCreateOrConnectWithoutShipmentLinesInput
+    connect?: DrugOrderLineWhereUniqueInput
+  }
+
+  export type DrugOrderReceiptLineCreateNestedManyWithoutShipmentLineInput = {
+    create?: XOR<DrugOrderReceiptLineCreateWithoutShipmentLineInput, DrugOrderReceiptLineUncheckedCreateWithoutShipmentLineInput> | DrugOrderReceiptLineCreateWithoutShipmentLineInput[] | DrugOrderReceiptLineUncheckedCreateWithoutShipmentLineInput[]
+    connectOrCreate?: DrugOrderReceiptLineCreateOrConnectWithoutShipmentLineInput | DrugOrderReceiptLineCreateOrConnectWithoutShipmentLineInput[]
+    createMany?: DrugOrderReceiptLineCreateManyShipmentLineInputEnvelope
+    connect?: DrugOrderReceiptLineWhereUniqueInput | DrugOrderReceiptLineWhereUniqueInput[]
+  }
+
+  export type DrugOrderReceiptLineUncheckedCreateNestedManyWithoutShipmentLineInput = {
+    create?: XOR<DrugOrderReceiptLineCreateWithoutShipmentLineInput, DrugOrderReceiptLineUncheckedCreateWithoutShipmentLineInput> | DrugOrderReceiptLineCreateWithoutShipmentLineInput[] | DrugOrderReceiptLineUncheckedCreateWithoutShipmentLineInput[]
+    connectOrCreate?: DrugOrderReceiptLineCreateOrConnectWithoutShipmentLineInput | DrugOrderReceiptLineCreateOrConnectWithoutShipmentLineInput[]
+    createMany?: DrugOrderReceiptLineCreateManyShipmentLineInputEnvelope
+    connect?: DrugOrderReceiptLineWhereUniqueInput | DrugOrderReceiptLineWhereUniqueInput[]
+  }
+
+  export type DrugOrderShipmentUpdateOneRequiredWithoutLinesNestedInput = {
+    create?: XOR<DrugOrderShipmentCreateWithoutLinesInput, DrugOrderShipmentUncheckedCreateWithoutLinesInput>
+    connectOrCreate?: DrugOrderShipmentCreateOrConnectWithoutLinesInput
+    upsert?: DrugOrderShipmentUpsertWithoutLinesInput
+    connect?: DrugOrderShipmentWhereUniqueInput
+    update?: XOR<XOR<DrugOrderShipmentUpdateToOneWithWhereWithoutLinesInput, DrugOrderShipmentUpdateWithoutLinesInput>, DrugOrderShipmentUncheckedUpdateWithoutLinesInput>
+  }
+
+  export type DrugOrderLineUpdateOneRequiredWithoutShipmentLinesNestedInput = {
+    create?: XOR<DrugOrderLineCreateWithoutShipmentLinesInput, DrugOrderLineUncheckedCreateWithoutShipmentLinesInput>
+    connectOrCreate?: DrugOrderLineCreateOrConnectWithoutShipmentLinesInput
+    upsert?: DrugOrderLineUpsertWithoutShipmentLinesInput
+    connect?: DrugOrderLineWhereUniqueInput
+    update?: XOR<XOR<DrugOrderLineUpdateToOneWithWhereWithoutShipmentLinesInput, DrugOrderLineUpdateWithoutShipmentLinesInput>, DrugOrderLineUncheckedUpdateWithoutShipmentLinesInput>
+  }
+
+  export type DrugOrderReceiptLineUpdateManyWithoutShipmentLineNestedInput = {
+    create?: XOR<DrugOrderReceiptLineCreateWithoutShipmentLineInput, DrugOrderReceiptLineUncheckedCreateWithoutShipmentLineInput> | DrugOrderReceiptLineCreateWithoutShipmentLineInput[] | DrugOrderReceiptLineUncheckedCreateWithoutShipmentLineInput[]
+    connectOrCreate?: DrugOrderReceiptLineCreateOrConnectWithoutShipmentLineInput | DrugOrderReceiptLineCreateOrConnectWithoutShipmentLineInput[]
+    upsert?: DrugOrderReceiptLineUpsertWithWhereUniqueWithoutShipmentLineInput | DrugOrderReceiptLineUpsertWithWhereUniqueWithoutShipmentLineInput[]
+    createMany?: DrugOrderReceiptLineCreateManyShipmentLineInputEnvelope
+    set?: DrugOrderReceiptLineWhereUniqueInput | DrugOrderReceiptLineWhereUniqueInput[]
+    disconnect?: DrugOrderReceiptLineWhereUniqueInput | DrugOrderReceiptLineWhereUniqueInput[]
+    delete?: DrugOrderReceiptLineWhereUniqueInput | DrugOrderReceiptLineWhereUniqueInput[]
+    connect?: DrugOrderReceiptLineWhereUniqueInput | DrugOrderReceiptLineWhereUniqueInput[]
+    update?: DrugOrderReceiptLineUpdateWithWhereUniqueWithoutShipmentLineInput | DrugOrderReceiptLineUpdateWithWhereUniqueWithoutShipmentLineInput[]
+    updateMany?: DrugOrderReceiptLineUpdateManyWithWhereWithoutShipmentLineInput | DrugOrderReceiptLineUpdateManyWithWhereWithoutShipmentLineInput[]
+    deleteMany?: DrugOrderReceiptLineScalarWhereInput | DrugOrderReceiptLineScalarWhereInput[]
+  }
+
+  export type DrugOrderReceiptLineUncheckedUpdateManyWithoutShipmentLineNestedInput = {
+    create?: XOR<DrugOrderReceiptLineCreateWithoutShipmentLineInput, DrugOrderReceiptLineUncheckedCreateWithoutShipmentLineInput> | DrugOrderReceiptLineCreateWithoutShipmentLineInput[] | DrugOrderReceiptLineUncheckedCreateWithoutShipmentLineInput[]
+    connectOrCreate?: DrugOrderReceiptLineCreateOrConnectWithoutShipmentLineInput | DrugOrderReceiptLineCreateOrConnectWithoutShipmentLineInput[]
+    upsert?: DrugOrderReceiptLineUpsertWithWhereUniqueWithoutShipmentLineInput | DrugOrderReceiptLineUpsertWithWhereUniqueWithoutShipmentLineInput[]
+    createMany?: DrugOrderReceiptLineCreateManyShipmentLineInputEnvelope
+    set?: DrugOrderReceiptLineWhereUniqueInput | DrugOrderReceiptLineWhereUniqueInput[]
+    disconnect?: DrugOrderReceiptLineWhereUniqueInput | DrugOrderReceiptLineWhereUniqueInput[]
+    delete?: DrugOrderReceiptLineWhereUniqueInput | DrugOrderReceiptLineWhereUniqueInput[]
+    connect?: DrugOrderReceiptLineWhereUniqueInput | DrugOrderReceiptLineWhereUniqueInput[]
+    update?: DrugOrderReceiptLineUpdateWithWhereUniqueWithoutShipmentLineInput | DrugOrderReceiptLineUpdateWithWhereUniqueWithoutShipmentLineInput[]
+    updateMany?: DrugOrderReceiptLineUpdateManyWithWhereWithoutShipmentLineInput | DrugOrderReceiptLineUpdateManyWithWhereWithoutShipmentLineInput[]
+    deleteMany?: DrugOrderReceiptLineScalarWhereInput | DrugOrderReceiptLineScalarWhereInput[]
+  }
+
+  export type DrugOrderCreateNestedOneWithoutReceiptsInput = {
+    create?: XOR<DrugOrderCreateWithoutReceiptsInput, DrugOrderUncheckedCreateWithoutReceiptsInput>
+    connectOrCreate?: DrugOrderCreateOrConnectWithoutReceiptsInput
+    connect?: DrugOrderWhereUniqueInput
+  }
+
+  export type DrugOrderShipmentCreateNestedOneWithoutReceiptsInput = {
+    create?: XOR<DrugOrderShipmentCreateWithoutReceiptsInput, DrugOrderShipmentUncheckedCreateWithoutReceiptsInput>
+    connectOrCreate?: DrugOrderShipmentCreateOrConnectWithoutReceiptsInput
+    connect?: DrugOrderShipmentWhereUniqueInput
+  }
+
+  export type UserCreateNestedOneWithoutDrugOrderReceiptsInput = {
+    create?: XOR<UserCreateWithoutDrugOrderReceiptsInput, UserUncheckedCreateWithoutDrugOrderReceiptsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutDrugOrderReceiptsInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type DrugOrderReceiptLineCreateNestedManyWithoutReceiptInput = {
+    create?: XOR<DrugOrderReceiptLineCreateWithoutReceiptInput, DrugOrderReceiptLineUncheckedCreateWithoutReceiptInput> | DrugOrderReceiptLineCreateWithoutReceiptInput[] | DrugOrderReceiptLineUncheckedCreateWithoutReceiptInput[]
+    connectOrCreate?: DrugOrderReceiptLineCreateOrConnectWithoutReceiptInput | DrugOrderReceiptLineCreateOrConnectWithoutReceiptInput[]
+    createMany?: DrugOrderReceiptLineCreateManyReceiptInputEnvelope
+    connect?: DrugOrderReceiptLineWhereUniqueInput | DrugOrderReceiptLineWhereUniqueInput[]
+  }
+
+  export type DrugOrderReceiptLineUncheckedCreateNestedManyWithoutReceiptInput = {
+    create?: XOR<DrugOrderReceiptLineCreateWithoutReceiptInput, DrugOrderReceiptLineUncheckedCreateWithoutReceiptInput> | DrugOrderReceiptLineCreateWithoutReceiptInput[] | DrugOrderReceiptLineUncheckedCreateWithoutReceiptInput[]
+    connectOrCreate?: DrugOrderReceiptLineCreateOrConnectWithoutReceiptInput | DrugOrderReceiptLineCreateOrConnectWithoutReceiptInput[]
+    createMany?: DrugOrderReceiptLineCreateManyReceiptInputEnvelope
+    connect?: DrugOrderReceiptLineWhereUniqueInput | DrugOrderReceiptLineWhereUniqueInput[]
+  }
+
+  export type DrugOrderUpdateOneRequiredWithoutReceiptsNestedInput = {
+    create?: XOR<DrugOrderCreateWithoutReceiptsInput, DrugOrderUncheckedCreateWithoutReceiptsInput>
+    connectOrCreate?: DrugOrderCreateOrConnectWithoutReceiptsInput
+    upsert?: DrugOrderUpsertWithoutReceiptsInput
+    connect?: DrugOrderWhereUniqueInput
+    update?: XOR<XOR<DrugOrderUpdateToOneWithWhereWithoutReceiptsInput, DrugOrderUpdateWithoutReceiptsInput>, DrugOrderUncheckedUpdateWithoutReceiptsInput>
+  }
+
+  export type DrugOrderShipmentUpdateOneRequiredWithoutReceiptsNestedInput = {
+    create?: XOR<DrugOrderShipmentCreateWithoutReceiptsInput, DrugOrderShipmentUncheckedCreateWithoutReceiptsInput>
+    connectOrCreate?: DrugOrderShipmentCreateOrConnectWithoutReceiptsInput
+    upsert?: DrugOrderShipmentUpsertWithoutReceiptsInput
+    connect?: DrugOrderShipmentWhereUniqueInput
+    update?: XOR<XOR<DrugOrderShipmentUpdateToOneWithWhereWithoutReceiptsInput, DrugOrderShipmentUpdateWithoutReceiptsInput>, DrugOrderShipmentUncheckedUpdateWithoutReceiptsInput>
+  }
+
+  export type UserUpdateOneRequiredWithoutDrugOrderReceiptsNestedInput = {
+    create?: XOR<UserCreateWithoutDrugOrderReceiptsInput, UserUncheckedCreateWithoutDrugOrderReceiptsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutDrugOrderReceiptsInput
+    upsert?: UserUpsertWithoutDrugOrderReceiptsInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutDrugOrderReceiptsInput, UserUpdateWithoutDrugOrderReceiptsInput>, UserUncheckedUpdateWithoutDrugOrderReceiptsInput>
+  }
+
+  export type DrugOrderReceiptLineUpdateManyWithoutReceiptNestedInput = {
+    create?: XOR<DrugOrderReceiptLineCreateWithoutReceiptInput, DrugOrderReceiptLineUncheckedCreateWithoutReceiptInput> | DrugOrderReceiptLineCreateWithoutReceiptInput[] | DrugOrderReceiptLineUncheckedCreateWithoutReceiptInput[]
+    connectOrCreate?: DrugOrderReceiptLineCreateOrConnectWithoutReceiptInput | DrugOrderReceiptLineCreateOrConnectWithoutReceiptInput[]
+    upsert?: DrugOrderReceiptLineUpsertWithWhereUniqueWithoutReceiptInput | DrugOrderReceiptLineUpsertWithWhereUniqueWithoutReceiptInput[]
+    createMany?: DrugOrderReceiptLineCreateManyReceiptInputEnvelope
+    set?: DrugOrderReceiptLineWhereUniqueInput | DrugOrderReceiptLineWhereUniqueInput[]
+    disconnect?: DrugOrderReceiptLineWhereUniqueInput | DrugOrderReceiptLineWhereUniqueInput[]
+    delete?: DrugOrderReceiptLineWhereUniqueInput | DrugOrderReceiptLineWhereUniqueInput[]
+    connect?: DrugOrderReceiptLineWhereUniqueInput | DrugOrderReceiptLineWhereUniqueInput[]
+    update?: DrugOrderReceiptLineUpdateWithWhereUniqueWithoutReceiptInput | DrugOrderReceiptLineUpdateWithWhereUniqueWithoutReceiptInput[]
+    updateMany?: DrugOrderReceiptLineUpdateManyWithWhereWithoutReceiptInput | DrugOrderReceiptLineUpdateManyWithWhereWithoutReceiptInput[]
+    deleteMany?: DrugOrderReceiptLineScalarWhereInput | DrugOrderReceiptLineScalarWhereInput[]
+  }
+
+  export type DrugOrderReceiptLineUncheckedUpdateManyWithoutReceiptNestedInput = {
+    create?: XOR<DrugOrderReceiptLineCreateWithoutReceiptInput, DrugOrderReceiptLineUncheckedCreateWithoutReceiptInput> | DrugOrderReceiptLineCreateWithoutReceiptInput[] | DrugOrderReceiptLineUncheckedCreateWithoutReceiptInput[]
+    connectOrCreate?: DrugOrderReceiptLineCreateOrConnectWithoutReceiptInput | DrugOrderReceiptLineCreateOrConnectWithoutReceiptInput[]
+    upsert?: DrugOrderReceiptLineUpsertWithWhereUniqueWithoutReceiptInput | DrugOrderReceiptLineUpsertWithWhereUniqueWithoutReceiptInput[]
+    createMany?: DrugOrderReceiptLineCreateManyReceiptInputEnvelope
+    set?: DrugOrderReceiptLineWhereUniqueInput | DrugOrderReceiptLineWhereUniqueInput[]
+    disconnect?: DrugOrderReceiptLineWhereUniqueInput | DrugOrderReceiptLineWhereUniqueInput[]
+    delete?: DrugOrderReceiptLineWhereUniqueInput | DrugOrderReceiptLineWhereUniqueInput[]
+    connect?: DrugOrderReceiptLineWhereUniqueInput | DrugOrderReceiptLineWhereUniqueInput[]
+    update?: DrugOrderReceiptLineUpdateWithWhereUniqueWithoutReceiptInput | DrugOrderReceiptLineUpdateWithWhereUniqueWithoutReceiptInput[]
+    updateMany?: DrugOrderReceiptLineUpdateManyWithWhereWithoutReceiptInput | DrugOrderReceiptLineUpdateManyWithWhereWithoutReceiptInput[]
+    deleteMany?: DrugOrderReceiptLineScalarWhereInput | DrugOrderReceiptLineScalarWhereInput[]
+  }
+
+  export type DrugOrderReceiptCreateNestedOneWithoutLinesInput = {
+    create?: XOR<DrugOrderReceiptCreateWithoutLinesInput, DrugOrderReceiptUncheckedCreateWithoutLinesInput>
+    connectOrCreate?: DrugOrderReceiptCreateOrConnectWithoutLinesInput
+    connect?: DrugOrderReceiptWhereUniqueInput
+  }
+
+  export type DrugOrderShipmentLineCreateNestedOneWithoutReceiptLinesInput = {
+    create?: XOR<DrugOrderShipmentLineCreateWithoutReceiptLinesInput, DrugOrderShipmentLineUncheckedCreateWithoutReceiptLinesInput>
+    connectOrCreate?: DrugOrderShipmentLineCreateOrConnectWithoutReceiptLinesInput
+    connect?: DrugOrderShipmentLineWhereUniqueInput
+  }
+
+  export type DrugOrderLineCreateNestedOneWithoutReceiptLinesInput = {
+    create?: XOR<DrugOrderLineCreateWithoutReceiptLinesInput, DrugOrderLineUncheckedCreateWithoutReceiptLinesInput>
+    connectOrCreate?: DrugOrderLineCreateOrConnectWithoutReceiptLinesInput
+    connect?: DrugOrderLineWhereUniqueInput
+  }
+
+  export type DrugOrderReceiptUpdateOneRequiredWithoutLinesNestedInput = {
+    create?: XOR<DrugOrderReceiptCreateWithoutLinesInput, DrugOrderReceiptUncheckedCreateWithoutLinesInput>
+    connectOrCreate?: DrugOrderReceiptCreateOrConnectWithoutLinesInput
+    upsert?: DrugOrderReceiptUpsertWithoutLinesInput
+    connect?: DrugOrderReceiptWhereUniqueInput
+    update?: XOR<XOR<DrugOrderReceiptUpdateToOneWithWhereWithoutLinesInput, DrugOrderReceiptUpdateWithoutLinesInput>, DrugOrderReceiptUncheckedUpdateWithoutLinesInput>
+  }
+
+  export type DrugOrderShipmentLineUpdateOneRequiredWithoutReceiptLinesNestedInput = {
+    create?: XOR<DrugOrderShipmentLineCreateWithoutReceiptLinesInput, DrugOrderShipmentLineUncheckedCreateWithoutReceiptLinesInput>
+    connectOrCreate?: DrugOrderShipmentLineCreateOrConnectWithoutReceiptLinesInput
+    upsert?: DrugOrderShipmentLineUpsertWithoutReceiptLinesInput
+    connect?: DrugOrderShipmentLineWhereUniqueInput
+    update?: XOR<XOR<DrugOrderShipmentLineUpdateToOneWithWhereWithoutReceiptLinesInput, DrugOrderShipmentLineUpdateWithoutReceiptLinesInput>, DrugOrderShipmentLineUncheckedUpdateWithoutReceiptLinesInput>
+  }
+
+  export type DrugOrderLineUpdateOneRequiredWithoutReceiptLinesNestedInput = {
+    create?: XOR<DrugOrderLineCreateWithoutReceiptLinesInput, DrugOrderLineUncheckedCreateWithoutReceiptLinesInput>
+    connectOrCreate?: DrugOrderLineCreateOrConnectWithoutReceiptLinesInput
+    upsert?: DrugOrderLineUpsertWithoutReceiptLinesInput
+    connect?: DrugOrderLineWhereUniqueInput
+    update?: XOR<XOR<DrugOrderLineUpdateToOneWithWhereWithoutReceiptLinesInput, DrugOrderLineUpdateWithoutReceiptLinesInput>, DrugOrderLineUncheckedUpdateWithoutReceiptLinesInput>
   }
 
   export type UserCreateNestedOneWithoutKeHoachLCNTsInput = {
@@ -27413,14 +41534,6 @@ export namespace Prisma {
     connectOrCreate?: KetQuaLCNTCreateOrConnectWithoutGoiThauInput | KetQuaLCNTCreateOrConnectWithoutGoiThauInput[]
     createMany?: KetQuaLCNTCreateManyGoiThauInputEnvelope
     connect?: KetQuaLCNTWhereUniqueInput | KetQuaLCNTWhereUniqueInput[]
-  }
-
-  export type NullableDecimalFieldUpdateOperationsInput = {
-    set?: Decimal | DecimalJsLike | number | string | null
-    increment?: Decimal | DecimalJsLike | number | string
-    decrement?: Decimal | DecimalJsLike | number | string
-    multiply?: Decimal | DecimalJsLike | number | string
-    divide?: Decimal | DecimalJsLike | number | string
   }
 
   export type KeHoachLCNTUpdateOneRequiredWithoutGoiThausNestedInput = {
@@ -27980,6 +42093,13 @@ export namespace Prisma {
     not?: NestedFloatFilter<$PrismaModel> | number
   }
 
+  export type NestedEnumDrugOrderStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.DrugOrderStatus | EnumDrugOrderStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.DrugOrderStatus[] | ListEnumDrugOrderStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.DrugOrderStatus[] | ListEnumDrugOrderStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumDrugOrderStatusFilter<$PrismaModel> | $Enums.DrugOrderStatus
+  }
+
   export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
@@ -27989,6 +42109,16 @@ export namespace Prisma {
     gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
+  export type NestedEnumDrugOrderStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.DrugOrderStatus | EnumDrugOrderStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.DrugOrderStatus[] | ListEnumDrugOrderStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.DrugOrderStatus[] | ListEnumDrugOrderStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumDrugOrderStatusWithAggregatesFilter<$PrismaModel> | $Enums.DrugOrderStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumDrugOrderStatusFilter<$PrismaModel>
+    _max?: NestedEnumDrugOrderStatusFilter<$PrismaModel>
   }
 
   export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -28003,6 +42133,84 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedDateTimeNullableFilter<$PrismaModel>
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
+  export type NestedEnumDrugOrderLineSourceTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.DrugOrderLineSourceType | EnumDrugOrderLineSourceTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.DrugOrderLineSourceType[] | ListEnumDrugOrderLineSourceTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.DrugOrderLineSourceType[] | ListEnumDrugOrderLineSourceTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumDrugOrderLineSourceTypeFilter<$PrismaModel> | $Enums.DrugOrderLineSourceType
+  }
+
+  export type NestedDecimalNullableFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalNullableFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
+  }
+
+  export type NestedEnumDrugOrderLineStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.DrugOrderLineStatus | EnumDrugOrderLineStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.DrugOrderLineStatus[] | ListEnumDrugOrderLineStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.DrugOrderLineStatus[] | ListEnumDrugOrderLineStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumDrugOrderLineStatusFilter<$PrismaModel> | $Enums.DrugOrderLineStatus
+  }
+
+  export type NestedEnumDrugOrderLineSourceTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.DrugOrderLineSourceType | EnumDrugOrderLineSourceTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.DrugOrderLineSourceType[] | ListEnumDrugOrderLineSourceTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.DrugOrderLineSourceType[] | ListEnumDrugOrderLineSourceTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumDrugOrderLineSourceTypeWithAggregatesFilter<$PrismaModel> | $Enums.DrugOrderLineSourceType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumDrugOrderLineSourceTypeFilter<$PrismaModel>
+    _max?: NestedEnumDrugOrderLineSourceTypeFilter<$PrismaModel>
+  }
+
+  export type NestedDecimalNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalNullableWithAggregatesFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedDecimalNullableFilter<$PrismaModel>
+    _sum?: NestedDecimalNullableFilter<$PrismaModel>
+    _min?: NestedDecimalNullableFilter<$PrismaModel>
+    _max?: NestedDecimalNullableFilter<$PrismaModel>
+  }
+
+  export type NestedEnumDrugOrderLineStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.DrugOrderLineStatus | EnumDrugOrderLineStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.DrugOrderLineStatus[] | ListEnumDrugOrderLineStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.DrugOrderLineStatus[] | ListEnumDrugOrderLineStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumDrugOrderLineStatusWithAggregatesFilter<$PrismaModel> | $Enums.DrugOrderLineStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumDrugOrderLineStatusFilter<$PrismaModel>
+    _max?: NestedEnumDrugOrderLineStatusFilter<$PrismaModel>
+  }
+
+  export type NestedEnumDrugOrderShipmentStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.DrugOrderShipmentStatus | EnumDrugOrderShipmentStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.DrugOrderShipmentStatus[] | ListEnumDrugOrderShipmentStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.DrugOrderShipmentStatus[] | ListEnumDrugOrderShipmentStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumDrugOrderShipmentStatusFilter<$PrismaModel> | $Enums.DrugOrderShipmentStatus
+  }
+
+  export type NestedEnumDrugOrderShipmentStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.DrugOrderShipmentStatus | EnumDrugOrderShipmentStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.DrugOrderShipmentStatus[] | ListEnumDrugOrderShipmentStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.DrugOrderShipmentStatus[] | ListEnumDrugOrderShipmentStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumDrugOrderShipmentStatusWithAggregatesFilter<$PrismaModel> | $Enums.DrugOrderShipmentStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumDrugOrderShipmentStatusFilter<$PrismaModel>
+    _max?: NestedEnumDrugOrderShipmentStatusFilter<$PrismaModel>
   }
 
   export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -28032,31 +42240,39 @@ export namespace Prisma {
     not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
 
-  export type NestedDecimalNullableFilter<$PrismaModel = never> = {
-    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
-    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
-    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
-    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    not?: NestedDecimalNullableFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
+  export type CompanyCreateWithoutUsersInput = {
+    id?: string
+    code: string
+    name: string
+    contactPerson?: string | null
+    phoneNumber?: string | null
+    email?: string | null
+    address?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    companyDrugs?: CompanyDrugCreateNestedManyWithoutCompanyInput
+    drugOrders?: DrugOrderCreateNestedManyWithoutCompanyInput
   }
 
-  export type NestedDecimalNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
-    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
-    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
-    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    not?: NestedDecimalNullableWithAggregatesFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedDecimalNullableFilter<$PrismaModel>
-    _sum?: NestedDecimalNullableFilter<$PrismaModel>
-    _min?: NestedDecimalNullableFilter<$PrismaModel>
-    _max?: NestedDecimalNullableFilter<$PrismaModel>
+  export type CompanyUncheckedCreateWithoutUsersInput = {
+    id?: string
+    code: string
+    name: string
+    contactPerson?: string | null
+    phoneNumber?: string | null
+    email?: string | null
+    address?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    companyDrugs?: CompanyDrugUncheckedCreateNestedManyWithoutCompanyInput
+    drugOrders?: DrugOrderUncheckedCreateNestedManyWithoutCompanyInput
+  }
+
+  export type CompanyCreateOrConnectWithoutUsersInput = {
+    where: CompanyWhereUniqueInput
+    create: XOR<CompanyCreateWithoutUsersInput, CompanyUncheckedCreateWithoutUsersInput>
   }
 
   export type FacilityDrugMapCreateWithoutFacilityInput = {
@@ -28235,6 +42451,80 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type DrugOrderCreateWithoutFacilityInput = {
+    id?: string
+    orderNo: string
+    status?: $Enums.DrugOrderStatus
+    baseReportMonth?: string | null
+    note?: string | null
+    submittedAt?: Date | string | null
+    closedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    company: CompanyCreateNestedOneWithoutDrugOrdersInput
+    lines?: DrugOrderLineCreateNestedManyWithoutOrderInput
+    shipments?: DrugOrderShipmentCreateNestedManyWithoutOrderInput
+    receipts?: DrugOrderReceiptCreateNestedManyWithoutOrderInput
+  }
+
+  export type DrugOrderUncheckedCreateWithoutFacilityInput = {
+    id?: string
+    orderNo: string
+    companyId: string
+    status?: $Enums.DrugOrderStatus
+    baseReportMonth?: string | null
+    note?: string | null
+    submittedAt?: Date | string | null
+    closedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    lines?: DrugOrderLineUncheckedCreateNestedManyWithoutOrderInput
+    shipments?: DrugOrderShipmentUncheckedCreateNestedManyWithoutOrderInput
+    receipts?: DrugOrderReceiptUncheckedCreateNestedManyWithoutOrderInput
+  }
+
+  export type DrugOrderCreateOrConnectWithoutFacilityInput = {
+    where: DrugOrderWhereUniqueInput
+    create: XOR<DrugOrderCreateWithoutFacilityInput, DrugOrderUncheckedCreateWithoutFacilityInput>
+  }
+
+  export type DrugOrderCreateManyFacilityInputEnvelope = {
+    data: DrugOrderCreateManyFacilityInput | DrugOrderCreateManyFacilityInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type DrugOrderReceiptCreateWithoutFacilityInput = {
+    id?: string
+    confirmedAt?: Date | string
+    note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    order: DrugOrderCreateNestedOneWithoutReceiptsInput
+    shipment: DrugOrderShipmentCreateNestedOneWithoutReceiptsInput
+    lines?: DrugOrderReceiptLineCreateNestedManyWithoutReceiptInput
+  }
+
+  export type DrugOrderReceiptUncheckedCreateWithoutFacilityInput = {
+    id?: string
+    orderId: string
+    shipmentId: string
+    confirmedAt?: Date | string
+    note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    lines?: DrugOrderReceiptLineUncheckedCreateNestedManyWithoutReceiptInput
+  }
+
+  export type DrugOrderReceiptCreateOrConnectWithoutFacilityInput = {
+    where: DrugOrderReceiptWhereUniqueInput
+    create: XOR<DrugOrderReceiptCreateWithoutFacilityInput, DrugOrderReceiptUncheckedCreateWithoutFacilityInput>
+  }
+
+  export type DrugOrderReceiptCreateManyFacilityInputEnvelope = {
+    data: DrugOrderReceiptCreateManyFacilityInput | DrugOrderReceiptCreateManyFacilityInput[]
+    skipDuplicates?: boolean
+  }
+
   export type NotificationCreateWithoutUserInput = {
     id?: string
     type: string
@@ -28295,6 +42585,47 @@ export namespace Prisma {
   export type ActivityLogCreateManyUserInputEnvelope = {
     data: ActivityLogCreateManyUserInput | ActivityLogCreateManyUserInput[]
     skipDuplicates?: boolean
+  }
+
+  export type CompanyUpsertWithoutUsersInput = {
+    update: XOR<CompanyUpdateWithoutUsersInput, CompanyUncheckedUpdateWithoutUsersInput>
+    create: XOR<CompanyCreateWithoutUsersInput, CompanyUncheckedCreateWithoutUsersInput>
+    where?: CompanyWhereInput
+  }
+
+  export type CompanyUpdateToOneWithWhereWithoutUsersInput = {
+    where?: CompanyWhereInput
+    data: XOR<CompanyUpdateWithoutUsersInput, CompanyUncheckedUpdateWithoutUsersInput>
+  }
+
+  export type CompanyUpdateWithoutUsersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    companyDrugs?: CompanyDrugUpdateManyWithoutCompanyNestedInput
+    drugOrders?: DrugOrderUpdateManyWithoutCompanyNestedInput
+  }
+
+  export type CompanyUncheckedUpdateWithoutUsersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    companyDrugs?: CompanyDrugUncheckedUpdateManyWithoutCompanyNestedInput
+    drugOrders?: DrugOrderUncheckedUpdateManyWithoutCompanyNestedInput
   }
 
   export type FacilityDrugMapUpsertWithWhereUniqueWithoutFacilityInput = {
@@ -28443,6 +42774,69 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"KeHoachLCNT"> | Date | string
   }
 
+  export type DrugOrderUpsertWithWhereUniqueWithoutFacilityInput = {
+    where: DrugOrderWhereUniqueInput
+    update: XOR<DrugOrderUpdateWithoutFacilityInput, DrugOrderUncheckedUpdateWithoutFacilityInput>
+    create: XOR<DrugOrderCreateWithoutFacilityInput, DrugOrderUncheckedCreateWithoutFacilityInput>
+  }
+
+  export type DrugOrderUpdateWithWhereUniqueWithoutFacilityInput = {
+    where: DrugOrderWhereUniqueInput
+    data: XOR<DrugOrderUpdateWithoutFacilityInput, DrugOrderUncheckedUpdateWithoutFacilityInput>
+  }
+
+  export type DrugOrderUpdateManyWithWhereWithoutFacilityInput = {
+    where: DrugOrderScalarWhereInput
+    data: XOR<DrugOrderUpdateManyMutationInput, DrugOrderUncheckedUpdateManyWithoutFacilityInput>
+  }
+
+  export type DrugOrderScalarWhereInput = {
+    AND?: DrugOrderScalarWhereInput | DrugOrderScalarWhereInput[]
+    OR?: DrugOrderScalarWhereInput[]
+    NOT?: DrugOrderScalarWhereInput | DrugOrderScalarWhereInput[]
+    id?: StringFilter<"DrugOrder"> | string
+    orderNo?: StringFilter<"DrugOrder"> | string
+    facilityId?: StringFilter<"DrugOrder"> | string
+    companyId?: StringFilter<"DrugOrder"> | string
+    status?: EnumDrugOrderStatusFilter<"DrugOrder"> | $Enums.DrugOrderStatus
+    baseReportMonth?: StringNullableFilter<"DrugOrder"> | string | null
+    note?: StringNullableFilter<"DrugOrder"> | string | null
+    submittedAt?: DateTimeNullableFilter<"DrugOrder"> | Date | string | null
+    closedAt?: DateTimeNullableFilter<"DrugOrder"> | Date | string | null
+    createdAt?: DateTimeFilter<"DrugOrder"> | Date | string
+    updatedAt?: DateTimeFilter<"DrugOrder"> | Date | string
+  }
+
+  export type DrugOrderReceiptUpsertWithWhereUniqueWithoutFacilityInput = {
+    where: DrugOrderReceiptWhereUniqueInput
+    update: XOR<DrugOrderReceiptUpdateWithoutFacilityInput, DrugOrderReceiptUncheckedUpdateWithoutFacilityInput>
+    create: XOR<DrugOrderReceiptCreateWithoutFacilityInput, DrugOrderReceiptUncheckedCreateWithoutFacilityInput>
+  }
+
+  export type DrugOrderReceiptUpdateWithWhereUniqueWithoutFacilityInput = {
+    where: DrugOrderReceiptWhereUniqueInput
+    data: XOR<DrugOrderReceiptUpdateWithoutFacilityInput, DrugOrderReceiptUncheckedUpdateWithoutFacilityInput>
+  }
+
+  export type DrugOrderReceiptUpdateManyWithWhereWithoutFacilityInput = {
+    where: DrugOrderReceiptScalarWhereInput
+    data: XOR<DrugOrderReceiptUpdateManyMutationInput, DrugOrderReceiptUncheckedUpdateManyWithoutFacilityInput>
+  }
+
+  export type DrugOrderReceiptScalarWhereInput = {
+    AND?: DrugOrderReceiptScalarWhereInput | DrugOrderReceiptScalarWhereInput[]
+    OR?: DrugOrderReceiptScalarWhereInput[]
+    NOT?: DrugOrderReceiptScalarWhereInput | DrugOrderReceiptScalarWhereInput[]
+    id?: StringFilter<"DrugOrderReceipt"> | string
+    orderId?: StringFilter<"DrugOrderReceipt"> | string
+    shipmentId?: StringFilter<"DrugOrderReceipt"> | string
+    facilityId?: StringFilter<"DrugOrderReceipt"> | string
+    confirmedAt?: DateTimeFilter<"DrugOrderReceipt"> | Date | string
+    note?: StringNullableFilter<"DrugOrderReceipt"> | string | null
+    createdAt?: DateTimeFilter<"DrugOrderReceipt"> | Date | string
+    updatedAt?: DateTimeFilter<"DrugOrderReceipt"> | Date | string
+  }
+
   export type NotificationUpsertWithWhereUniqueWithoutUserInput = {
     where: NotificationWhereUniqueInput
     update: XOR<NotificationUpdateWithoutUserInput, NotificationUncheckedUpdateWithoutUserInput>
@@ -28504,6 +42898,232 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"ActivityLog"> | Date | string
   }
 
+  export type UserCreateWithoutCompanyInput = {
+    id?: string
+    username: string
+    passwordHash: string
+    role?: $Enums.Role
+    facilityName?: string | null
+    facilityCode?: string | null
+    isActive?: boolean
+    autonomyGroup?: string | null
+    facilityType?: string | null
+    contactPerson?: string | null
+    phoneNumber?: string | null
+    address?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    drugMaps?: FacilityDrugMapCreateNestedManyWithoutFacilityInput
+    reports?: InventoryReportCreateNestedManyWithoutFacilityInput
+    reportSubmissions?: FacilityReportSubmissionCreateNestedManyWithoutFacilityInput
+    keHoachLCNTs?: KeHoachLCNTCreateNestedManyWithoutFacilityInput
+    drugOrders?: DrugOrderCreateNestedManyWithoutFacilityInput
+    drugOrderReceipts?: DrugOrderReceiptCreateNestedManyWithoutFacilityInput
+    notifications?: NotificationCreateNestedManyWithoutUserInput
+    activityLogs?: ActivityLogCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutCompanyInput = {
+    id?: string
+    username: string
+    passwordHash: string
+    role?: $Enums.Role
+    facilityName?: string | null
+    facilityCode?: string | null
+    isActive?: boolean
+    autonomyGroup?: string | null
+    facilityType?: string | null
+    contactPerson?: string | null
+    phoneNumber?: string | null
+    address?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    drugMaps?: FacilityDrugMapUncheckedCreateNestedManyWithoutFacilityInput
+    reports?: InventoryReportUncheckedCreateNestedManyWithoutFacilityInput
+    reportSubmissions?: FacilityReportSubmissionUncheckedCreateNestedManyWithoutFacilityInput
+    keHoachLCNTs?: KeHoachLCNTUncheckedCreateNestedManyWithoutFacilityInput
+    drugOrders?: DrugOrderUncheckedCreateNestedManyWithoutFacilityInput
+    drugOrderReceipts?: DrugOrderReceiptUncheckedCreateNestedManyWithoutFacilityInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
+    activityLogs?: ActivityLogUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutCompanyInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutCompanyInput, UserUncheckedCreateWithoutCompanyInput>
+  }
+
+  export type UserCreateManyCompanyInputEnvelope = {
+    data: UserCreateManyCompanyInput | UserCreateManyCompanyInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type CompanyDrugCreateWithoutCompanyInput = {
+    id?: string
+    companyDrugCode: string
+    companyDrugName: string
+    activeIngredient?: string | null
+    quyCach?: string | null
+    unit?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    masterDrug?: MasterDrugCreateNestedOneWithoutCompanyDrugsInput
+    drugOrderLines?: DrugOrderLineCreateNestedManyWithoutCompanyDrugInput
+  }
+
+  export type CompanyDrugUncheckedCreateWithoutCompanyInput = {
+    id?: string
+    masterDrugId?: string | null
+    companyDrugCode: string
+    companyDrugName: string
+    activeIngredient?: string | null
+    quyCach?: string | null
+    unit?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    drugOrderLines?: DrugOrderLineUncheckedCreateNestedManyWithoutCompanyDrugInput
+  }
+
+  export type CompanyDrugCreateOrConnectWithoutCompanyInput = {
+    where: CompanyDrugWhereUniqueInput
+    create: XOR<CompanyDrugCreateWithoutCompanyInput, CompanyDrugUncheckedCreateWithoutCompanyInput>
+  }
+
+  export type CompanyDrugCreateManyCompanyInputEnvelope = {
+    data: CompanyDrugCreateManyCompanyInput | CompanyDrugCreateManyCompanyInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type DrugOrderCreateWithoutCompanyInput = {
+    id?: string
+    orderNo: string
+    status?: $Enums.DrugOrderStatus
+    baseReportMonth?: string | null
+    note?: string | null
+    submittedAt?: Date | string | null
+    closedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    facility: UserCreateNestedOneWithoutDrugOrdersInput
+    lines?: DrugOrderLineCreateNestedManyWithoutOrderInput
+    shipments?: DrugOrderShipmentCreateNestedManyWithoutOrderInput
+    receipts?: DrugOrderReceiptCreateNestedManyWithoutOrderInput
+  }
+
+  export type DrugOrderUncheckedCreateWithoutCompanyInput = {
+    id?: string
+    orderNo: string
+    facilityId: string
+    status?: $Enums.DrugOrderStatus
+    baseReportMonth?: string | null
+    note?: string | null
+    submittedAt?: Date | string | null
+    closedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    lines?: DrugOrderLineUncheckedCreateNestedManyWithoutOrderInput
+    shipments?: DrugOrderShipmentUncheckedCreateNestedManyWithoutOrderInput
+    receipts?: DrugOrderReceiptUncheckedCreateNestedManyWithoutOrderInput
+  }
+
+  export type DrugOrderCreateOrConnectWithoutCompanyInput = {
+    where: DrugOrderWhereUniqueInput
+    create: XOR<DrugOrderCreateWithoutCompanyInput, DrugOrderUncheckedCreateWithoutCompanyInput>
+  }
+
+  export type DrugOrderCreateManyCompanyInputEnvelope = {
+    data: DrugOrderCreateManyCompanyInput | DrugOrderCreateManyCompanyInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type UserUpsertWithWhereUniqueWithoutCompanyInput = {
+    where: UserWhereUniqueInput
+    update: XOR<UserUpdateWithoutCompanyInput, UserUncheckedUpdateWithoutCompanyInput>
+    create: XOR<UserCreateWithoutCompanyInput, UserUncheckedCreateWithoutCompanyInput>
+  }
+
+  export type UserUpdateWithWhereUniqueWithoutCompanyInput = {
+    where: UserWhereUniqueInput
+    data: XOR<UserUpdateWithoutCompanyInput, UserUncheckedUpdateWithoutCompanyInput>
+  }
+
+  export type UserUpdateManyWithWhereWithoutCompanyInput = {
+    where: UserScalarWhereInput
+    data: XOR<UserUpdateManyMutationInput, UserUncheckedUpdateManyWithoutCompanyInput>
+  }
+
+  export type UserScalarWhereInput = {
+    AND?: UserScalarWhereInput | UserScalarWhereInput[]
+    OR?: UserScalarWhereInput[]
+    NOT?: UserScalarWhereInput | UserScalarWhereInput[]
+    id?: StringFilter<"User"> | string
+    username?: StringFilter<"User"> | string
+    passwordHash?: StringFilter<"User"> | string
+    role?: EnumRoleFilter<"User"> | $Enums.Role
+    facilityName?: StringNullableFilter<"User"> | string | null
+    facilityCode?: StringNullableFilter<"User"> | string | null
+    companyId?: StringNullableFilter<"User"> | string | null
+    isActive?: BoolFilter<"User"> | boolean
+    autonomyGroup?: StringNullableFilter<"User"> | string | null
+    facilityType?: StringNullableFilter<"User"> | string | null
+    contactPerson?: StringNullableFilter<"User"> | string | null
+    phoneNumber?: StringNullableFilter<"User"> | string | null
+    address?: StringNullableFilter<"User"> | string | null
+    createdAt?: DateTimeFilter<"User"> | Date | string
+    updatedAt?: DateTimeFilter<"User"> | Date | string
+  }
+
+  export type CompanyDrugUpsertWithWhereUniqueWithoutCompanyInput = {
+    where: CompanyDrugWhereUniqueInput
+    update: XOR<CompanyDrugUpdateWithoutCompanyInput, CompanyDrugUncheckedUpdateWithoutCompanyInput>
+    create: XOR<CompanyDrugCreateWithoutCompanyInput, CompanyDrugUncheckedCreateWithoutCompanyInput>
+  }
+
+  export type CompanyDrugUpdateWithWhereUniqueWithoutCompanyInput = {
+    where: CompanyDrugWhereUniqueInput
+    data: XOR<CompanyDrugUpdateWithoutCompanyInput, CompanyDrugUncheckedUpdateWithoutCompanyInput>
+  }
+
+  export type CompanyDrugUpdateManyWithWhereWithoutCompanyInput = {
+    where: CompanyDrugScalarWhereInput
+    data: XOR<CompanyDrugUpdateManyMutationInput, CompanyDrugUncheckedUpdateManyWithoutCompanyInput>
+  }
+
+  export type CompanyDrugScalarWhereInput = {
+    AND?: CompanyDrugScalarWhereInput | CompanyDrugScalarWhereInput[]
+    OR?: CompanyDrugScalarWhereInput[]
+    NOT?: CompanyDrugScalarWhereInput | CompanyDrugScalarWhereInput[]
+    id?: StringFilter<"CompanyDrug"> | string
+    companyId?: StringFilter<"CompanyDrug"> | string
+    masterDrugId?: StringNullableFilter<"CompanyDrug"> | string | null
+    companyDrugCode?: StringFilter<"CompanyDrug"> | string
+    companyDrugName?: StringFilter<"CompanyDrug"> | string
+    activeIngredient?: StringNullableFilter<"CompanyDrug"> | string | null
+    quyCach?: StringNullableFilter<"CompanyDrug"> | string | null
+    unit?: StringNullableFilter<"CompanyDrug"> | string | null
+    isActive?: BoolFilter<"CompanyDrug"> | boolean
+    createdAt?: DateTimeFilter<"CompanyDrug"> | Date | string
+    updatedAt?: DateTimeFilter<"CompanyDrug"> | Date | string
+  }
+
+  export type DrugOrderUpsertWithWhereUniqueWithoutCompanyInput = {
+    where: DrugOrderWhereUniqueInput
+    update: XOR<DrugOrderUpdateWithoutCompanyInput, DrugOrderUncheckedUpdateWithoutCompanyInput>
+    create: XOR<DrugOrderCreateWithoutCompanyInput, DrugOrderUncheckedCreateWithoutCompanyInput>
+  }
+
+  export type DrugOrderUpdateWithWhereUniqueWithoutCompanyInput = {
+    where: DrugOrderWhereUniqueInput
+    data: XOR<DrugOrderUpdateWithoutCompanyInput, DrugOrderUncheckedUpdateWithoutCompanyInput>
+  }
+
+  export type DrugOrderUpdateManyWithWhereWithoutCompanyInput = {
+    where: DrugOrderScalarWhereInput
+    data: XOR<DrugOrderUpdateManyMutationInput, DrugOrderUncheckedUpdateManyWithoutCompanyInput>
+  }
+
   export type MasterDrugCreateWithoutTherapeuticGroupInput = {
     id?: string
     maChung: string
@@ -28533,6 +43153,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     drugMaps?: FacilityDrugMapCreateNestedManyWithoutMasterDrugInput
+    companyDrugs?: CompanyDrugCreateNestedManyWithoutMasterDrugInput
+    drugOrderLines?: DrugOrderLineCreateNestedManyWithoutMasterDrugInput
   }
 
   export type MasterDrugUncheckedCreateWithoutTherapeuticGroupInput = {
@@ -28564,6 +43186,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     drugMaps?: FacilityDrugMapUncheckedCreateNestedManyWithoutMasterDrugInput
+    companyDrugs?: CompanyDrugUncheckedCreateNestedManyWithoutMasterDrugInput
+    drugOrderLines?: DrugOrderLineUncheckedCreateNestedManyWithoutMasterDrugInput
   }
 
   export type MasterDrugCreateOrConnectWithoutTherapeuticGroupInput = {
@@ -28691,6 +43315,96 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type CompanyDrugCreateWithoutMasterDrugInput = {
+    id?: string
+    companyDrugCode: string
+    companyDrugName: string
+    activeIngredient?: string | null
+    quyCach?: string | null
+    unit?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    company: CompanyCreateNestedOneWithoutCompanyDrugsInput
+    drugOrderLines?: DrugOrderLineCreateNestedManyWithoutCompanyDrugInput
+  }
+
+  export type CompanyDrugUncheckedCreateWithoutMasterDrugInput = {
+    id?: string
+    companyId: string
+    companyDrugCode: string
+    companyDrugName: string
+    activeIngredient?: string | null
+    quyCach?: string | null
+    unit?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    drugOrderLines?: DrugOrderLineUncheckedCreateNestedManyWithoutCompanyDrugInput
+  }
+
+  export type CompanyDrugCreateOrConnectWithoutMasterDrugInput = {
+    where: CompanyDrugWhereUniqueInput
+    create: XOR<CompanyDrugCreateWithoutMasterDrugInput, CompanyDrugUncheckedCreateWithoutMasterDrugInput>
+  }
+
+  export type CompanyDrugCreateManyMasterDrugInputEnvelope = {
+    data: CompanyDrugCreateManyMasterDrugInput | CompanyDrugCreateManyMasterDrugInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type DrugOrderLineCreateWithoutMasterDrugInput = {
+    id?: string
+    sourceType: $Enums.DrugOrderLineSourceType
+    displayName: string
+    unit?: string | null
+    requestedQty?: Decimal | DecimalJsLike | number | string
+    acceptedQty?: Decimal | DecimalJsLike | number | string
+    suggestedQty?: Decimal | DecimalJsLike | number | string | null
+    lineStatus?: $Enums.DrugOrderLineStatus
+    companyResponseReason?: string | null
+    suggestionBasis?: string | null
+    suggestionReportMonth?: string | null
+    suggestionRuleVersion?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    order: DrugOrderCreateNestedOneWithoutLinesInput
+    companyDrug?: CompanyDrugCreateNestedOneWithoutDrugOrderLinesInput
+    shipmentLines?: DrugOrderShipmentLineCreateNestedManyWithoutOrderLineInput
+    receiptLines?: DrugOrderReceiptLineCreateNestedManyWithoutOrderLineInput
+  }
+
+  export type DrugOrderLineUncheckedCreateWithoutMasterDrugInput = {
+    id?: string
+    orderId: string
+    sourceType: $Enums.DrugOrderLineSourceType
+    companyDrugId?: string | null
+    displayName: string
+    unit?: string | null
+    requestedQty?: Decimal | DecimalJsLike | number | string
+    acceptedQty?: Decimal | DecimalJsLike | number | string
+    suggestedQty?: Decimal | DecimalJsLike | number | string | null
+    lineStatus?: $Enums.DrugOrderLineStatus
+    companyResponseReason?: string | null
+    suggestionBasis?: string | null
+    suggestionReportMonth?: string | null
+    suggestionRuleVersion?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    shipmentLines?: DrugOrderShipmentLineUncheckedCreateNestedManyWithoutOrderLineInput
+    receiptLines?: DrugOrderReceiptLineUncheckedCreateNestedManyWithoutOrderLineInput
+  }
+
+  export type DrugOrderLineCreateOrConnectWithoutMasterDrugInput = {
+    where: DrugOrderLineWhereUniqueInput
+    create: XOR<DrugOrderLineCreateWithoutMasterDrugInput, DrugOrderLineUncheckedCreateWithoutMasterDrugInput>
+  }
+
+  export type DrugOrderLineCreateManyMasterDrugInputEnvelope = {
+    data: DrugOrderLineCreateManyMasterDrugInput | DrugOrderLineCreateManyMasterDrugInput[]
+    skipDuplicates?: boolean
+  }
+
   export type TherapeuticGroupUpsertWithoutMasterDrugsInput = {
     update: XOR<TherapeuticGroupUpdateWithoutMasterDrugsInput, TherapeuticGroupUncheckedUpdateWithoutMasterDrugsInput>
     create: XOR<TherapeuticGroupCreateWithoutMasterDrugsInput, TherapeuticGroupUncheckedCreateWithoutMasterDrugsInput>
@@ -28736,6 +43450,353 @@ export namespace Prisma {
     data: XOR<FacilityDrugMapUpdateManyMutationInput, FacilityDrugMapUncheckedUpdateManyWithoutMasterDrugInput>
   }
 
+  export type CompanyDrugUpsertWithWhereUniqueWithoutMasterDrugInput = {
+    where: CompanyDrugWhereUniqueInput
+    update: XOR<CompanyDrugUpdateWithoutMasterDrugInput, CompanyDrugUncheckedUpdateWithoutMasterDrugInput>
+    create: XOR<CompanyDrugCreateWithoutMasterDrugInput, CompanyDrugUncheckedCreateWithoutMasterDrugInput>
+  }
+
+  export type CompanyDrugUpdateWithWhereUniqueWithoutMasterDrugInput = {
+    where: CompanyDrugWhereUniqueInput
+    data: XOR<CompanyDrugUpdateWithoutMasterDrugInput, CompanyDrugUncheckedUpdateWithoutMasterDrugInput>
+  }
+
+  export type CompanyDrugUpdateManyWithWhereWithoutMasterDrugInput = {
+    where: CompanyDrugScalarWhereInput
+    data: XOR<CompanyDrugUpdateManyMutationInput, CompanyDrugUncheckedUpdateManyWithoutMasterDrugInput>
+  }
+
+  export type DrugOrderLineUpsertWithWhereUniqueWithoutMasterDrugInput = {
+    where: DrugOrderLineWhereUniqueInput
+    update: XOR<DrugOrderLineUpdateWithoutMasterDrugInput, DrugOrderLineUncheckedUpdateWithoutMasterDrugInput>
+    create: XOR<DrugOrderLineCreateWithoutMasterDrugInput, DrugOrderLineUncheckedCreateWithoutMasterDrugInput>
+  }
+
+  export type DrugOrderLineUpdateWithWhereUniqueWithoutMasterDrugInput = {
+    where: DrugOrderLineWhereUniqueInput
+    data: XOR<DrugOrderLineUpdateWithoutMasterDrugInput, DrugOrderLineUncheckedUpdateWithoutMasterDrugInput>
+  }
+
+  export type DrugOrderLineUpdateManyWithWhereWithoutMasterDrugInput = {
+    where: DrugOrderLineScalarWhereInput
+    data: XOR<DrugOrderLineUpdateManyMutationInput, DrugOrderLineUncheckedUpdateManyWithoutMasterDrugInput>
+  }
+
+  export type DrugOrderLineScalarWhereInput = {
+    AND?: DrugOrderLineScalarWhereInput | DrugOrderLineScalarWhereInput[]
+    OR?: DrugOrderLineScalarWhereInput[]
+    NOT?: DrugOrderLineScalarWhereInput | DrugOrderLineScalarWhereInput[]
+    id?: StringFilter<"DrugOrderLine"> | string
+    orderId?: StringFilter<"DrugOrderLine"> | string
+    sourceType?: EnumDrugOrderLineSourceTypeFilter<"DrugOrderLine"> | $Enums.DrugOrderLineSourceType
+    masterDrugId?: StringNullableFilter<"DrugOrderLine"> | string | null
+    companyDrugId?: StringNullableFilter<"DrugOrderLine"> | string | null
+    displayName?: StringFilter<"DrugOrderLine"> | string
+    unit?: StringNullableFilter<"DrugOrderLine"> | string | null
+    requestedQty?: DecimalFilter<"DrugOrderLine"> | Decimal | DecimalJsLike | number | string
+    acceptedQty?: DecimalFilter<"DrugOrderLine"> | Decimal | DecimalJsLike | number | string
+    suggestedQty?: DecimalNullableFilter<"DrugOrderLine"> | Decimal | DecimalJsLike | number | string | null
+    lineStatus?: EnumDrugOrderLineStatusFilter<"DrugOrderLine"> | $Enums.DrugOrderLineStatus
+    companyResponseReason?: StringNullableFilter<"DrugOrderLine"> | string | null
+    suggestionBasis?: StringNullableFilter<"DrugOrderLine"> | string | null
+    suggestionReportMonth?: StringNullableFilter<"DrugOrderLine"> | string | null
+    suggestionRuleVersion?: StringNullableFilter<"DrugOrderLine"> | string | null
+    createdAt?: DateTimeFilter<"DrugOrderLine"> | Date | string
+    updatedAt?: DateTimeFilter<"DrugOrderLine"> | Date | string
+  }
+
+  export type CompanyCreateWithoutCompanyDrugsInput = {
+    id?: string
+    code: string
+    name: string
+    contactPerson?: string | null
+    phoneNumber?: string | null
+    email?: string | null
+    address?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    users?: UserCreateNestedManyWithoutCompanyInput
+    drugOrders?: DrugOrderCreateNestedManyWithoutCompanyInput
+  }
+
+  export type CompanyUncheckedCreateWithoutCompanyDrugsInput = {
+    id?: string
+    code: string
+    name: string
+    contactPerson?: string | null
+    phoneNumber?: string | null
+    email?: string | null
+    address?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    users?: UserUncheckedCreateNestedManyWithoutCompanyInput
+    drugOrders?: DrugOrderUncheckedCreateNestedManyWithoutCompanyInput
+  }
+
+  export type CompanyCreateOrConnectWithoutCompanyDrugsInput = {
+    where: CompanyWhereUniqueInput
+    create: XOR<CompanyCreateWithoutCompanyDrugsInput, CompanyUncheckedCreateWithoutCompanyDrugsInput>
+  }
+
+  export type MasterDrugCreateWithoutCompanyDrugsInput = {
+    id?: string
+    maChung: string
+    maBhyt?: string | null
+    tenThuoc: string
+    hoatChat?: string | null
+    hamLuong?: string | null
+    dangBaoChe?: string | null
+    soDangKy?: string | null
+    quyCach?: string | null
+    donViTinh?: string | null
+    tieuChuan?: string | null
+    tuoiTho?: string | null
+    duongDung?: string | null
+    nguonGoc?: string | null
+    congTySanXuat?: string | null
+    nuocSanXuat?: string | null
+    diaChiSanXuat?: string | null
+    congTyDangKy?: string | null
+    nuocDangKy?: string | null
+    diaChiDangKy?: string | null
+    nhomThuoc?: string | null
+    isKeDon?: string | null
+    kiemSoatDacBiet?: string | null
+    isTrongNuoc?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    therapeuticGroup?: TherapeuticGroupCreateNestedOneWithoutMasterDrugsInput
+    drugMaps?: FacilityDrugMapCreateNestedManyWithoutMasterDrugInput
+    drugOrderLines?: DrugOrderLineCreateNestedManyWithoutMasterDrugInput
+  }
+
+  export type MasterDrugUncheckedCreateWithoutCompanyDrugsInput = {
+    id?: string
+    maChung: string
+    maBhyt?: string | null
+    tenThuoc: string
+    hoatChat?: string | null
+    hamLuong?: string | null
+    dangBaoChe?: string | null
+    soDangKy?: string | null
+    quyCach?: string | null
+    donViTinh?: string | null
+    tieuChuan?: string | null
+    tuoiTho?: string | null
+    duongDung?: string | null
+    nguonGoc?: string | null
+    congTySanXuat?: string | null
+    nuocSanXuat?: string | null
+    diaChiSanXuat?: string | null
+    congTyDangKy?: string | null
+    nuocDangKy?: string | null
+    diaChiDangKy?: string | null
+    nhomThuoc?: string | null
+    therapeuticGroupId?: string | null
+    isKeDon?: string | null
+    kiemSoatDacBiet?: string | null
+    isTrongNuoc?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    drugMaps?: FacilityDrugMapUncheckedCreateNestedManyWithoutMasterDrugInput
+    drugOrderLines?: DrugOrderLineUncheckedCreateNestedManyWithoutMasterDrugInput
+  }
+
+  export type MasterDrugCreateOrConnectWithoutCompanyDrugsInput = {
+    where: MasterDrugWhereUniqueInput
+    create: XOR<MasterDrugCreateWithoutCompanyDrugsInput, MasterDrugUncheckedCreateWithoutCompanyDrugsInput>
+  }
+
+  export type DrugOrderLineCreateWithoutCompanyDrugInput = {
+    id?: string
+    sourceType: $Enums.DrugOrderLineSourceType
+    displayName: string
+    unit?: string | null
+    requestedQty?: Decimal | DecimalJsLike | number | string
+    acceptedQty?: Decimal | DecimalJsLike | number | string
+    suggestedQty?: Decimal | DecimalJsLike | number | string | null
+    lineStatus?: $Enums.DrugOrderLineStatus
+    companyResponseReason?: string | null
+    suggestionBasis?: string | null
+    suggestionReportMonth?: string | null
+    suggestionRuleVersion?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    order: DrugOrderCreateNestedOneWithoutLinesInput
+    masterDrug?: MasterDrugCreateNestedOneWithoutDrugOrderLinesInput
+    shipmentLines?: DrugOrderShipmentLineCreateNestedManyWithoutOrderLineInput
+    receiptLines?: DrugOrderReceiptLineCreateNestedManyWithoutOrderLineInput
+  }
+
+  export type DrugOrderLineUncheckedCreateWithoutCompanyDrugInput = {
+    id?: string
+    orderId: string
+    sourceType: $Enums.DrugOrderLineSourceType
+    masterDrugId?: string | null
+    displayName: string
+    unit?: string | null
+    requestedQty?: Decimal | DecimalJsLike | number | string
+    acceptedQty?: Decimal | DecimalJsLike | number | string
+    suggestedQty?: Decimal | DecimalJsLike | number | string | null
+    lineStatus?: $Enums.DrugOrderLineStatus
+    companyResponseReason?: string | null
+    suggestionBasis?: string | null
+    suggestionReportMonth?: string | null
+    suggestionRuleVersion?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    shipmentLines?: DrugOrderShipmentLineUncheckedCreateNestedManyWithoutOrderLineInput
+    receiptLines?: DrugOrderReceiptLineUncheckedCreateNestedManyWithoutOrderLineInput
+  }
+
+  export type DrugOrderLineCreateOrConnectWithoutCompanyDrugInput = {
+    where: DrugOrderLineWhereUniqueInput
+    create: XOR<DrugOrderLineCreateWithoutCompanyDrugInput, DrugOrderLineUncheckedCreateWithoutCompanyDrugInput>
+  }
+
+  export type DrugOrderLineCreateManyCompanyDrugInputEnvelope = {
+    data: DrugOrderLineCreateManyCompanyDrugInput | DrugOrderLineCreateManyCompanyDrugInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type CompanyUpsertWithoutCompanyDrugsInput = {
+    update: XOR<CompanyUpdateWithoutCompanyDrugsInput, CompanyUncheckedUpdateWithoutCompanyDrugsInput>
+    create: XOR<CompanyCreateWithoutCompanyDrugsInput, CompanyUncheckedCreateWithoutCompanyDrugsInput>
+    where?: CompanyWhereInput
+  }
+
+  export type CompanyUpdateToOneWithWhereWithoutCompanyDrugsInput = {
+    where?: CompanyWhereInput
+    data: XOR<CompanyUpdateWithoutCompanyDrugsInput, CompanyUncheckedUpdateWithoutCompanyDrugsInput>
+  }
+
+  export type CompanyUpdateWithoutCompanyDrugsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    users?: UserUpdateManyWithoutCompanyNestedInput
+    drugOrders?: DrugOrderUpdateManyWithoutCompanyNestedInput
+  }
+
+  export type CompanyUncheckedUpdateWithoutCompanyDrugsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    users?: UserUncheckedUpdateManyWithoutCompanyNestedInput
+    drugOrders?: DrugOrderUncheckedUpdateManyWithoutCompanyNestedInput
+  }
+
+  export type MasterDrugUpsertWithoutCompanyDrugsInput = {
+    update: XOR<MasterDrugUpdateWithoutCompanyDrugsInput, MasterDrugUncheckedUpdateWithoutCompanyDrugsInput>
+    create: XOR<MasterDrugCreateWithoutCompanyDrugsInput, MasterDrugUncheckedCreateWithoutCompanyDrugsInput>
+    where?: MasterDrugWhereInput
+  }
+
+  export type MasterDrugUpdateToOneWithWhereWithoutCompanyDrugsInput = {
+    where?: MasterDrugWhereInput
+    data: XOR<MasterDrugUpdateWithoutCompanyDrugsInput, MasterDrugUncheckedUpdateWithoutCompanyDrugsInput>
+  }
+
+  export type MasterDrugUpdateWithoutCompanyDrugsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    maChung?: StringFieldUpdateOperationsInput | string
+    maBhyt?: NullableStringFieldUpdateOperationsInput | string | null
+    tenThuoc?: StringFieldUpdateOperationsInput | string
+    hoatChat?: NullableStringFieldUpdateOperationsInput | string | null
+    hamLuong?: NullableStringFieldUpdateOperationsInput | string | null
+    dangBaoChe?: NullableStringFieldUpdateOperationsInput | string | null
+    soDangKy?: NullableStringFieldUpdateOperationsInput | string | null
+    quyCach?: NullableStringFieldUpdateOperationsInput | string | null
+    donViTinh?: NullableStringFieldUpdateOperationsInput | string | null
+    tieuChuan?: NullableStringFieldUpdateOperationsInput | string | null
+    tuoiTho?: NullableStringFieldUpdateOperationsInput | string | null
+    duongDung?: NullableStringFieldUpdateOperationsInput | string | null
+    nguonGoc?: NullableStringFieldUpdateOperationsInput | string | null
+    congTySanXuat?: NullableStringFieldUpdateOperationsInput | string | null
+    nuocSanXuat?: NullableStringFieldUpdateOperationsInput | string | null
+    diaChiSanXuat?: NullableStringFieldUpdateOperationsInput | string | null
+    congTyDangKy?: NullableStringFieldUpdateOperationsInput | string | null
+    nuocDangKy?: NullableStringFieldUpdateOperationsInput | string | null
+    diaChiDangKy?: NullableStringFieldUpdateOperationsInput | string | null
+    nhomThuoc?: NullableStringFieldUpdateOperationsInput | string | null
+    isKeDon?: NullableStringFieldUpdateOperationsInput | string | null
+    kiemSoatDacBiet?: NullableStringFieldUpdateOperationsInput | string | null
+    isTrongNuoc?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    therapeuticGroup?: TherapeuticGroupUpdateOneWithoutMasterDrugsNestedInput
+    drugMaps?: FacilityDrugMapUpdateManyWithoutMasterDrugNestedInput
+    drugOrderLines?: DrugOrderLineUpdateManyWithoutMasterDrugNestedInput
+  }
+
+  export type MasterDrugUncheckedUpdateWithoutCompanyDrugsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    maChung?: StringFieldUpdateOperationsInput | string
+    maBhyt?: NullableStringFieldUpdateOperationsInput | string | null
+    tenThuoc?: StringFieldUpdateOperationsInput | string
+    hoatChat?: NullableStringFieldUpdateOperationsInput | string | null
+    hamLuong?: NullableStringFieldUpdateOperationsInput | string | null
+    dangBaoChe?: NullableStringFieldUpdateOperationsInput | string | null
+    soDangKy?: NullableStringFieldUpdateOperationsInput | string | null
+    quyCach?: NullableStringFieldUpdateOperationsInput | string | null
+    donViTinh?: NullableStringFieldUpdateOperationsInput | string | null
+    tieuChuan?: NullableStringFieldUpdateOperationsInput | string | null
+    tuoiTho?: NullableStringFieldUpdateOperationsInput | string | null
+    duongDung?: NullableStringFieldUpdateOperationsInput | string | null
+    nguonGoc?: NullableStringFieldUpdateOperationsInput | string | null
+    congTySanXuat?: NullableStringFieldUpdateOperationsInput | string | null
+    nuocSanXuat?: NullableStringFieldUpdateOperationsInput | string | null
+    diaChiSanXuat?: NullableStringFieldUpdateOperationsInput | string | null
+    congTyDangKy?: NullableStringFieldUpdateOperationsInput | string | null
+    nuocDangKy?: NullableStringFieldUpdateOperationsInput | string | null
+    diaChiDangKy?: NullableStringFieldUpdateOperationsInput | string | null
+    nhomThuoc?: NullableStringFieldUpdateOperationsInput | string | null
+    therapeuticGroupId?: NullableStringFieldUpdateOperationsInput | string | null
+    isKeDon?: NullableStringFieldUpdateOperationsInput | string | null
+    kiemSoatDacBiet?: NullableStringFieldUpdateOperationsInput | string | null
+    isTrongNuoc?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    drugMaps?: FacilityDrugMapUncheckedUpdateManyWithoutMasterDrugNestedInput
+    drugOrderLines?: DrugOrderLineUncheckedUpdateManyWithoutMasterDrugNestedInput
+  }
+
+  export type DrugOrderLineUpsertWithWhereUniqueWithoutCompanyDrugInput = {
+    where: DrugOrderLineWhereUniqueInput
+    update: XOR<DrugOrderLineUpdateWithoutCompanyDrugInput, DrugOrderLineUncheckedUpdateWithoutCompanyDrugInput>
+    create: XOR<DrugOrderLineCreateWithoutCompanyDrugInput, DrugOrderLineUncheckedCreateWithoutCompanyDrugInput>
+  }
+
+  export type DrugOrderLineUpdateWithWhereUniqueWithoutCompanyDrugInput = {
+    where: DrugOrderLineWhereUniqueInput
+    data: XOR<DrugOrderLineUpdateWithoutCompanyDrugInput, DrugOrderLineUncheckedUpdateWithoutCompanyDrugInput>
+  }
+
+  export type DrugOrderLineUpdateManyWithWhereWithoutCompanyDrugInput = {
+    where: DrugOrderLineScalarWhereInput
+    data: XOR<DrugOrderLineUpdateManyMutationInput, DrugOrderLineUncheckedUpdateManyWithoutCompanyDrugInput>
+  }
+
   export type UserCreateWithoutDrugMapsInput = {
     id?: string
     username: string
@@ -28751,9 +43812,12 @@ export namespace Prisma {
     address?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    company?: CompanyCreateNestedOneWithoutUsersInput
     reports?: InventoryReportCreateNestedManyWithoutFacilityInput
     reportSubmissions?: FacilityReportSubmissionCreateNestedManyWithoutFacilityInput
     keHoachLCNTs?: KeHoachLCNTCreateNestedManyWithoutFacilityInput
+    drugOrders?: DrugOrderCreateNestedManyWithoutFacilityInput
+    drugOrderReceipts?: DrugOrderReceiptCreateNestedManyWithoutFacilityInput
     notifications?: NotificationCreateNestedManyWithoutUserInput
     activityLogs?: ActivityLogCreateNestedManyWithoutUserInput
   }
@@ -28765,6 +43829,7 @@ export namespace Prisma {
     role?: $Enums.Role
     facilityName?: string | null
     facilityCode?: string | null
+    companyId?: string | null
     isActive?: boolean
     autonomyGroup?: string | null
     facilityType?: string | null
@@ -28776,6 +43841,8 @@ export namespace Prisma {
     reports?: InventoryReportUncheckedCreateNestedManyWithoutFacilityInput
     reportSubmissions?: FacilityReportSubmissionUncheckedCreateNestedManyWithoutFacilityInput
     keHoachLCNTs?: KeHoachLCNTUncheckedCreateNestedManyWithoutFacilityInput
+    drugOrders?: DrugOrderUncheckedCreateNestedManyWithoutFacilityInput
+    drugOrderReceipts?: DrugOrderReceiptUncheckedCreateNestedManyWithoutFacilityInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
     activityLogs?: ActivityLogUncheckedCreateNestedManyWithoutUserInput
   }
@@ -28814,6 +43881,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     therapeuticGroup?: TherapeuticGroupCreateNestedOneWithoutMasterDrugsInput
+    companyDrugs?: CompanyDrugCreateNestedManyWithoutMasterDrugInput
+    drugOrderLines?: DrugOrderLineCreateNestedManyWithoutMasterDrugInput
   }
 
   export type MasterDrugUncheckedCreateWithoutDrugMapsInput = {
@@ -28845,6 +43914,8 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    companyDrugs?: CompanyDrugUncheckedCreateNestedManyWithoutMasterDrugInput
+    drugOrderLines?: DrugOrderLineUncheckedCreateNestedManyWithoutMasterDrugInput
   }
 
   export type MasterDrugCreateOrConnectWithoutDrugMapsInput = {
@@ -28932,9 +44003,12 @@ export namespace Prisma {
     address?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    company?: CompanyUpdateOneWithoutUsersNestedInput
     reports?: InventoryReportUpdateManyWithoutFacilityNestedInput
     reportSubmissions?: FacilityReportSubmissionUpdateManyWithoutFacilityNestedInput
     keHoachLCNTs?: KeHoachLCNTUpdateManyWithoutFacilityNestedInput
+    drugOrders?: DrugOrderUpdateManyWithoutFacilityNestedInput
+    drugOrderReceipts?: DrugOrderReceiptUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUpdateManyWithoutUserNestedInput
     activityLogs?: ActivityLogUpdateManyWithoutUserNestedInput
   }
@@ -28946,6 +44020,7 @@ export namespace Prisma {
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     facilityName?: NullableStringFieldUpdateOperationsInput | string | null
     facilityCode?: NullableStringFieldUpdateOperationsInput | string | null
+    companyId?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     autonomyGroup?: NullableStringFieldUpdateOperationsInput | string | null
     facilityType?: NullableStringFieldUpdateOperationsInput | string | null
@@ -28957,6 +44032,8 @@ export namespace Prisma {
     reports?: InventoryReportUncheckedUpdateManyWithoutFacilityNestedInput
     reportSubmissions?: FacilityReportSubmissionUncheckedUpdateManyWithoutFacilityNestedInput
     keHoachLCNTs?: KeHoachLCNTUncheckedUpdateManyWithoutFacilityNestedInput
+    drugOrders?: DrugOrderUncheckedUpdateManyWithoutFacilityNestedInput
+    drugOrderReceipts?: DrugOrderReceiptUncheckedUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
     activityLogs?: ActivityLogUncheckedUpdateManyWithoutUserNestedInput
   }
@@ -29001,6 +44078,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     therapeuticGroup?: TherapeuticGroupUpdateOneWithoutMasterDrugsNestedInput
+    companyDrugs?: CompanyDrugUpdateManyWithoutMasterDrugNestedInput
+    drugOrderLines?: DrugOrderLineUpdateManyWithoutMasterDrugNestedInput
   }
 
   export type MasterDrugUncheckedUpdateWithoutDrugMapsInput = {
@@ -29032,6 +44111,8 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    companyDrugs?: CompanyDrugUncheckedUpdateManyWithoutMasterDrugNestedInput
+    drugOrderLines?: DrugOrderLineUncheckedUpdateManyWithoutMasterDrugNestedInput
   }
 
   export type InventoryReportUpsertWithWhereUniqueWithoutDrugMapInput = {
@@ -29065,9 +44146,12 @@ export namespace Prisma {
     address?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    company?: CompanyCreateNestedOneWithoutUsersInput
     drugMaps?: FacilityDrugMapCreateNestedManyWithoutFacilityInput
     reportSubmissions?: FacilityReportSubmissionCreateNestedManyWithoutFacilityInput
     keHoachLCNTs?: KeHoachLCNTCreateNestedManyWithoutFacilityInput
+    drugOrders?: DrugOrderCreateNestedManyWithoutFacilityInput
+    drugOrderReceipts?: DrugOrderReceiptCreateNestedManyWithoutFacilityInput
     notifications?: NotificationCreateNestedManyWithoutUserInput
     activityLogs?: ActivityLogCreateNestedManyWithoutUserInput
   }
@@ -29079,6 +44163,7 @@ export namespace Prisma {
     role?: $Enums.Role
     facilityName?: string | null
     facilityCode?: string | null
+    companyId?: string | null
     isActive?: boolean
     autonomyGroup?: string | null
     facilityType?: string | null
@@ -29090,6 +44175,8 @@ export namespace Prisma {
     drugMaps?: FacilityDrugMapUncheckedCreateNestedManyWithoutFacilityInput
     reportSubmissions?: FacilityReportSubmissionUncheckedCreateNestedManyWithoutFacilityInput
     keHoachLCNTs?: KeHoachLCNTUncheckedCreateNestedManyWithoutFacilityInput
+    drugOrders?: DrugOrderUncheckedCreateNestedManyWithoutFacilityInput
+    drugOrderReceipts?: DrugOrderReceiptUncheckedCreateNestedManyWithoutFacilityInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
     activityLogs?: ActivityLogUncheckedCreateNestedManyWithoutUserInput
   }
@@ -29162,9 +44249,12 @@ export namespace Prisma {
     address?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    company?: CompanyUpdateOneWithoutUsersNestedInput
     drugMaps?: FacilityDrugMapUpdateManyWithoutFacilityNestedInput
     reportSubmissions?: FacilityReportSubmissionUpdateManyWithoutFacilityNestedInput
     keHoachLCNTs?: KeHoachLCNTUpdateManyWithoutFacilityNestedInput
+    drugOrders?: DrugOrderUpdateManyWithoutFacilityNestedInput
+    drugOrderReceipts?: DrugOrderReceiptUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUpdateManyWithoutUserNestedInput
     activityLogs?: ActivityLogUpdateManyWithoutUserNestedInput
   }
@@ -29176,6 +44266,7 @@ export namespace Prisma {
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     facilityName?: NullableStringFieldUpdateOperationsInput | string | null
     facilityCode?: NullableStringFieldUpdateOperationsInput | string | null
+    companyId?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     autonomyGroup?: NullableStringFieldUpdateOperationsInput | string | null
     facilityType?: NullableStringFieldUpdateOperationsInput | string | null
@@ -29187,6 +44278,8 @@ export namespace Prisma {
     drugMaps?: FacilityDrugMapUncheckedUpdateManyWithoutFacilityNestedInput
     reportSubmissions?: FacilityReportSubmissionUncheckedUpdateManyWithoutFacilityNestedInput
     keHoachLCNTs?: KeHoachLCNTUncheckedUpdateManyWithoutFacilityNestedInput
+    drugOrders?: DrugOrderUncheckedUpdateManyWithoutFacilityNestedInput
+    drugOrderReceipts?: DrugOrderReceiptUncheckedUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
     activityLogs?: ActivityLogUncheckedUpdateManyWithoutUserNestedInput
   }
@@ -29249,9 +44342,12 @@ export namespace Prisma {
     address?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    company?: CompanyCreateNestedOneWithoutUsersInput
     drugMaps?: FacilityDrugMapCreateNestedManyWithoutFacilityInput
     reports?: InventoryReportCreateNestedManyWithoutFacilityInput
     keHoachLCNTs?: KeHoachLCNTCreateNestedManyWithoutFacilityInput
+    drugOrders?: DrugOrderCreateNestedManyWithoutFacilityInput
+    drugOrderReceipts?: DrugOrderReceiptCreateNestedManyWithoutFacilityInput
     notifications?: NotificationCreateNestedManyWithoutUserInput
     activityLogs?: ActivityLogCreateNestedManyWithoutUserInput
   }
@@ -29263,6 +44359,7 @@ export namespace Prisma {
     role?: $Enums.Role
     facilityName?: string | null
     facilityCode?: string | null
+    companyId?: string | null
     isActive?: boolean
     autonomyGroup?: string | null
     facilityType?: string | null
@@ -29274,6 +44371,8 @@ export namespace Prisma {
     drugMaps?: FacilityDrugMapUncheckedCreateNestedManyWithoutFacilityInput
     reports?: InventoryReportUncheckedCreateNestedManyWithoutFacilityInput
     keHoachLCNTs?: KeHoachLCNTUncheckedCreateNestedManyWithoutFacilityInput
+    drugOrders?: DrugOrderUncheckedCreateNestedManyWithoutFacilityInput
+    drugOrderReceipts?: DrugOrderReceiptUncheckedCreateNestedManyWithoutFacilityInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
     activityLogs?: ActivityLogUncheckedCreateNestedManyWithoutUserInput
   }
@@ -29309,14 +44408,261 @@ export namespace Prisma {
     address?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    company?: CompanyUpdateOneWithoutUsersNestedInput
     drugMaps?: FacilityDrugMapUpdateManyWithoutFacilityNestedInput
     reports?: InventoryReportUpdateManyWithoutFacilityNestedInput
     keHoachLCNTs?: KeHoachLCNTUpdateManyWithoutFacilityNestedInput
+    drugOrders?: DrugOrderUpdateManyWithoutFacilityNestedInput
+    drugOrderReceipts?: DrugOrderReceiptUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUpdateManyWithoutUserNestedInput
     activityLogs?: ActivityLogUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutReportSubmissionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    facilityName?: NullableStringFieldUpdateOperationsInput | string | null
+    facilityCode?: NullableStringFieldUpdateOperationsInput | string | null
+    companyId?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    autonomyGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    facilityType?: NullableStringFieldUpdateOperationsInput | string | null
+    contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    drugMaps?: FacilityDrugMapUncheckedUpdateManyWithoutFacilityNestedInput
+    reports?: InventoryReportUncheckedUpdateManyWithoutFacilityNestedInput
+    keHoachLCNTs?: KeHoachLCNTUncheckedUpdateManyWithoutFacilityNestedInput
+    drugOrders?: DrugOrderUncheckedUpdateManyWithoutFacilityNestedInput
+    drugOrderReceipts?: DrugOrderReceiptUncheckedUpdateManyWithoutFacilityNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
+    activityLogs?: ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserCreateWithoutDrugOrdersInput = {
+    id?: string
+    username: string
+    passwordHash: string
+    role?: $Enums.Role
+    facilityName?: string | null
+    facilityCode?: string | null
+    isActive?: boolean
+    autonomyGroup?: string | null
+    facilityType?: string | null
+    contactPerson?: string | null
+    phoneNumber?: string | null
+    address?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    company?: CompanyCreateNestedOneWithoutUsersInput
+    drugMaps?: FacilityDrugMapCreateNestedManyWithoutFacilityInput
+    reports?: InventoryReportCreateNestedManyWithoutFacilityInput
+    reportSubmissions?: FacilityReportSubmissionCreateNestedManyWithoutFacilityInput
+    keHoachLCNTs?: KeHoachLCNTCreateNestedManyWithoutFacilityInput
+    drugOrderReceipts?: DrugOrderReceiptCreateNestedManyWithoutFacilityInput
+    notifications?: NotificationCreateNestedManyWithoutUserInput
+    activityLogs?: ActivityLogCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutDrugOrdersInput = {
+    id?: string
+    username: string
+    passwordHash: string
+    role?: $Enums.Role
+    facilityName?: string | null
+    facilityCode?: string | null
+    companyId?: string | null
+    isActive?: boolean
+    autonomyGroup?: string | null
+    facilityType?: string | null
+    contactPerson?: string | null
+    phoneNumber?: string | null
+    address?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    drugMaps?: FacilityDrugMapUncheckedCreateNestedManyWithoutFacilityInput
+    reports?: InventoryReportUncheckedCreateNestedManyWithoutFacilityInput
+    reportSubmissions?: FacilityReportSubmissionUncheckedCreateNestedManyWithoutFacilityInput
+    keHoachLCNTs?: KeHoachLCNTUncheckedCreateNestedManyWithoutFacilityInput
+    drugOrderReceipts?: DrugOrderReceiptUncheckedCreateNestedManyWithoutFacilityInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
+    activityLogs?: ActivityLogUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutDrugOrdersInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutDrugOrdersInput, UserUncheckedCreateWithoutDrugOrdersInput>
+  }
+
+  export type CompanyCreateWithoutDrugOrdersInput = {
+    id?: string
+    code: string
+    name: string
+    contactPerson?: string | null
+    phoneNumber?: string | null
+    email?: string | null
+    address?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    users?: UserCreateNestedManyWithoutCompanyInput
+    companyDrugs?: CompanyDrugCreateNestedManyWithoutCompanyInput
+  }
+
+  export type CompanyUncheckedCreateWithoutDrugOrdersInput = {
+    id?: string
+    code: string
+    name: string
+    contactPerson?: string | null
+    phoneNumber?: string | null
+    email?: string | null
+    address?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    users?: UserUncheckedCreateNestedManyWithoutCompanyInput
+    companyDrugs?: CompanyDrugUncheckedCreateNestedManyWithoutCompanyInput
+  }
+
+  export type CompanyCreateOrConnectWithoutDrugOrdersInput = {
+    where: CompanyWhereUniqueInput
+    create: XOR<CompanyCreateWithoutDrugOrdersInput, CompanyUncheckedCreateWithoutDrugOrdersInput>
+  }
+
+  export type DrugOrderLineCreateWithoutOrderInput = {
+    id?: string
+    sourceType: $Enums.DrugOrderLineSourceType
+    displayName: string
+    unit?: string | null
+    requestedQty?: Decimal | DecimalJsLike | number | string
+    acceptedQty?: Decimal | DecimalJsLike | number | string
+    suggestedQty?: Decimal | DecimalJsLike | number | string | null
+    lineStatus?: $Enums.DrugOrderLineStatus
+    companyResponseReason?: string | null
+    suggestionBasis?: string | null
+    suggestionReportMonth?: string | null
+    suggestionRuleVersion?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    masterDrug?: MasterDrugCreateNestedOneWithoutDrugOrderLinesInput
+    companyDrug?: CompanyDrugCreateNestedOneWithoutDrugOrderLinesInput
+    shipmentLines?: DrugOrderShipmentLineCreateNestedManyWithoutOrderLineInput
+    receiptLines?: DrugOrderReceiptLineCreateNestedManyWithoutOrderLineInput
+  }
+
+  export type DrugOrderLineUncheckedCreateWithoutOrderInput = {
+    id?: string
+    sourceType: $Enums.DrugOrderLineSourceType
+    masterDrugId?: string | null
+    companyDrugId?: string | null
+    displayName: string
+    unit?: string | null
+    requestedQty?: Decimal | DecimalJsLike | number | string
+    acceptedQty?: Decimal | DecimalJsLike | number | string
+    suggestedQty?: Decimal | DecimalJsLike | number | string | null
+    lineStatus?: $Enums.DrugOrderLineStatus
+    companyResponseReason?: string | null
+    suggestionBasis?: string | null
+    suggestionReportMonth?: string | null
+    suggestionRuleVersion?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    shipmentLines?: DrugOrderShipmentLineUncheckedCreateNestedManyWithoutOrderLineInput
+    receiptLines?: DrugOrderReceiptLineUncheckedCreateNestedManyWithoutOrderLineInput
+  }
+
+  export type DrugOrderLineCreateOrConnectWithoutOrderInput = {
+    where: DrugOrderLineWhereUniqueInput
+    create: XOR<DrugOrderLineCreateWithoutOrderInput, DrugOrderLineUncheckedCreateWithoutOrderInput>
+  }
+
+  export type DrugOrderLineCreateManyOrderInputEnvelope = {
+    data: DrugOrderLineCreateManyOrderInput | DrugOrderLineCreateManyOrderInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type DrugOrderShipmentCreateWithoutOrderInput = {
+    id?: string
+    shipmentNo: number
+    status?: $Enums.DrugOrderShipmentStatus
+    shippedAt?: Date | string | null
+    companyNote?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    lines?: DrugOrderShipmentLineCreateNestedManyWithoutShipmentInput
+    receipts?: DrugOrderReceiptCreateNestedManyWithoutShipmentInput
+  }
+
+  export type DrugOrderShipmentUncheckedCreateWithoutOrderInput = {
+    id?: string
+    shipmentNo: number
+    status?: $Enums.DrugOrderShipmentStatus
+    shippedAt?: Date | string | null
+    companyNote?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    lines?: DrugOrderShipmentLineUncheckedCreateNestedManyWithoutShipmentInput
+    receipts?: DrugOrderReceiptUncheckedCreateNestedManyWithoutShipmentInput
+  }
+
+  export type DrugOrderShipmentCreateOrConnectWithoutOrderInput = {
+    where: DrugOrderShipmentWhereUniqueInput
+    create: XOR<DrugOrderShipmentCreateWithoutOrderInput, DrugOrderShipmentUncheckedCreateWithoutOrderInput>
+  }
+
+  export type DrugOrderShipmentCreateManyOrderInputEnvelope = {
+    data: DrugOrderShipmentCreateManyOrderInput | DrugOrderShipmentCreateManyOrderInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type DrugOrderReceiptCreateWithoutOrderInput = {
+    id?: string
+    confirmedAt?: Date | string
+    note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    shipment: DrugOrderShipmentCreateNestedOneWithoutReceiptsInput
+    facility: UserCreateNestedOneWithoutDrugOrderReceiptsInput
+    lines?: DrugOrderReceiptLineCreateNestedManyWithoutReceiptInput
+  }
+
+  export type DrugOrderReceiptUncheckedCreateWithoutOrderInput = {
+    id?: string
+    shipmentId: string
+    facilityId: string
+    confirmedAt?: Date | string
+    note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    lines?: DrugOrderReceiptLineUncheckedCreateNestedManyWithoutReceiptInput
+  }
+
+  export type DrugOrderReceiptCreateOrConnectWithoutOrderInput = {
+    where: DrugOrderReceiptWhereUniqueInput
+    create: XOR<DrugOrderReceiptCreateWithoutOrderInput, DrugOrderReceiptUncheckedCreateWithoutOrderInput>
+  }
+
+  export type DrugOrderReceiptCreateManyOrderInputEnvelope = {
+    data: DrugOrderReceiptCreateManyOrderInput | DrugOrderReceiptCreateManyOrderInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type UserUpsertWithoutDrugOrdersInput = {
+    update: XOR<UserUpdateWithoutDrugOrdersInput, UserUncheckedUpdateWithoutDrugOrdersInput>
+    create: XOR<UserCreateWithoutDrugOrdersInput, UserUncheckedCreateWithoutDrugOrdersInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutDrugOrdersInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutDrugOrdersInput, UserUncheckedUpdateWithoutDrugOrdersInput>
+  }
+
+  export type UserUpdateWithoutDrugOrdersInput = {
     id?: StringFieldUpdateOperationsInput | string
     username?: StringFieldUpdateOperationsInput | string
     passwordHash?: StringFieldUpdateOperationsInput | string
@@ -29331,11 +44677,1467 @@ export namespace Prisma {
     address?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    company?: CompanyUpdateOneWithoutUsersNestedInput
+    drugMaps?: FacilityDrugMapUpdateManyWithoutFacilityNestedInput
+    reports?: InventoryReportUpdateManyWithoutFacilityNestedInput
+    reportSubmissions?: FacilityReportSubmissionUpdateManyWithoutFacilityNestedInput
+    keHoachLCNTs?: KeHoachLCNTUpdateManyWithoutFacilityNestedInput
+    drugOrderReceipts?: DrugOrderReceiptUpdateManyWithoutFacilityNestedInput
+    notifications?: NotificationUpdateManyWithoutUserNestedInput
+    activityLogs?: ActivityLogUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutDrugOrdersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    facilityName?: NullableStringFieldUpdateOperationsInput | string | null
+    facilityCode?: NullableStringFieldUpdateOperationsInput | string | null
+    companyId?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    autonomyGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    facilityType?: NullableStringFieldUpdateOperationsInput | string | null
+    contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     drugMaps?: FacilityDrugMapUncheckedUpdateManyWithoutFacilityNestedInput
     reports?: InventoryReportUncheckedUpdateManyWithoutFacilityNestedInput
+    reportSubmissions?: FacilityReportSubmissionUncheckedUpdateManyWithoutFacilityNestedInput
     keHoachLCNTs?: KeHoachLCNTUncheckedUpdateManyWithoutFacilityNestedInput
+    drugOrderReceipts?: DrugOrderReceiptUncheckedUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
     activityLogs?: ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type CompanyUpsertWithoutDrugOrdersInput = {
+    update: XOR<CompanyUpdateWithoutDrugOrdersInput, CompanyUncheckedUpdateWithoutDrugOrdersInput>
+    create: XOR<CompanyCreateWithoutDrugOrdersInput, CompanyUncheckedCreateWithoutDrugOrdersInput>
+    where?: CompanyWhereInput
+  }
+
+  export type CompanyUpdateToOneWithWhereWithoutDrugOrdersInput = {
+    where?: CompanyWhereInput
+    data: XOR<CompanyUpdateWithoutDrugOrdersInput, CompanyUncheckedUpdateWithoutDrugOrdersInput>
+  }
+
+  export type CompanyUpdateWithoutDrugOrdersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    users?: UserUpdateManyWithoutCompanyNestedInput
+    companyDrugs?: CompanyDrugUpdateManyWithoutCompanyNestedInput
+  }
+
+  export type CompanyUncheckedUpdateWithoutDrugOrdersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    users?: UserUncheckedUpdateManyWithoutCompanyNestedInput
+    companyDrugs?: CompanyDrugUncheckedUpdateManyWithoutCompanyNestedInput
+  }
+
+  export type DrugOrderLineUpsertWithWhereUniqueWithoutOrderInput = {
+    where: DrugOrderLineWhereUniqueInput
+    update: XOR<DrugOrderLineUpdateWithoutOrderInput, DrugOrderLineUncheckedUpdateWithoutOrderInput>
+    create: XOR<DrugOrderLineCreateWithoutOrderInput, DrugOrderLineUncheckedCreateWithoutOrderInput>
+  }
+
+  export type DrugOrderLineUpdateWithWhereUniqueWithoutOrderInput = {
+    where: DrugOrderLineWhereUniqueInput
+    data: XOR<DrugOrderLineUpdateWithoutOrderInput, DrugOrderLineUncheckedUpdateWithoutOrderInput>
+  }
+
+  export type DrugOrderLineUpdateManyWithWhereWithoutOrderInput = {
+    where: DrugOrderLineScalarWhereInput
+    data: XOR<DrugOrderLineUpdateManyMutationInput, DrugOrderLineUncheckedUpdateManyWithoutOrderInput>
+  }
+
+  export type DrugOrderShipmentUpsertWithWhereUniqueWithoutOrderInput = {
+    where: DrugOrderShipmentWhereUniqueInput
+    update: XOR<DrugOrderShipmentUpdateWithoutOrderInput, DrugOrderShipmentUncheckedUpdateWithoutOrderInput>
+    create: XOR<DrugOrderShipmentCreateWithoutOrderInput, DrugOrderShipmentUncheckedCreateWithoutOrderInput>
+  }
+
+  export type DrugOrderShipmentUpdateWithWhereUniqueWithoutOrderInput = {
+    where: DrugOrderShipmentWhereUniqueInput
+    data: XOR<DrugOrderShipmentUpdateWithoutOrderInput, DrugOrderShipmentUncheckedUpdateWithoutOrderInput>
+  }
+
+  export type DrugOrderShipmentUpdateManyWithWhereWithoutOrderInput = {
+    where: DrugOrderShipmentScalarWhereInput
+    data: XOR<DrugOrderShipmentUpdateManyMutationInput, DrugOrderShipmentUncheckedUpdateManyWithoutOrderInput>
+  }
+
+  export type DrugOrderShipmentScalarWhereInput = {
+    AND?: DrugOrderShipmentScalarWhereInput | DrugOrderShipmentScalarWhereInput[]
+    OR?: DrugOrderShipmentScalarWhereInput[]
+    NOT?: DrugOrderShipmentScalarWhereInput | DrugOrderShipmentScalarWhereInput[]
+    id?: StringFilter<"DrugOrderShipment"> | string
+    orderId?: StringFilter<"DrugOrderShipment"> | string
+    shipmentNo?: IntFilter<"DrugOrderShipment"> | number
+    status?: EnumDrugOrderShipmentStatusFilter<"DrugOrderShipment"> | $Enums.DrugOrderShipmentStatus
+    shippedAt?: DateTimeNullableFilter<"DrugOrderShipment"> | Date | string | null
+    companyNote?: StringNullableFilter<"DrugOrderShipment"> | string | null
+    createdAt?: DateTimeFilter<"DrugOrderShipment"> | Date | string
+    updatedAt?: DateTimeFilter<"DrugOrderShipment"> | Date | string
+  }
+
+  export type DrugOrderReceiptUpsertWithWhereUniqueWithoutOrderInput = {
+    where: DrugOrderReceiptWhereUniqueInput
+    update: XOR<DrugOrderReceiptUpdateWithoutOrderInput, DrugOrderReceiptUncheckedUpdateWithoutOrderInput>
+    create: XOR<DrugOrderReceiptCreateWithoutOrderInput, DrugOrderReceiptUncheckedCreateWithoutOrderInput>
+  }
+
+  export type DrugOrderReceiptUpdateWithWhereUniqueWithoutOrderInput = {
+    where: DrugOrderReceiptWhereUniqueInput
+    data: XOR<DrugOrderReceiptUpdateWithoutOrderInput, DrugOrderReceiptUncheckedUpdateWithoutOrderInput>
+  }
+
+  export type DrugOrderReceiptUpdateManyWithWhereWithoutOrderInput = {
+    where: DrugOrderReceiptScalarWhereInput
+    data: XOR<DrugOrderReceiptUpdateManyMutationInput, DrugOrderReceiptUncheckedUpdateManyWithoutOrderInput>
+  }
+
+  export type DrugOrderCreateWithoutLinesInput = {
+    id?: string
+    orderNo: string
+    status?: $Enums.DrugOrderStatus
+    baseReportMonth?: string | null
+    note?: string | null
+    submittedAt?: Date | string | null
+    closedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    facility: UserCreateNestedOneWithoutDrugOrdersInput
+    company: CompanyCreateNestedOneWithoutDrugOrdersInput
+    shipments?: DrugOrderShipmentCreateNestedManyWithoutOrderInput
+    receipts?: DrugOrderReceiptCreateNestedManyWithoutOrderInput
+  }
+
+  export type DrugOrderUncheckedCreateWithoutLinesInput = {
+    id?: string
+    orderNo: string
+    facilityId: string
+    companyId: string
+    status?: $Enums.DrugOrderStatus
+    baseReportMonth?: string | null
+    note?: string | null
+    submittedAt?: Date | string | null
+    closedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    shipments?: DrugOrderShipmentUncheckedCreateNestedManyWithoutOrderInput
+    receipts?: DrugOrderReceiptUncheckedCreateNestedManyWithoutOrderInput
+  }
+
+  export type DrugOrderCreateOrConnectWithoutLinesInput = {
+    where: DrugOrderWhereUniqueInput
+    create: XOR<DrugOrderCreateWithoutLinesInput, DrugOrderUncheckedCreateWithoutLinesInput>
+  }
+
+  export type MasterDrugCreateWithoutDrugOrderLinesInput = {
+    id?: string
+    maChung: string
+    maBhyt?: string | null
+    tenThuoc: string
+    hoatChat?: string | null
+    hamLuong?: string | null
+    dangBaoChe?: string | null
+    soDangKy?: string | null
+    quyCach?: string | null
+    donViTinh?: string | null
+    tieuChuan?: string | null
+    tuoiTho?: string | null
+    duongDung?: string | null
+    nguonGoc?: string | null
+    congTySanXuat?: string | null
+    nuocSanXuat?: string | null
+    diaChiSanXuat?: string | null
+    congTyDangKy?: string | null
+    nuocDangKy?: string | null
+    diaChiDangKy?: string | null
+    nhomThuoc?: string | null
+    isKeDon?: string | null
+    kiemSoatDacBiet?: string | null
+    isTrongNuoc?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    therapeuticGroup?: TherapeuticGroupCreateNestedOneWithoutMasterDrugsInput
+    drugMaps?: FacilityDrugMapCreateNestedManyWithoutMasterDrugInput
+    companyDrugs?: CompanyDrugCreateNestedManyWithoutMasterDrugInput
+  }
+
+  export type MasterDrugUncheckedCreateWithoutDrugOrderLinesInput = {
+    id?: string
+    maChung: string
+    maBhyt?: string | null
+    tenThuoc: string
+    hoatChat?: string | null
+    hamLuong?: string | null
+    dangBaoChe?: string | null
+    soDangKy?: string | null
+    quyCach?: string | null
+    donViTinh?: string | null
+    tieuChuan?: string | null
+    tuoiTho?: string | null
+    duongDung?: string | null
+    nguonGoc?: string | null
+    congTySanXuat?: string | null
+    nuocSanXuat?: string | null
+    diaChiSanXuat?: string | null
+    congTyDangKy?: string | null
+    nuocDangKy?: string | null
+    diaChiDangKy?: string | null
+    nhomThuoc?: string | null
+    therapeuticGroupId?: string | null
+    isKeDon?: string | null
+    kiemSoatDacBiet?: string | null
+    isTrongNuoc?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    drugMaps?: FacilityDrugMapUncheckedCreateNestedManyWithoutMasterDrugInput
+    companyDrugs?: CompanyDrugUncheckedCreateNestedManyWithoutMasterDrugInput
+  }
+
+  export type MasterDrugCreateOrConnectWithoutDrugOrderLinesInput = {
+    where: MasterDrugWhereUniqueInput
+    create: XOR<MasterDrugCreateWithoutDrugOrderLinesInput, MasterDrugUncheckedCreateWithoutDrugOrderLinesInput>
+  }
+
+  export type CompanyDrugCreateWithoutDrugOrderLinesInput = {
+    id?: string
+    companyDrugCode: string
+    companyDrugName: string
+    activeIngredient?: string | null
+    quyCach?: string | null
+    unit?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    company: CompanyCreateNestedOneWithoutCompanyDrugsInput
+    masterDrug?: MasterDrugCreateNestedOneWithoutCompanyDrugsInput
+  }
+
+  export type CompanyDrugUncheckedCreateWithoutDrugOrderLinesInput = {
+    id?: string
+    companyId: string
+    masterDrugId?: string | null
+    companyDrugCode: string
+    companyDrugName: string
+    activeIngredient?: string | null
+    quyCach?: string | null
+    unit?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type CompanyDrugCreateOrConnectWithoutDrugOrderLinesInput = {
+    where: CompanyDrugWhereUniqueInput
+    create: XOR<CompanyDrugCreateWithoutDrugOrderLinesInput, CompanyDrugUncheckedCreateWithoutDrugOrderLinesInput>
+  }
+
+  export type DrugOrderShipmentLineCreateWithoutOrderLineInput = {
+    id?: string
+    shippedQty?: Decimal | DecimalJsLike | number | string
+    reason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    shipment: DrugOrderShipmentCreateNestedOneWithoutLinesInput
+    receiptLines?: DrugOrderReceiptLineCreateNestedManyWithoutShipmentLineInput
+  }
+
+  export type DrugOrderShipmentLineUncheckedCreateWithoutOrderLineInput = {
+    id?: string
+    shipmentId: string
+    shippedQty?: Decimal | DecimalJsLike | number | string
+    reason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    receiptLines?: DrugOrderReceiptLineUncheckedCreateNestedManyWithoutShipmentLineInput
+  }
+
+  export type DrugOrderShipmentLineCreateOrConnectWithoutOrderLineInput = {
+    where: DrugOrderShipmentLineWhereUniqueInput
+    create: XOR<DrugOrderShipmentLineCreateWithoutOrderLineInput, DrugOrderShipmentLineUncheckedCreateWithoutOrderLineInput>
+  }
+
+  export type DrugOrderShipmentLineCreateManyOrderLineInputEnvelope = {
+    data: DrugOrderShipmentLineCreateManyOrderLineInput | DrugOrderShipmentLineCreateManyOrderLineInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type DrugOrderReceiptLineCreateWithoutOrderLineInput = {
+    id?: string
+    receivedQty?: Decimal | DecimalJsLike | number | string
+    differenceReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    receipt: DrugOrderReceiptCreateNestedOneWithoutLinesInput
+    shipmentLine: DrugOrderShipmentLineCreateNestedOneWithoutReceiptLinesInput
+  }
+
+  export type DrugOrderReceiptLineUncheckedCreateWithoutOrderLineInput = {
+    id?: string
+    receiptId: string
+    shipmentLineId: string
+    receivedQty?: Decimal | DecimalJsLike | number | string
+    differenceReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DrugOrderReceiptLineCreateOrConnectWithoutOrderLineInput = {
+    where: DrugOrderReceiptLineWhereUniqueInput
+    create: XOR<DrugOrderReceiptLineCreateWithoutOrderLineInput, DrugOrderReceiptLineUncheckedCreateWithoutOrderLineInput>
+  }
+
+  export type DrugOrderReceiptLineCreateManyOrderLineInputEnvelope = {
+    data: DrugOrderReceiptLineCreateManyOrderLineInput | DrugOrderReceiptLineCreateManyOrderLineInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type DrugOrderUpsertWithoutLinesInput = {
+    update: XOR<DrugOrderUpdateWithoutLinesInput, DrugOrderUncheckedUpdateWithoutLinesInput>
+    create: XOR<DrugOrderCreateWithoutLinesInput, DrugOrderUncheckedCreateWithoutLinesInput>
+    where?: DrugOrderWhereInput
+  }
+
+  export type DrugOrderUpdateToOneWithWhereWithoutLinesInput = {
+    where?: DrugOrderWhereInput
+    data: XOR<DrugOrderUpdateWithoutLinesInput, DrugOrderUncheckedUpdateWithoutLinesInput>
+  }
+
+  export type DrugOrderUpdateWithoutLinesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderNo?: StringFieldUpdateOperationsInput | string
+    status?: EnumDrugOrderStatusFieldUpdateOperationsInput | $Enums.DrugOrderStatus
+    baseReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    facility?: UserUpdateOneRequiredWithoutDrugOrdersNestedInput
+    company?: CompanyUpdateOneRequiredWithoutDrugOrdersNestedInput
+    shipments?: DrugOrderShipmentUpdateManyWithoutOrderNestedInput
+    receipts?: DrugOrderReceiptUpdateManyWithoutOrderNestedInput
+  }
+
+  export type DrugOrderUncheckedUpdateWithoutLinesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderNo?: StringFieldUpdateOperationsInput | string
+    facilityId?: StringFieldUpdateOperationsInput | string
+    companyId?: StringFieldUpdateOperationsInput | string
+    status?: EnumDrugOrderStatusFieldUpdateOperationsInput | $Enums.DrugOrderStatus
+    baseReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    shipments?: DrugOrderShipmentUncheckedUpdateManyWithoutOrderNestedInput
+    receipts?: DrugOrderReceiptUncheckedUpdateManyWithoutOrderNestedInput
+  }
+
+  export type MasterDrugUpsertWithoutDrugOrderLinesInput = {
+    update: XOR<MasterDrugUpdateWithoutDrugOrderLinesInput, MasterDrugUncheckedUpdateWithoutDrugOrderLinesInput>
+    create: XOR<MasterDrugCreateWithoutDrugOrderLinesInput, MasterDrugUncheckedCreateWithoutDrugOrderLinesInput>
+    where?: MasterDrugWhereInput
+  }
+
+  export type MasterDrugUpdateToOneWithWhereWithoutDrugOrderLinesInput = {
+    where?: MasterDrugWhereInput
+    data: XOR<MasterDrugUpdateWithoutDrugOrderLinesInput, MasterDrugUncheckedUpdateWithoutDrugOrderLinesInput>
+  }
+
+  export type MasterDrugUpdateWithoutDrugOrderLinesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    maChung?: StringFieldUpdateOperationsInput | string
+    maBhyt?: NullableStringFieldUpdateOperationsInput | string | null
+    tenThuoc?: StringFieldUpdateOperationsInput | string
+    hoatChat?: NullableStringFieldUpdateOperationsInput | string | null
+    hamLuong?: NullableStringFieldUpdateOperationsInput | string | null
+    dangBaoChe?: NullableStringFieldUpdateOperationsInput | string | null
+    soDangKy?: NullableStringFieldUpdateOperationsInput | string | null
+    quyCach?: NullableStringFieldUpdateOperationsInput | string | null
+    donViTinh?: NullableStringFieldUpdateOperationsInput | string | null
+    tieuChuan?: NullableStringFieldUpdateOperationsInput | string | null
+    tuoiTho?: NullableStringFieldUpdateOperationsInput | string | null
+    duongDung?: NullableStringFieldUpdateOperationsInput | string | null
+    nguonGoc?: NullableStringFieldUpdateOperationsInput | string | null
+    congTySanXuat?: NullableStringFieldUpdateOperationsInput | string | null
+    nuocSanXuat?: NullableStringFieldUpdateOperationsInput | string | null
+    diaChiSanXuat?: NullableStringFieldUpdateOperationsInput | string | null
+    congTyDangKy?: NullableStringFieldUpdateOperationsInput | string | null
+    nuocDangKy?: NullableStringFieldUpdateOperationsInput | string | null
+    diaChiDangKy?: NullableStringFieldUpdateOperationsInput | string | null
+    nhomThuoc?: NullableStringFieldUpdateOperationsInput | string | null
+    isKeDon?: NullableStringFieldUpdateOperationsInput | string | null
+    kiemSoatDacBiet?: NullableStringFieldUpdateOperationsInput | string | null
+    isTrongNuoc?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    therapeuticGroup?: TherapeuticGroupUpdateOneWithoutMasterDrugsNestedInput
+    drugMaps?: FacilityDrugMapUpdateManyWithoutMasterDrugNestedInput
+    companyDrugs?: CompanyDrugUpdateManyWithoutMasterDrugNestedInput
+  }
+
+  export type MasterDrugUncheckedUpdateWithoutDrugOrderLinesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    maChung?: StringFieldUpdateOperationsInput | string
+    maBhyt?: NullableStringFieldUpdateOperationsInput | string | null
+    tenThuoc?: StringFieldUpdateOperationsInput | string
+    hoatChat?: NullableStringFieldUpdateOperationsInput | string | null
+    hamLuong?: NullableStringFieldUpdateOperationsInput | string | null
+    dangBaoChe?: NullableStringFieldUpdateOperationsInput | string | null
+    soDangKy?: NullableStringFieldUpdateOperationsInput | string | null
+    quyCach?: NullableStringFieldUpdateOperationsInput | string | null
+    donViTinh?: NullableStringFieldUpdateOperationsInput | string | null
+    tieuChuan?: NullableStringFieldUpdateOperationsInput | string | null
+    tuoiTho?: NullableStringFieldUpdateOperationsInput | string | null
+    duongDung?: NullableStringFieldUpdateOperationsInput | string | null
+    nguonGoc?: NullableStringFieldUpdateOperationsInput | string | null
+    congTySanXuat?: NullableStringFieldUpdateOperationsInput | string | null
+    nuocSanXuat?: NullableStringFieldUpdateOperationsInput | string | null
+    diaChiSanXuat?: NullableStringFieldUpdateOperationsInput | string | null
+    congTyDangKy?: NullableStringFieldUpdateOperationsInput | string | null
+    nuocDangKy?: NullableStringFieldUpdateOperationsInput | string | null
+    diaChiDangKy?: NullableStringFieldUpdateOperationsInput | string | null
+    nhomThuoc?: NullableStringFieldUpdateOperationsInput | string | null
+    therapeuticGroupId?: NullableStringFieldUpdateOperationsInput | string | null
+    isKeDon?: NullableStringFieldUpdateOperationsInput | string | null
+    kiemSoatDacBiet?: NullableStringFieldUpdateOperationsInput | string | null
+    isTrongNuoc?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    drugMaps?: FacilityDrugMapUncheckedUpdateManyWithoutMasterDrugNestedInput
+    companyDrugs?: CompanyDrugUncheckedUpdateManyWithoutMasterDrugNestedInput
+  }
+
+  export type CompanyDrugUpsertWithoutDrugOrderLinesInput = {
+    update: XOR<CompanyDrugUpdateWithoutDrugOrderLinesInput, CompanyDrugUncheckedUpdateWithoutDrugOrderLinesInput>
+    create: XOR<CompanyDrugCreateWithoutDrugOrderLinesInput, CompanyDrugUncheckedCreateWithoutDrugOrderLinesInput>
+    where?: CompanyDrugWhereInput
+  }
+
+  export type CompanyDrugUpdateToOneWithWhereWithoutDrugOrderLinesInput = {
+    where?: CompanyDrugWhereInput
+    data: XOR<CompanyDrugUpdateWithoutDrugOrderLinesInput, CompanyDrugUncheckedUpdateWithoutDrugOrderLinesInput>
+  }
+
+  export type CompanyDrugUpdateWithoutDrugOrderLinesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    companyDrugCode?: StringFieldUpdateOperationsInput | string
+    companyDrugName?: StringFieldUpdateOperationsInput | string
+    activeIngredient?: NullableStringFieldUpdateOperationsInput | string | null
+    quyCach?: NullableStringFieldUpdateOperationsInput | string | null
+    unit?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    company?: CompanyUpdateOneRequiredWithoutCompanyDrugsNestedInput
+    masterDrug?: MasterDrugUpdateOneWithoutCompanyDrugsNestedInput
+  }
+
+  export type CompanyDrugUncheckedUpdateWithoutDrugOrderLinesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    companyId?: StringFieldUpdateOperationsInput | string
+    masterDrugId?: NullableStringFieldUpdateOperationsInput | string | null
+    companyDrugCode?: StringFieldUpdateOperationsInput | string
+    companyDrugName?: StringFieldUpdateOperationsInput | string
+    activeIngredient?: NullableStringFieldUpdateOperationsInput | string | null
+    quyCach?: NullableStringFieldUpdateOperationsInput | string | null
+    unit?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DrugOrderShipmentLineUpsertWithWhereUniqueWithoutOrderLineInput = {
+    where: DrugOrderShipmentLineWhereUniqueInput
+    update: XOR<DrugOrderShipmentLineUpdateWithoutOrderLineInput, DrugOrderShipmentLineUncheckedUpdateWithoutOrderLineInput>
+    create: XOR<DrugOrderShipmentLineCreateWithoutOrderLineInput, DrugOrderShipmentLineUncheckedCreateWithoutOrderLineInput>
+  }
+
+  export type DrugOrderShipmentLineUpdateWithWhereUniqueWithoutOrderLineInput = {
+    where: DrugOrderShipmentLineWhereUniqueInput
+    data: XOR<DrugOrderShipmentLineUpdateWithoutOrderLineInput, DrugOrderShipmentLineUncheckedUpdateWithoutOrderLineInput>
+  }
+
+  export type DrugOrderShipmentLineUpdateManyWithWhereWithoutOrderLineInput = {
+    where: DrugOrderShipmentLineScalarWhereInput
+    data: XOR<DrugOrderShipmentLineUpdateManyMutationInput, DrugOrderShipmentLineUncheckedUpdateManyWithoutOrderLineInput>
+  }
+
+  export type DrugOrderShipmentLineScalarWhereInput = {
+    AND?: DrugOrderShipmentLineScalarWhereInput | DrugOrderShipmentLineScalarWhereInput[]
+    OR?: DrugOrderShipmentLineScalarWhereInput[]
+    NOT?: DrugOrderShipmentLineScalarWhereInput | DrugOrderShipmentLineScalarWhereInput[]
+    id?: StringFilter<"DrugOrderShipmentLine"> | string
+    shipmentId?: StringFilter<"DrugOrderShipmentLine"> | string
+    orderLineId?: StringFilter<"DrugOrderShipmentLine"> | string
+    shippedQty?: DecimalFilter<"DrugOrderShipmentLine"> | Decimal | DecimalJsLike | number | string
+    reason?: StringNullableFilter<"DrugOrderShipmentLine"> | string | null
+    createdAt?: DateTimeFilter<"DrugOrderShipmentLine"> | Date | string
+    updatedAt?: DateTimeFilter<"DrugOrderShipmentLine"> | Date | string
+  }
+
+  export type DrugOrderReceiptLineUpsertWithWhereUniqueWithoutOrderLineInput = {
+    where: DrugOrderReceiptLineWhereUniqueInput
+    update: XOR<DrugOrderReceiptLineUpdateWithoutOrderLineInput, DrugOrderReceiptLineUncheckedUpdateWithoutOrderLineInput>
+    create: XOR<DrugOrderReceiptLineCreateWithoutOrderLineInput, DrugOrderReceiptLineUncheckedCreateWithoutOrderLineInput>
+  }
+
+  export type DrugOrderReceiptLineUpdateWithWhereUniqueWithoutOrderLineInput = {
+    where: DrugOrderReceiptLineWhereUniqueInput
+    data: XOR<DrugOrderReceiptLineUpdateWithoutOrderLineInput, DrugOrderReceiptLineUncheckedUpdateWithoutOrderLineInput>
+  }
+
+  export type DrugOrderReceiptLineUpdateManyWithWhereWithoutOrderLineInput = {
+    where: DrugOrderReceiptLineScalarWhereInput
+    data: XOR<DrugOrderReceiptLineUpdateManyMutationInput, DrugOrderReceiptLineUncheckedUpdateManyWithoutOrderLineInput>
+  }
+
+  export type DrugOrderReceiptLineScalarWhereInput = {
+    AND?: DrugOrderReceiptLineScalarWhereInput | DrugOrderReceiptLineScalarWhereInput[]
+    OR?: DrugOrderReceiptLineScalarWhereInput[]
+    NOT?: DrugOrderReceiptLineScalarWhereInput | DrugOrderReceiptLineScalarWhereInput[]
+    id?: StringFilter<"DrugOrderReceiptLine"> | string
+    receiptId?: StringFilter<"DrugOrderReceiptLine"> | string
+    shipmentLineId?: StringFilter<"DrugOrderReceiptLine"> | string
+    orderLineId?: StringFilter<"DrugOrderReceiptLine"> | string
+    receivedQty?: DecimalFilter<"DrugOrderReceiptLine"> | Decimal | DecimalJsLike | number | string
+    differenceReason?: StringNullableFilter<"DrugOrderReceiptLine"> | string | null
+    createdAt?: DateTimeFilter<"DrugOrderReceiptLine"> | Date | string
+    updatedAt?: DateTimeFilter<"DrugOrderReceiptLine"> | Date | string
+  }
+
+  export type DrugOrderCreateWithoutShipmentsInput = {
+    id?: string
+    orderNo: string
+    status?: $Enums.DrugOrderStatus
+    baseReportMonth?: string | null
+    note?: string | null
+    submittedAt?: Date | string | null
+    closedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    facility: UserCreateNestedOneWithoutDrugOrdersInput
+    company: CompanyCreateNestedOneWithoutDrugOrdersInput
+    lines?: DrugOrderLineCreateNestedManyWithoutOrderInput
+    receipts?: DrugOrderReceiptCreateNestedManyWithoutOrderInput
+  }
+
+  export type DrugOrderUncheckedCreateWithoutShipmentsInput = {
+    id?: string
+    orderNo: string
+    facilityId: string
+    companyId: string
+    status?: $Enums.DrugOrderStatus
+    baseReportMonth?: string | null
+    note?: string | null
+    submittedAt?: Date | string | null
+    closedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    lines?: DrugOrderLineUncheckedCreateNestedManyWithoutOrderInput
+    receipts?: DrugOrderReceiptUncheckedCreateNestedManyWithoutOrderInput
+  }
+
+  export type DrugOrderCreateOrConnectWithoutShipmentsInput = {
+    where: DrugOrderWhereUniqueInput
+    create: XOR<DrugOrderCreateWithoutShipmentsInput, DrugOrderUncheckedCreateWithoutShipmentsInput>
+  }
+
+  export type DrugOrderShipmentLineCreateWithoutShipmentInput = {
+    id?: string
+    shippedQty?: Decimal | DecimalJsLike | number | string
+    reason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    orderLine: DrugOrderLineCreateNestedOneWithoutShipmentLinesInput
+    receiptLines?: DrugOrderReceiptLineCreateNestedManyWithoutShipmentLineInput
+  }
+
+  export type DrugOrderShipmentLineUncheckedCreateWithoutShipmentInput = {
+    id?: string
+    orderLineId: string
+    shippedQty?: Decimal | DecimalJsLike | number | string
+    reason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    receiptLines?: DrugOrderReceiptLineUncheckedCreateNestedManyWithoutShipmentLineInput
+  }
+
+  export type DrugOrderShipmentLineCreateOrConnectWithoutShipmentInput = {
+    where: DrugOrderShipmentLineWhereUniqueInput
+    create: XOR<DrugOrderShipmentLineCreateWithoutShipmentInput, DrugOrderShipmentLineUncheckedCreateWithoutShipmentInput>
+  }
+
+  export type DrugOrderShipmentLineCreateManyShipmentInputEnvelope = {
+    data: DrugOrderShipmentLineCreateManyShipmentInput | DrugOrderShipmentLineCreateManyShipmentInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type DrugOrderReceiptCreateWithoutShipmentInput = {
+    id?: string
+    confirmedAt?: Date | string
+    note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    order: DrugOrderCreateNestedOneWithoutReceiptsInput
+    facility: UserCreateNestedOneWithoutDrugOrderReceiptsInput
+    lines?: DrugOrderReceiptLineCreateNestedManyWithoutReceiptInput
+  }
+
+  export type DrugOrderReceiptUncheckedCreateWithoutShipmentInput = {
+    id?: string
+    orderId: string
+    facilityId: string
+    confirmedAt?: Date | string
+    note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    lines?: DrugOrderReceiptLineUncheckedCreateNestedManyWithoutReceiptInput
+  }
+
+  export type DrugOrderReceiptCreateOrConnectWithoutShipmentInput = {
+    where: DrugOrderReceiptWhereUniqueInput
+    create: XOR<DrugOrderReceiptCreateWithoutShipmentInput, DrugOrderReceiptUncheckedCreateWithoutShipmentInput>
+  }
+
+  export type DrugOrderReceiptCreateManyShipmentInputEnvelope = {
+    data: DrugOrderReceiptCreateManyShipmentInput | DrugOrderReceiptCreateManyShipmentInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type DrugOrderUpsertWithoutShipmentsInput = {
+    update: XOR<DrugOrderUpdateWithoutShipmentsInput, DrugOrderUncheckedUpdateWithoutShipmentsInput>
+    create: XOR<DrugOrderCreateWithoutShipmentsInput, DrugOrderUncheckedCreateWithoutShipmentsInput>
+    where?: DrugOrderWhereInput
+  }
+
+  export type DrugOrderUpdateToOneWithWhereWithoutShipmentsInput = {
+    where?: DrugOrderWhereInput
+    data: XOR<DrugOrderUpdateWithoutShipmentsInput, DrugOrderUncheckedUpdateWithoutShipmentsInput>
+  }
+
+  export type DrugOrderUpdateWithoutShipmentsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderNo?: StringFieldUpdateOperationsInput | string
+    status?: EnumDrugOrderStatusFieldUpdateOperationsInput | $Enums.DrugOrderStatus
+    baseReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    facility?: UserUpdateOneRequiredWithoutDrugOrdersNestedInput
+    company?: CompanyUpdateOneRequiredWithoutDrugOrdersNestedInput
+    lines?: DrugOrderLineUpdateManyWithoutOrderNestedInput
+    receipts?: DrugOrderReceiptUpdateManyWithoutOrderNestedInput
+  }
+
+  export type DrugOrderUncheckedUpdateWithoutShipmentsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderNo?: StringFieldUpdateOperationsInput | string
+    facilityId?: StringFieldUpdateOperationsInput | string
+    companyId?: StringFieldUpdateOperationsInput | string
+    status?: EnumDrugOrderStatusFieldUpdateOperationsInput | $Enums.DrugOrderStatus
+    baseReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lines?: DrugOrderLineUncheckedUpdateManyWithoutOrderNestedInput
+    receipts?: DrugOrderReceiptUncheckedUpdateManyWithoutOrderNestedInput
+  }
+
+  export type DrugOrderShipmentLineUpsertWithWhereUniqueWithoutShipmentInput = {
+    where: DrugOrderShipmentLineWhereUniqueInput
+    update: XOR<DrugOrderShipmentLineUpdateWithoutShipmentInput, DrugOrderShipmentLineUncheckedUpdateWithoutShipmentInput>
+    create: XOR<DrugOrderShipmentLineCreateWithoutShipmentInput, DrugOrderShipmentLineUncheckedCreateWithoutShipmentInput>
+  }
+
+  export type DrugOrderShipmentLineUpdateWithWhereUniqueWithoutShipmentInput = {
+    where: DrugOrderShipmentLineWhereUniqueInput
+    data: XOR<DrugOrderShipmentLineUpdateWithoutShipmentInput, DrugOrderShipmentLineUncheckedUpdateWithoutShipmentInput>
+  }
+
+  export type DrugOrderShipmentLineUpdateManyWithWhereWithoutShipmentInput = {
+    where: DrugOrderShipmentLineScalarWhereInput
+    data: XOR<DrugOrderShipmentLineUpdateManyMutationInput, DrugOrderShipmentLineUncheckedUpdateManyWithoutShipmentInput>
+  }
+
+  export type DrugOrderReceiptUpsertWithWhereUniqueWithoutShipmentInput = {
+    where: DrugOrderReceiptWhereUniqueInput
+    update: XOR<DrugOrderReceiptUpdateWithoutShipmentInput, DrugOrderReceiptUncheckedUpdateWithoutShipmentInput>
+    create: XOR<DrugOrderReceiptCreateWithoutShipmentInput, DrugOrderReceiptUncheckedCreateWithoutShipmentInput>
+  }
+
+  export type DrugOrderReceiptUpdateWithWhereUniqueWithoutShipmentInput = {
+    where: DrugOrderReceiptWhereUniqueInput
+    data: XOR<DrugOrderReceiptUpdateWithoutShipmentInput, DrugOrderReceiptUncheckedUpdateWithoutShipmentInput>
+  }
+
+  export type DrugOrderReceiptUpdateManyWithWhereWithoutShipmentInput = {
+    where: DrugOrderReceiptScalarWhereInput
+    data: XOR<DrugOrderReceiptUpdateManyMutationInput, DrugOrderReceiptUncheckedUpdateManyWithoutShipmentInput>
+  }
+
+  export type DrugOrderShipmentCreateWithoutLinesInput = {
+    id?: string
+    shipmentNo: number
+    status?: $Enums.DrugOrderShipmentStatus
+    shippedAt?: Date | string | null
+    companyNote?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    order: DrugOrderCreateNestedOneWithoutShipmentsInput
+    receipts?: DrugOrderReceiptCreateNestedManyWithoutShipmentInput
+  }
+
+  export type DrugOrderShipmentUncheckedCreateWithoutLinesInput = {
+    id?: string
+    orderId: string
+    shipmentNo: number
+    status?: $Enums.DrugOrderShipmentStatus
+    shippedAt?: Date | string | null
+    companyNote?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    receipts?: DrugOrderReceiptUncheckedCreateNestedManyWithoutShipmentInput
+  }
+
+  export type DrugOrderShipmentCreateOrConnectWithoutLinesInput = {
+    where: DrugOrderShipmentWhereUniqueInput
+    create: XOR<DrugOrderShipmentCreateWithoutLinesInput, DrugOrderShipmentUncheckedCreateWithoutLinesInput>
+  }
+
+  export type DrugOrderLineCreateWithoutShipmentLinesInput = {
+    id?: string
+    sourceType: $Enums.DrugOrderLineSourceType
+    displayName: string
+    unit?: string | null
+    requestedQty?: Decimal | DecimalJsLike | number | string
+    acceptedQty?: Decimal | DecimalJsLike | number | string
+    suggestedQty?: Decimal | DecimalJsLike | number | string | null
+    lineStatus?: $Enums.DrugOrderLineStatus
+    companyResponseReason?: string | null
+    suggestionBasis?: string | null
+    suggestionReportMonth?: string | null
+    suggestionRuleVersion?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    order: DrugOrderCreateNestedOneWithoutLinesInput
+    masterDrug?: MasterDrugCreateNestedOneWithoutDrugOrderLinesInput
+    companyDrug?: CompanyDrugCreateNestedOneWithoutDrugOrderLinesInput
+    receiptLines?: DrugOrderReceiptLineCreateNestedManyWithoutOrderLineInput
+  }
+
+  export type DrugOrderLineUncheckedCreateWithoutShipmentLinesInput = {
+    id?: string
+    orderId: string
+    sourceType: $Enums.DrugOrderLineSourceType
+    masterDrugId?: string | null
+    companyDrugId?: string | null
+    displayName: string
+    unit?: string | null
+    requestedQty?: Decimal | DecimalJsLike | number | string
+    acceptedQty?: Decimal | DecimalJsLike | number | string
+    suggestedQty?: Decimal | DecimalJsLike | number | string | null
+    lineStatus?: $Enums.DrugOrderLineStatus
+    companyResponseReason?: string | null
+    suggestionBasis?: string | null
+    suggestionReportMonth?: string | null
+    suggestionRuleVersion?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    receiptLines?: DrugOrderReceiptLineUncheckedCreateNestedManyWithoutOrderLineInput
+  }
+
+  export type DrugOrderLineCreateOrConnectWithoutShipmentLinesInput = {
+    where: DrugOrderLineWhereUniqueInput
+    create: XOR<DrugOrderLineCreateWithoutShipmentLinesInput, DrugOrderLineUncheckedCreateWithoutShipmentLinesInput>
+  }
+
+  export type DrugOrderReceiptLineCreateWithoutShipmentLineInput = {
+    id?: string
+    receivedQty?: Decimal | DecimalJsLike | number | string
+    differenceReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    receipt: DrugOrderReceiptCreateNestedOneWithoutLinesInput
+    orderLine: DrugOrderLineCreateNestedOneWithoutReceiptLinesInput
+  }
+
+  export type DrugOrderReceiptLineUncheckedCreateWithoutShipmentLineInput = {
+    id?: string
+    receiptId: string
+    orderLineId: string
+    receivedQty?: Decimal | DecimalJsLike | number | string
+    differenceReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DrugOrderReceiptLineCreateOrConnectWithoutShipmentLineInput = {
+    where: DrugOrderReceiptLineWhereUniqueInput
+    create: XOR<DrugOrderReceiptLineCreateWithoutShipmentLineInput, DrugOrderReceiptLineUncheckedCreateWithoutShipmentLineInput>
+  }
+
+  export type DrugOrderReceiptLineCreateManyShipmentLineInputEnvelope = {
+    data: DrugOrderReceiptLineCreateManyShipmentLineInput | DrugOrderReceiptLineCreateManyShipmentLineInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type DrugOrderShipmentUpsertWithoutLinesInput = {
+    update: XOR<DrugOrderShipmentUpdateWithoutLinesInput, DrugOrderShipmentUncheckedUpdateWithoutLinesInput>
+    create: XOR<DrugOrderShipmentCreateWithoutLinesInput, DrugOrderShipmentUncheckedCreateWithoutLinesInput>
+    where?: DrugOrderShipmentWhereInput
+  }
+
+  export type DrugOrderShipmentUpdateToOneWithWhereWithoutLinesInput = {
+    where?: DrugOrderShipmentWhereInput
+    data: XOR<DrugOrderShipmentUpdateWithoutLinesInput, DrugOrderShipmentUncheckedUpdateWithoutLinesInput>
+  }
+
+  export type DrugOrderShipmentUpdateWithoutLinesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    shipmentNo?: IntFieldUpdateOperationsInput | number
+    status?: EnumDrugOrderShipmentStatusFieldUpdateOperationsInput | $Enums.DrugOrderShipmentStatus
+    shippedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    companyNote?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    order?: DrugOrderUpdateOneRequiredWithoutShipmentsNestedInput
+    receipts?: DrugOrderReceiptUpdateManyWithoutShipmentNestedInput
+  }
+
+  export type DrugOrderShipmentUncheckedUpdateWithoutLinesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderId?: StringFieldUpdateOperationsInput | string
+    shipmentNo?: IntFieldUpdateOperationsInput | number
+    status?: EnumDrugOrderShipmentStatusFieldUpdateOperationsInput | $Enums.DrugOrderShipmentStatus
+    shippedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    companyNote?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    receipts?: DrugOrderReceiptUncheckedUpdateManyWithoutShipmentNestedInput
+  }
+
+  export type DrugOrderLineUpsertWithoutShipmentLinesInput = {
+    update: XOR<DrugOrderLineUpdateWithoutShipmentLinesInput, DrugOrderLineUncheckedUpdateWithoutShipmentLinesInput>
+    create: XOR<DrugOrderLineCreateWithoutShipmentLinesInput, DrugOrderLineUncheckedCreateWithoutShipmentLinesInput>
+    where?: DrugOrderLineWhereInput
+  }
+
+  export type DrugOrderLineUpdateToOneWithWhereWithoutShipmentLinesInput = {
+    where?: DrugOrderLineWhereInput
+    data: XOR<DrugOrderLineUpdateWithoutShipmentLinesInput, DrugOrderLineUncheckedUpdateWithoutShipmentLinesInput>
+  }
+
+  export type DrugOrderLineUpdateWithoutShipmentLinesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    sourceType?: EnumDrugOrderLineSourceTypeFieldUpdateOperationsInput | $Enums.DrugOrderLineSourceType
+    displayName?: StringFieldUpdateOperationsInput | string
+    unit?: NullableStringFieldUpdateOperationsInput | string | null
+    requestedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    acceptedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    suggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    lineStatus?: EnumDrugOrderLineStatusFieldUpdateOperationsInput | $Enums.DrugOrderLineStatus
+    companyResponseReason?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionBasis?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionRuleVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    order?: DrugOrderUpdateOneRequiredWithoutLinesNestedInput
+    masterDrug?: MasterDrugUpdateOneWithoutDrugOrderLinesNestedInput
+    companyDrug?: CompanyDrugUpdateOneWithoutDrugOrderLinesNestedInput
+    receiptLines?: DrugOrderReceiptLineUpdateManyWithoutOrderLineNestedInput
+  }
+
+  export type DrugOrderLineUncheckedUpdateWithoutShipmentLinesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderId?: StringFieldUpdateOperationsInput | string
+    sourceType?: EnumDrugOrderLineSourceTypeFieldUpdateOperationsInput | $Enums.DrugOrderLineSourceType
+    masterDrugId?: NullableStringFieldUpdateOperationsInput | string | null
+    companyDrugId?: NullableStringFieldUpdateOperationsInput | string | null
+    displayName?: StringFieldUpdateOperationsInput | string
+    unit?: NullableStringFieldUpdateOperationsInput | string | null
+    requestedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    acceptedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    suggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    lineStatus?: EnumDrugOrderLineStatusFieldUpdateOperationsInput | $Enums.DrugOrderLineStatus
+    companyResponseReason?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionBasis?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionRuleVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    receiptLines?: DrugOrderReceiptLineUncheckedUpdateManyWithoutOrderLineNestedInput
+  }
+
+  export type DrugOrderReceiptLineUpsertWithWhereUniqueWithoutShipmentLineInput = {
+    where: DrugOrderReceiptLineWhereUniqueInput
+    update: XOR<DrugOrderReceiptLineUpdateWithoutShipmentLineInput, DrugOrderReceiptLineUncheckedUpdateWithoutShipmentLineInput>
+    create: XOR<DrugOrderReceiptLineCreateWithoutShipmentLineInput, DrugOrderReceiptLineUncheckedCreateWithoutShipmentLineInput>
+  }
+
+  export type DrugOrderReceiptLineUpdateWithWhereUniqueWithoutShipmentLineInput = {
+    where: DrugOrderReceiptLineWhereUniqueInput
+    data: XOR<DrugOrderReceiptLineUpdateWithoutShipmentLineInput, DrugOrderReceiptLineUncheckedUpdateWithoutShipmentLineInput>
+  }
+
+  export type DrugOrderReceiptLineUpdateManyWithWhereWithoutShipmentLineInput = {
+    where: DrugOrderReceiptLineScalarWhereInput
+    data: XOR<DrugOrderReceiptLineUpdateManyMutationInput, DrugOrderReceiptLineUncheckedUpdateManyWithoutShipmentLineInput>
+  }
+
+  export type DrugOrderCreateWithoutReceiptsInput = {
+    id?: string
+    orderNo: string
+    status?: $Enums.DrugOrderStatus
+    baseReportMonth?: string | null
+    note?: string | null
+    submittedAt?: Date | string | null
+    closedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    facility: UserCreateNestedOneWithoutDrugOrdersInput
+    company: CompanyCreateNestedOneWithoutDrugOrdersInput
+    lines?: DrugOrderLineCreateNestedManyWithoutOrderInput
+    shipments?: DrugOrderShipmentCreateNestedManyWithoutOrderInput
+  }
+
+  export type DrugOrderUncheckedCreateWithoutReceiptsInput = {
+    id?: string
+    orderNo: string
+    facilityId: string
+    companyId: string
+    status?: $Enums.DrugOrderStatus
+    baseReportMonth?: string | null
+    note?: string | null
+    submittedAt?: Date | string | null
+    closedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    lines?: DrugOrderLineUncheckedCreateNestedManyWithoutOrderInput
+    shipments?: DrugOrderShipmentUncheckedCreateNestedManyWithoutOrderInput
+  }
+
+  export type DrugOrderCreateOrConnectWithoutReceiptsInput = {
+    where: DrugOrderWhereUniqueInput
+    create: XOR<DrugOrderCreateWithoutReceiptsInput, DrugOrderUncheckedCreateWithoutReceiptsInput>
+  }
+
+  export type DrugOrderShipmentCreateWithoutReceiptsInput = {
+    id?: string
+    shipmentNo: number
+    status?: $Enums.DrugOrderShipmentStatus
+    shippedAt?: Date | string | null
+    companyNote?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    order: DrugOrderCreateNestedOneWithoutShipmentsInput
+    lines?: DrugOrderShipmentLineCreateNestedManyWithoutShipmentInput
+  }
+
+  export type DrugOrderShipmentUncheckedCreateWithoutReceiptsInput = {
+    id?: string
+    orderId: string
+    shipmentNo: number
+    status?: $Enums.DrugOrderShipmentStatus
+    shippedAt?: Date | string | null
+    companyNote?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    lines?: DrugOrderShipmentLineUncheckedCreateNestedManyWithoutShipmentInput
+  }
+
+  export type DrugOrderShipmentCreateOrConnectWithoutReceiptsInput = {
+    where: DrugOrderShipmentWhereUniqueInput
+    create: XOR<DrugOrderShipmentCreateWithoutReceiptsInput, DrugOrderShipmentUncheckedCreateWithoutReceiptsInput>
+  }
+
+  export type UserCreateWithoutDrugOrderReceiptsInput = {
+    id?: string
+    username: string
+    passwordHash: string
+    role?: $Enums.Role
+    facilityName?: string | null
+    facilityCode?: string | null
+    isActive?: boolean
+    autonomyGroup?: string | null
+    facilityType?: string | null
+    contactPerson?: string | null
+    phoneNumber?: string | null
+    address?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    company?: CompanyCreateNestedOneWithoutUsersInput
+    drugMaps?: FacilityDrugMapCreateNestedManyWithoutFacilityInput
+    reports?: InventoryReportCreateNestedManyWithoutFacilityInput
+    reportSubmissions?: FacilityReportSubmissionCreateNestedManyWithoutFacilityInput
+    keHoachLCNTs?: KeHoachLCNTCreateNestedManyWithoutFacilityInput
+    drugOrders?: DrugOrderCreateNestedManyWithoutFacilityInput
+    notifications?: NotificationCreateNestedManyWithoutUserInput
+    activityLogs?: ActivityLogCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutDrugOrderReceiptsInput = {
+    id?: string
+    username: string
+    passwordHash: string
+    role?: $Enums.Role
+    facilityName?: string | null
+    facilityCode?: string | null
+    companyId?: string | null
+    isActive?: boolean
+    autonomyGroup?: string | null
+    facilityType?: string | null
+    contactPerson?: string | null
+    phoneNumber?: string | null
+    address?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    drugMaps?: FacilityDrugMapUncheckedCreateNestedManyWithoutFacilityInput
+    reports?: InventoryReportUncheckedCreateNestedManyWithoutFacilityInput
+    reportSubmissions?: FacilityReportSubmissionUncheckedCreateNestedManyWithoutFacilityInput
+    keHoachLCNTs?: KeHoachLCNTUncheckedCreateNestedManyWithoutFacilityInput
+    drugOrders?: DrugOrderUncheckedCreateNestedManyWithoutFacilityInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
+    activityLogs?: ActivityLogUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutDrugOrderReceiptsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutDrugOrderReceiptsInput, UserUncheckedCreateWithoutDrugOrderReceiptsInput>
+  }
+
+  export type DrugOrderReceiptLineCreateWithoutReceiptInput = {
+    id?: string
+    receivedQty?: Decimal | DecimalJsLike | number | string
+    differenceReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    shipmentLine: DrugOrderShipmentLineCreateNestedOneWithoutReceiptLinesInput
+    orderLine: DrugOrderLineCreateNestedOneWithoutReceiptLinesInput
+  }
+
+  export type DrugOrderReceiptLineUncheckedCreateWithoutReceiptInput = {
+    id?: string
+    shipmentLineId: string
+    orderLineId: string
+    receivedQty?: Decimal | DecimalJsLike | number | string
+    differenceReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DrugOrderReceiptLineCreateOrConnectWithoutReceiptInput = {
+    where: DrugOrderReceiptLineWhereUniqueInput
+    create: XOR<DrugOrderReceiptLineCreateWithoutReceiptInput, DrugOrderReceiptLineUncheckedCreateWithoutReceiptInput>
+  }
+
+  export type DrugOrderReceiptLineCreateManyReceiptInputEnvelope = {
+    data: DrugOrderReceiptLineCreateManyReceiptInput | DrugOrderReceiptLineCreateManyReceiptInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type DrugOrderUpsertWithoutReceiptsInput = {
+    update: XOR<DrugOrderUpdateWithoutReceiptsInput, DrugOrderUncheckedUpdateWithoutReceiptsInput>
+    create: XOR<DrugOrderCreateWithoutReceiptsInput, DrugOrderUncheckedCreateWithoutReceiptsInput>
+    where?: DrugOrderWhereInput
+  }
+
+  export type DrugOrderUpdateToOneWithWhereWithoutReceiptsInput = {
+    where?: DrugOrderWhereInput
+    data: XOR<DrugOrderUpdateWithoutReceiptsInput, DrugOrderUncheckedUpdateWithoutReceiptsInput>
+  }
+
+  export type DrugOrderUpdateWithoutReceiptsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderNo?: StringFieldUpdateOperationsInput | string
+    status?: EnumDrugOrderStatusFieldUpdateOperationsInput | $Enums.DrugOrderStatus
+    baseReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    facility?: UserUpdateOneRequiredWithoutDrugOrdersNestedInput
+    company?: CompanyUpdateOneRequiredWithoutDrugOrdersNestedInput
+    lines?: DrugOrderLineUpdateManyWithoutOrderNestedInput
+    shipments?: DrugOrderShipmentUpdateManyWithoutOrderNestedInput
+  }
+
+  export type DrugOrderUncheckedUpdateWithoutReceiptsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderNo?: StringFieldUpdateOperationsInput | string
+    facilityId?: StringFieldUpdateOperationsInput | string
+    companyId?: StringFieldUpdateOperationsInput | string
+    status?: EnumDrugOrderStatusFieldUpdateOperationsInput | $Enums.DrugOrderStatus
+    baseReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lines?: DrugOrderLineUncheckedUpdateManyWithoutOrderNestedInput
+    shipments?: DrugOrderShipmentUncheckedUpdateManyWithoutOrderNestedInput
+  }
+
+  export type DrugOrderShipmentUpsertWithoutReceiptsInput = {
+    update: XOR<DrugOrderShipmentUpdateWithoutReceiptsInput, DrugOrderShipmentUncheckedUpdateWithoutReceiptsInput>
+    create: XOR<DrugOrderShipmentCreateWithoutReceiptsInput, DrugOrderShipmentUncheckedCreateWithoutReceiptsInput>
+    where?: DrugOrderShipmentWhereInput
+  }
+
+  export type DrugOrderShipmentUpdateToOneWithWhereWithoutReceiptsInput = {
+    where?: DrugOrderShipmentWhereInput
+    data: XOR<DrugOrderShipmentUpdateWithoutReceiptsInput, DrugOrderShipmentUncheckedUpdateWithoutReceiptsInput>
+  }
+
+  export type DrugOrderShipmentUpdateWithoutReceiptsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    shipmentNo?: IntFieldUpdateOperationsInput | number
+    status?: EnumDrugOrderShipmentStatusFieldUpdateOperationsInput | $Enums.DrugOrderShipmentStatus
+    shippedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    companyNote?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    order?: DrugOrderUpdateOneRequiredWithoutShipmentsNestedInput
+    lines?: DrugOrderShipmentLineUpdateManyWithoutShipmentNestedInput
+  }
+
+  export type DrugOrderShipmentUncheckedUpdateWithoutReceiptsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderId?: StringFieldUpdateOperationsInput | string
+    shipmentNo?: IntFieldUpdateOperationsInput | number
+    status?: EnumDrugOrderShipmentStatusFieldUpdateOperationsInput | $Enums.DrugOrderShipmentStatus
+    shippedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    companyNote?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lines?: DrugOrderShipmentLineUncheckedUpdateManyWithoutShipmentNestedInput
+  }
+
+  export type UserUpsertWithoutDrugOrderReceiptsInput = {
+    update: XOR<UserUpdateWithoutDrugOrderReceiptsInput, UserUncheckedUpdateWithoutDrugOrderReceiptsInput>
+    create: XOR<UserCreateWithoutDrugOrderReceiptsInput, UserUncheckedCreateWithoutDrugOrderReceiptsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutDrugOrderReceiptsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutDrugOrderReceiptsInput, UserUncheckedUpdateWithoutDrugOrderReceiptsInput>
+  }
+
+  export type UserUpdateWithoutDrugOrderReceiptsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    facilityName?: NullableStringFieldUpdateOperationsInput | string | null
+    facilityCode?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    autonomyGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    facilityType?: NullableStringFieldUpdateOperationsInput | string | null
+    contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    company?: CompanyUpdateOneWithoutUsersNestedInput
+    drugMaps?: FacilityDrugMapUpdateManyWithoutFacilityNestedInput
+    reports?: InventoryReportUpdateManyWithoutFacilityNestedInput
+    reportSubmissions?: FacilityReportSubmissionUpdateManyWithoutFacilityNestedInput
+    keHoachLCNTs?: KeHoachLCNTUpdateManyWithoutFacilityNestedInput
+    drugOrders?: DrugOrderUpdateManyWithoutFacilityNestedInput
+    notifications?: NotificationUpdateManyWithoutUserNestedInput
+    activityLogs?: ActivityLogUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutDrugOrderReceiptsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    facilityName?: NullableStringFieldUpdateOperationsInput | string | null
+    facilityCode?: NullableStringFieldUpdateOperationsInput | string | null
+    companyId?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    autonomyGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    facilityType?: NullableStringFieldUpdateOperationsInput | string | null
+    contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    drugMaps?: FacilityDrugMapUncheckedUpdateManyWithoutFacilityNestedInput
+    reports?: InventoryReportUncheckedUpdateManyWithoutFacilityNestedInput
+    reportSubmissions?: FacilityReportSubmissionUncheckedUpdateManyWithoutFacilityNestedInput
+    keHoachLCNTs?: KeHoachLCNTUncheckedUpdateManyWithoutFacilityNestedInput
+    drugOrders?: DrugOrderUncheckedUpdateManyWithoutFacilityNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
+    activityLogs?: ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type DrugOrderReceiptLineUpsertWithWhereUniqueWithoutReceiptInput = {
+    where: DrugOrderReceiptLineWhereUniqueInput
+    update: XOR<DrugOrderReceiptLineUpdateWithoutReceiptInput, DrugOrderReceiptLineUncheckedUpdateWithoutReceiptInput>
+    create: XOR<DrugOrderReceiptLineCreateWithoutReceiptInput, DrugOrderReceiptLineUncheckedCreateWithoutReceiptInput>
+  }
+
+  export type DrugOrderReceiptLineUpdateWithWhereUniqueWithoutReceiptInput = {
+    where: DrugOrderReceiptLineWhereUniqueInput
+    data: XOR<DrugOrderReceiptLineUpdateWithoutReceiptInput, DrugOrderReceiptLineUncheckedUpdateWithoutReceiptInput>
+  }
+
+  export type DrugOrderReceiptLineUpdateManyWithWhereWithoutReceiptInput = {
+    where: DrugOrderReceiptLineScalarWhereInput
+    data: XOR<DrugOrderReceiptLineUpdateManyMutationInput, DrugOrderReceiptLineUncheckedUpdateManyWithoutReceiptInput>
+  }
+
+  export type DrugOrderReceiptCreateWithoutLinesInput = {
+    id?: string
+    confirmedAt?: Date | string
+    note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    order: DrugOrderCreateNestedOneWithoutReceiptsInput
+    shipment: DrugOrderShipmentCreateNestedOneWithoutReceiptsInput
+    facility: UserCreateNestedOneWithoutDrugOrderReceiptsInput
+  }
+
+  export type DrugOrderReceiptUncheckedCreateWithoutLinesInput = {
+    id?: string
+    orderId: string
+    shipmentId: string
+    facilityId: string
+    confirmedAt?: Date | string
+    note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DrugOrderReceiptCreateOrConnectWithoutLinesInput = {
+    where: DrugOrderReceiptWhereUniqueInput
+    create: XOR<DrugOrderReceiptCreateWithoutLinesInput, DrugOrderReceiptUncheckedCreateWithoutLinesInput>
+  }
+
+  export type DrugOrderShipmentLineCreateWithoutReceiptLinesInput = {
+    id?: string
+    shippedQty?: Decimal | DecimalJsLike | number | string
+    reason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    shipment: DrugOrderShipmentCreateNestedOneWithoutLinesInput
+    orderLine: DrugOrderLineCreateNestedOneWithoutShipmentLinesInput
+  }
+
+  export type DrugOrderShipmentLineUncheckedCreateWithoutReceiptLinesInput = {
+    id?: string
+    shipmentId: string
+    orderLineId: string
+    shippedQty?: Decimal | DecimalJsLike | number | string
+    reason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DrugOrderShipmentLineCreateOrConnectWithoutReceiptLinesInput = {
+    where: DrugOrderShipmentLineWhereUniqueInput
+    create: XOR<DrugOrderShipmentLineCreateWithoutReceiptLinesInput, DrugOrderShipmentLineUncheckedCreateWithoutReceiptLinesInput>
+  }
+
+  export type DrugOrderLineCreateWithoutReceiptLinesInput = {
+    id?: string
+    sourceType: $Enums.DrugOrderLineSourceType
+    displayName: string
+    unit?: string | null
+    requestedQty?: Decimal | DecimalJsLike | number | string
+    acceptedQty?: Decimal | DecimalJsLike | number | string
+    suggestedQty?: Decimal | DecimalJsLike | number | string | null
+    lineStatus?: $Enums.DrugOrderLineStatus
+    companyResponseReason?: string | null
+    suggestionBasis?: string | null
+    suggestionReportMonth?: string | null
+    suggestionRuleVersion?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    order: DrugOrderCreateNestedOneWithoutLinesInput
+    masterDrug?: MasterDrugCreateNestedOneWithoutDrugOrderLinesInput
+    companyDrug?: CompanyDrugCreateNestedOneWithoutDrugOrderLinesInput
+    shipmentLines?: DrugOrderShipmentLineCreateNestedManyWithoutOrderLineInput
+  }
+
+  export type DrugOrderLineUncheckedCreateWithoutReceiptLinesInput = {
+    id?: string
+    orderId: string
+    sourceType: $Enums.DrugOrderLineSourceType
+    masterDrugId?: string | null
+    companyDrugId?: string | null
+    displayName: string
+    unit?: string | null
+    requestedQty?: Decimal | DecimalJsLike | number | string
+    acceptedQty?: Decimal | DecimalJsLike | number | string
+    suggestedQty?: Decimal | DecimalJsLike | number | string | null
+    lineStatus?: $Enums.DrugOrderLineStatus
+    companyResponseReason?: string | null
+    suggestionBasis?: string | null
+    suggestionReportMonth?: string | null
+    suggestionRuleVersion?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    shipmentLines?: DrugOrderShipmentLineUncheckedCreateNestedManyWithoutOrderLineInput
+  }
+
+  export type DrugOrderLineCreateOrConnectWithoutReceiptLinesInput = {
+    where: DrugOrderLineWhereUniqueInput
+    create: XOR<DrugOrderLineCreateWithoutReceiptLinesInput, DrugOrderLineUncheckedCreateWithoutReceiptLinesInput>
+  }
+
+  export type DrugOrderReceiptUpsertWithoutLinesInput = {
+    update: XOR<DrugOrderReceiptUpdateWithoutLinesInput, DrugOrderReceiptUncheckedUpdateWithoutLinesInput>
+    create: XOR<DrugOrderReceiptCreateWithoutLinesInput, DrugOrderReceiptUncheckedCreateWithoutLinesInput>
+    where?: DrugOrderReceiptWhereInput
+  }
+
+  export type DrugOrderReceiptUpdateToOneWithWhereWithoutLinesInput = {
+    where?: DrugOrderReceiptWhereInput
+    data: XOR<DrugOrderReceiptUpdateWithoutLinesInput, DrugOrderReceiptUncheckedUpdateWithoutLinesInput>
+  }
+
+  export type DrugOrderReceiptUpdateWithoutLinesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    confirmedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    order?: DrugOrderUpdateOneRequiredWithoutReceiptsNestedInput
+    shipment?: DrugOrderShipmentUpdateOneRequiredWithoutReceiptsNestedInput
+    facility?: UserUpdateOneRequiredWithoutDrugOrderReceiptsNestedInput
+  }
+
+  export type DrugOrderReceiptUncheckedUpdateWithoutLinesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderId?: StringFieldUpdateOperationsInput | string
+    shipmentId?: StringFieldUpdateOperationsInput | string
+    facilityId?: StringFieldUpdateOperationsInput | string
+    confirmedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DrugOrderShipmentLineUpsertWithoutReceiptLinesInput = {
+    update: XOR<DrugOrderShipmentLineUpdateWithoutReceiptLinesInput, DrugOrderShipmentLineUncheckedUpdateWithoutReceiptLinesInput>
+    create: XOR<DrugOrderShipmentLineCreateWithoutReceiptLinesInput, DrugOrderShipmentLineUncheckedCreateWithoutReceiptLinesInput>
+    where?: DrugOrderShipmentLineWhereInput
+  }
+
+  export type DrugOrderShipmentLineUpdateToOneWithWhereWithoutReceiptLinesInput = {
+    where?: DrugOrderShipmentLineWhereInput
+    data: XOR<DrugOrderShipmentLineUpdateWithoutReceiptLinesInput, DrugOrderShipmentLineUncheckedUpdateWithoutReceiptLinesInput>
+  }
+
+  export type DrugOrderShipmentLineUpdateWithoutReceiptLinesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    shippedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    shipment?: DrugOrderShipmentUpdateOneRequiredWithoutLinesNestedInput
+    orderLine?: DrugOrderLineUpdateOneRequiredWithoutShipmentLinesNestedInput
+  }
+
+  export type DrugOrderShipmentLineUncheckedUpdateWithoutReceiptLinesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    shipmentId?: StringFieldUpdateOperationsInput | string
+    orderLineId?: StringFieldUpdateOperationsInput | string
+    shippedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DrugOrderLineUpsertWithoutReceiptLinesInput = {
+    update: XOR<DrugOrderLineUpdateWithoutReceiptLinesInput, DrugOrderLineUncheckedUpdateWithoutReceiptLinesInput>
+    create: XOR<DrugOrderLineCreateWithoutReceiptLinesInput, DrugOrderLineUncheckedCreateWithoutReceiptLinesInput>
+    where?: DrugOrderLineWhereInput
+  }
+
+  export type DrugOrderLineUpdateToOneWithWhereWithoutReceiptLinesInput = {
+    where?: DrugOrderLineWhereInput
+    data: XOR<DrugOrderLineUpdateWithoutReceiptLinesInput, DrugOrderLineUncheckedUpdateWithoutReceiptLinesInput>
+  }
+
+  export type DrugOrderLineUpdateWithoutReceiptLinesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    sourceType?: EnumDrugOrderLineSourceTypeFieldUpdateOperationsInput | $Enums.DrugOrderLineSourceType
+    displayName?: StringFieldUpdateOperationsInput | string
+    unit?: NullableStringFieldUpdateOperationsInput | string | null
+    requestedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    acceptedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    suggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    lineStatus?: EnumDrugOrderLineStatusFieldUpdateOperationsInput | $Enums.DrugOrderLineStatus
+    companyResponseReason?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionBasis?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionRuleVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    order?: DrugOrderUpdateOneRequiredWithoutLinesNestedInput
+    masterDrug?: MasterDrugUpdateOneWithoutDrugOrderLinesNestedInput
+    companyDrug?: CompanyDrugUpdateOneWithoutDrugOrderLinesNestedInput
+    shipmentLines?: DrugOrderShipmentLineUpdateManyWithoutOrderLineNestedInput
+  }
+
+  export type DrugOrderLineUncheckedUpdateWithoutReceiptLinesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderId?: StringFieldUpdateOperationsInput | string
+    sourceType?: EnumDrugOrderLineSourceTypeFieldUpdateOperationsInput | $Enums.DrugOrderLineSourceType
+    masterDrugId?: NullableStringFieldUpdateOperationsInput | string | null
+    companyDrugId?: NullableStringFieldUpdateOperationsInput | string | null
+    displayName?: StringFieldUpdateOperationsInput | string
+    unit?: NullableStringFieldUpdateOperationsInput | string | null
+    requestedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    acceptedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    suggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    lineStatus?: EnumDrugOrderLineStatusFieldUpdateOperationsInput | $Enums.DrugOrderLineStatus
+    companyResponseReason?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionBasis?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionRuleVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    shipmentLines?: DrugOrderShipmentLineUncheckedUpdateManyWithoutOrderLineNestedInput
   }
 
   export type UserCreateWithoutKeHoachLCNTsInput = {
@@ -29353,9 +46155,12 @@ export namespace Prisma {
     address?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    company?: CompanyCreateNestedOneWithoutUsersInput
     drugMaps?: FacilityDrugMapCreateNestedManyWithoutFacilityInput
     reports?: InventoryReportCreateNestedManyWithoutFacilityInput
     reportSubmissions?: FacilityReportSubmissionCreateNestedManyWithoutFacilityInput
+    drugOrders?: DrugOrderCreateNestedManyWithoutFacilityInput
+    drugOrderReceipts?: DrugOrderReceiptCreateNestedManyWithoutFacilityInput
     notifications?: NotificationCreateNestedManyWithoutUserInput
     activityLogs?: ActivityLogCreateNestedManyWithoutUserInput
   }
@@ -29367,6 +46172,7 @@ export namespace Prisma {
     role?: $Enums.Role
     facilityName?: string | null
     facilityCode?: string | null
+    companyId?: string | null
     isActive?: boolean
     autonomyGroup?: string | null
     facilityType?: string | null
@@ -29378,6 +46184,8 @@ export namespace Prisma {
     drugMaps?: FacilityDrugMapUncheckedCreateNestedManyWithoutFacilityInput
     reports?: InventoryReportUncheckedCreateNestedManyWithoutFacilityInput
     reportSubmissions?: FacilityReportSubmissionUncheckedCreateNestedManyWithoutFacilityInput
+    drugOrders?: DrugOrderUncheckedCreateNestedManyWithoutFacilityInput
+    drugOrderReceipts?: DrugOrderReceiptUncheckedCreateNestedManyWithoutFacilityInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
     activityLogs?: ActivityLogUncheckedCreateNestedManyWithoutUserInput
   }
@@ -29469,9 +46277,12 @@ export namespace Prisma {
     address?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    company?: CompanyUpdateOneWithoutUsersNestedInput
     drugMaps?: FacilityDrugMapUpdateManyWithoutFacilityNestedInput
     reports?: InventoryReportUpdateManyWithoutFacilityNestedInput
     reportSubmissions?: FacilityReportSubmissionUpdateManyWithoutFacilityNestedInput
+    drugOrders?: DrugOrderUpdateManyWithoutFacilityNestedInput
+    drugOrderReceipts?: DrugOrderReceiptUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUpdateManyWithoutUserNestedInput
     activityLogs?: ActivityLogUpdateManyWithoutUserNestedInput
   }
@@ -29483,6 +46294,7 @@ export namespace Prisma {
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     facilityName?: NullableStringFieldUpdateOperationsInput | string | null
     facilityCode?: NullableStringFieldUpdateOperationsInput | string | null
+    companyId?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     autonomyGroup?: NullableStringFieldUpdateOperationsInput | string | null
     facilityType?: NullableStringFieldUpdateOperationsInput | string | null
@@ -29494,6 +46306,8 @@ export namespace Prisma {
     drugMaps?: FacilityDrugMapUncheckedUpdateManyWithoutFacilityNestedInput
     reports?: InventoryReportUncheckedUpdateManyWithoutFacilityNestedInput
     reportSubmissions?: FacilityReportSubmissionUncheckedUpdateManyWithoutFacilityNestedInput
+    drugOrders?: DrugOrderUncheckedUpdateManyWithoutFacilityNestedInput
+    drugOrderReceipts?: DrugOrderReceiptUncheckedUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
     activityLogs?: ActivityLogUncheckedUpdateManyWithoutUserNestedInput
   }
@@ -30546,10 +47360,13 @@ export namespace Prisma {
     address?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    company?: CompanyCreateNestedOneWithoutUsersInput
     drugMaps?: FacilityDrugMapCreateNestedManyWithoutFacilityInput
     reports?: InventoryReportCreateNestedManyWithoutFacilityInput
     reportSubmissions?: FacilityReportSubmissionCreateNestedManyWithoutFacilityInput
     keHoachLCNTs?: KeHoachLCNTCreateNestedManyWithoutFacilityInput
+    drugOrders?: DrugOrderCreateNestedManyWithoutFacilityInput
+    drugOrderReceipts?: DrugOrderReceiptCreateNestedManyWithoutFacilityInput
     activityLogs?: ActivityLogCreateNestedManyWithoutUserInput
   }
 
@@ -30560,6 +47377,7 @@ export namespace Prisma {
     role?: $Enums.Role
     facilityName?: string | null
     facilityCode?: string | null
+    companyId?: string | null
     isActive?: boolean
     autonomyGroup?: string | null
     facilityType?: string | null
@@ -30572,6 +47390,8 @@ export namespace Prisma {
     reports?: InventoryReportUncheckedCreateNestedManyWithoutFacilityInput
     reportSubmissions?: FacilityReportSubmissionUncheckedCreateNestedManyWithoutFacilityInput
     keHoachLCNTs?: KeHoachLCNTUncheckedCreateNestedManyWithoutFacilityInput
+    drugOrders?: DrugOrderUncheckedCreateNestedManyWithoutFacilityInput
+    drugOrderReceipts?: DrugOrderReceiptUncheckedCreateNestedManyWithoutFacilityInput
     activityLogs?: ActivityLogUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -30606,10 +47426,13 @@ export namespace Prisma {
     address?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    company?: CompanyUpdateOneWithoutUsersNestedInput
     drugMaps?: FacilityDrugMapUpdateManyWithoutFacilityNestedInput
     reports?: InventoryReportUpdateManyWithoutFacilityNestedInput
     reportSubmissions?: FacilityReportSubmissionUpdateManyWithoutFacilityNestedInput
     keHoachLCNTs?: KeHoachLCNTUpdateManyWithoutFacilityNestedInput
+    drugOrders?: DrugOrderUpdateManyWithoutFacilityNestedInput
+    drugOrderReceipts?: DrugOrderReceiptUpdateManyWithoutFacilityNestedInput
     activityLogs?: ActivityLogUpdateManyWithoutUserNestedInput
   }
 
@@ -30620,6 +47443,7 @@ export namespace Prisma {
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     facilityName?: NullableStringFieldUpdateOperationsInput | string | null
     facilityCode?: NullableStringFieldUpdateOperationsInput | string | null
+    companyId?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     autonomyGroup?: NullableStringFieldUpdateOperationsInput | string | null
     facilityType?: NullableStringFieldUpdateOperationsInput | string | null
@@ -30632,6 +47456,8 @@ export namespace Prisma {
     reports?: InventoryReportUncheckedUpdateManyWithoutFacilityNestedInput
     reportSubmissions?: FacilityReportSubmissionUncheckedUpdateManyWithoutFacilityNestedInput
     keHoachLCNTs?: KeHoachLCNTUncheckedUpdateManyWithoutFacilityNestedInput
+    drugOrders?: DrugOrderUncheckedUpdateManyWithoutFacilityNestedInput
+    drugOrderReceipts?: DrugOrderReceiptUncheckedUpdateManyWithoutFacilityNestedInput
     activityLogs?: ActivityLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -30650,10 +47476,13 @@ export namespace Prisma {
     address?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    company?: CompanyCreateNestedOneWithoutUsersInput
     drugMaps?: FacilityDrugMapCreateNestedManyWithoutFacilityInput
     reports?: InventoryReportCreateNestedManyWithoutFacilityInput
     reportSubmissions?: FacilityReportSubmissionCreateNestedManyWithoutFacilityInput
     keHoachLCNTs?: KeHoachLCNTCreateNestedManyWithoutFacilityInput
+    drugOrders?: DrugOrderCreateNestedManyWithoutFacilityInput
+    drugOrderReceipts?: DrugOrderReceiptCreateNestedManyWithoutFacilityInput
     notifications?: NotificationCreateNestedManyWithoutUserInput
   }
 
@@ -30664,6 +47493,7 @@ export namespace Prisma {
     role?: $Enums.Role
     facilityName?: string | null
     facilityCode?: string | null
+    companyId?: string | null
     isActive?: boolean
     autonomyGroup?: string | null
     facilityType?: string | null
@@ -30676,6 +47506,8 @@ export namespace Prisma {
     reports?: InventoryReportUncheckedCreateNestedManyWithoutFacilityInput
     reportSubmissions?: FacilityReportSubmissionUncheckedCreateNestedManyWithoutFacilityInput
     keHoachLCNTs?: KeHoachLCNTUncheckedCreateNestedManyWithoutFacilityInput
+    drugOrders?: DrugOrderUncheckedCreateNestedManyWithoutFacilityInput
+    drugOrderReceipts?: DrugOrderReceiptUncheckedCreateNestedManyWithoutFacilityInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -30710,10 +47542,13 @@ export namespace Prisma {
     address?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    company?: CompanyUpdateOneWithoutUsersNestedInput
     drugMaps?: FacilityDrugMapUpdateManyWithoutFacilityNestedInput
     reports?: InventoryReportUpdateManyWithoutFacilityNestedInput
     reportSubmissions?: FacilityReportSubmissionUpdateManyWithoutFacilityNestedInput
     keHoachLCNTs?: KeHoachLCNTUpdateManyWithoutFacilityNestedInput
+    drugOrders?: DrugOrderUpdateManyWithoutFacilityNestedInput
+    drugOrderReceipts?: DrugOrderReceiptUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUpdateManyWithoutUserNestedInput
   }
 
@@ -30724,6 +47559,7 @@ export namespace Prisma {
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     facilityName?: NullableStringFieldUpdateOperationsInput | string | null
     facilityCode?: NullableStringFieldUpdateOperationsInput | string | null
+    companyId?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     autonomyGroup?: NullableStringFieldUpdateOperationsInput | string | null
     facilityType?: NullableStringFieldUpdateOperationsInput | string | null
@@ -30736,6 +47572,8 @@ export namespace Prisma {
     reports?: InventoryReportUncheckedUpdateManyWithoutFacilityNestedInput
     reportSubmissions?: FacilityReportSubmissionUncheckedUpdateManyWithoutFacilityNestedInput
     keHoachLCNTs?: KeHoachLCNTUncheckedUpdateManyWithoutFacilityNestedInput
+    drugOrders?: DrugOrderUncheckedUpdateManyWithoutFacilityNestedInput
+    drugOrderReceipts?: DrugOrderReceiptUncheckedUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -30801,6 +47639,29 @@ export namespace Prisma {
     thoiGianBatDauThucHienHopDong?: Date | string | null
     thoiGianThucHienHopDong?: string | null
     thoiGianKetThucHopDong?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DrugOrderCreateManyFacilityInput = {
+    id?: string
+    orderNo: string
+    companyId: string
+    status?: $Enums.DrugOrderStatus
+    baseReportMonth?: string | null
+    note?: string | null
+    submittedAt?: Date | string | null
+    closedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DrugOrderReceiptCreateManyFacilityInput = {
+    id?: string
+    orderId: string
+    shipmentId: string
+    confirmedAt?: Date | string
+    note?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -31028,6 +47889,83 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type DrugOrderUpdateWithoutFacilityInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderNo?: StringFieldUpdateOperationsInput | string
+    status?: EnumDrugOrderStatusFieldUpdateOperationsInput | $Enums.DrugOrderStatus
+    baseReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    company?: CompanyUpdateOneRequiredWithoutDrugOrdersNestedInput
+    lines?: DrugOrderLineUpdateManyWithoutOrderNestedInput
+    shipments?: DrugOrderShipmentUpdateManyWithoutOrderNestedInput
+    receipts?: DrugOrderReceiptUpdateManyWithoutOrderNestedInput
+  }
+
+  export type DrugOrderUncheckedUpdateWithoutFacilityInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderNo?: StringFieldUpdateOperationsInput | string
+    companyId?: StringFieldUpdateOperationsInput | string
+    status?: EnumDrugOrderStatusFieldUpdateOperationsInput | $Enums.DrugOrderStatus
+    baseReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lines?: DrugOrderLineUncheckedUpdateManyWithoutOrderNestedInput
+    shipments?: DrugOrderShipmentUncheckedUpdateManyWithoutOrderNestedInput
+    receipts?: DrugOrderReceiptUncheckedUpdateManyWithoutOrderNestedInput
+  }
+
+  export type DrugOrderUncheckedUpdateManyWithoutFacilityInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderNo?: StringFieldUpdateOperationsInput | string
+    companyId?: StringFieldUpdateOperationsInput | string
+    status?: EnumDrugOrderStatusFieldUpdateOperationsInput | $Enums.DrugOrderStatus
+    baseReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DrugOrderReceiptUpdateWithoutFacilityInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    confirmedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    order?: DrugOrderUpdateOneRequiredWithoutReceiptsNestedInput
+    shipment?: DrugOrderShipmentUpdateOneRequiredWithoutReceiptsNestedInput
+    lines?: DrugOrderReceiptLineUpdateManyWithoutReceiptNestedInput
+  }
+
+  export type DrugOrderReceiptUncheckedUpdateWithoutFacilityInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderId?: StringFieldUpdateOperationsInput | string
+    shipmentId?: StringFieldUpdateOperationsInput | string
+    confirmedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lines?: DrugOrderReceiptLineUncheckedUpdateManyWithoutReceiptNestedInput
+  }
+
+  export type DrugOrderReceiptUncheckedUpdateManyWithoutFacilityInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderId?: StringFieldUpdateOperationsInput | string
+    shipmentId?: StringFieldUpdateOperationsInput | string
+    confirmedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type NotificationUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
@@ -31091,6 +48029,202 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type UserCreateManyCompanyInput = {
+    id?: string
+    username: string
+    passwordHash: string
+    role?: $Enums.Role
+    facilityName?: string | null
+    facilityCode?: string | null
+    isActive?: boolean
+    autonomyGroup?: string | null
+    facilityType?: string | null
+    contactPerson?: string | null
+    phoneNumber?: string | null
+    address?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type CompanyDrugCreateManyCompanyInput = {
+    id?: string
+    masterDrugId?: string | null
+    companyDrugCode: string
+    companyDrugName: string
+    activeIngredient?: string | null
+    quyCach?: string | null
+    unit?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DrugOrderCreateManyCompanyInput = {
+    id?: string
+    orderNo: string
+    facilityId: string
+    status?: $Enums.DrugOrderStatus
+    baseReportMonth?: string | null
+    note?: string | null
+    submittedAt?: Date | string | null
+    closedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type UserUpdateWithoutCompanyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    facilityName?: NullableStringFieldUpdateOperationsInput | string | null
+    facilityCode?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    autonomyGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    facilityType?: NullableStringFieldUpdateOperationsInput | string | null
+    contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    drugMaps?: FacilityDrugMapUpdateManyWithoutFacilityNestedInput
+    reports?: InventoryReportUpdateManyWithoutFacilityNestedInput
+    reportSubmissions?: FacilityReportSubmissionUpdateManyWithoutFacilityNestedInput
+    keHoachLCNTs?: KeHoachLCNTUpdateManyWithoutFacilityNestedInput
+    drugOrders?: DrugOrderUpdateManyWithoutFacilityNestedInput
+    drugOrderReceipts?: DrugOrderReceiptUpdateManyWithoutFacilityNestedInput
+    notifications?: NotificationUpdateManyWithoutUserNestedInput
+    activityLogs?: ActivityLogUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutCompanyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    facilityName?: NullableStringFieldUpdateOperationsInput | string | null
+    facilityCode?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    autonomyGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    facilityType?: NullableStringFieldUpdateOperationsInput | string | null
+    contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    drugMaps?: FacilityDrugMapUncheckedUpdateManyWithoutFacilityNestedInput
+    reports?: InventoryReportUncheckedUpdateManyWithoutFacilityNestedInput
+    reportSubmissions?: FacilityReportSubmissionUncheckedUpdateManyWithoutFacilityNestedInput
+    keHoachLCNTs?: KeHoachLCNTUncheckedUpdateManyWithoutFacilityNestedInput
+    drugOrders?: DrugOrderUncheckedUpdateManyWithoutFacilityNestedInput
+    drugOrderReceipts?: DrugOrderReceiptUncheckedUpdateManyWithoutFacilityNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
+    activityLogs?: ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateManyWithoutCompanyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    facilityName?: NullableStringFieldUpdateOperationsInput | string | null
+    facilityCode?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    autonomyGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    facilityType?: NullableStringFieldUpdateOperationsInput | string | null
+    contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CompanyDrugUpdateWithoutCompanyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    companyDrugCode?: StringFieldUpdateOperationsInput | string
+    companyDrugName?: StringFieldUpdateOperationsInput | string
+    activeIngredient?: NullableStringFieldUpdateOperationsInput | string | null
+    quyCach?: NullableStringFieldUpdateOperationsInput | string | null
+    unit?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    masterDrug?: MasterDrugUpdateOneWithoutCompanyDrugsNestedInput
+    drugOrderLines?: DrugOrderLineUpdateManyWithoutCompanyDrugNestedInput
+  }
+
+  export type CompanyDrugUncheckedUpdateWithoutCompanyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    masterDrugId?: NullableStringFieldUpdateOperationsInput | string | null
+    companyDrugCode?: StringFieldUpdateOperationsInput | string
+    companyDrugName?: StringFieldUpdateOperationsInput | string
+    activeIngredient?: NullableStringFieldUpdateOperationsInput | string | null
+    quyCach?: NullableStringFieldUpdateOperationsInput | string | null
+    unit?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    drugOrderLines?: DrugOrderLineUncheckedUpdateManyWithoutCompanyDrugNestedInput
+  }
+
+  export type CompanyDrugUncheckedUpdateManyWithoutCompanyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    masterDrugId?: NullableStringFieldUpdateOperationsInput | string | null
+    companyDrugCode?: StringFieldUpdateOperationsInput | string
+    companyDrugName?: StringFieldUpdateOperationsInput | string
+    activeIngredient?: NullableStringFieldUpdateOperationsInput | string | null
+    quyCach?: NullableStringFieldUpdateOperationsInput | string | null
+    unit?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DrugOrderUpdateWithoutCompanyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderNo?: StringFieldUpdateOperationsInput | string
+    status?: EnumDrugOrderStatusFieldUpdateOperationsInput | $Enums.DrugOrderStatus
+    baseReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    facility?: UserUpdateOneRequiredWithoutDrugOrdersNestedInput
+    lines?: DrugOrderLineUpdateManyWithoutOrderNestedInput
+    shipments?: DrugOrderShipmentUpdateManyWithoutOrderNestedInput
+    receipts?: DrugOrderReceiptUpdateManyWithoutOrderNestedInput
+  }
+
+  export type DrugOrderUncheckedUpdateWithoutCompanyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderNo?: StringFieldUpdateOperationsInput | string
+    facilityId?: StringFieldUpdateOperationsInput | string
+    status?: EnumDrugOrderStatusFieldUpdateOperationsInput | $Enums.DrugOrderStatus
+    baseReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lines?: DrugOrderLineUncheckedUpdateManyWithoutOrderNestedInput
+    shipments?: DrugOrderShipmentUncheckedUpdateManyWithoutOrderNestedInput
+    receipts?: DrugOrderReceiptUncheckedUpdateManyWithoutOrderNestedInput
+  }
+
+  export type DrugOrderUncheckedUpdateManyWithoutCompanyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderNo?: StringFieldUpdateOperationsInput | string
+    facilityId?: StringFieldUpdateOperationsInput | string
+    status?: EnumDrugOrderStatusFieldUpdateOperationsInput | $Enums.DrugOrderStatus
+    baseReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type MasterDrugCreateManyTherapeuticGroupInput = {
     id?: string
     maChung: string
@@ -31150,6 +48284,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     drugMaps?: FacilityDrugMapUpdateManyWithoutMasterDrugNestedInput
+    companyDrugs?: CompanyDrugUpdateManyWithoutMasterDrugNestedInput
+    drugOrderLines?: DrugOrderLineUpdateManyWithoutMasterDrugNestedInput
   }
 
   export type MasterDrugUncheckedUpdateWithoutTherapeuticGroupInput = {
@@ -31181,6 +48317,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     drugMaps?: FacilityDrugMapUncheckedUpdateManyWithoutMasterDrugNestedInput
+    companyDrugs?: CompanyDrugUncheckedUpdateManyWithoutMasterDrugNestedInput
+    drugOrderLines?: DrugOrderLineUncheckedUpdateManyWithoutMasterDrugNestedInput
   }
 
   export type MasterDrugUncheckedUpdateManyWithoutTherapeuticGroupInput = {
@@ -31228,6 +48366,38 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type CompanyDrugCreateManyMasterDrugInput = {
+    id?: string
+    companyId: string
+    companyDrugCode: string
+    companyDrugName: string
+    activeIngredient?: string | null
+    quyCach?: string | null
+    unit?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DrugOrderLineCreateManyMasterDrugInput = {
+    id?: string
+    orderId: string
+    sourceType: $Enums.DrugOrderLineSourceType
+    companyDrugId?: string | null
+    displayName: string
+    unit?: string | null
+    requestedQty?: Decimal | DecimalJsLike | number | string
+    acceptedQty?: Decimal | DecimalJsLike | number | string
+    suggestedQty?: Decimal | DecimalJsLike | number | string | null
+    lineStatus?: $Enums.DrugOrderLineStatus
+    companyResponseReason?: string | null
+    suggestionBasis?: string | null
+    suggestionReportMonth?: string | null
+    suggestionRuleVersion?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type FacilityDrugMapUpdateWithoutMasterDrugInput = {
     id?: StringFieldUpdateOperationsInput | string
     maNoiBo?: StringFieldUpdateOperationsInput | string
@@ -31271,6 +48441,188 @@ export namespace Prisma {
     status?: EnumMappingStatusFieldUpdateOperationsInput | $Enums.MappingStatus
     adminNote?: NullableStringFieldUpdateOperationsInput | string | null
     isOutOfCatalog?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CompanyDrugUpdateWithoutMasterDrugInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    companyDrugCode?: StringFieldUpdateOperationsInput | string
+    companyDrugName?: StringFieldUpdateOperationsInput | string
+    activeIngredient?: NullableStringFieldUpdateOperationsInput | string | null
+    quyCach?: NullableStringFieldUpdateOperationsInput | string | null
+    unit?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    company?: CompanyUpdateOneRequiredWithoutCompanyDrugsNestedInput
+    drugOrderLines?: DrugOrderLineUpdateManyWithoutCompanyDrugNestedInput
+  }
+
+  export type CompanyDrugUncheckedUpdateWithoutMasterDrugInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    companyId?: StringFieldUpdateOperationsInput | string
+    companyDrugCode?: StringFieldUpdateOperationsInput | string
+    companyDrugName?: StringFieldUpdateOperationsInput | string
+    activeIngredient?: NullableStringFieldUpdateOperationsInput | string | null
+    quyCach?: NullableStringFieldUpdateOperationsInput | string | null
+    unit?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    drugOrderLines?: DrugOrderLineUncheckedUpdateManyWithoutCompanyDrugNestedInput
+  }
+
+  export type CompanyDrugUncheckedUpdateManyWithoutMasterDrugInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    companyId?: StringFieldUpdateOperationsInput | string
+    companyDrugCode?: StringFieldUpdateOperationsInput | string
+    companyDrugName?: StringFieldUpdateOperationsInput | string
+    activeIngredient?: NullableStringFieldUpdateOperationsInput | string | null
+    quyCach?: NullableStringFieldUpdateOperationsInput | string | null
+    unit?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DrugOrderLineUpdateWithoutMasterDrugInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    sourceType?: EnumDrugOrderLineSourceTypeFieldUpdateOperationsInput | $Enums.DrugOrderLineSourceType
+    displayName?: StringFieldUpdateOperationsInput | string
+    unit?: NullableStringFieldUpdateOperationsInput | string | null
+    requestedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    acceptedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    suggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    lineStatus?: EnumDrugOrderLineStatusFieldUpdateOperationsInput | $Enums.DrugOrderLineStatus
+    companyResponseReason?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionBasis?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionRuleVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    order?: DrugOrderUpdateOneRequiredWithoutLinesNestedInput
+    companyDrug?: CompanyDrugUpdateOneWithoutDrugOrderLinesNestedInput
+    shipmentLines?: DrugOrderShipmentLineUpdateManyWithoutOrderLineNestedInput
+    receiptLines?: DrugOrderReceiptLineUpdateManyWithoutOrderLineNestedInput
+  }
+
+  export type DrugOrderLineUncheckedUpdateWithoutMasterDrugInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderId?: StringFieldUpdateOperationsInput | string
+    sourceType?: EnumDrugOrderLineSourceTypeFieldUpdateOperationsInput | $Enums.DrugOrderLineSourceType
+    companyDrugId?: NullableStringFieldUpdateOperationsInput | string | null
+    displayName?: StringFieldUpdateOperationsInput | string
+    unit?: NullableStringFieldUpdateOperationsInput | string | null
+    requestedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    acceptedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    suggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    lineStatus?: EnumDrugOrderLineStatusFieldUpdateOperationsInput | $Enums.DrugOrderLineStatus
+    companyResponseReason?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionBasis?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionRuleVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    shipmentLines?: DrugOrderShipmentLineUncheckedUpdateManyWithoutOrderLineNestedInput
+    receiptLines?: DrugOrderReceiptLineUncheckedUpdateManyWithoutOrderLineNestedInput
+  }
+
+  export type DrugOrderLineUncheckedUpdateManyWithoutMasterDrugInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderId?: StringFieldUpdateOperationsInput | string
+    sourceType?: EnumDrugOrderLineSourceTypeFieldUpdateOperationsInput | $Enums.DrugOrderLineSourceType
+    companyDrugId?: NullableStringFieldUpdateOperationsInput | string | null
+    displayName?: StringFieldUpdateOperationsInput | string
+    unit?: NullableStringFieldUpdateOperationsInput | string | null
+    requestedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    acceptedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    suggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    lineStatus?: EnumDrugOrderLineStatusFieldUpdateOperationsInput | $Enums.DrugOrderLineStatus
+    companyResponseReason?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionBasis?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionRuleVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DrugOrderLineCreateManyCompanyDrugInput = {
+    id?: string
+    orderId: string
+    sourceType: $Enums.DrugOrderLineSourceType
+    masterDrugId?: string | null
+    displayName: string
+    unit?: string | null
+    requestedQty?: Decimal | DecimalJsLike | number | string
+    acceptedQty?: Decimal | DecimalJsLike | number | string
+    suggestedQty?: Decimal | DecimalJsLike | number | string | null
+    lineStatus?: $Enums.DrugOrderLineStatus
+    companyResponseReason?: string | null
+    suggestionBasis?: string | null
+    suggestionReportMonth?: string | null
+    suggestionRuleVersion?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DrugOrderLineUpdateWithoutCompanyDrugInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    sourceType?: EnumDrugOrderLineSourceTypeFieldUpdateOperationsInput | $Enums.DrugOrderLineSourceType
+    displayName?: StringFieldUpdateOperationsInput | string
+    unit?: NullableStringFieldUpdateOperationsInput | string | null
+    requestedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    acceptedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    suggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    lineStatus?: EnumDrugOrderLineStatusFieldUpdateOperationsInput | $Enums.DrugOrderLineStatus
+    companyResponseReason?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionBasis?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionRuleVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    order?: DrugOrderUpdateOneRequiredWithoutLinesNestedInput
+    masterDrug?: MasterDrugUpdateOneWithoutDrugOrderLinesNestedInput
+    shipmentLines?: DrugOrderShipmentLineUpdateManyWithoutOrderLineNestedInput
+    receiptLines?: DrugOrderReceiptLineUpdateManyWithoutOrderLineNestedInput
+  }
+
+  export type DrugOrderLineUncheckedUpdateWithoutCompanyDrugInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderId?: StringFieldUpdateOperationsInput | string
+    sourceType?: EnumDrugOrderLineSourceTypeFieldUpdateOperationsInput | $Enums.DrugOrderLineSourceType
+    masterDrugId?: NullableStringFieldUpdateOperationsInput | string | null
+    displayName?: StringFieldUpdateOperationsInput | string
+    unit?: NullableStringFieldUpdateOperationsInput | string | null
+    requestedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    acceptedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    suggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    lineStatus?: EnumDrugOrderLineStatusFieldUpdateOperationsInput | $Enums.DrugOrderLineStatus
+    companyResponseReason?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionBasis?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionRuleVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    shipmentLines?: DrugOrderShipmentLineUncheckedUpdateManyWithoutOrderLineNestedInput
+    receiptLines?: DrugOrderReceiptLineUncheckedUpdateManyWithoutOrderLineNestedInput
+  }
+
+  export type DrugOrderLineUncheckedUpdateManyWithoutCompanyDrugInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderId?: StringFieldUpdateOperationsInput | string
+    sourceType?: EnumDrugOrderLineSourceTypeFieldUpdateOperationsInput | $Enums.DrugOrderLineSourceType
+    masterDrugId?: NullableStringFieldUpdateOperationsInput | string | null
+    displayName?: StringFieldUpdateOperationsInput | string
+    unit?: NullableStringFieldUpdateOperationsInput | string | null
+    requestedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    acceptedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    suggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    lineStatus?: EnumDrugOrderLineStatusFieldUpdateOperationsInput | $Enums.DrugOrderLineStatus
+    companyResponseReason?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionBasis?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionRuleVersion?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -31359,6 +48711,410 @@ export namespace Prisma {
     dichVu?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumReportStatusFieldUpdateOperationsInput | $Enums.ReportStatus
     adminNote?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DrugOrderLineCreateManyOrderInput = {
+    id?: string
+    sourceType: $Enums.DrugOrderLineSourceType
+    masterDrugId?: string | null
+    companyDrugId?: string | null
+    displayName: string
+    unit?: string | null
+    requestedQty?: Decimal | DecimalJsLike | number | string
+    acceptedQty?: Decimal | DecimalJsLike | number | string
+    suggestedQty?: Decimal | DecimalJsLike | number | string | null
+    lineStatus?: $Enums.DrugOrderLineStatus
+    companyResponseReason?: string | null
+    suggestionBasis?: string | null
+    suggestionReportMonth?: string | null
+    suggestionRuleVersion?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DrugOrderShipmentCreateManyOrderInput = {
+    id?: string
+    shipmentNo: number
+    status?: $Enums.DrugOrderShipmentStatus
+    shippedAt?: Date | string | null
+    companyNote?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DrugOrderReceiptCreateManyOrderInput = {
+    id?: string
+    shipmentId: string
+    facilityId: string
+    confirmedAt?: Date | string
+    note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DrugOrderLineUpdateWithoutOrderInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    sourceType?: EnumDrugOrderLineSourceTypeFieldUpdateOperationsInput | $Enums.DrugOrderLineSourceType
+    displayName?: StringFieldUpdateOperationsInput | string
+    unit?: NullableStringFieldUpdateOperationsInput | string | null
+    requestedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    acceptedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    suggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    lineStatus?: EnumDrugOrderLineStatusFieldUpdateOperationsInput | $Enums.DrugOrderLineStatus
+    companyResponseReason?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionBasis?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionRuleVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    masterDrug?: MasterDrugUpdateOneWithoutDrugOrderLinesNestedInput
+    companyDrug?: CompanyDrugUpdateOneWithoutDrugOrderLinesNestedInput
+    shipmentLines?: DrugOrderShipmentLineUpdateManyWithoutOrderLineNestedInput
+    receiptLines?: DrugOrderReceiptLineUpdateManyWithoutOrderLineNestedInput
+  }
+
+  export type DrugOrderLineUncheckedUpdateWithoutOrderInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    sourceType?: EnumDrugOrderLineSourceTypeFieldUpdateOperationsInput | $Enums.DrugOrderLineSourceType
+    masterDrugId?: NullableStringFieldUpdateOperationsInput | string | null
+    companyDrugId?: NullableStringFieldUpdateOperationsInput | string | null
+    displayName?: StringFieldUpdateOperationsInput | string
+    unit?: NullableStringFieldUpdateOperationsInput | string | null
+    requestedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    acceptedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    suggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    lineStatus?: EnumDrugOrderLineStatusFieldUpdateOperationsInput | $Enums.DrugOrderLineStatus
+    companyResponseReason?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionBasis?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionRuleVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    shipmentLines?: DrugOrderShipmentLineUncheckedUpdateManyWithoutOrderLineNestedInput
+    receiptLines?: DrugOrderReceiptLineUncheckedUpdateManyWithoutOrderLineNestedInput
+  }
+
+  export type DrugOrderLineUncheckedUpdateManyWithoutOrderInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    sourceType?: EnumDrugOrderLineSourceTypeFieldUpdateOperationsInput | $Enums.DrugOrderLineSourceType
+    masterDrugId?: NullableStringFieldUpdateOperationsInput | string | null
+    companyDrugId?: NullableStringFieldUpdateOperationsInput | string | null
+    displayName?: StringFieldUpdateOperationsInput | string
+    unit?: NullableStringFieldUpdateOperationsInput | string | null
+    requestedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    acceptedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    suggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    lineStatus?: EnumDrugOrderLineStatusFieldUpdateOperationsInput | $Enums.DrugOrderLineStatus
+    companyResponseReason?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionBasis?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionRuleVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DrugOrderShipmentUpdateWithoutOrderInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    shipmentNo?: IntFieldUpdateOperationsInput | number
+    status?: EnumDrugOrderShipmentStatusFieldUpdateOperationsInput | $Enums.DrugOrderShipmentStatus
+    shippedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    companyNote?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lines?: DrugOrderShipmentLineUpdateManyWithoutShipmentNestedInput
+    receipts?: DrugOrderReceiptUpdateManyWithoutShipmentNestedInput
+  }
+
+  export type DrugOrderShipmentUncheckedUpdateWithoutOrderInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    shipmentNo?: IntFieldUpdateOperationsInput | number
+    status?: EnumDrugOrderShipmentStatusFieldUpdateOperationsInput | $Enums.DrugOrderShipmentStatus
+    shippedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    companyNote?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lines?: DrugOrderShipmentLineUncheckedUpdateManyWithoutShipmentNestedInput
+    receipts?: DrugOrderReceiptUncheckedUpdateManyWithoutShipmentNestedInput
+  }
+
+  export type DrugOrderShipmentUncheckedUpdateManyWithoutOrderInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    shipmentNo?: IntFieldUpdateOperationsInput | number
+    status?: EnumDrugOrderShipmentStatusFieldUpdateOperationsInput | $Enums.DrugOrderShipmentStatus
+    shippedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    companyNote?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DrugOrderReceiptUpdateWithoutOrderInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    confirmedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    shipment?: DrugOrderShipmentUpdateOneRequiredWithoutReceiptsNestedInput
+    facility?: UserUpdateOneRequiredWithoutDrugOrderReceiptsNestedInput
+    lines?: DrugOrderReceiptLineUpdateManyWithoutReceiptNestedInput
+  }
+
+  export type DrugOrderReceiptUncheckedUpdateWithoutOrderInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    shipmentId?: StringFieldUpdateOperationsInput | string
+    facilityId?: StringFieldUpdateOperationsInput | string
+    confirmedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lines?: DrugOrderReceiptLineUncheckedUpdateManyWithoutReceiptNestedInput
+  }
+
+  export type DrugOrderReceiptUncheckedUpdateManyWithoutOrderInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    shipmentId?: StringFieldUpdateOperationsInput | string
+    facilityId?: StringFieldUpdateOperationsInput | string
+    confirmedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DrugOrderShipmentLineCreateManyOrderLineInput = {
+    id?: string
+    shipmentId: string
+    shippedQty?: Decimal | DecimalJsLike | number | string
+    reason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DrugOrderReceiptLineCreateManyOrderLineInput = {
+    id?: string
+    receiptId: string
+    shipmentLineId: string
+    receivedQty?: Decimal | DecimalJsLike | number | string
+    differenceReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DrugOrderShipmentLineUpdateWithoutOrderLineInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    shippedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    shipment?: DrugOrderShipmentUpdateOneRequiredWithoutLinesNestedInput
+    receiptLines?: DrugOrderReceiptLineUpdateManyWithoutShipmentLineNestedInput
+  }
+
+  export type DrugOrderShipmentLineUncheckedUpdateWithoutOrderLineInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    shipmentId?: StringFieldUpdateOperationsInput | string
+    shippedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    receiptLines?: DrugOrderReceiptLineUncheckedUpdateManyWithoutShipmentLineNestedInput
+  }
+
+  export type DrugOrderShipmentLineUncheckedUpdateManyWithoutOrderLineInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    shipmentId?: StringFieldUpdateOperationsInput | string
+    shippedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DrugOrderReceiptLineUpdateWithoutOrderLineInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    receivedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    differenceReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    receipt?: DrugOrderReceiptUpdateOneRequiredWithoutLinesNestedInput
+    shipmentLine?: DrugOrderShipmentLineUpdateOneRequiredWithoutReceiptLinesNestedInput
+  }
+
+  export type DrugOrderReceiptLineUncheckedUpdateWithoutOrderLineInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    receiptId?: StringFieldUpdateOperationsInput | string
+    shipmentLineId?: StringFieldUpdateOperationsInput | string
+    receivedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    differenceReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DrugOrderReceiptLineUncheckedUpdateManyWithoutOrderLineInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    receiptId?: StringFieldUpdateOperationsInput | string
+    shipmentLineId?: StringFieldUpdateOperationsInput | string
+    receivedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    differenceReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DrugOrderShipmentLineCreateManyShipmentInput = {
+    id?: string
+    orderLineId: string
+    shippedQty?: Decimal | DecimalJsLike | number | string
+    reason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DrugOrderReceiptCreateManyShipmentInput = {
+    id?: string
+    orderId: string
+    facilityId: string
+    confirmedAt?: Date | string
+    note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DrugOrderShipmentLineUpdateWithoutShipmentInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    shippedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    orderLine?: DrugOrderLineUpdateOneRequiredWithoutShipmentLinesNestedInput
+    receiptLines?: DrugOrderReceiptLineUpdateManyWithoutShipmentLineNestedInput
+  }
+
+  export type DrugOrderShipmentLineUncheckedUpdateWithoutShipmentInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderLineId?: StringFieldUpdateOperationsInput | string
+    shippedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    receiptLines?: DrugOrderReceiptLineUncheckedUpdateManyWithoutShipmentLineNestedInput
+  }
+
+  export type DrugOrderShipmentLineUncheckedUpdateManyWithoutShipmentInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderLineId?: StringFieldUpdateOperationsInput | string
+    shippedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DrugOrderReceiptUpdateWithoutShipmentInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    confirmedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    order?: DrugOrderUpdateOneRequiredWithoutReceiptsNestedInput
+    facility?: UserUpdateOneRequiredWithoutDrugOrderReceiptsNestedInput
+    lines?: DrugOrderReceiptLineUpdateManyWithoutReceiptNestedInput
+  }
+
+  export type DrugOrderReceiptUncheckedUpdateWithoutShipmentInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderId?: StringFieldUpdateOperationsInput | string
+    facilityId?: StringFieldUpdateOperationsInput | string
+    confirmedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lines?: DrugOrderReceiptLineUncheckedUpdateManyWithoutReceiptNestedInput
+  }
+
+  export type DrugOrderReceiptUncheckedUpdateManyWithoutShipmentInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    orderId?: StringFieldUpdateOperationsInput | string
+    facilityId?: StringFieldUpdateOperationsInput | string
+    confirmedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DrugOrderReceiptLineCreateManyShipmentLineInput = {
+    id?: string
+    receiptId: string
+    orderLineId: string
+    receivedQty?: Decimal | DecimalJsLike | number | string
+    differenceReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DrugOrderReceiptLineUpdateWithoutShipmentLineInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    receivedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    differenceReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    receipt?: DrugOrderReceiptUpdateOneRequiredWithoutLinesNestedInput
+    orderLine?: DrugOrderLineUpdateOneRequiredWithoutReceiptLinesNestedInput
+  }
+
+  export type DrugOrderReceiptLineUncheckedUpdateWithoutShipmentLineInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    receiptId?: StringFieldUpdateOperationsInput | string
+    orderLineId?: StringFieldUpdateOperationsInput | string
+    receivedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    differenceReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DrugOrderReceiptLineUncheckedUpdateManyWithoutShipmentLineInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    receiptId?: StringFieldUpdateOperationsInput | string
+    orderLineId?: StringFieldUpdateOperationsInput | string
+    receivedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    differenceReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DrugOrderReceiptLineCreateManyReceiptInput = {
+    id?: string
+    shipmentLineId: string
+    orderLineId: string
+    receivedQty?: Decimal | DecimalJsLike | number | string
+    differenceReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DrugOrderReceiptLineUpdateWithoutReceiptInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    receivedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    differenceReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    shipmentLine?: DrugOrderShipmentLineUpdateOneRequiredWithoutReceiptLinesNestedInput
+    orderLine?: DrugOrderLineUpdateOneRequiredWithoutReceiptLinesNestedInput
+  }
+
+  export type DrugOrderReceiptLineUncheckedUpdateWithoutReceiptInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    shipmentLineId?: StringFieldUpdateOperationsInput | string
+    orderLineId?: StringFieldUpdateOperationsInput | string
+    receivedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    differenceReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DrugOrderReceiptLineUncheckedUpdateManyWithoutReceiptInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    shipmentLineId?: StringFieldUpdateOperationsInput | string
+    orderLineId?: StringFieldUpdateOperationsInput | string
+    receivedQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    differenceReason?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
