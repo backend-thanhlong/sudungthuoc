@@ -56,7 +56,7 @@ export async function PATCH(
             orderId: id,
             baseReportMonth: parseBaseReportMonth(body.baseReportMonth),
             note: parseDraftNote(body.note),
-            lines: parseDraftLineInputs(body.lines),
+            lines: parseDraftLineInputs(body.lines, { allowZero: true }),
         });
 
         logActivity({

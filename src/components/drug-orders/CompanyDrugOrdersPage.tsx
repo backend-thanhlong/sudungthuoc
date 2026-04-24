@@ -3,6 +3,8 @@
 import { useCallback, useDeferredValue, useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
+    ChevronDown,
+    ChevronRight,
     BadgeCheck,
     ClipboardList,
     Loader2,
@@ -15,6 +17,7 @@ import {
     Trash2,
     Truck,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -51,6 +54,11 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import DrugOrderQrCode from "@/components/drug-orders/DrugOrderQrCode";
+import {
+    formatDateInputValue,
+    formatShipmentDateRangeLabel,
+} from "@/lib/drug-orders/shipment-date-range";
 
 type OrderStatus =
     | "DRAFT"
@@ -71,6 +79,7 @@ type LineStatus =
 type ShipmentStatus = "CREATED" | "PARTIALLY_RECEIVED" | "RECEIVED";
 type SourceType = "MASTER_DRUG" | "COMPANY_DRUG";
 type ResponseDecision = "CONFIRMED" | "PARTIAL" | "REJECTED";
+type ResponseFilter = "ALL" | "PENDING" | "CATALOG" | "INVALID";
 
 interface FacilityOption {
     id: string;
@@ -149,6 +158,8 @@ interface OrderLine {
         shipmentId: string;
         shipmentNo: number;
         shippedAt: string | null;
+        shippedFromDate: string | null;
+        shippedToDate: string | null;
         shipmentStatus: ShipmentStatus;
         shippedQty: number;
         reason: string | null;
@@ -159,6 +170,7 @@ interface OrderLine {
 interface OrderDetail {
     id: string;
     orderNo: string;
+    lookupUrl: string;
     facilityId: string;
     companyId: string;
     facility: FacilityOption;
@@ -179,6 +191,8 @@ interface OrderDetail {
         shipmentNo: number;
         status: ShipmentStatus;
         shippedAt: string | null;
+        shippedFromDate: string | null;
+        shippedToDate: string | null;
         companyNote: string | null;
         createdAt: string;
         lines: Array<{
@@ -220,6 +234,9 @@ interface ResponseDraftLine {
     requestedQty: number;
     requiresCatalog: boolean;
     masterDrug: MasterDrugOption | null;
+    companyDrugId: string | null;
+    companyDrugCode: string | null;
+    companyDrugName: string | null;
     decision: ResponseDecision | typeof UNSET_VALUE;
     acceptedQty: string;
     reason: string;
@@ -232,6 +249,8 @@ interface ShipmentDraftLine {
     orderLineId: string;
     displayName: string;
     unit: string | null;
+    companyDrugCode: string | null;
+    companyDrugName: string | null;
     acceptedQty: number;
     remainingAcceptedQty: number;
     shippedQty: string;
@@ -330,12 +349,6 @@ function formatDateTime(value: string | null | undefined) {
     return new Date(value).toLocaleString("vi-VN");
 }
 
-function formatDateTimeLocal(value: Date = new Date()) {
-    const offset = value.getTimezoneOffset();
-    const local = new Date(value.getTime() - offset * 60_000);
-    return local.toISOString().slice(0, 16);
-}
-
 function buildCatalogDraft(item?: CompanyDrugOption | null): CatalogDraft {
     return {
         id: item?.id || null,
@@ -388,6 +401,9 @@ function buildResponseDraftLines(order: OrderDetail): ResponseDraftLine[] {
             requiresCatalog:
                 line.lineStatus === "PENDING_CATALOG_CONFIRMATION" && !!line.masterDrugId,
             masterDrug: line.masterDrug,
+            companyDrugId: line.companyDrug?.id || line.companyDrugId || null,
+            companyDrugCode: line.companyDrug?.companyDrugCode || null,
+            companyDrugName: line.companyDrug?.companyDrugName || null,
             decision: UNSET_VALUE,
             acceptedQty:
                 line.lineStatus === "PENDING_CATALOG_CONFIRMATION"
@@ -408,11 +424,67 @@ function buildShipmentDraftLines(order: OrderDetail): ShipmentDraftLine[] {
             orderLineId: line.id,
             displayName: line.displayName,
             unit: line.unit,
+            companyDrugCode: line.companyDrug?.companyDrugCode || null,
+            companyDrugName: line.companyDrug?.companyDrugName || null,
             acceptedQty: line.acceptedQty,
             remainingAcceptedQty: line.remainingAcceptedQty,
             shippedQty: "",
             reason: "",
         }));
+}
+
+function getResponseLineValidationError(line: ResponseDraftLine) {
+    if (line.decision === UNSET_VALUE) {
+        return "Chưa chọn phản hồi";
+    }
+
+    if (!line.reason.trim()) {
+        return "Chưa nhập lý do phản hồi";
+    }
+
+    if (
+        line.decision === "PARTIAL" &&
+        (!line.acceptedQty.trim() || !Number.isFinite(Number(line.acceptedQty)) || Number(line.acceptedQty) <= 0)
+    ) {
+        return "Số lượng chấp nhận phải lớn hơn 0";
+    }
+
+    if (line.requiresCatalog && line.decision !== "REJECTED") {
+        if (line.catalogSelection === CREATE_NEW_VALUE && !line.newCompanyDrugCode.trim()) {
+            return "Chưa nhập mã thuốc công ty";
+        }
+
+        if (!line.catalogSelection || line.catalogSelection === NONE_VALUE) {
+            return "Chưa chọn hoặc tạo thuốc công ty";
+        }
+    }
+
+    return null;
+}
+
+function getLinePrimaryName(line: OrderLine) {
+    return line.companyDrug?.companyDrugName || line.displayName;
+}
+
+function getLinePrimaryCode(line: OrderLine) {
+    return line.companyDrug?.companyDrugCode || null;
+}
+
+function getLineLatestShipment(line: OrderLine) {
+    if (line.shipmentHistory.length === 0) {
+        return null;
+    }
+
+    return line.shipmentHistory[line.shipmentHistory.length - 1];
+}
+
+function DetailField(props: { label: string; value: string }) {
+    return (
+        <div className="space-y-1">
+            <p className="text-xs uppercase tracking-wide text-gray-400">{props.label}</p>
+            <p className="text-sm text-gray-700">{props.value}</p>
+        </div>
+    );
 }
 
 function OrderStatusBadge({ status }: { status: OrderStatus }) {
@@ -446,14 +518,17 @@ export default function CompanyDrugOrdersPage() {
     const [orderSearch, setOrderSearch] = useState("");
     const [orderStatusFilter, setOrderStatusFilter] = useState(ALL_VALUE);
     const [facilityFilter, setFacilityFilter] = useState(ALL_VALUE);
+    const [expandedOrderLineId, setExpandedOrderLineId] = useState<string | null>(null);
 
     const [isResponseDialogOpen, setIsResponseDialogOpen] = useState(false);
     const [responseLines, setResponseLines] = useState<ResponseDraftLine[]>([]);
+    const [responseFilter, setResponseFilter] = useState<ResponseFilter>("ALL");
     const [isSubmittingResponse, setIsSubmittingResponse] = useState(false);
 
     const [isShipmentDialogOpen, setIsShipmentDialogOpen] = useState(false);
     const [shipmentLines, setShipmentLines] = useState<ShipmentDraftLine[]>([]);
-    const [shipmentAt, setShipmentAt] = useState(formatDateTimeLocal());
+    const [shipmentFromDate, setShipmentFromDate] = useState(formatDateInputValue());
+    const [shipmentToDate, setShipmentToDate] = useState(formatDateInputValue());
     const [shipmentNote, setShipmentNote] = useState("");
     const [isCreatingShipment, setIsCreatingShipment] = useState(false);
 
@@ -631,6 +706,7 @@ export default function CompanyDrugOrdersPage() {
     useEffect(() => {
         if (!selectedOrderId) {
             setSelectedOrder(null);
+            setExpandedOrderLineId(null);
             return;
         }
 
@@ -653,6 +729,7 @@ export default function CompanyDrugOrdersPage() {
         }
 
         setResponseLines(buildResponseDraftLines(selectedOrder));
+        setResponseFilter("ALL");
         setIsResponseDialogOpen(true);
     }
 
@@ -662,7 +739,8 @@ export default function CompanyDrugOrdersPage() {
         }
 
         setShipmentLines(buildShipmentDraftLines(selectedOrder));
-        setShipmentAt(formatDateTimeLocal());
+        setShipmentFromDate(formatDateInputValue());
+        setShipmentToDate(formatDateInputValue());
         setShipmentNote("");
         setIsShipmentDialogOpen(true);
     }
@@ -769,6 +847,16 @@ export default function CompanyDrugOrdersPage() {
             return;
         }
 
+        if (!shipmentFromDate || !shipmentToDate) {
+            toast.error("Vui lòng chọn Từ ngày và Đến ngày giao hàng");
+            return;
+        }
+
+        if (shipmentFromDate > shipmentToDate) {
+            toast.error("Từ ngày không được lớn hơn Đến ngày");
+            return;
+        }
+
         const lines = shipmentLines
             .map((line) => ({
                 orderLineId: line.orderLineId,
@@ -790,7 +878,8 @@ export default function CompanyDrugOrdersPage() {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        shippedAt: shipmentAt,
+                        shippedFromDate: shipmentFromDate,
+                        shippedToDate: shipmentToDate,
                         companyNote: shipmentNote,
                         lines,
                     }),
@@ -942,6 +1031,45 @@ export default function CompanyDrugOrdersPage() {
     }
 
     const selectedOrderSummary = orders.find((order) => order.id === selectedOrderId) || null;
+    const selectedOrderRequestedQty =
+        selectedOrder?.lines.reduce((sum, line) => sum + line.requestedQty, 0) || 0;
+    const selectedOrderPendingLineCount =
+        selectedOrder?.lines.filter(
+            (line) =>
+                line.lineStatus === "PENDING" ||
+                line.lineStatus === "PENDING_CATALOG_CONFIRMATION"
+        ).length || 0;
+    const selectedOrderAcceptedQty =
+        selectedOrder?.lines.reduce((sum, line) => sum + line.acceptedQty, 0) || 0;
+    const selectedOrderShippedQty =
+        selectedOrder?.lines.reduce((sum, line) => sum + line.totalShippedQty, 0) || 0;
+    const responseCompletedCount = responseLines.filter(
+        (line) => getResponseLineValidationError(line) === null
+    ).length;
+    const responseRemainingCount = responseLines.length - responseCompletedCount;
+    const filteredResponseLines = responseLines.filter((line) => {
+        if (responseFilter === "PENDING") {
+            return line.decision === UNSET_VALUE;
+        }
+
+        if (responseFilter === "CATALOG") {
+            return line.requiresCatalog;
+        }
+
+        if (responseFilter === "INVALID") {
+            return getResponseLineValidationError(line) !== null;
+        }
+
+        return true;
+    });
+    const shipmentPlannedQty = shipmentLines.reduce((sum, line) => {
+        const parsed = Number(line.shippedQty);
+        return Number.isFinite(parsed) && parsed > 0 ? sum + parsed : sum;
+    }, 0);
+    const shipmentRemainingQty = shipmentLines.reduce(
+        (sum, line) => sum + line.remainingAcceptedQty,
+        0
+    );
 
     return (
         <div className="space-y-6">
@@ -1237,6 +1365,54 @@ export default function CompanyDrugOrdersPage() {
                                         </div>
                                     ) : (
                                         <div className="space-y-6">
+                                            <DrugOrderQrCode
+                                                lookupUrl={selectedOrder.lookupUrl}
+                                                orderNo={selectedOrder.orderNo}
+                                            />
+
+                                            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+                                                <div className="rounded-xl border border-gray-200 bg-white px-4 py-3">
+                                                    <p className="text-xs uppercase tracking-wide text-gray-400">
+                                                        Tổng số dòng
+                                                    </p>
+                                                    <p className="mt-2 text-lg font-semibold text-gray-900">
+                                                        {selectedOrder.lines.length}
+                                                    </p>
+                                                </div>
+                                                <div className="rounded-xl border border-gray-200 bg-white px-4 py-3">
+                                                    <p className="text-xs uppercase tracking-wide text-gray-400">
+                                                        Tổng yêu cầu
+                                                    </p>
+                                                    <p className="mt-2 text-lg font-semibold text-gray-900">
+                                                        {formatQuantity(selectedOrderRequestedQty)}
+                                                    </p>
+                                                </div>
+                                                <div className="rounded-xl border border-gray-200 bg-white px-4 py-3">
+                                                    <p className="text-xs uppercase tracking-wide text-gray-400">
+                                                        Tổng chấp nhận
+                                                    </p>
+                                                    <p className="mt-2 text-lg font-semibold text-gray-900">
+                                                        {formatQuantity(selectedOrderAcceptedQty)}
+                                                    </p>
+                                                </div>
+                                                <div className="rounded-xl border border-gray-200 bg-white px-4 py-3">
+                                                    <p className="text-xs uppercase tracking-wide text-gray-400">
+                                                        Tổng đã giao
+                                                    </p>
+                                                    <p className="mt-2 text-lg font-semibold text-gray-900">
+                                                        {formatQuantity(selectedOrderShippedQty)}
+                                                    </p>
+                                                </div>
+                                                <div className="rounded-xl border border-gray-200 bg-white px-4 py-3">
+                                                    <p className="text-xs uppercase tracking-wide text-gray-400">
+                                                        Dòng chờ xử lý
+                                                    </p>
+                                                    <p className="mt-2 text-lg font-semibold text-gray-900">
+                                                        {selectedOrderPendingLineCount}
+                                                    </p>
+                                                </div>
+                                            </div>
+
                                             <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
                                                 <p className="text-sm font-medium text-gray-700">Ghi chú từ cơ sở</p>
                                                 <p className="mt-1 text-sm text-gray-600">
@@ -1244,70 +1420,394 @@ export default function CompanyDrugOrdersPage() {
                                                 </p>
                                             </div>
 
-                                            <div className="overflow-x-auto rounded-xl border border-gray-200">
-                                                <Table>
-                                                    <TableHeader>
-                                                        <TableRow>
-                                                            <TableHead>Thuốc</TableHead>
-                                                            <TableHead>Nguồn</TableHead>
-                                                            <TableHead className="text-right">Yêu cầu</TableHead>
-                                                            <TableHead className="text-right">Chấp nhận</TableHead>
-                                                            <TableHead className="text-right">Đã giao</TableHead>
-                                                            <TableHead className="text-right">Còn lại</TableHead>
-                                                            <TableHead>Trạng thái</TableHead>
-                                                            <TableHead>Lý do</TableHead>
-                                                        </TableRow>
-                                                    </TableHeader>
-                                                    <TableBody>
-                                                        {selectedOrder.lines.map((line) => (
-                                                            <TableRow key={line.id}>
-                                                                <TableCell className="min-w-[320px] align-top">
-                                                                    <div className="space-y-1">
-                                                                        <p className="font-medium text-gray-900">
-                                                                            {line.displayName}
-                                                                        </p>
-                                                                        <p className="text-xs text-gray-500">
-                                                                            Đơn vị: {line.unit || "—"}
-                                                                        </p>
-                                                                        {line.masterDrug && (
-                                                                            <p className="text-xs text-gray-500">
-                                                                                Thuốc chuẩn: {line.masterDrug.maChung} - {line.masterDrug.tenThuoc}
-                                                                            </p>
-                                                                        )}
-                                                                        {line.companyDrug && (
-                                                                            <p className="text-xs text-gray-500">
-                                                                                Thuốc công ty: {line.companyDrug.companyDrugCode} - {line.companyDrug.companyDrugName}
-                                                                            </p>
-                                                                        )}
-                                                                    </div>
-                                                                </TableCell>
-                                                                <TableCell className="align-top">
-                                                                    <Badge variant="outline">
-                                                                        {line.sourceType === "MASTER_DRUG" ? "Danh mục chung" : "Danh mục công ty"}
-                                                                    </Badge>
-                                                                </TableCell>
-                                                                <TableCell className="text-right align-top">
-                                                                    {formatQuantity(line.requestedQty)}
-                                                                </TableCell>
-                                                                <TableCell className="text-right align-top">
-                                                                    {formatQuantity(line.acceptedQty)}
-                                                                </TableCell>
-                                                                <TableCell className="text-right align-top">
-                                                                    {formatQuantity(line.totalShippedQty)}
-                                                                </TableCell>
-                                                                <TableCell className="text-right align-top">
-                                                                    {formatQuantity(line.remainingAcceptedQty)}
-                                                                </TableCell>
-                                                                <TableCell className="align-top">
-                                                                    <LineStatusBadge status={line.lineStatus} />
-                                                                </TableCell>
-                                                                <TableCell className="min-w-[220px] align-top text-sm text-gray-600">
-                                                                    {line.companyResponseReason || "—"}
-                                                                </TableCell>
+                                            <div className="space-y-3">
+                                                <div className="flex items-center justify-between gap-3">
+                                                    <div>
+                                                        <h3 className="font-semibold text-gray-900">
+                                                            Dòng thuốc trong đơn
+                                                        </h3>
+                                                        <p className="text-sm text-gray-500">
+                                                            Mặt ngoài của bảng ưu tiên số liệu xử lý. Mở rộng từng dòng để xem đủ hồ sơ thuốc và tình trạng thực hiện.
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                <div className="overflow-x-auto rounded-xl border border-gray-200">
+                                                    <Table>
+                                                        <TableHeader>
+                                                            <TableRow>
+                                                                <TableHead className="w-12"></TableHead>
+                                                                <TableHead className="min-w-[280px]">
+                                                                    Thuốc công ty
+                                                                </TableHead>
+                                                                <TableHead className="text-right">
+                                                                    Yêu cầu
+                                                                </TableHead>
+                                                                <TableHead className="text-right">
+                                                                    Chấp nhận
+                                                                </TableHead>
+                                                                <TableHead className="text-right">
+                                                                    Đã giao
+                                                                </TableHead>
+                                                                <TableHead className="text-right">
+                                                                    Còn lại
+                                                                </TableHead>
+                                                                <TableHead>Trạng thái</TableHead>
+                                                                <TableHead className="min-w-[220px]">
+                                                                    Lý do
+                                                                </TableHead>
                                                             </TableRow>
-                                                        ))}
-                                                    </TableBody>
-                                                </Table>
+                                                        </TableHeader>
+                                                        <TableBody>
+                                                            {selectedOrder.lines.flatMap((line) => {
+                                                                const isExpanded =
+                                                                    expandedOrderLineId ===
+                                                                    line.id;
+                                                                const latestShipment =
+                                                                    getLineLatestShipment(line);
+                                                                const primaryDrugName =
+                                                                    getLinePrimaryName(line);
+                                                                const primaryDrugCode =
+                                                                    getLinePrimaryCode(line);
+                                                                const companyDrugStatus =
+                                                                    line.companyDrug
+                                                                        ? line.companyDrug.isActive
+                                                                            ? "Đang dùng"
+                                                                            : "Ngừng dùng"
+                                                                        : "Chưa chốt";
+                                                                const linkageStatus = line
+                                                                    .companyDrug
+                                                                    ? line.companyDrug.isLegacy
+                                                                        ? "Legacy / cần rà soát"
+                                                                        : "Đã liên kết hợp lệ"
+                                                                    : line.masterDrug
+                                                                        ? "Đang chờ gắn thuốc công ty"
+                                                                        : "Chưa liên kết";
+
+                                                                return [
+                                                                    <TableRow
+                                                                        key={line.id}
+                                                                        className={cn(
+                                                                            isExpanded &&
+                                                                                "bg-slate-50/70"
+                                                                        )}
+                                                                    >
+                                                                        <TableCell className="align-top">
+                                                                            <Button
+                                                                                type="button"
+                                                                                variant="ghost"
+                                                                                size="icon"
+                                                                                className="size-8"
+                                                                                aria-label={
+                                                                                    isExpanded
+                                                                                        ? "Thu gọn chi tiết dòng thuốc"
+                                                                                        : "Mở rộng chi tiết dòng thuốc"
+                                                                                }
+                                                                                onClick={() =>
+                                                                                    setExpandedOrderLineId(
+                                                                                        current =>
+                                                                                            current ===
+                                                                                            line.id
+                                                                                                ? null
+                                                                                                : line.id
+                                                                                    )
+                                                                                }
+                                                                            >
+                                                                                {isExpanded ? (
+                                                                                    <ChevronDown className="size-4" />
+                                                                                ) : (
+                                                                                    <ChevronRight className="size-4" />
+                                                                                )}
+                                                                            </Button>
+                                                                        </TableCell>
+                                                                        <TableCell className="align-top">
+                                                                            <div className="space-y-2">
+                                                                                <div>
+                                                                                    <p className="font-medium text-gray-900">
+                                                                                        {
+                                                                                            primaryDrugName
+                                                                                        }
+                                                                                    </p>
+                                                                                    {primaryDrugCode ? (
+                                                                                        <p className="text-xs text-gray-500">
+                                                                                            Mã thuốc công ty:{" "}
+                                                                                            {
+                                                                                                primaryDrugCode
+                                                                                            }
+                                                                                        </p>
+                                                                                    ) : null}
+                                                                                </div>
+                                                                                {!line.companyDrug ? (
+                                                                                    <div className="flex flex-wrap gap-2">
+                                                                                        <Badge
+                                                                                            variant="outline"
+                                                                                            className="border-amber-300 text-amber-700"
+                                                                                        >
+                                                                                            Chờ gắn thuốc công ty
+                                                                                        </Badge>
+                                                                                        {line.masterDrug ? (
+                                                                                            <span className="text-xs text-gray-500">
+                                                                                                Đang đợi chốt theo thuốc chuẩn
+                                                                                            </span>
+                                                                                        ) : null}
+                                                                                    </div>
+                                                                                ) : null}
+                                                                            </div>
+                                                                        </TableCell>
+                                                                        <TableCell className="text-right align-top font-medium text-gray-900">
+                                                                            {formatQuantity(
+                                                                                line.requestedQty
+                                                                            )}
+                                                                        </TableCell>
+                                                                        <TableCell className="text-right align-top font-medium text-gray-900">
+                                                                            {formatQuantity(
+                                                                                line.acceptedQty
+                                                                            )}
+                                                                        </TableCell>
+                                                                        <TableCell className="text-right align-top font-medium text-gray-900">
+                                                                            {formatQuantity(
+                                                                                line.totalShippedQty
+                                                                            )}
+                                                                        </TableCell>
+                                                                        <TableCell className="text-right align-top font-medium text-gray-900">
+                                                                            {formatQuantity(
+                                                                                line.remainingAcceptedQty
+                                                                            )}
+                                                                        </TableCell>
+                                                                        <TableCell className="align-top">
+                                                                            <LineStatusBadge
+                                                                                status={
+                                                                                    line.lineStatus
+                                                                                }
+                                                                            />
+                                                                        </TableCell>
+                                                                        <TableCell className="align-top text-sm text-gray-600">
+                                                                            <div className="line-clamp-2 whitespace-normal break-words">
+                                                                                {line.companyResponseReason ||
+                                                                                    "—"}
+                                                                            </div>
+                                                                        </TableCell>
+                                                                    </TableRow>,
+                                                                    ...(isExpanded
+                                                                        ? [
+                                                                            <TableRow
+                                                                                key={`${line.id}-expanded`}
+                                                                                className="bg-slate-50/60"
+                                                                            >
+                                                                                <TableCell
+                                                                                    colSpan={8}
+                                                                                    className="p-4"
+                                                                                >
+                                                                                    <div className="grid gap-4 lg:grid-cols-2">
+                                                                                        <div className="rounded-xl border border-slate-200 bg-white p-4">
+                                                                                            <div className="mb-4">
+                                                                                                <h4 className="font-semibold text-slate-900">
+                                                                                                    Thông tin thuốc
+                                                                                                </h4>
+                                                                                                <p className="text-sm text-slate-500">
+                                                                                                    Hồ sơ đầy đủ của thuốc công ty và thuốc chuẩn liên kết.
+                                                                                                </p>
+                                                                                            </div>
+
+                                                                                            {!line.companyDrug &&
+                                                                                            line.masterDrug ? (
+                                                                                                <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+                                                                                                    Dòng này chưa chốt thuốc công ty. Một số trường bên dưới đang hiển thị tạm theo thuốc chuẩn.
+                                                                                                </div>
+                                                                                            ) : null}
+
+                                                                                            <div className="grid gap-4 sm:grid-cols-2">
+                                                                                                <DetailField
+                                                                                                    label="Mã thuốc công ty"
+                                                                                                    value={
+                                                                                                        line.companyDrug
+                                                                                                            ?.companyDrugCode ||
+                                                                                                        "—"
+                                                                                                    }
+                                                                                                />
+                                                                                                <DetailField
+                                                                                                    label="Tên thuốc công ty"
+                                                                                                    value={
+                                                                                                        line.companyDrug
+                                                                                                            ?.companyDrugName ||
+                                                                                                        line.displayName
+                                                                                                    }
+                                                                                                />
+                                                                                                <DetailField
+                                                                                                    label="Trạng thái thuốc công ty"
+                                                                                                    value={
+                                                                                                        companyDrugStatus
+                                                                                                    }
+                                                                                                />
+                                                                                                <DetailField
+                                                                                                    label="Trạng thái liên kết"
+                                                                                                    value={
+                                                                                                        linkageStatus
+                                                                                                    }
+                                                                                                />
+                                                                                                <DetailField
+                                                                                                    label="Hoạt chất"
+                                                                                                    value={
+                                                                                                        line.companyDrug
+                                                                                                            ?.activeIngredient ||
+                                                                                                        line.masterDrug
+                                                                                                            ?.hoatChat ||
+                                                                                                        "—"
+                                                                                                    }
+                                                                                                />
+                                                                                                <DetailField
+                                                                                                    label="Hàm lượng"
+                                                                                                    value={
+                                                                                                        line.masterDrug
+                                                                                                            ?.hamLuong ||
+                                                                                                        "—"
+                                                                                                    }
+                                                                                                />
+                                                                                                <DetailField
+                                                                                                    label="Số đăng ký"
+                                                                                                    value={
+                                                                                                        line.masterDrug
+                                                                                                            ?.soDangKy ||
+                                                                                                        "—"
+                                                                                                    }
+                                                                                                />
+                                                                                                <DetailField
+                                                                                                    label="Dạng bào chế"
+                                                                                                    value={
+                                                                                                        line.masterDrug
+                                                                                                            ?.dangBaoChe ||
+                                                                                                        "—"
+                                                                                                    }
+                                                                                                />
+                                                                                                <DetailField
+                                                                                                    label="Quy cách"
+                                                                                                    value={
+                                                                                                        line.companyDrug
+                                                                                                            ?.quyCach ||
+                                                                                                        line.masterDrug
+                                                                                                            ?.quyCach ||
+                                                                                                        "—"
+                                                                                                    }
+                                                                                                />
+                                                                                                <DetailField
+                                                                                                    label="Đơn vị"
+                                                                                                    value={
+                                                                                                        line.companyDrug
+                                                                                                            ?.unit ||
+                                                                                                        line.masterDrug
+                                                                                                            ?.donViTinh ||
+                                                                                                        line.unit ||
+                                                                                                        "—"
+                                                                                                    }
+                                                                                                />
+                                                                                                <div className="sm:col-span-2">
+                                                                                                    <DetailField
+                                                                                                        label="Thuốc chuẩn liên kết"
+                                                                                                        value={
+                                                                                                            line.masterDrug
+                                                                                                                ? `${line.masterDrug.maChung} - ${line.masterDrug.tenThuoc}`
+                                                                                                                : "Chưa liên kết"
+                                                                                                        }
+                                                                                                    />
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+
+                                                                                        <div className="rounded-xl border border-slate-200 bg-white p-4">
+                                                                                            <div className="mb-4">
+                                                                                                <h4 className="font-semibold text-slate-900">
+                                                                                                    Tình trạng xử lý
+                                                                                                </h4>
+                                                                                                <p className="text-sm text-slate-500">
+                                                                                                    Tóm tắt trạng thái phản hồi, giao hàng và dòng thuốc đã chốt.
+                                                                                                </p>
+                                                                                            </div>
+
+                                                                                            <div className="grid gap-4 sm:grid-cols-2">
+                                                                                                <DetailField
+                                                                                                    label="Yêu cầu"
+                                                                                                    value={formatQuantity(
+                                                                                                        line.requestedQty
+                                                                                                    )}
+                                                                                                />
+                                                                                                <DetailField
+                                                                                                    label="Chấp nhận"
+                                                                                                    value={formatQuantity(
+                                                                                                        line.acceptedQty
+                                                                                                    )}
+                                                                                                />
+                                                                                                <DetailField
+                                                                                                    label="Đã giao"
+                                                                                                    value={formatQuantity(
+                                                                                                        line.totalShippedQty
+                                                                                                    )}
+                                                                                                />
+                                                                                                <DetailField
+                                                                                                    label="Đã nhận"
+                                                                                                    value={formatQuantity(
+                                                                                                        line.totalReceivedQty
+                                                                                                    )}
+                                                                                                />
+                                                                                                <DetailField
+                                                                                                    label="Còn lại"
+                                                                                                    value={formatQuantity(
+                                                                                                        line.remainingAcceptedQty
+                                                                                                    )}
+                                                                                                />
+                                                                                                <DetailField
+                                                                                                    label="Trạng thái dòng"
+                                                                                                    value={
+                                                                                                        LINE_STATUS_META[
+                                                                                                            line
+                                                                                                                .lineStatus
+                                                                                                        ].label
+                                                                                                    }
+                                                                                                />
+                                                                                                <div className="sm:col-span-2">
+                                                                                                    <DetailField
+                                                                                                        label="Thuốc công ty đã chốt"
+                                                                                                        value={
+                                                                                                            line.companyDrug
+                                                                                                                ? `${line.companyDrug.companyDrugCode} - ${line.companyDrug.companyDrugName}`
+                                                                                                                : "Chưa chốt"
+                                                                                                        }
+                                                                                                    />
+                                                                                                </div>
+                                                                                                <div className="sm:col-span-2">
+                                                                                                    <DetailField
+                                                                                                        label="Lý do phản hồi"
+                                                                                                        value={
+                                                                                                            line.companyResponseReason ||
+                                                                                                            "Chưa có"
+                                                                                                        }
+                                                                                                    />
+                                                                                                </div>
+                                                                                                <div className="sm:col-span-2">
+                                                                                                    <DetailField
+                                                                                                        label="Đợt giao gần nhất"
+                                                                                                        value={
+                                                                                                            latestShipment
+                                                                                                                ? `Đợt #${latestShipment.shipmentNo} | ${formatShipmentDateRangeLabel({
+                                                                                                                      shippedFromDate: latestShipment.shippedFromDate,
+                                                                                                                      shippedToDate: latestShipment.shippedToDate,
+                                                                                                                      shippedAt: latestShipment.shippedAt,
+                                                                                                                  })} | Giao ${formatQuantity(latestShipment.shippedQty)}`
+                                                                                                                : "Chưa có đợt giao"
+                                                                                                        }
+                                                                                                    />
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </TableCell>
+                                                                            </TableRow>,
+                                                                        ]
+                                                                        : []),
+                                                                ];
+                                                            })}
+                                                        </TableBody>
+                                                    </Table>
+                                                </div>
                                             </div>
 
                                             <div className="space-y-4">
@@ -1330,7 +1830,12 @@ export default function CompanyDrugOrdersPage() {
                                                                             Đợt giao #{shipment.shipmentNo}
                                                                         </CardTitle>
                                                                         <CardDescription>
-                                                                            Thời điểm giao: {formatDateTime(shipment.shippedAt)}
+                                                                            Thời gian giao:{" "}
+                                                                            {formatShipmentDateRangeLabel({
+                                                                                shippedFromDate: shipment.shippedFromDate,
+                                                                                shippedToDate: shipment.shippedToDate,
+                                                                                shippedAt: shipment.shippedAt,
+                                                                            })}
                                                                         </CardDescription>
                                                                     </div>
 
@@ -1615,35 +2120,132 @@ export default function CompanyDrugOrdersPage() {
                     <DialogHeader>
                         <DialogTitle>Phản hồi đơn đặt hàng</DialogTitle>
                         <DialogDescription>
-                            Công ty phải phản hồi đầy đủ từng dòng. Mọi quyết định đều cần lý do.
+                            Xử lý lần lượt từng dòng, hoàn tất quyết định và lý do trước khi lưu phản hồi cho toàn bộ đơn.
                         </DialogDescription>
                     </DialogHeader>
 
                     <div className="space-y-4">
-                        {responseLines.map((line, index) => {
+                        <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+                            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                                <div>
+                                    <p className="text-sm font-medium text-gray-700">
+                                        Tiến độ phản hồi
+                                    </p>
+                                    <p className="mt-1 text-sm text-gray-600">
+                                        Đã hoàn tất {responseCompletedCount} / {responseLines.length} dòng.
+                                        {responseRemainingCount > 0
+                                            ? ` Còn ${responseRemainingCount} dòng chưa hợp lệ.`
+                                            : " Tất cả dòng đã sẵn sàng để lưu."}
+                                    </p>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                    {[
+                                        {
+                                            value: "ALL" as const,
+                                            label: "Tất cả",
+                                        },
+                                        {
+                                            value: "PENDING" as const,
+                                            label: "Chờ phản hồi",
+                                        },
+                                        {
+                                            value: "CATALOG" as const,
+                                            label: "Chờ gắn thuốc công ty",
+                                        },
+                                        {
+                                            value: "INVALID" as const,
+                                            label: "Thiếu thông tin",
+                                        },
+                                    ].map((item) => (
+                                        <Button
+                                            key={item.value}
+                                            type="button"
+                                            size="sm"
+                                            variant={
+                                                responseFilter === item.value
+                                                    ? "default"
+                                                    : "outline"
+                                            }
+                                            onClick={() => setResponseFilter(item.value)}
+                                        >
+                                            {item.label}
+                                        </Button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {filteredResponseLines.length === 0 ? (
+                            <div className="rounded-xl border border-dashed border-gray-200 px-4 py-10 text-center text-sm text-gray-500">
+                                Không còn dòng nào khớp bộ lọc hiện tại.
+                            </div>
+                        ) : (
+                            filteredResponseLines.map((line, index) => {
                             const matchingCompanyDrugs =
                                 selectedOrder?.options.companyDrugs.filter(
                                     (drug) => drug.masterDrugId && drug.masterDrugId === line.masterDrug?.id
                                 ) || [];
+                            const validationError = getResponseLineValidationError(line);
+                            const isComplete = validationError === null;
 
                             return (
-                                <div key={line.lineId} className="rounded-xl border border-gray-200 p-4">
-                                    <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                                <div
+                                    key={line.lineId}
+                                    className={cn(
+                                        "rounded-xl border p-4",
+                                        isComplete
+                                            ? "border-emerald-200 bg-emerald-50/40"
+                                            : "border-gray-200 bg-white"
+                                    )}
+                                >
+                                    <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                                         <div>
                                             <p className="font-semibold text-gray-900">
                                                 {index + 1}. {line.displayName}
                                             </p>
-                                            <p className="mt-1 text-sm text-gray-500">
-                                                Yêu cầu: {formatQuantity(line.requestedQty)} {line.unit || ""}
+                                            <div className="mt-2 flex flex-wrap gap-2">
+                                                {line.companyDrugCode ? (
+                                                    <Badge
+                                                        variant="outline"
+                                                        className="border-slate-300 text-slate-700"
+                                                    >
+                                                        {line.companyDrugCode}
+                                                    </Badge>
+                                                ) : null}
+                                                {line.requiresCatalog ? (
+                                                    <Badge
+                                                        variant="outline"
+                                                        className="border-amber-300 text-amber-700"
+                                                    >
+                                                        Chờ gắn thuốc công ty
+                                                    </Badge>
+                                                ) : null}
+                                                <Badge
+                                                    variant={isComplete ? "outline" : "secondary"}
+                                                    className={
+                                                        isComplete
+                                                            ? "border-emerald-300 text-emerald-700"
+                                                            : undefined
+                                                    }
+                                                >
+                                                    {isComplete
+                                                        ? "Đã hợp lệ"
+                                                        : "Chưa hoàn tất"}
+                                                </Badge>
+                                            </div>
+                                            <p className="mt-3 text-sm text-gray-500">
+                                                Yêu cầu: {formatQuantity(line.requestedQty)}{" "}
+                                                {line.unit || ""}
                                             </p>
-                                            {line.masterDrug && (
-                                                <p className="text-xs text-gray-500">
-                                                    Thuốc chuẩn: {line.masterDrug.maChung} - {line.masterDrug.tenThuoc}
-                                                </p>
-                                            )}
+                                            <p className="text-xs text-gray-500">
+                                                Thuốc chuẩn:{" "}
+                                                {line.masterDrug
+                                                    ? `${line.masterDrug.maChung} - ${line.masterDrug.tenThuoc}`
+                                                    : "—"}
+                                            </p>
                                         </div>
 
-                                        <div className="grid gap-3 lg:grid-cols-[220px_160px]">
+                                        <div className="grid gap-3 lg:grid-cols-[240px_180px]">
                                             <div className="space-y-2">
                                                 <Label>Phản hồi</Label>
                                                 <Select
@@ -1702,23 +2304,45 @@ export default function CompanyDrugOrdersPage() {
                                         </div>
                                     </div>
 
-                                    <div className="mt-4 space-y-2">
-                                        <Label>Lý do phản hồi</Label>
-                                        <Textarea
-                                            value={line.reason}
-                                            onChange={(event) => {
-                                                const nextValue = event.target.value;
-                                                setResponseLines((current) =>
-                                                    current.map((currentLine) =>
-                                                        currentLine.lineId === line.lineId
-                                                            ? { ...currentLine, reason: nextValue }
-                                                            : currentLine
-                                                    )
-                                                );
-                                            }}
-                                            rows={2}
-                                            placeholder="Nhập lý do xác nhận, giao một phần hoặc từ chối"
-                                        />
+                                    <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
+                                        <div className="space-y-2">
+                                            <Label>Lý do phản hồi</Label>
+                                            <Textarea
+                                                value={line.reason}
+                                                onChange={(event) => {
+                                                    const nextValue = event.target.value;
+                                                    setResponseLines((current) =>
+                                                        current.map((currentLine) =>
+                                                            currentLine.lineId === line.lineId
+                                                                ? { ...currentLine, reason: nextValue }
+                                                                : currentLine
+                                                        )
+                                                    );
+                                                }}
+                                                rows={3}
+                                                placeholder="Nhập lý do xác nhận, giao một phần hoặc từ chối"
+                                            />
+                                        </div>
+
+                                        <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                                            <p className="text-sm font-medium text-slate-700">
+                                                Tình trạng dòng
+                                            </p>
+                                            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                                                <DetailField
+                                                    label="Thuốc công ty hiện tại"
+                                                    value={
+                                                        line.companyDrugCode && line.companyDrugName
+                                                            ? `${line.companyDrugCode} - ${line.companyDrugName}`
+                                                            : "Chưa chốt"
+                                                    }
+                                                />
+                                                <DetailField
+                                                    label="Yêu cầu"
+                                                    value={formatQuantity(line.requestedQty)}
+                                                />
+                                            </div>
+                                        </div>
                                     </div>
 
                                     {line.requiresCatalog && line.decision !== "REJECTED" && (
@@ -1766,108 +2390,113 @@ export default function CompanyDrugOrdersPage() {
                                             </div>
 
                                             {line.catalogSelection === CREATE_NEW_VALUE && (
-                                                <div className="mt-3 grid gap-3 lg:grid-cols-2">
-                                                    <div className="space-y-2">
-                                                        <Label>Mã thuốc công ty</Label>
-                                                        <Input
-                                                            value={line.newCompanyDrugCode}
-                                                            onChange={(event) => {
-                                                                const nextValue = event.target.value;
-                                                                setResponseLines((current) =>
-                                                                    current.map((currentLine) =>
-                                                                        currentLine.lineId === line.lineId
-                                                                            ? {
-                                                                                ...currentLine,
-                                                                                newCompanyDrugCode: nextValue,
-                                                                            }
-                                                                            : currentLine
-                                                                    )
-                                                                );
-                                                            }}
-                                                            placeholder="VD: CTY-001"
-                                                        />
+                                                <div className="mt-3 space-y-4">
+                                                    <div className="grid gap-3 lg:grid-cols-2">
+                                                        <div className="space-y-2">
+                                                            <Label>Mã thuốc công ty</Label>
+                                                            <Input
+                                                                value={line.newCompanyDrugCode}
+                                                                onChange={(event) => {
+                                                                    const nextValue = event.target.value;
+                                                                    setResponseLines((current) =>
+                                                                        current.map((currentLine) =>
+                                                                            currentLine.lineId === line.lineId
+                                                                                ? {
+                                                                                    ...currentLine,
+                                                                                    newCompanyDrugCode: nextValue,
+                                                                                }
+                                                                                : currentLine
+                                                                        )
+                                                                    );
+                                                                }}
+                                                                placeholder="VD: CTY-001"
+                                                            />
+                                                        </div>
+
+                                                        <div className="space-y-2">
+                                                            <Label>Quy cách</Label>
+                                                            <Input
+                                                                value={line.newQuyCach}
+                                                                onChange={(event) => {
+                                                                    const nextValue = event.target.value;
+                                                                    setResponseLines((current) =>
+                                                                        current.map((currentLine) =>
+                                                                            currentLine.lineId === line.lineId
+                                                                                ? {
+                                                                                    ...currentLine,
+                                                                                    newQuyCach: nextValue,
+                                                                                }
+                                                                                : currentLine
+                                                                        )
+                                                                    );
+                                                                }}
+                                                            />
+                                                        </div>
                                                     </div>
 
-                                                    <div className="space-y-2">
-                                                        <Label>Tên thuốc</Label>
-                                                        <Input
-                                                            value={line.masterDrug?.tenThuoc || line.displayName}
-                                                            readOnly
-                                                            className="bg-gray-50"
-                                                        />
-                                                    </div>
-
-                                                    <div className="space-y-2">
-                                                        <Label>Hoạt chất</Label>
-                                                        <Input
-                                                            value={line.masterDrug?.hoatChat || ""}
-                                                            readOnly
-                                                            className="bg-gray-50"
-                                                        />
-                                                    </div>
-
-                                                    <div className="space-y-2">
-                                                        <Label>Hàm lượng</Label>
-                                                        <Input
-                                                            value={line.masterDrug?.hamLuong || ""}
-                                                            readOnly
-                                                            className="bg-gray-50"
-                                                        />
-                                                    </div>
-
-                                                    <div className="space-y-2">
-                                                        <Label>Số đăng ký</Label>
-                                                        <Input
-                                                            value={line.masterDrug?.soDangKy || ""}
-                                                            readOnly
-                                                            className="bg-gray-50"
-                                                        />
-                                                    </div>
-
-                                                    <div className="space-y-2">
-                                                        <Label>Dạng bào chế</Label>
-                                                        <Input
-                                                            value={line.masterDrug?.dangBaoChe || ""}
-                                                            readOnly
-                                                            className="bg-gray-50"
-                                                        />
-                                                    </div>
-
-                                                    <div className="space-y-2">
-                                                        <Label>Quy cách</Label>
-                                                        <Input
-                                                            value={line.newQuyCach}
-                                                            onChange={(event) => {
-                                                                const nextValue = event.target.value;
-                                                                setResponseLines((current) =>
-                                                                    current.map((currentLine) =>
-                                                                        currentLine.lineId === line.lineId
-                                                                            ? {
-                                                                                ...currentLine,
-                                                                                newQuyCach: nextValue,
-                                                                            }
-                                                                            : currentLine
-                                                                    )
-                                                                );
-                                                            }}
-                                                        />
-                                                    </div>
-
-                                                    <div className="space-y-2">
-                                                        <Label>Đơn vị</Label>
-                                                        <Input
-                                                            value={line.masterDrug?.donViTinh || line.unit || ""}
-                                                            readOnly
-                                                            className="bg-gray-50"
-                                                        />
+                                                    <div className="rounded-lg border border-amber-200 bg-white p-4">
+                                                        <p className="text-sm font-medium text-slate-700">
+                                                            Thông tin lấy từ thuốc chuẩn
+                                                        </p>
+                                                        <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                                                            <DetailField
+                                                                label="Tên thuốc"
+                                                                value={
+                                                                    line.masterDrug?.tenThuoc ||
+                                                                    line.displayName
+                                                                }
+                                                            />
+                                                            <DetailField
+                                                                label="Hoạt chất"
+                                                                value={
+                                                                    line.masterDrug?.hoatChat || "—"
+                                                                }
+                                                            />
+                                                            <DetailField
+                                                                label="Hàm lượng"
+                                                                value={
+                                                                    line.masterDrug?.hamLuong || "—"
+                                                                }
+                                                            />
+                                                            <DetailField
+                                                                label="Số đăng ký"
+                                                                value={
+                                                                    line.masterDrug?.soDangKy || "—"
+                                                                }
+                                                            />
+                                                            <DetailField
+                                                                label="Dạng bào chế"
+                                                                value={
+                                                                    line.masterDrug?.dangBaoChe || "—"
+                                                                }
+                                                            />
+                                                            <DetailField
+                                                                label="Đơn vị"
+                                                                value={
+                                                                    line.masterDrug?.donViTinh ||
+                                                                    line.unit ||
+                                                                    "—"
+                                                                }
+                                                            />
+                                                        </div>
                                                     </div>
                                                 </div>
                                             )}
                                         </div>
                                     )}
+                                    {validationError ? (
+                                        <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+                                            {validationError}
+                                        </div>
+                                    ) : (
+                                        <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+                                            Dòng này đã đầy đủ thông tin để lưu phản hồi.
+                                        </div>
+                                    )}
                                 </div>
                             );
-                        })}
+                        })
+                        )}
                     </div>
 
                     <DialogFooter>
@@ -1879,13 +2508,17 @@ export default function CompanyDrugOrdersPage() {
                         >
                             Đóng
                         </Button>
-                        <Button type="button" onClick={handleSubmitResponse} disabled={isSubmittingResponse}>
+                        <Button
+                            type="button"
+                            onClick={handleSubmitResponse}
+                            disabled={isSubmittingResponse || responseRemainingCount > 0}
+                        >
                             {isSubmittingResponse ? (
                                 <Loader2 className="mr-2 size-4 animate-spin" />
                             ) : (
                                 <Send className="mr-2 size-4" />
                             )}
-                            Gửi phản hồi
+                            Lưu phản hồi
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -1896,85 +2529,167 @@ export default function CompanyDrugOrdersPage() {
                     <DialogHeader>
                         <DialogTitle>Tạo đợt giao hàng</DialogTitle>
                         <DialogDescription>
-                            Chỉ giao trong phạm vi số lượng đã chấp nhận và chưa giao hết.
+                            Chỉ nhập các dòng cần giao ở kỳ này. Hệ thống sẽ bỏ qua các dòng có số lượng giao bằng 0.
                         </DialogDescription>
                     </DialogHeader>
 
-                    <div className="grid gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
-                        <div className="space-y-2">
-                            <Label>Thời điểm giao</Label>
-                            <Input
-                                type="datetime-local"
-                                value={shipmentAt}
-                                onChange={(event) => setShipmentAt(event.target.value)}
-                            />
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label>Ghi chú đợt giao</Label>
-                            <Textarea
-                                value={shipmentNote}
-                                onChange={(event) => setShipmentNote(event.target.value)}
-                                rows={2}
-                                placeholder="Ghi chú chung cho đợt giao"
-                            />
-                        </div>
-                    </div>
-
                     <div className="space-y-4">
-                        {shipmentLines.map((line) => (
-                            <div key={line.orderLineId} className="rounded-xl border border-gray-200 p-4">
-                                <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_160px_160px]">
-                                    <div>
-                                        <p className="font-semibold text-gray-900">{line.displayName}</p>
-                                        <p className="mt-1 text-sm text-gray-500">
-                                            Đã chấp nhận: {formatQuantity(line.acceptedQty)} {line.unit || ""}
-                                        </p>
-                                        <p className="text-sm text-gray-500">
-                                            Còn lại chưa giao: {formatQuantity(line.remainingAcceptedQty)}
-                                        </p>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label>Số lượng giao</Label>
-                                        <Input
-                                            type="number"
-                                            min="0"
-                                            step="0.01"
-                                            value={line.shippedQty}
-                                            onChange={(event) => {
-                                                const nextValue = event.target.value;
-                                                setShipmentLines((current) =>
-                                                    current.map((currentLine) =>
-                                                        currentLine.orderLineId === line.orderLineId
-                                                            ? { ...currentLine, shippedQty: nextValue }
-                                                            : currentLine
-                                                    )
-                                                );
-                                            }}
-                                        />
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label>Lý do nếu giao chưa đủ</Label>
-                                        <Input
-                                            value={line.reason}
-                                            onChange={(event) => {
-                                                const nextValue = event.target.value;
-                                                setShipmentLines((current) =>
-                                                    current.map((currentLine) =>
-                                                        currentLine.orderLineId === line.orderLineId
-                                                            ? { ...currentLine, reason: nextValue }
-                                                            : currentLine
-                                                    )
-                                                );
-                                            }}
-                                            placeholder="Ví dụ: chia làm 2 đợt"
-                                        />
-                                    </div>
-                                </div>
+                        <div className="grid gap-3 md:grid-cols-3">
+                            <div className="rounded-xl border border-gray-200 bg-white px-4 py-3">
+                                <p className="text-xs uppercase tracking-wide text-gray-400">
+                                    Số dòng có thể giao
+                                </p>
+                                <p className="mt-2 text-lg font-semibold text-gray-900">
+                                    {shipmentLines.length}
+                                </p>
                             </div>
-                        ))}
+                            <div className="rounded-xl border border-gray-200 bg-white px-4 py-3">
+                                <p className="text-xs uppercase tracking-wide text-gray-400">
+                                    Tổng còn lại
+                                </p>
+                                <p className="mt-2 text-lg font-semibold text-gray-900">
+                                    {formatQuantity(shipmentRemainingQty)}
+                                </p>
+                            </div>
+                            <div className="rounded-xl border border-gray-200 bg-white px-4 py-3">
+                                <p className="text-xs uppercase tracking-wide text-gray-400">
+                                    Dự kiến giao kỳ này
+                                </p>
+                                <p className="mt-2 text-lg font-semibold text-gray-900">
+                                    {formatQuantity(shipmentPlannedQty)}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="grid gap-4 lg:grid-cols-[minmax(0,220px)_minmax(0,220px)_minmax(0,1fr)]">
+                            <div className="space-y-2">
+                                <Label>Từ ngày</Label>
+                                <Input
+                                    type="date"
+                                    value={shipmentFromDate}
+                                    onChange={(event) => setShipmentFromDate(event.target.value)}
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label>Đến ngày</Label>
+                                <Input
+                                    type="date"
+                                    value={shipmentToDate}
+                                    onChange={(event) => setShipmentToDate(event.target.value)}
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label>Ghi chú đợt giao</Label>
+                                <Textarea
+                                    value={shipmentNote}
+                                    onChange={(event) => setShipmentNote(event.target.value)}
+                                    rows={2}
+                                    placeholder="Ghi chú chung cho đợt giao"
+                                />
+                            </div>
+                        </div>
+
+                        {shipmentLines.length === 0 ? (
+                            <div className="rounded-xl border border-dashed border-gray-200 px-4 py-10 text-center text-sm text-gray-500">
+                                Không còn dòng nào đủ điều kiện để tạo đợt giao.
+                            </div>
+                        ) : (
+                            <div className="overflow-x-auto rounded-xl border border-gray-200">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead className="min-w-[280px]">
+                                                Thuốc công ty
+                                            </TableHead>
+                                            <TableHead className="text-right">
+                                                Còn lại
+                                            </TableHead>
+                                            <TableHead className="min-w-[180px]">
+                                                Số giao kỳ này
+                                            </TableHead>
+                                            <TableHead className="min-w-[240px]">
+                                                Lý do
+                                            </TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {shipmentLines.map((line) => (
+                                            <TableRow key={line.orderLineId}>
+                                                <TableCell>
+                                                    <div className="space-y-1">
+                                                        <p className="font-medium text-gray-900">
+                                                            {line.companyDrugName ||
+                                                                line.displayName}
+                                                        </p>
+                                                        <p className="text-xs text-gray-500">
+                                                            {line.companyDrugCode
+                                                                ? `Mã thuốc công ty: ${line.companyDrugCode}`
+                                                                : "Chưa chốt mã thuốc công ty"}
+                                                        </p>
+                                                        <p className="text-xs text-gray-500">
+                                                            Đã chấp nhận:{" "}
+                                                            {formatQuantity(line.acceptedQty)}{" "}
+                                                            {line.unit || ""}
+                                                        </p>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell className="text-right font-medium text-gray-900">
+                                                    {formatQuantity(
+                                                        line.remainingAcceptedQty
+                                                    )}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Input
+                                                        type="number"
+                                                        min="0"
+                                                        step="0.01"
+                                                        value={line.shippedQty}
+                                                        onChange={(event) => {
+                                                            const nextValue =
+                                                                event.target.value;
+                                                            setShipmentLines((current) =>
+                                                                current.map((currentLine) =>
+                                                                    currentLine.orderLineId ===
+                                                                    line.orderLineId
+                                                                        ? {
+                                                                            ...currentLine,
+                                                                            shippedQty: nextValue,
+                                                                        }
+                                                                        : currentLine
+                                                                )
+                                                            );
+                                                        }}
+                                                    />
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Input
+                                                        value={line.reason}
+                                                        onChange={(event) => {
+                                                            const nextValue =
+                                                                event.target.value;
+                                                            setShipmentLines((current) =>
+                                                                current.map((currentLine) =>
+                                                                    currentLine.orderLineId ===
+                                                                    line.orderLineId
+                                                                        ? {
+                                                                            ...currentLine,
+                                                                            reason: nextValue,
+                                                                        }
+                                                                        : currentLine
+                                                                )
+                                                            );
+                                                        }}
+                                                        placeholder="Ví dụ: chia làm 2 đợt"
+                                                    />
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        )}
                     </div>
 
                     <DialogFooter>

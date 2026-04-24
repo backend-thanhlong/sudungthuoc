@@ -295,6 +295,8 @@ exports.Prisma.DrugOrderShipmentScalarFieldEnum = {
   shipmentNo: 'shipmentNo',
   status: 'status',
   shippedAt: 'shippedAt',
+  shippedFromDate: 'shippedFromDate',
+  shippedToDate: 'shippedToDate',
   companyNote: 'companyNote',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

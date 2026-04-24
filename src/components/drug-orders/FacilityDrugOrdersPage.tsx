@@ -1,21 +1,26 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
+    ArrowLeft,
     CheckCircle,
-    Building2,
     ClipboardList,
+    FileText,
+    Info,
+    ListChecks,
     Loader2,
-    PackageSearch,
     Plus,
+    Printer,
     RefreshCcw,
     Save,
-    Search,
     Send,
+    Sparkles,
+    Trash2,
     Truck,
     Undo2,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -51,6 +56,18 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import DrugOrderLineMobileCard from "@/components/drug-orders/DrugOrderLineMobileCard";
+import DrugOrderMobileActionBar, {
+    type DrugOrderMobileAction,
+} from "@/components/drug-orders/DrugOrderMobileActionBar";
+import DrugOrderMobileSectionTabs, {
+    type DrugOrderMobileSectionTab,
+} from "@/components/drug-orders/DrugOrderMobileSectionTabs";
+import DrugOrderShipmentMobileCard from "@/components/drug-orders/DrugOrderShipmentMobileCard";
+import DrugOrderSummaryCard from "@/components/drug-orders/DrugOrderSummaryCard";
+import FacilityDrugOrderCatalogDialog from "@/components/drug-orders/FacilityDrugOrderCatalogDialog";
+import DrugOrderQrCode from "@/components/drug-orders/DrugOrderQrCode";
+import { formatShipmentDateRangeLabel } from "@/lib/drug-orders/shipment-date-range";
 
 type OrderStatus =
     | "DRAFT"
@@ -70,6 +87,13 @@ type LineStatus =
 
 type ShipmentStatus = "CREATED" | "PARTIALLY_RECEIVED" | "RECEIVED";
 type SourceType = "MASTER_DRUG" | "COMPANY_DRUG";
+type FacilityMobileSection = "overview" | "lines" | "shipments" | "notes";
+type SuggestionStatus =
+    | "OFFICIAL"
+    | "PROVISIONAL"
+    | "UNLINKED"
+    | "INSUFFICIENT_DATA";
+type SuggestionConfidence = "HIGH" | "LOW" | "NONE";
 
 interface CompanyOption {
     id: string;
@@ -90,6 +114,7 @@ interface MasterDrugOption {
     hamLuong: string | null;
     dangBaoChe: string | null;
     soDangKy: string | null;
+    quyCach: string | null;
     donViTinh: string | null;
 }
 
@@ -98,6 +123,7 @@ interface CompanyDrugOption {
     companyDrugCode: string;
     companyDrugName: string;
     activeIngredient: string | null;
+    quyCach: string | null;
     unit: string | null;
     masterDrugId: string | null;
     masterDrug: MasterDrugOption | null;
@@ -144,6 +170,8 @@ interface OrderLine {
         shipmentId: string;
         shipmentNo: number;
         shippedAt: string | null;
+        shippedFromDate: string | null;
+        shippedToDate: string | null;
         shipmentStatus: ShipmentStatus;
         shippedQty: number;
         reason: string | null;
@@ -154,6 +182,7 @@ interface OrderLine {
 interface OrderDetail {
     id: string;
     orderNo: string;
+    lookupUrl: string;
     companyId: string;
     company: CompanyOption;
     status: OrderStatus;
@@ -175,6 +204,8 @@ interface OrderDetail {
         shipmentNo: number;
         status: ShipmentStatus;
         shippedAt: string | null;
+        shippedFromDate: string | null;
+        shippedToDate: string | null;
         companyNote: string | null;
         createdAt: string;
         lines: Array<{
@@ -204,6 +235,46 @@ interface OrderDetail {
     };
 }
 
+interface DrugOrderLineSuggestion {
+    recommendedQty: number | null;
+    xntBaseQty: number | null;
+    incomingAcceptedQty: number;
+    avgMonthlyExport: number | null;
+    latestEndingStock: number | null;
+    monthsOfCover: number | null;
+    confidence: SuggestionConfidence;
+    status: SuggestionStatus;
+    statusLabel: string;
+    suggestionReportMonth: string | null;
+    suggestionRuleVersion: string;
+    basisLines: string[];
+    suggestionBasis: string;
+    isSuppressedDuplicateMasterDrug?: boolean;
+}
+
+interface DrugOrderCatalogSuggestion extends DrugOrderLineSuggestion {
+    sourceType: "COMPANY_DRUG";
+    sourceId: string;
+    companyDrugId: string;
+    companyDrugCode: string;
+    companyDrugName: string;
+    activeIngredient: string | null;
+    quyCach: string | null;
+    unit: string | null;
+    masterDrugId: string | null;
+    masterDrug: MasterDrugOption | null;
+}
+
+interface DrugOrderSuggestionsResponse {
+    lineSuggestions: Record<string, DrugOrderLineSuggestion>;
+    catalogSuggestions: DrugOrderCatalogSuggestion[];
+    meta: {
+        effectiveReportMonth: string | null;
+        coverageTargetMonths: number;
+        includeAllCatalog: boolean;
+    };
+}
+
 interface DraftEditorLine {
     localId: string;
     sourceType: SourceType;
@@ -229,6 +300,8 @@ interface ReceiptDraftLine {
     differenceReason: string;
 }
 
+type CatalogDialogMode = "create" | "append";
+
 const NONE_VALUE = "__none__";
 
 const ORDER_STATUS_META: Record<
@@ -253,10 +326,40 @@ const LINE_STATUS_META: Record<
         variant: "outline",
         className: "border-amber-300 text-amber-700",
     },
-    CONFIRMED: { label: "Nhận đủ", variant: "outline", className: "border-emerald-300 text-emerald-700" },
-    PARTIAL: { label: "Nhận một phần", variant: "outline", className: "border-blue-300 text-blue-700" },
+    CONFIRMED: {
+        label: "Công ty xác nhận đủ",
+        variant: "outline",
+        className: "border-emerald-300 text-emerald-700",
+    },
+    PARTIAL: {
+        label: "Công ty xác nhận một phần",
+        variant: "outline",
+        className: "border-blue-300 text-blue-700",
+    },
     REJECTED: { label: "Từ chối", variant: "destructive" },
     COMPLETED: { label: "Hoàn tất", variant: "outline", className: "border-emerald-300 text-emerald-700" },
+};
+
+const SUGGESTION_STATUS_META: Record<
+    SuggestionStatus,
+    { variant: "default" | "secondary" | "destructive" | "outline"; className?: string }
+> = {
+    OFFICIAL: {
+        variant: "outline",
+        className: "border-emerald-300 text-emerald-700",
+    },
+    PROVISIONAL: {
+        variant: "outline",
+        className: "border-amber-300 text-amber-700",
+    },
+    UNLINKED: {
+        variant: "outline",
+        className: "border-amber-300 text-amber-700",
+    },
+    INSUFFICIENT_DATA: {
+        variant: "outline",
+        className: "border-slate-300 text-slate-700",
+    },
 };
 
 function formatQuantity(value: number | null | undefined) {
@@ -276,6 +379,71 @@ function formatDateTime(value: string | null | undefined) {
     }
 
     return new Date(value).toLocaleString("vi-VN");
+}
+
+function buildFallbackSuggestionBasis(drug: CompanyDrugOption) {
+    if (!drug.masterDrugId) {
+        return "Thuốc công ty này chưa liên kết thuốc chuẩn nên chưa có gợi ý.";
+    }
+
+    return "Lưu nháp để hệ thống tính và làm mới gợi ý hoàn chỉnh.";
+}
+
+function buildCompanyDrugOptionFromSuggestion(
+    suggestion: DrugOrderCatalogSuggestion
+): CompanyDrugOption {
+    return {
+        id: suggestion.companyDrugId,
+        companyDrugCode: suggestion.companyDrugCode,
+        companyDrugName: suggestion.companyDrugName,
+        activeIngredient: suggestion.activeIngredient,
+        quyCach: suggestion.quyCach,
+        unit: suggestion.unit,
+        masterDrugId: suggestion.masterDrugId,
+        masterDrug: suggestion.masterDrug,
+    };
+}
+
+function resolveCompanyDrugMasterDrugId(
+    drug:
+        | Pick<CompanyDrugOption, "masterDrugId" | "masterDrug">
+        | Pick<DrugOrderCatalogSuggestion, "masterDrugId" | "masterDrug">
+        | null
+) {
+    if (!drug) {
+        return null;
+    }
+
+    return drug.masterDrug?.id || drug.masterDrugId || null;
+}
+
+function resolveEditorLineMasterDrugId(line: DraftEditorLine) {
+    if (line.sourceType === "MASTER_DRUG") {
+        return line.masterDrug?.id || line.sourceId || null;
+    }
+
+    return resolveCompanyDrugMasterDrugId(line.companyDrug) || line.masterDrug?.id || null;
+}
+
+function buildDuplicateMasterLineIdSet(lines: DraftEditorLine[]) {
+    const seenMasterDrugIds = new Set<string>();
+    const duplicateLineIds = new Set<string>();
+
+    lines.forEach((line) => {
+        const masterDrugId = resolveEditorLineMasterDrugId(line);
+        if (!masterDrugId) {
+            return;
+        }
+
+        if (seenMasterDrugIds.has(masterDrugId)) {
+            duplicateLineIds.add(line.localId);
+            return;
+        }
+
+        seenMasterDrugIds.add(masterDrugId);
+    });
+
+    return duplicateLineIds;
 }
 
 function buildEditorLines(order: OrderDetail): DraftEditorLine[] {
@@ -299,24 +467,6 @@ function buildEditorLines(order: OrderDetail): DraftEditorLine[] {
     }));
 }
 
-function buildCatalogLineStatus(
-    sourceType: SourceType,
-    masterDrugId: string | null,
-    companyDrugs: CompanyDrugOption[]
-): LineStatus {
-    if (sourceType === "COMPANY_DRUG") {
-        return "PENDING";
-    }
-
-    if (!masterDrugId) {
-        return "PENDING_CATALOG_CONFIRMATION";
-    }
-
-    return companyDrugs.some((drug) => drug.masterDrugId === masterDrugId)
-        ? "PENDING"
-        : "PENDING_CATALOG_CONFIRMATION";
-}
-
 function buildReceiptDraftLines(order: OrderDetail, shipmentId: string): ReceiptDraftLine[] {
     const shipment = order.shipments.find((item) => item.id === shipmentId);
     if (!shipment) {
@@ -333,6 +483,24 @@ function buildReceiptDraftLines(order: OrderDetail, shipmentId: string): Receipt
     }));
 }
 
+function isValidRequestedQty(value: string) {
+    if (value.trim() === "") {
+        return false;
+    }
+
+    const parsed = Number(value);
+    return Number.isFinite(parsed) && parsed > 0;
+}
+
+function parseReceiptQty(value: string) {
+    if (value.trim() === "") {
+        return null;
+    }
+
+    const parsed = Number(value);
+    return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+}
+
 export default function FacilityDrugOrdersPage() {
     const [orders, setOrders] = useState<OrderSummary[]>([]);
     const [companies, setCompanies] = useState<CompanyOption[]>([]);
@@ -344,6 +512,8 @@ export default function FacilityDrugOrdersPage() {
     const [editorNote, setEditorNote] = useState("");
     const [editorBaseReportMonth, setEditorBaseReportMonth] = useState(NONE_VALUE);
     const [isDirty, setIsDirty] = useState(false);
+    const [mobileSection, setMobileSection] =
+        useState<FacilityMobileSection>("overview");
 
     const [isListLoading, setIsListLoading] = useState(true);
     const [isDetailLoading, setIsDetailLoading] = useState(false);
@@ -352,42 +522,141 @@ export default function FacilityDrugOrdersPage() {
     const [isRecalling, setIsRecalling] = useState(false);
     const [isConfirmingReceipt, setIsConfirmingReceipt] = useState(false);
 
-    const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+    const [isCatalogDialogOpen, setIsCatalogDialogOpen] = useState(false);
+    const [catalogMode, setCatalogMode] = useState<CatalogDialogMode>("create");
     const [isReceiptDialogOpen, setIsReceiptDialogOpen] = useState(false);
-    const [isCreating, setIsCreating] = useState(false);
-    const [createCompanyId, setCreateCompanyId] = useState("");
-    const [createBaseReportMonth, setCreateBaseReportMonth] = useState(NONE_VALUE);
-    const [createNote, setCreateNote] = useState("");
+    const [isCatalogLoading, setIsCatalogLoading] = useState(false);
+    const [isDraftSuggestionsLoading, setIsDraftSuggestionsLoading] = useState(false);
+    const [isCatalogSuggestionsLoading, setIsCatalogSuggestionsLoading] = useState(false);
+    const [isCatalogSubmitting, setIsCatalogSubmitting] = useState(false);
+    const [catalogCompanyId, setCatalogCompanyId] = useState("");
+    const [catalogBaseReportMonth, setCatalogBaseReportMonth] = useState(NONE_VALUE);
+    const [catalogNote, setCatalogNote] = useState("");
+    const [catalogItems, setCatalogItems] = useState<CompanyDrugOption[]>([]);
+    const [catalogSuggestions, setCatalogSuggestions] = useState<
+        DrugOrderCatalogSuggestion[]
+    >([]);
+    const [catalogSearch, setCatalogSearch] = useState("");
+    const [catalogLinkedOnly, setCatalogLinkedOnly] = useState(false);
+    const [includeAllCatalogSuggestions, setIncludeAllCatalogSuggestions] =
+        useState(false);
+    const [selectedCatalogDrugIds, setSelectedCatalogDrugIds] = useState<string[]>([]);
     const [selectedReceiptShipmentId, setSelectedReceiptShipmentId] = useState("");
     const [receiptLines, setReceiptLines] = useState<ReceiptDraftLine[]>([]);
     const [receiptNote, setReceiptNote] = useState("");
+    const [highlightedLineIds, setHighlightedLineIds] = useState<string[]>([]);
+    const [pendingFocusLineId, setPendingFocusLineId] = useState<string | null>(null);
+    const [lineSuggestionMap, setLineSuggestionMap] = useState<
+        Record<string, DrugOrderLineSuggestion>
+    >({});
+    const [draftSuggestionsError, setDraftSuggestionsError] = useState<string | null>(
+        null
+    );
+    const [catalogSuggestionsError, setCatalogSuggestionsError] = useState<
+        string | null
+    >(null);
+    const [draftSuggestionEffectiveMonth, setDraftSuggestionEffectiveMonth] =
+        useState<string | null>(null);
+    const [catalogSuggestionEffectiveMonth, setCatalogSuggestionEffectiveMonth] =
+        useState<string | null>(null);
+    const [suggestedCatalogCount, setSuggestedCatalogCount] = useState(0);
 
-    const [masterDrugSearch, setMasterDrugSearch] = useState("");
-    const [masterDrugResults, setMasterDrugResults] = useState<MasterDrugOption[]>([]);
-    const [isMasterDrugLoading, setIsMasterDrugLoading] = useState(false);
-    const [companyDrugSearch, setCompanyDrugSearch] = useState("");
+    const catalogRequestIdRef = useRef(0);
+    const draftSuggestionRequestIdRef = useRef(0);
+    const catalogSuggestionRequestIdRef = useRef(0);
+    const lineInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
     const canEdit = selectedOrder?.permissions.canEdit ?? false;
-    const canSubmitCurrent = canEdit && editorLines.length > 0;
-    const selectedCompanyDrugs = selectedOrder?.options.companyDrugs || [];
+    const invalidDraftLineCount = editorLines.filter(
+        (line) => !isValidRequestedQty(line.requestedQty)
+    ).length;
+    const canSubmitCurrent =
+        canEdit && editorLines.length > 0 && invalidDraftLineCount === 0;
     const pendingReceiptShipments =
         selectedOrder?.shipments.filter((shipment) => shipment.receipts.length === 0) || [];
-    const filteredCompanyDrugs = selectedCompanyDrugs.filter((drug) => {
-        const search = companyDrugSearch.trim().toLowerCase();
-        if (!search) {
-            return true;
+    const enteredQtyLineCount = editorLines.filter((line) =>
+        isValidRequestedQty(line.requestedQty)
+    ).length;
+    const pendingCatalogLineCount = editorLines.filter(
+        (line) => line.lineStatus === "PENDING_CATALOG_CONFIRMATION"
+    ).length;
+    const duplicateMasterLineIds = buildDuplicateMasterLineIdSet(editorLines);
+    const existingCompanyDrugIds = editorLines
+        .filter((line) => line.sourceType === "COMPANY_DRUG")
+        .map((line) => line.sourceId);
+    const existingMasterDrugIds = editorLines
+        .map((line) => resolveEditorLineMasterDrugId(line))
+        .filter((value): value is string => Boolean(value));
+    const blockedCatalogDrugIds = catalogMode === "append" ? existingCompanyDrugIds : [];
+    const blockedCatalogMasterDrugIds =
+        catalogMode === "append" ? existingMasterDrugIds : [];
+    const blockedCatalogMasterDrugIdSet = new Set(blockedCatalogMasterDrugIds);
+    const catalogSuggestionMap = new Map(
+        catalogSuggestions.map((item) => [item.companyDrugId, item] as const)
+    );
+    const availableCatalogDrugMap = new Map(
+        catalogItems.map((drug) => [drug.id, drug] as const)
+    );
+    catalogSuggestions.forEach((suggestion) => {
+        if (!availableCatalogDrugMap.has(suggestion.companyDrugId)) {
+            availableCatalogDrugMap.set(
+                suggestion.companyDrugId,
+                buildCompanyDrugOptionFromSuggestion(suggestion)
+            );
+        }
+    });
+    const selectedCatalogMasterDrugIdSet = new Set(
+        selectedCatalogDrugIds
+            .map((drugId) =>
+                resolveCompanyDrugMasterDrugId(availableCatalogDrugMap.get(drugId) || null)
+            )
+            .filter((value): value is string => Boolean(value))
+    );
+    const lineWithSuggestionCount = editorLines.filter((line) => {
+        if (duplicateMasterLineIds.has(line.localId)) {
+            return false;
         }
 
-        return [
-            drug.companyDrugCode,
-            drug.companyDrugName,
-            drug.activeIngredient,
-            drug.masterDrug?.tenThuoc,
-            drug.masterDrug?.maChung,
-        ]
-            .filter(Boolean)
-            .some((value) => String(value).toLowerCase().includes(search));
+        const recommendedQty =
+            lineSuggestionMap[line.localId]?.recommendedQty ?? line.suggestedQty;
+        return recommendedQty !== null;
+    }).length;
+    const hasApplicableSuggestion = editorLines.some((line) => {
+        if (duplicateMasterLineIds.has(line.localId)) {
+            return false;
+        }
+
+        const recommendedQty =
+            lineSuggestionMap[line.localId]?.recommendedQty ?? line.suggestedQty;
+        return recommendedQty !== null && recommendedQty > 0;
     });
+    const receiptLineValidations = receiptLines.map((line) => {
+        const parsedReceivedQty = parseReceiptQty(line.receivedQty);
+        const invalidReceivedQty = parsedReceivedQty === null;
+        const exceedsShippedQty =
+            parsedReceivedQty !== null && parsedReceivedQty > line.shippedQty;
+        const missingDifferenceReason =
+            parsedReceivedQty !== null &&
+            parsedReceivedQty !== line.shippedQty &&
+            line.differenceReason.trim().length === 0;
+
+        return {
+            shipmentLineId: line.shipmentLineId,
+            parsedReceivedQty,
+            invalidReceivedQty,
+            exceedsShippedQty,
+            missingDifferenceReason,
+        };
+    });
+    const receiptValidationMap = new Map(
+        receiptLineValidations.map((line) => [line.shipmentLineId, line] as const)
+    );
+    const hasInvalidReceiptLine = receiptLineValidations.some(
+        (line) =>
+            line.invalidReceivedQty ||
+            line.exceedsShippedQty ||
+            line.missingDifferenceReason
+    );
 
     const applyOrderDetail = (order: OrderDetail) => {
         setSelectedOrder(order);
@@ -413,8 +682,8 @@ export default function FacilityDrugOrdersPage() {
             setReportMonths(payload.options?.reportMonths || []);
             setDefaultBaseReportMonth(payload.options?.defaultBaseReportMonth || null);
 
-            setCreateCompanyId((current) => current || payload.options?.companies?.[0]?.id || "");
-            setCreateBaseReportMonth((current) =>
+            setCatalogCompanyId((current) => current || payload.options?.companies?.[0]?.id || "");
+            setCatalogBaseReportMonth((current) =>
                 current === NONE_VALUE && payload.options?.defaultBaseReportMonth
                     ? payload.options.defaultBaseReportMonth
                     : current
@@ -483,49 +752,246 @@ export default function FacilityDrugOrdersPage() {
     }, [selectedOrderId, selectedOrder?.id, loadOrderDetail]);
 
     useEffect(() => {
-        if (!canEdit) {
-            setMasterDrugResults([]);
+        if (!pendingFocusLineId) {
             return;
         }
 
-        const controller = new AbortController();
-        const timer = window.setTimeout(async () => {
-            setIsMasterDrugLoading(true);
+        const frameId = window.requestAnimationFrame(() => {
+            const target = lineInputRefs.current[pendingFocusLineId];
+            if (!target) {
+                return;
+            }
+
+            target.focus();
+            target.scrollIntoView({ behavior: "smooth", block: "center" });
+        });
+
+        return () => window.cancelAnimationFrame(frameId);
+    }, [pendingFocusLineId, editorLines.length]);
+
+    useEffect(() => {
+        if (highlightedLineIds.length === 0) {
+            return;
+        }
+
+        const timer = window.setTimeout(() => {
+            setHighlightedLineIds([]);
+        }, 2500);
+
+        return () => window.clearTimeout(timer);
+    }, [highlightedLineIds]);
+
+    const loadCatalogItems = useCallback(async (companyId: string) => {
+        if (!companyId) {
+            setCatalogItems([]);
+            setIsCatalogLoading(false);
+            return;
+        }
+
+        const requestId = ++catalogRequestIdRef.current;
+        setIsCatalogLoading(true);
+        try {
+            const params = new URLSearchParams({ companyId });
+            const res = await fetch(
+                `/api/facility/dutru-dat-hang/company-drugs?${params.toString()}`
+            );
+            const payload = await res.json();
+
+            if (!res.ok) {
+                throw new Error(payload.message || "Không thể tải danh mục công ty");
+            }
+
+            if (requestId !== catalogRequestIdRef.current) {
+                return;
+            }
+
+            setCatalogItems(payload.items || []);
+        } catch (error) {
+            if (requestId !== catalogRequestIdRef.current) {
+                return;
+            }
+
+            console.error(error);
+            setCatalogItems([]);
+            toast.error(
+                error instanceof Error ? error.message : "Không thể tải danh mục công ty"
+            );
+        } finally {
+            if (requestId === catalogRequestIdRef.current) {
+                setIsCatalogLoading(false);
+            }
+        }
+    }, []);
+
+    const fetchSuggestionPayload = useCallback(
+        async (params: {
+            companyId: string;
+            baseReportMonth: string;
+            orderId?: string | null;
+            includeAllCatalog?: boolean;
+        }) => {
+            const searchParams = new URLSearchParams({ companyId: params.companyId });
+            if (params.baseReportMonth !== NONE_VALUE) {
+                searchParams.set("baseReportMonth", params.baseReportMonth);
+            }
+            if (params.orderId) {
+                searchParams.set("orderId", params.orderId);
+            }
+            if (params.includeAllCatalog) {
+                searchParams.set("includeAllCatalog", "1");
+            }
+
+            const res = await fetch(
+                `/api/facility/dutru-dat-hang/suggestions?${searchParams.toString()}`
+            );
+            const payload = await res.json();
+
+            if (!res.ok) {
+                throw new Error(payload.message || "Không thể tải gợi ý");
+            }
+
+            return payload as DrugOrderSuggestionsResponse;
+        },
+        []
+    );
+
+    const loadDraftSuggestions = useCallback(
+        async (params: {
+            orderId: string;
+            companyId: string;
+            baseReportMonth: string;
+        }) => {
+            const requestId = ++draftSuggestionRequestIdRef.current;
+            setIsDraftSuggestionsLoading(true);
+            setDraftSuggestionsError(null);
             try {
-                const params = new URLSearchParams({
-                    limit: "10",
+                const payload = await fetchSuggestionPayload({
+                    companyId: params.companyId,
+                    baseReportMonth: params.baseReportMonth,
+                    orderId: params.orderId,
                 });
 
-                if (masterDrugSearch.trim()) {
-                    params.set("search", masterDrugSearch.trim());
+                if (requestId !== draftSuggestionRequestIdRef.current) {
+                    return;
                 }
 
-                const res = await fetch(`/api/admin/master-drugs?${params.toString()}`, {
-                    signal: controller.signal,
-                });
-                const payload = await res.json();
-
-                if (!res.ok) {
-                    throw new Error(payload.message || "Không thể tải danh mục thuốc");
-                }
-
-                setMasterDrugResults(payload.data || []);
+                setLineSuggestionMap(payload.lineSuggestions || {});
+                setSuggestedCatalogCount(payload.catalogSuggestions?.length || 0);
+                setDraftSuggestionEffectiveMonth(
+                    payload.meta?.effectiveReportMonth || null
+                );
             } catch (error) {
-                if ((error as Error).name === "AbortError") {
+                if (requestId !== draftSuggestionRequestIdRef.current) {
                     return;
                 }
 
                 console.error(error);
+                setLineSuggestionMap({});
+                setSuggestedCatalogCount(0);
+                setDraftSuggestionEffectiveMonth(null);
+                setDraftSuggestionsError(
+                    error instanceof Error
+                        ? error.message
+                        : "Không thể tải gợi ý cho dự trù"
+                );
             } finally {
-                setIsMasterDrugLoading(false);
+                if (requestId === draftSuggestionRequestIdRef.current) {
+                    setIsDraftSuggestionsLoading(false);
+                }
             }
-        }, 300);
+        },
+        [fetchSuggestionPayload]
+    );
 
-        return () => {
-            controller.abort();
-            window.clearTimeout(timer);
-        };
-    }, [masterDrugSearch, canEdit]);
+    const loadCatalogSuggestions = useCallback(
+        async (params: {
+            companyId: string;
+            baseReportMonth: string;
+            orderId?: string | null;
+            includeAllCatalog: boolean;
+        }) => {
+            const requestId = ++catalogSuggestionRequestIdRef.current;
+            setIsCatalogSuggestionsLoading(true);
+            setCatalogSuggestionsError(null);
+            try {
+                const payload = await fetchSuggestionPayload({
+                    companyId: params.companyId,
+                    baseReportMonth: params.baseReportMonth,
+                    orderId: params.orderId,
+                    includeAllCatalog: params.includeAllCatalog,
+                });
+
+                if (requestId !== catalogSuggestionRequestIdRef.current) {
+                    return;
+                }
+
+                setCatalogSuggestions(payload.catalogSuggestions || []);
+                setCatalogSuggestionEffectiveMonth(
+                    payload.meta?.effectiveReportMonth || null
+                );
+            } catch (error) {
+                if (requestId !== catalogSuggestionRequestIdRef.current) {
+                    return;
+                }
+
+                console.error(error);
+                setCatalogSuggestions([]);
+                setCatalogSuggestionEffectiveMonth(null);
+                setCatalogSuggestionsError(
+                    error instanceof Error
+                        ? error.message
+                        : "Không thể tải gợi ý thuốc nên thêm"
+                );
+            } finally {
+                if (requestId === catalogSuggestionRequestIdRef.current) {
+                    setIsCatalogSuggestionsLoading(false);
+                }
+            }
+        },
+        [fetchSuggestionPayload]
+    );
+
+    useEffect(() => {
+        if (!selectedOrder || !selectedOrder.permissions.canEdit) {
+            setLineSuggestionMap({});
+            setSuggestedCatalogCount(0);
+            setDraftSuggestionsError(null);
+            setDraftSuggestionEffectiveMonth(null);
+            setIsDraftSuggestionsLoading(false);
+            return;
+        }
+
+        void loadDraftSuggestions({
+            orderId: selectedOrder.id,
+            companyId: selectedOrder.companyId,
+            baseReportMonth: editorBaseReportMonth,
+        });
+    }, [selectedOrder, editorBaseReportMonth, loadDraftSuggestions]);
+
+    useEffect(() => {
+        if (!isCatalogDialogOpen || !catalogCompanyId) {
+            setCatalogSuggestions([]);
+            setCatalogSuggestionsError(null);
+            setCatalogSuggestionEffectiveMonth(null);
+            setIsCatalogSuggestionsLoading(false);
+            return;
+        }
+
+        void loadCatalogSuggestions({
+            companyId: catalogCompanyId,
+            baseReportMonth: catalogBaseReportMonth,
+            orderId: catalogMode === "append" ? selectedOrder?.id || null : null,
+            includeAllCatalog: includeAllCatalogSuggestions,
+        });
+    }, [
+        isCatalogDialogOpen,
+        catalogCompanyId,
+        catalogBaseReportMonth,
+        catalogMode,
+        selectedOrder?.id,
+        includeAllCatalogSuggestions,
+        loadCatalogSuggestions,
+    ]);
 
     const confirmDiscardChanges = () => {
         if (!isDirty) {
@@ -546,80 +1012,299 @@ export default function FacilityDrugOrdersPage() {
 
         setSelectedOrder(null);
         setSelectedOrderId(orderId);
+        setMobileSection("overview");
     };
 
-    const addMasterDrugLine = (drug: MasterDrugOption) => {
-        if (!canEdit || !selectedOrder) {
+    const showMobileOrderList = () => {
+        if (!confirmDiscardChanges()) {
             return;
         }
 
-        const duplicate = editorLines.some(
-            (line) => line.sourceType === "MASTER_DRUG" && line.sourceId === drug.id
-        );
-        if (duplicate) {
-            toast.error("Thuốc này đã có trong đơn nháp");
-            return;
-        }
-
-        setEditorLines((current) => [
-            ...current,
-            {
-                localId: `master-${drug.id}`,
-                sourceType: "MASTER_DRUG",
-                sourceId: drug.id,
-                displayName: drug.tenThuoc,
-                unit: drug.donViTinh,
-                requestedQty: "1",
-                lineStatus: buildCatalogLineStatus(
-                    "MASTER_DRUG",
-                    drug.id,
-                    selectedOrder.options.companyDrugs
-                ),
-                suggestedQty: null,
-                suggestionBasis: "Lưu nháp để hệ thống tính và làm mới gợi ý từ XNT.",
-                suggestionReportMonth: null,
-                companyResponseReason: null,
-                masterDrug: drug,
-                companyDrug: null,
-            },
-        ]);
-        setIsDirty(true);
+        setSelectedOrder(null);
+        setSelectedOrderId(null);
+        setEditorLines([]);
+        setEditorNote("");
+        setEditorBaseReportMonth(NONE_VALUE);
+        setIsDirty(false);
+        setMobileSection("overview");
     };
 
-    const addCompanyDrugLine = (drug: CompanyDrugOption) => {
-        if (!canEdit) {
+    const openPrintOrder = () => {
+        if (!selectedOrder) {
             return;
         }
 
-        const duplicate = editorLines.some(
-            (line) => line.sourceType === "COMPANY_DRUG" && line.sourceId === drug.id
+        if (
+            isDirty &&
+            !window.confirm(
+                "Đơn đang có thay đổi chưa lưu. Bản in sẽ dùng dữ liệu đã lưu gần nhất. Tiếp tục in?"
+            )
+        ) {
+            return;
+        }
+
+        window.open(
+            `/dashboard/facility/dutru-dat-hang/${selectedOrder.id}/print`,
+            "_blank",
+            "noopener,noreferrer"
         );
-        if (duplicate) {
-            toast.error("Thuốc công ty này đã có trong đơn nháp");
+    };
+
+    const clearCatalogSelection = () => {
+        setSelectedCatalogDrugIds([]);
+    };
+
+    const resetCatalogDialogState = () => {
+        setSelectedCatalogDrugIds([]);
+        setCatalogSearch("");
+        setCatalogLinkedOnly(false);
+        setIncludeAllCatalogSuggestions(false);
+        setCatalogSuggestions([]);
+        setCatalogSuggestionsError(null);
+        setCatalogSuggestionEffectiveMonth(null);
+    };
+
+    const handleCatalogDialogOpenChange = (open: boolean) => {
+        if (isCatalogSubmitting) {
             return;
         }
 
-        setEditorLines((current) => [
-            ...current,
-            {
+        setIsCatalogDialogOpen(open);
+        if (!open) {
+            resetCatalogDialogState();
+        }
+    };
+
+    const openCreateCatalogDialog = () => {
+        if (!confirmDiscardChanges()) {
+            return;
+        }
+
+        const nextCompanyId = companies[0]?.id || "";
+        setCatalogMode("create");
+        setCatalogCompanyId(nextCompanyId);
+        setCatalogBaseReportMonth(defaultBaseReportMonth || NONE_VALUE);
+        setCatalogNote("");
+        resetCatalogDialogState();
+        setCatalogItems([]);
+        setIsCatalogDialogOpen(true);
+        void loadCatalogItems(nextCompanyId);
+    };
+
+    const openAppendCatalogDialog = () => {
+        if (!selectedOrder || !canEdit) {
+            return;
+        }
+
+        setCatalogMode("append");
+        setCatalogCompanyId(selectedOrder.companyId);
+        setCatalogBaseReportMonth(editorBaseReportMonth);
+        setCatalogNote(editorNote);
+        resetCatalogDialogState();
+        setCatalogItems([]);
+        setIsCatalogDialogOpen(true);
+        void loadCatalogItems(selectedOrder.companyId);
+    };
+
+    const handleCatalogCompanyChange = (companyId: string) => {
+        setCatalogCompanyId(companyId);
+        resetCatalogDialogState();
+        setCatalogItems([]);
+        void loadCatalogItems(companyId);
+    };
+
+    const toggleCatalogSelection = (drugId: string) => {
+        if (blockedCatalogDrugIds.includes(drugId)) {
+            return;
+        }
+
+        const selectedDrug = availableCatalogDrugMap.get(drugId) || null;
+        const selectedMasterDrugId = resolveCompanyDrugMasterDrugId(selectedDrug);
+        if (
+            selectedMasterDrugId &&
+            blockedCatalogMasterDrugIdSet.has(selectedMasterDrugId)
+        ) {
+            toast.error("Thuốc chuẩn này đã có trong dự trù hiện tại");
+            return;
+        }
+
+        if (
+            selectedMasterDrugId &&
+            selectedCatalogMasterDrugIdSet.has(selectedMasterDrugId) &&
+            !selectedCatalogDrugIds.includes(drugId)
+        ) {
+            toast.error("Chỉ được chọn một thuốc công ty cho mỗi thuốc chuẩn");
+            return;
+        }
+
+        setSelectedCatalogDrugIds((current) =>
+            current.includes(drugId)
+                ? current.filter((id) => id !== drugId)
+                : [...current, drugId]
+        );
+    };
+
+    const setVisibleCatalogSelection = (visibleIds: string[], shouldSelect: boolean) => {
+        setSelectedCatalogDrugIds((current) => {
+            const currentSet = new Set(current);
+            if (shouldSelect) {
+                const selectedMasterDrugIds = new Set(
+                    Array.from(currentSet)
+                        .map((id) =>
+                            resolveCompanyDrugMasterDrugId(
+                                availableCatalogDrugMap.get(id) || null
+                            )
+                        )
+                        .filter((value): value is string => Boolean(value))
+                );
+
+                visibleIds.forEach((id) => {
+                    if (blockedCatalogDrugIds.includes(id)) {
+                        return;
+                    }
+
+                    const drug = availableCatalogDrugMap.get(id) || null;
+                    const masterDrugId = resolveCompanyDrugMasterDrugId(drug);
+                    if (
+                        masterDrugId &&
+                        (blockedCatalogMasterDrugIdSet.has(masterDrugId) ||
+                            selectedMasterDrugIds.has(masterDrugId))
+                    ) {
+                        return;
+                    }
+
+                    currentSet.add(id);
+                    if (masterDrugId) {
+                        selectedMasterDrugIds.add(masterDrugId);
+                    }
+                });
+            } else {
+                visibleIds.forEach((id) => currentSet.delete(id));
+            }
+
+            return Array.from(currentSet);
+        });
+    };
+
+    const handleCatalogSubmit = async () => {
+        const selectedDrugs = selectedCatalogDrugIds
+            .map((drugId) => availableCatalogDrugMap.get(drugId) || null)
+            .filter((drug): drug is CompanyDrugOption => Boolean(drug));
+        if (selectedDrugs.length === 0) {
+            toast.error("Không thể tải thông tin các thuốc đã chọn");
+            return;
+        }
+
+        const selectedMasterDrugIds = new Set<string>();
+        for (const drug of selectedDrugs) {
+            const masterDrugId = resolveCompanyDrugMasterDrugId(drug);
+            if (!masterDrugId) {
+                continue;
+            }
+
+            if (selectedMasterDrugIds.has(masterDrugId)) {
+                toast.error("Chỉ được chọn một thuốc công ty cho mỗi thuốc chuẩn");
+                return;
+            }
+
+            if (blockedCatalogMasterDrugIdSet.has(masterDrugId)) {
+                toast.error("Thuốc chuẩn này đã có trong dự trù hiện tại");
+                return;
+            }
+
+            selectedMasterDrugIds.add(masterDrugId);
+        }
+
+        if (catalogMode === "create") {
+            if (!catalogCompanyId) {
+                toast.error("Vui lòng chọn công ty cung ứng");
+                return;
+            }
+
+            setIsCatalogSubmitting(true);
+            try {
+                const res = await fetch("/api/facility/dutru-dat-hang", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        companyId: catalogCompanyId,
+                        baseReportMonth:
+                            catalogBaseReportMonth === NONE_VALUE
+                                ? null
+                                : catalogBaseReportMonth,
+                        note: catalogNote.trim() || null,
+                        lines: selectedDrugs.map((drug) => ({
+                            sourceType: "COMPANY_DRUG",
+                            sourceId: drug.id,
+                            requestedQty: 0,
+                        })),
+                    }),
+                });
+                const payload = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(payload.message || "Không thể thêm thuốc vào dự trù");
+                }
+
+                applyOrderDetail(payload.order);
+                await refreshOrders(payload.order.id);
+                setHighlightedLineIds(payload.order.lines.map((line: OrderLine) => line.id));
+                setPendingFocusLineId(payload.order.lines[0]?.id || null);
+                setIsCatalogDialogOpen(false);
+                setCatalogNote("");
+                setCatalogBaseReportMonth(defaultBaseReportMonth || NONE_VALUE);
+                resetCatalogDialogState();
+                toast.success(`Đã thêm ${selectedDrugs.length} thuốc vào dự trù`);
+            } catch (error) {
+                console.error(error);
+                toast.error(
+                    error instanceof Error
+                        ? error.message
+                        : "Không thể thêm thuốc vào dự trù"
+                );
+            } finally {
+                setIsCatalogSubmitting(false);
+            }
+            return;
+        }
+
+        const existingIdSet = new Set(existingCompanyDrugIds);
+        const drugsToAdd = selectedDrugs.filter((drug) => !existingIdSet.has(drug.id));
+        if (drugsToAdd.length === 0) {
+            toast.error("Các thuốc đã chọn đều đã có trong dự trù");
+            return;
+        }
+
+        const nextLines: DraftEditorLine[] = drugsToAdd.map((drug) => {
+            const suggestion = catalogSuggestionMap.get(drug.id) || null;
+
+            return {
                 localId: `company-${drug.id}`,
                 sourceType: "COMPANY_DRUG",
                 sourceId: drug.id,
                 displayName: drug.companyDrugName,
                 unit: drug.unit,
-                requestedQty: "1",
+                requestedQty: "0",
                 lineStatus: "PENDING",
-                suggestedQty: null,
-                suggestionBasis: drug.masterDrugId
-                    ? "Lưu nháp để hệ thống tính và làm mới gợi ý từ XNT."
-                    : "Thuốc công ty này chưa liên kết danh mục dùng chung nên không có gợi ý từ XNT.",
-                suggestionReportMonth: null,
+                suggestedQty: suggestion?.recommendedQty ?? null,
+                suggestionBasis:
+                    suggestion?.suggestionBasis || buildFallbackSuggestionBasis(drug),
+                suggestionReportMonth: suggestion?.suggestionReportMonth ?? null,
                 companyResponseReason: null,
                 masterDrug: drug.masterDrug,
                 companyDrug: drug,
-            },
-        ]);
+            };
+        });
+
+        setEditorLines((current) => [...current, ...nextLines]);
         setIsDirty(true);
+        setHighlightedLineIds(nextLines.map((line) => line.localId));
+        setPendingFocusLineId(nextLines[0]?.localId || null);
+        setIsCatalogDialogOpen(false);
+        resetCatalogDialogState();
+        toast.success(`Đã thêm ${nextLines.length} thuốc vào dự trù`);
     };
 
     const updateLineQty = (localId: string, requestedQty: string) => {
@@ -638,6 +1323,67 @@ export default function FacilityDrugOrdersPage() {
 
     const removeLine = (localId: string) => {
         setEditorLines((current) => current.filter((line) => line.localId !== localId));
+        setIsDirty(true);
+    };
+
+    const applySuggestedQty = (localId: string) => {
+        const targetLine = editorLines.find((line) => line.localId === localId);
+        if (!targetLine) {
+            return;
+        }
+
+        if (duplicateMasterLineIds.has(localId)) {
+            toast.error(
+                "Thuốc chuẩn này đã có ở dòng khác. Hãy giữ một dòng để tránh nhân đôi gợi ý."
+            );
+            return;
+        }
+
+        const recommendedQty = targetLine
+            ? lineSuggestionMap[targetLine.localId]?.recommendedQty ??
+              targetLine.suggestedQty
+            : null;
+        if (recommendedQty === null || recommendedQty <= 0) {
+            return;
+        }
+
+        setEditorLines((current) =>
+            current.map((line) =>
+                line.localId === localId
+                    ? {
+                          ...line,
+                          requestedQty: String(
+                              lineSuggestionMap[line.localId]?.recommendedQty ??
+                                  line.suggestedQty
+                          ),
+                      }
+                    : line
+            )
+        );
+        setIsDirty(true);
+    };
+
+    const applyAllSuggestedQty = () => {
+        if (!hasApplicableSuggestion) {
+            return;
+        }
+
+        setEditorLines((current) =>
+            current.map((line) =>
+                !duplicateMasterLineIds.has(line.localId) &&
+                (lineSuggestionMap[line.localId]?.recommendedQty ?? line.suggestedQty) !==
+                    null &&
+                (lineSuggestionMap[line.localId]?.recommendedQty ?? line.suggestedQty)! > 0
+                    ? {
+                          ...line,
+                          requestedQty: String(
+                              lineSuggestionMap[line.localId]?.recommendedQty ??
+                                  line.suggestedQty
+                          ),
+                      }
+                    : line
+            )
+        );
         setIsDirty(true);
     };
 
@@ -754,46 +1500,6 @@ export default function FacilityDrugOrdersPage() {
         }
     };
 
-    const handleCreateDraft = async () => {
-        if (!createCompanyId) {
-            toast.error("Vui lòng chọn công ty cung ứng");
-            return;
-        }
-
-        setIsCreating(true);
-        try {
-            const res = await fetch("/api/facility/dutru-dat-hang", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    companyId: createCompanyId,
-                    baseReportMonth:
-                        createBaseReportMonth === NONE_VALUE ? null : createBaseReportMonth,
-                    note: createNote.trim() || null,
-                }),
-            });
-            const payload = await res.json();
-
-            if (!res.ok) {
-                throw new Error(payload.message || "Không thể tạo đơn nháp");
-            }
-
-            applyOrderDetail(payload.order);
-            await refreshOrders(payload.order.id);
-            setIsCreateDialogOpen(false);
-            setCreateNote("");
-            setCreateBaseReportMonth(defaultBaseReportMonth || NONE_VALUE);
-            toast.success("Đã tạo đơn nháp mới");
-        } catch (error) {
-            console.error(error);
-            toast.error(error instanceof Error ? error.message : "Không thể tạo đơn nháp");
-        } finally {
-            setIsCreating(false);
-        }
-    };
-
     const openReceiptDialog = () => {
         if (!selectedOrder || pendingReceiptShipments.length === 0) {
             return;
@@ -821,6 +1527,30 @@ export default function FacilityDrugOrdersPage() {
             return;
         }
 
+        const validatedReceiptLines = receiptLines.map((line) => {
+            const validation = receiptValidationMap.get(line.shipmentLineId);
+            return {
+                ...line,
+                parsedReceivedQty: validation?.parsedReceivedQty ?? null,
+                invalidReceivedQty: validation?.invalidReceivedQty ?? true,
+                exceedsShippedQty: validation?.exceedsShippedQty ?? false,
+                missingDifferenceReason: validation?.missingDifferenceReason ?? false,
+            };
+        });
+
+        if (
+            validatedReceiptLines.some(
+                (line) =>
+                    line.invalidReceivedQty ||
+                    line.exceedsShippedQty ||
+                    line.missingDifferenceReason ||
+                    line.parsedReceivedQty === null
+            )
+        ) {
+            toast.error("Vui lòng sửa các dòng thực nhận chưa hợp lệ trước khi xác nhận");
+            return;
+        }
+
         setIsConfirmingReceipt(true);
         try {
             const res = await fetch(
@@ -833,10 +1563,10 @@ export default function FacilityDrugOrdersPage() {
                     body: JSON.stringify({
                         shipmentId: selectedReceiptShipmentId,
                         note: receiptNote.trim() || null,
-                        lines: receiptLines.map((line) => ({
+                        lines: validatedReceiptLines.map((line) => ({
                             shipmentLineId: line.shipmentLineId,
-                            receivedQty: line.receivedQty,
-                            differenceReason: line.differenceReason,
+                            receivedQty: line.parsedReceivedQty,
+                            differenceReason: line.differenceReason.trim() || null,
                         })),
                     }),
                 }
@@ -865,44 +1595,837 @@ export default function FacilityDrugOrdersPage() {
 
     const selectedSummary = orders.find((order) => order.id === selectedOrderId) || null;
 
-    return (
-        <div className="space-y-6">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+    const renderOrderStatusBadge = (status: OrderStatus) => {
+        const meta = ORDER_STATUS_META[status];
+
+        return (
+            <Badge variant={meta.variant} className={meta.className}>
+                {meta.label}
+            </Badge>
+        );
+    };
+
+    const renderLineStatusBadge = (status: LineStatus) => {
+        const meta = LINE_STATUS_META[status];
+
+        return (
+            <Badge variant={meta.variant} className={meta.className}>
+                {meta.label}
+            </Badge>
+        );
+    };
+
+    const renderShipmentStatusBadge = (status: ShipmentStatus) => {
+        const statusConfig = {
+            RECEIVED: {
+                label: "Đã nhận",
+                className: "border-emerald-300 text-emerald-700",
+            },
+            PARTIALLY_RECEIVED: {
+                label: "Nhận một phần",
+                className: "border-amber-300 text-amber-700",
+            },
+            CREATED: {
+                label: "Đã tạo",
+                className: "border-blue-300 text-blue-700",
+            },
+        }[status];
+
+        return (
+            <Badge variant="outline" className={statusConfig.className}>
+                {statusConfig.label}
+            </Badge>
+        );
+    };
+
+    const mobileTabs: DrugOrderMobileSectionTab[] = [
+        {
+            value: "overview",
+            label: "Tổng quan",
+            icon: <Info className="size-4" />,
+        },
+        {
+            value: "lines",
+            label: "Thuốc",
+            icon: <ListChecks className="size-4" />,
+        },
+        {
+            value: "shipments",
+            label: "Giao nhận",
+            icon: <Truck className="size-4" />,
+        },
+        {
+            value: "notes",
+            label: "Ghi chú",
+            icon: <FileText className="size-4" />,
+        },
+    ];
+
+    const mobileActionHelperText =
+        selectedOrder && canEdit && invalidDraftLineCount > 0
+            ? invalidDraftLineCount === 1
+                ? "Còn 1 dòng chưa nhập số lượng hợp lệ."
+                : `Còn ${invalidDraftLineCount} dòng chưa nhập số lượng hợp lệ.`
+            : selectedOrder && isDirty
+                ? "Có thay đổi chưa lưu."
+                : undefined;
+
+    const mobileActionBarActions: DrugOrderMobileAction[] = [
+        {
+            id: "submit",
+            label: "Gửi công ty",
+            icon: <Send className="size-4" />,
+            loading: isSubmitting,
+            disabled: isSaving || isSubmitting || !canSubmitCurrent,
+            hidden: !selectedOrder || !canEdit,
+            onClick: () => void handleSubmit(),
+        },
+        {
+            id: "save",
+            label: "Lưu nháp",
+            icon: <Save className="size-4" />,
+            loading: isSaving,
+            disabled: isSaving || isSubmitting,
+            hidden: !selectedOrder || !canEdit,
+            variant: "outline",
+            onClick: () => void saveDraft(),
+        },
+        {
+            id: "append-drugs",
+            label: "Thêm thuốc",
+            icon: <Plus className="size-4" />,
+            hidden: !selectedOrder || !canEdit,
+            variant: "outline",
+            onClick: openAppendCatalogDialog,
+        },
+        {
+            id: "confirm-receipt",
+            label: "Xác nhận thực nhận",
+            icon: <CheckCircle className="size-4" />,
+            disabled: pendingReceiptShipments.length === 0,
+            hidden: !selectedOrder?.permissions.canConfirmReceipt,
+            variant: "secondary",
+            onClick: openReceiptDialog,
+        },
+        {
+            id: "recall",
+            label: "Thu hồi",
+            icon: <Undo2 className="size-4" />,
+            loading: isRecalling,
+            disabled: isRecalling,
+            hidden: !selectedOrder?.permissions.canRecall,
+            variant: "outline",
+            onClick: () => void handleRecall(),
+        },
+        {
+            id: "print",
+            label: "In đơn",
+            icon: <Printer className="size-4" />,
+            hidden: !selectedOrder,
+            variant: "outline",
+            onClick: openPrintOrder,
+        },
+    ];
+
+    const renderMobileOrderList = () => (
+        <div className="space-y-4 pb-6">
+            <div className="space-y-3">
                 <div>
-                    <h2 className="text-3xl font-bold text-gray-800">Dự trù đặt hàng</h2>
-                    <p className="mt-1 text-gray-500">
-                        Lập đơn nháp theo công ty, dùng dữ liệu Xuất-Nhập-Tồn để tham khảo số lượng và gửi đơn trực tiếp từ phần mềm.
+                    <h2 className="text-2xl font-bold text-gray-800">Dự trù đặt hàng</h2>
+                    <p className="mt-1 text-sm text-gray-500">
+                        Lập và theo dõi đơn dự trù theo từng công ty cung ứng.
                     </p>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="grid grid-cols-2 gap-2">
                     <Button
                         variant="outline"
                         onClick={() => void refreshOrders(selectedOrderId)}
                         disabled={isListLoading}
                     >
-                        <RefreshCcw className="h-4 w-4" />
+                        {isListLoading ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                            <RefreshCcw className="h-4 w-4" />
+                        )}
                         Làm mới
                     </Button>
-                    <Button
-                        onClick={() => {
-                            if (!confirmDiscardChanges()) {
-                                return;
-                            }
-
-                            setCreateCompanyId(companies[0]?.id || "");
-                            setCreateBaseReportMonth(defaultBaseReportMonth || NONE_VALUE);
-                            setCreateNote("");
-                            setIsCreateDialogOpen(true);
-                        }}
-                        disabled={companies.length === 0}
-                    >
+                    <Button onClick={openCreateCatalogDialog} disabled={companies.length === 0}>
                         <Plus className="h-4 w-4" />
-                        Tạo nháp mới
+                        Thêm dự trù
                     </Button>
                 </div>
             </div>
 
-            <div className="grid gap-6 xl:grid-cols-[340px_minmax(0,1fr)]">
+            <div className="space-y-3">
+                <div className="flex items-center justify-between gap-3">
+                    <div>
+                        <h3 className="font-semibold text-slate-900">Danh sách đơn</h3>
+                        <p className="text-sm text-slate-500">
+                            {orders.length > 0
+                                ? `${orders.length} đơn đã tạo`
+                                : "Chưa có đơn nào cho cơ sở này."}
+                        </p>
+                    </div>
+                </div>
+
+                {isListLoading ? (
+                    <div className="flex items-center gap-2 rounded-xl border border-dashed border-slate-200 bg-white p-4 text-sm text-slate-500">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Đang tải danh sách đơn...
+                    </div>
+                ) : orders.length === 0 ? (
+                    <div className="rounded-xl border border-dashed border-slate-200 bg-white p-5 text-sm text-slate-500">
+                        Chưa có đơn nào. Hãy thêm dự trù đầu tiên.
+                    </div>
+                ) : (
+                    <div className="space-y-3">
+                        {orders.map((order) => (
+                            <DrugOrderSummaryCard
+                                key={order.id}
+                                title={order.orderNo}
+                                subtitle={order.company.name}
+                                description={order.company.code}
+                                status={renderOrderStatusBadge(order.status)}
+                                active={order.id === selectedOrderId}
+                                onClick={() => selectOrder(order.id)}
+                                metrics={[
+                                    {
+                                        label: "Dòng thuốc",
+                                        value: order.lineCount,
+                                    },
+                                    {
+                                        label: "Tổng SL",
+                                        value: formatQuantity(order.totalRequestedQty),
+                                    },
+                                    {
+                                        label: "Cập nhật",
+                                        value: formatDateTime(order.updatedAt),
+                                        tone: "muted",
+                                    },
+                                    {
+                                        label: "Chờ danh mục",
+                                        value: order.pendingCatalogCount,
+                                        tone:
+                                            order.pendingCatalogCount > 0
+                                                ? "warning"
+                                                : "muted",
+                                    },
+                                ]}
+                                warnings={
+                                    order.pendingCatalogCount > 0
+                                        ? [
+                                              `${order.pendingCatalogCount} dòng chờ công ty xác nhận danh mục.`,
+                                          ]
+                                        : []
+                                }
+                            />
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+
+    const renderMobileOverviewSection = () => {
+        if (!selectedOrder) {
+            return null;
+        }
+
+        return (
+            <div className="space-y-4">
+                <DrugOrderSummaryCard
+                    title="Tổng quan đơn"
+                    subtitle={selectedOrder.company.name}
+                    description={`Mã công ty: ${selectedOrder.company.code}`}
+                    status={renderOrderStatusBadge(selectedOrder.status)}
+                    metrics={[
+                        {
+                            label: "Tổng dòng",
+                            value: editorLines.length,
+                        },
+                        {
+                            label: "Đã nhập SL",
+                            value: enteredQtyLineCount,
+                        },
+                        {
+                            label: "Có gợi ý",
+                            value: lineWithSuggestionCount,
+                        },
+                        {
+                            label: "Nên thêm",
+                            value: suggestedCatalogCount,
+                        },
+                    ]}
+                    footer={`Cập nhật: ${formatDateTime(selectedOrder.updatedAt)}`}
+                />
+
+                <DrugOrderQrCode
+                    lookupUrl={selectedOrder.lookupUrl}
+                    orderNo={selectedOrder.orderNo}
+                    size={128}
+                />
+
+                <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                    <div className="space-y-2">
+                        <Label>Tháng gốc XNT</Label>
+                        <Select
+                            value={editorBaseReportMonth}
+                            onValueChange={(value) => {
+                                setEditorBaseReportMonth(value);
+                                setIsDirty(true);
+                            }}
+                            disabled={!canEdit}
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="Không chọn" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value={NONE_VALUE}>Không chọn</SelectItem>
+                                {reportMonths.map((month) => (
+                                    <SelectItem key={month.value} value={month.value}>
+                                        {month.label}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <p className="text-xs text-slate-500">
+                            Hệ thống dùng dữ liệu XNT đến tháng này để tính gợi ý 2 tháng phủ.
+                        </p>
+                    </div>
+
+                    {canEdit ? (
+                        <div className="rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 text-sm text-blue-800">
+                            <div className="space-y-1">
+                                <p>
+                                    Gợi ý được tính từ XNT phủ 2 tháng và trừ số lượng đã được duyệt nhưng cơ sở chưa nhận.
+                                </p>
+                                <p className="text-blue-700">
+                                    {isDraftSuggestionsLoading
+                                        ? "Đang làm mới gợi ý..."
+                                        : `Tháng tham chiếu: ${draftSuggestionEffectiveMonth || "Chưa xác định"}`}
+                                </p>
+                            </div>
+                        </div>
+                    ) : null}
+
+                    {canEdit && draftSuggestionsError ? (
+                        <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+                            Không tải được gợi ý mới. Bạn vẫn có thể thao tác thủ công hoặc dùng snapshot đang có nếu tồn tại.
+                        </div>
+                    ) : null}
+                </div>
+            </div>
+        );
+    };
+
+    const renderMobileLinesSection = () => (
+        <div className="space-y-4">
+            <div className="flex items-start justify-between gap-3">
+                <div>
+                    <h3 className="font-semibold text-slate-900">Dòng thuốc trong đơn</h3>
+                    <p className="text-sm text-slate-500">
+                        {editorLines.length > 0
+                            ? `${editorLines.length} dòng đang có trong đơn`
+                            : "Chưa có dòng thuốc nào trong đơn"}
+                    </p>
+                </div>
+                {canEdit ? (
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={applyAllSuggestedQty}
+                        disabled={!hasApplicableSuggestion}
+                    >
+                        <Sparkles className="h-4 w-4" />
+                        Dùng gợi ý
+                    </Button>
+                ) : null}
+            </div>
+
+            {canEdit && invalidDraftLineCount > 0 ? (
+                <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                    {invalidDraftLineCount === 1
+                        ? "Còn 1 dòng chưa nhập số lượng hợp lệ."
+                        : `Còn ${invalidDraftLineCount} dòng chưa nhập số lượng hợp lệ.`}
+                </div>
+            ) : null}
+
+            {canEdit && duplicateMasterLineIds.size > 0 ? (
+                <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                    Có nhiều dòng đang trùng cùng một thuốc chuẩn. Hệ thống sẽ chặn áp gợi ý và chặn lưu nháp cho đến khi bạn giữ lại một dòng cho mỗi thuốc chuẩn.
+                </div>
+            ) : null}
+
+            {editorLines.length === 0 ? (
+                <div className="rounded-xl border border-dashed border-slate-200 bg-white p-6 text-center text-sm text-slate-500">
+                    Thêm thuốc từ danh mục công ty để bắt đầu lập nháp.
+                </div>
+            ) : (
+                <div className="space-y-3">
+                    {editorLines.map((line) => {
+                        const companyDrugCode = line.companyDrug?.companyDrugCode || "—";
+                        const linkedMasterDrug = line.masterDrug;
+                        const invalidRequestedQty = !isValidRequestedQty(line.requestedQty);
+                        const isHighlighted = highlightedLineIds.includes(line.localId);
+                        const liveSuggestion = lineSuggestionMap[line.localId] || null;
+                        const isDuplicateMasterLine = duplicateMasterLineIds.has(line.localId);
+                        const duplicateSuggestionMessage =
+                            liveSuggestion?.isSuppressedDuplicateMasterDrug ||
+                            isDuplicateMasterLine
+                                ? "Thuốc chuẩn này đã xuất hiện ở dòng khác nên hệ thống tắt gợi ý để tránh nhân đôi số lượng."
+                                : null;
+                        const resolvedSuggestedQty = duplicateSuggestionMessage
+                            ? null
+                            : liveSuggestion?.recommendedQty ?? line.suggestedQty;
+                        const resolvedSuggestionReportMonth = duplicateSuggestionMessage
+                            ? null
+                            : liveSuggestion?.suggestionReportMonth ??
+                              line.suggestionReportMonth;
+                        const suggestionMeta = liveSuggestion
+                            ? SUGGESTION_STATUS_META[liveSuggestion.status]
+                            : null;
+                        const validationMessages = [
+                            invalidRequestedQty ? "Cần nhập số lượng > 0." : null,
+                            duplicateSuggestionMessage,
+                        ].filter((message): message is string => Boolean(message));
+
+                        return (
+                            <DrugOrderLineMobileCard
+                                key={line.localId}
+                                title={line.displayName}
+                                subtitle={
+                                    line.companyDrug?.activeIngredient ||
+                                    line.companyResponseReason ||
+                                    undefined
+                                }
+                                badges={
+                                    <>
+                                        {renderLineStatusBadge(line.lineStatus)}
+                                        <Badge variant="outline">{companyDrugCode}</Badge>
+                                    </>
+                                }
+                                highlighted={isHighlighted}
+                                fields={[
+                                    {
+                                        label: "Thuốc chuẩn",
+                                        value: linkedMasterDrug
+                                            ? `${linkedMasterDrug.maChung} - ${linkedMasterDrug.tenThuoc}`
+                                            : "Chưa liên kết",
+                                        tone: linkedMasterDrug ? "default" : "warning",
+                                    },
+                                    {
+                                        label: "Đơn vị",
+                                        value: line.unit || "—",
+                                        tone: line.unit ? "default" : "muted",
+                                    },
+                                    ...(canEdit
+                                        ? []
+                                        : [
+                                              {
+                                                  label: "SL yêu cầu",
+                                                  value: formatQuantity(
+                                                      Number(line.requestedQty)
+                                                  ),
+                                              },
+                                          ]),
+                                ]}
+                                quantityInput={
+                                    canEdit
+                                        ? {
+                                              label: "Số lượng yêu cầu",
+                                              value: line.requestedQty,
+                                              invalid: invalidRequestedQty,
+                                              onChange: (value) => {
+                                                  updateLineQty(line.localId, value);
+                                                  if (pendingFocusLineId === line.localId) {
+                                                      setPendingFocusLineId(null);
+                                                  }
+                                              },
+                                          }
+                                        : undefined
+                                }
+                                suggestion={
+                                    <div className="space-y-2">
+                                        <div className="flex items-center justify-between gap-3">
+                                            <span className="text-xs font-medium uppercase tracking-wide text-blue-700">
+                                                Gợi ý
+                                            </span>
+                                            <span className="font-semibold text-blue-950">
+                                                {formatQuantity(resolvedSuggestedQty)}
+                                            </span>
+                                        </div>
+                                        {liveSuggestion ? (
+                                            <div className="space-y-1 text-xs text-blue-900">
+                                                <div className="flex flex-wrap gap-2">
+                                                    <Badge
+                                                        variant={suggestionMeta?.variant || "outline"}
+                                                        className={suggestionMeta?.className}
+                                                    >
+                                                        {liveSuggestion.statusLabel}
+                                                    </Badge>
+                                                    {liveSuggestion.monthsOfCover !== null ? (
+                                                        <span>
+                                                            Độ phủ:{" "}
+                                                            {formatQuantity(
+                                                                liveSuggestion.monthsOfCover
+                                                            )}{" "}
+                                                            tháng
+                                                        </span>
+                                                    ) : null}
+                                                </div>
+                                                {liveSuggestion.xntBaseQty !== null ? (
+                                                    <p>
+                                                        Nền XNT:{" "}
+                                                        {formatQuantity(
+                                                            liveSuggestion.xntBaseQty
+                                                        )}
+                                                    </p>
+                                                ) : null}
+                                                <p>
+                                                    Đang về:{" "}
+                                                    {formatQuantity(
+                                                        liveSuggestion.incomingAcceptedQty
+                                                    )}
+                                                </p>
+                                                <p>
+                                                    Tháng tham chiếu:{" "}
+                                                    {liveSuggestion.suggestionReportMonth ||
+                                                        draftSuggestionEffectiveMonth ||
+                                                        "—"}
+                                                </p>
+                                                {(liveSuggestion.status === "UNLINKED" ||
+                                                    liveSuggestion.status ===
+                                                        "INSUFFICIENT_DATA") &&
+                                                liveSuggestion.basisLines[0] ? (
+                                                    <p>{liveSuggestion.basisLines[0]}</p>
+                                                ) : null}
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-1 text-xs text-blue-900">
+                                                <p>
+                                                    Tháng tham chiếu:{" "}
+                                                    {resolvedSuggestionReportMonth || "Chưa tính"}
+                                                </p>
+                                                {line.suggestionBasis ? (
+                                                    <p>{line.suggestionBasis}</p>
+                                                ) : null}
+                                            </div>
+                                        )}
+                                    </div>
+                                }
+                                validationMessage={
+                                    validationMessages.length > 0 ? (
+                                        <div className="space-y-1">
+                                            {validationMessages.map((message) => (
+                                                <p key={message}>{message}</p>
+                                            ))}
+                                        </div>
+                                    ) : null
+                                }
+                                actions={[
+                                    {
+                                        id: "apply-suggestion",
+                                        label: "Dùng gợi ý",
+                                        icon: <Sparkles className="size-4" />,
+                                        hidden:
+                                            !canEdit ||
+                                            resolvedSuggestedQty === null ||
+                                            resolvedSuggestedQty <= 0,
+                                        onClick: () => applySuggestedQty(line.localId),
+                                    },
+                                    {
+                                        id: "remove",
+                                        label: "Xóa",
+                                        icon: <Trash2 className="size-4" />,
+                                        hidden: !canEdit,
+                                        variant: "destructive",
+                                        onClick: () => removeLine(line.localId),
+                                    },
+                                ]}
+                            />
+                        );
+                    })}
+                </div>
+            )}
+        </div>
+    );
+
+    const renderMobileShipmentsSection = () => {
+        if (!selectedOrder) {
+            return null;
+        }
+
+        return (
+            <div className="space-y-4">
+                <div>
+                    <h3 className="font-semibold text-slate-900">Lịch sử giao và nhận</h3>
+                    <p className="text-sm text-slate-500">
+                        Theo dõi từng đợt giao do công ty tạo và phần cơ sở đã xác nhận thực nhận.
+                    </p>
+                </div>
+
+                {selectedOrder.shipments.length === 0 ? (
+                    <div className="rounded-xl border border-dashed border-slate-200 bg-white p-6 text-center text-sm text-slate-500">
+                        Chưa có đợt giao nào cho đơn này.
+                    </div>
+                ) : (
+                    <div className="space-y-3">
+                        {selectedOrder.shipments.map((shipment) => (
+                            <DrugOrderShipmentMobileCard
+                                key={shipment.id}
+                                title={`Đợt giao #${shipment.shipmentNo}`}
+                                subtitle={`Thời gian giao: ${formatShipmentDateRangeLabel({
+                                    shippedFromDate: shipment.shippedFromDate,
+                                    shippedToDate: shipment.shippedToDate,
+                                    shippedAt: shipment.shippedAt,
+                                })}`}
+                                status={renderShipmentStatusBadge(shipment.status)}
+                                note={
+                                    shipment.companyNote
+                                        ? `Ghi chú công ty: ${shipment.companyNote}`
+                                        : undefined
+                                }
+                                lines={shipment.lines.map((line) => ({
+                                    id: line.id,
+                                    title: line.displayName,
+                                    subtitle: `Đơn vị: ${line.unit || "—"}`,
+                                    metrics: [
+                                        {
+                                            label: "Yêu cầu",
+                                            value: formatQuantity(line.requestedQty),
+                                        },
+                                        {
+                                            label: "Duyệt",
+                                            value: formatQuantity(line.acceptedQty),
+                                        },
+                                        {
+                                            label: "Giao",
+                                            value: formatQuantity(line.shippedQty),
+                                        },
+                                        {
+                                            label: "Thực nhận",
+                                            value: formatQuantity(line.receivedQty),
+                                        },
+                                    ],
+                                    reason: line.reason
+                                        ? `Lý do giao thiếu: ${line.reason}`
+                                        : undefined,
+                                }))}
+                                receipts={
+                                    shipment.receipts.length > 0 ? (
+                                        <div className="space-y-2 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
+                                            {shipment.receipts.map((receipt) => (
+                                                <div key={receipt.id} className="space-y-1">
+                                                    <p>
+                                                        Xác nhận lúc:{" "}
+                                                        {formatDateTime(receipt.confirmedAt)}
+                                                    </p>
+                                                    <p>Ghi chú: {receipt.note || "Không có"}</p>
+                                                    {receipt.lines
+                                                        .filter((line) => line.differenceReason)
+                                                        .map((line) => (
+                                                            <p
+                                                                key={line.shipmentLineId}
+                                                                className="text-xs"
+                                                            >
+                                                                Lý do chênh lệch:{" "}
+                                                                {line.differenceReason}
+                                                            </p>
+                                                        ))}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="rounded-lg border border-dashed border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+                                            Đợt giao này đang chờ cơ sở xác nhận thực nhận.
+                                        </div>
+                                    )
+                                }
+                            />
+                        ))}
+                    </div>
+                )}
+            </div>
+        );
+    };
+
+    const renderMobileNotesSection = () => (
+        <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div>
+                <h3 className="font-semibold text-slate-900">Ghi chú cơ sở</h3>
+                <p className="text-sm text-slate-500">
+                    Ghi chú nội bộ hoặc lưu ý khi gửi công ty.
+                </p>
+            </div>
+            <Textarea
+                value={editorNote}
+                onChange={(event) => {
+                    setEditorNote(event.target.value);
+                    setIsDirty(true);
+                }}
+                disabled={!canEdit}
+                placeholder="Ghi chú nội bộ hoặc lưu ý khi gửi công ty"
+                className="min-h-32"
+            />
+            {selectedOrder ? (
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div className="rounded-lg bg-slate-50 px-3 py-2">
+                        <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
+                            Ngày tạo
+                        </p>
+                        <p className="mt-1 font-semibold text-slate-900">
+                            {formatDateTime(selectedOrder.createdAt)}
+                        </p>
+                    </div>
+                    <div className="rounded-lg bg-slate-50 px-3 py-2">
+                        <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
+                            Ngày gửi
+                        </p>
+                        <p className="mt-1 font-semibold text-slate-900">
+                            {formatDateTime(selectedOrder.submittedAt)}
+                        </p>
+                    </div>
+                </div>
+            ) : null}
+        </div>
+    );
+
+    const renderMobileSelectedSection = () => {
+        if (mobileSection === "lines") {
+            return renderMobileLinesSection();
+        }
+
+        if (mobileSection === "shipments") {
+            return renderMobileShipmentsSection();
+        }
+
+        if (mobileSection === "notes") {
+            return renderMobileNotesSection();
+        }
+
+        return renderMobileOverviewSection();
+    };
+
+    const renderMobileOrderDetail = () => {
+        if (!selectedOrderId) {
+            return renderMobileOrderList();
+        }
+
+        if (isDetailLoading || !selectedOrder) {
+            return (
+                <div className="space-y-4 pb-6">
+                    <Button variant="ghost" size="sm" onClick={showMobileOrderList}>
+                        <ArrowLeft className="h-4 w-4" />
+                        Danh sách đơn
+                    </Button>
+                    <div className="flex items-center gap-2 rounded-xl border border-dashed border-slate-200 bg-white p-4 text-sm text-slate-500">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Đang tải chi tiết đơn...
+                    </div>
+                </div>
+            );
+        }
+
+        return (
+            <div className="space-y-4 pb-32">
+                <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={showMobileOrderList}
+                        className="-ml-2 mb-3"
+                    >
+                        <ArrowLeft className="h-4 w-4" />
+                        Danh sách đơn
+                    </Button>
+                    <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                            <h2 className="break-words text-xl font-bold text-slate-900">
+                                {selectedOrder.orderNo}
+                            </h2>
+                            <p className="mt-1 text-sm text-slate-600">
+                                {selectedOrder.company.name}
+                            </p>
+                            <p className="text-xs text-slate-500">
+                                {selectedOrder.company.code}
+                            </p>
+                        </div>
+                        <div className="shrink-0">
+                            {renderOrderStatusBadge(selectedOrder.status)}
+                        </div>
+                    </div>
+                    <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
+                        <div className="rounded-lg bg-slate-50 px-3 py-2">
+                            <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
+                                Cập nhật
+                            </p>
+                            <p className="mt-1 font-semibold text-slate-900">
+                                {formatDateTime(selectedOrder.updatedAt)}
+                            </p>
+                        </div>
+                        <div className="rounded-lg bg-slate-50 px-3 py-2">
+                            <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
+                                Ngày gửi
+                            </p>
+                            <p className="mt-1 font-semibold text-slate-900">
+                                {formatDateTime(selectedOrder.submittedAt)}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <DrugOrderMobileSectionTabs
+                    value={mobileSection}
+                    tabs={mobileTabs}
+                    onValueChange={(value) =>
+                        setMobileSection(value as FacilityMobileSection)
+                    }
+                    sticky
+                />
+
+                {renderMobileSelectedSection()}
+
+                <DrugOrderMobileActionBar
+                    actions={mobileActionBarActions}
+                    helperText={mobileActionHelperText}
+                    maxVisibleActions={2}
+                />
+            </div>
+        );
+    };
+
+    return (
+        <div className="space-y-6">
+            <div className="xl:hidden">{renderMobileOrderDetail()}</div>
+
+            <div className="hidden space-y-6 xl:block">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                    <div>
+                        <h2 className="text-3xl font-bold text-gray-800">Dự trù đặt hàng</h2>
+                        <p className="mt-1 text-gray-500">
+                            Lập đơn nháp theo công ty, dùng dữ liệu Xuất-Nhập-Tồn để tham khảo số lượng và gửi đơn trực tiếp từ phần mềm.
+                        </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                        <Button
+                            variant="outline"
+                            onClick={() => void refreshOrders(selectedOrderId)}
+                            disabled={isListLoading}
+                        >
+                            <RefreshCcw className="h-4 w-4" />
+                            Làm mới
+                        </Button>
+                        <Button
+                            onClick={openCreateCatalogDialog}
+                            disabled={companies.length === 0}
+                        >
+                            <Plus className="h-4 w-4" />
+                            Thêm dự trù
+                        </Button>
+                    </div>
+                </div>
+
+                <div className="grid gap-6 xl:grid-cols-[340px_minmax(0,1fr)]">
                 <Card className="border-slate-200">
                     <CardHeader className="pb-4">
                         <CardTitle className="flex items-center gap-2">
@@ -912,7 +2435,7 @@ export default function FacilityDrugOrdersPage() {
                         <CardDescription>
                             {orders.length > 0
                                 ? `${orders.length} đơn đã tạo`
-                                : "Chưa có đơn nào. Hãy tạo nháp đầu tiên."}
+                                : "Chưa có đơn nào. Hãy thêm dự trù đầu tiên."}
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-3">
@@ -983,6 +2506,22 @@ export default function FacilityDrugOrdersPage() {
                                 </div>
                                 {selectedOrder && (
                                     <div className="flex flex-wrap gap-2">
+                                        <Button
+                                            variant="outline"
+                                            onClick={openPrintOrder}
+                                        >
+                                            <Printer className="h-4 w-4" />
+                                            In đơn
+                                        </Button>
+                                        {canEdit && (
+                                            <Button
+                                                variant="outline"
+                                                onClick={openAppendCatalogDialog}
+                                            >
+                                                <Plus className="h-4 w-4" />
+                                                Thêm thuốc
+                                            </Button>
+                                        )}
                                         {canEdit && (
                                             <Button
                                                 variant="outline"
@@ -1052,7 +2591,7 @@ export default function FacilityDrugOrdersPage() {
                                 <div className="space-y-6">
                                     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                                         <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                                            <p className="text-xs uppercase tracking-wide text-slate-500">Số đơn</p>
+                                            <p className="text-xs uppercase tracking-wide text-slate-500">Mã đơn</p>
                                             <p className="mt-2 font-semibold text-slate-900">{selectedOrder.orderNo}</p>
                                         </div>
                                         <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
@@ -1075,6 +2614,54 @@ export default function FacilityDrugOrdersPage() {
                                             <p className="text-xs uppercase tracking-wide text-slate-500">Ngày gửi</p>
                                             <p className="mt-2 font-semibold text-slate-900">
                                                 {formatDateTime(selectedOrder.submittedAt)}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <DrugOrderQrCode
+                                        lookupUrl={selectedOrder.lookupUrl}
+                                        orderNo={selectedOrder.orderNo}
+                                    />
+
+                                    <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+                                        <div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
+                                            <p className="text-xs uppercase tracking-wide text-slate-500">
+                                                Tổng số dòng
+                                            </p>
+                                            <p className="mt-2 text-lg font-semibold text-slate-900">
+                                                {editorLines.length}
+                                            </p>
+                                        </div>
+                                        <div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
+                                            <p className="text-xs uppercase tracking-wide text-slate-500">
+                                                Đã nhập số lượng
+                                            </p>
+                                            <p className="mt-2 text-lg font-semibold text-slate-900">
+                                                {enteredQtyLineCount}
+                                            </p>
+                                        </div>
+                                        <div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
+                                            <p className="text-xs uppercase tracking-wide text-slate-500">
+                                                Dòng có gợi ý
+                                            </p>
+                                            <p className="mt-2 text-lg font-semibold text-slate-900">
+                                                {lineWithSuggestionCount}
+                                            </p>
+                                        </div>
+                                        <div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
+                                            <p className="text-xs uppercase tracking-wide text-slate-500">
+                                                Thuốc đề xuất nên thêm
+                                            </p>
+                                            <p className="mt-2 text-lg font-semibold text-slate-900">
+                                                {suggestedCatalogCount}
+                                            </p>
+                                        </div>
+                                        <div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
+                                            <p className="text-xs uppercase tracking-wide text-slate-500">
+                                                Chờ xác nhận danh mục
+                                            </p>
+                                            <p className="mt-2 text-lg font-semibold text-slate-900">
+                                                {pendingCatalogLineCount}
                                             </p>
                                         </div>
                                     </div>
@@ -1103,7 +2690,7 @@ export default function FacilityDrugOrdersPage() {
                                                 </SelectContent>
                                             </Select>
                                             <p className="text-xs text-slate-500">
-                                                Hệ thống dùng dữ liệu XNT đến tháng này để gợi ý số lượng.
+                                                Hệ thống dùng dữ liệu XNT đến tháng này để tính gợi ý 2 tháng phủ.
                                             </p>
                                         </div>
                                         <div className="space-y-2">
@@ -1122,132 +2709,22 @@ export default function FacilityDrugOrdersPage() {
 
                                     {canEdit && (
                                         <div className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-800">
-                                            Gợi ý số lượng từ XNT sẽ được làm mới mỗi lần lưu nháp. Thuốc công ty chưa liên kết danh mục dùng chung sẽ không có gợi ý.
+                                            <div className="flex flex-col gap-1 lg:flex-row lg:items-center lg:justify-between">
+                                                <span>
+                                                    Gợi ý được tính từ XNT phủ 2 tháng và trừ số lượng đã được duyệt nhưng cơ sở chưa nhận.
+                                                </span>
+                                                <span className="text-blue-700">
+                                                    {isDraftSuggestionsLoading
+                                                        ? "Đang làm mới gợi ý..."
+                                                        : `Tháng tham chiếu: ${draftSuggestionEffectiveMonth || "Chưa xác định"}`}
+                                                </span>
+                                            </div>
                                         </div>
                                     )}
 
-                                    {canEdit && (
-                                        <div className="grid gap-6 xl:grid-cols-2">
-                                            <Card className="border-slate-200">
-                                                <CardHeader className="pb-4">
-                                                    <CardTitle className="flex items-center gap-2 text-base">
-                                                        <PackageSearch className="h-4 w-4 text-blue-600" />
-                                                        Thêm từ danh mục dùng chung
-                                                    </CardTitle>
-                                                    <CardDescription>
-                                                        Chọn thuốc hệ thống. Nếu công ty chưa khai báo cung ứng, dòng sẽ chờ xác nhận danh mục.
-                                                    </CardDescription>
-                                                </CardHeader>
-                                                <CardContent className="space-y-3">
-                                                    <div className="relative">
-                                                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                                                        <Input
-                                                            value={masterDrugSearch}
-                                                            onChange={(event) => setMasterDrugSearch(event.target.value)}
-                                                            placeholder="Tìm theo tên thuốc, mã chung, hoạt chất, số đăng ký"
-                                                            className="pl-9"
-                                                        />
-                                                    </div>
-                                                    <div className="max-h-72 space-y-2 overflow-auto">
-                                                        {isMasterDrugLoading ? (
-                                                            <div className="flex items-center gap-2 rounded-lg border border-dashed border-slate-200 p-3 text-sm text-slate-500">
-                                                                <Loader2 className="h-4 w-4 animate-spin" />
-                                                                Đang tải danh mục thuốc...
-                                                            </div>
-                                                        ) : masterDrugResults.length === 0 ? (
-                                                            <div className="rounded-lg border border-dashed border-slate-200 p-3 text-sm text-slate-500">
-                                                                Không tìm thấy thuốc phù hợp.
-                                                            </div>
-                                                        ) : (
-                                                            masterDrugResults.map((drug) => (
-                                                                <div
-                                                                    key={drug.id}
-                                                                    className="rounded-lg border border-slate-200 p-3"
-                                                                >
-                                                                    <div className="flex items-start justify-between gap-3">
-                                                                        <div className="min-w-0">
-                                                                            <p className="font-medium text-slate-900">{drug.tenThuoc}</p>
-                                                                            <p className="text-xs text-slate-500">
-                                                                                {drug.maChung}
-                                                                                {drug.hoatChat ? ` • ${drug.hoatChat}` : ""}
-                                                                                {drug.hamLuong ? ` • ${drug.hamLuong}` : ""}
-                                                                            </p>
-                                                                        </div>
-                                                                        <Button
-                                                                            size="sm"
-                                                                            variant="outline"
-                                                                            onClick={() => addMasterDrugLine(drug)}
-                                                                        >
-                                                                            <Plus className="h-4 w-4" />
-                                                                            Thêm
-                                                                        </Button>
-                                                                    </div>
-                                                                </div>
-                                                            ))
-                                                        )}
-                                                    </div>
-                                                </CardContent>
-                                            </Card>
-
-                                            <Card className="border-slate-200">
-                                                <CardHeader className="pb-4">
-                                                    <CardTitle className="flex items-center gap-2 text-base">
-                                                        <Building2 className="h-4 w-4 text-emerald-600" />
-                                                        Thêm từ danh mục công ty
-                                                    </CardTitle>
-                                                    <CardDescription>
-                                                        Danh mục riêng do công ty này khai báo trong module dự trù đặt hàng.
-                                                    </CardDescription>
-                                                </CardHeader>
-                                                <CardContent className="space-y-3">
-                                                    <div className="relative">
-                                                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                                                        <Input
-                                                            value={companyDrugSearch}
-                                                            onChange={(event) => setCompanyDrugSearch(event.target.value)}
-                                                            placeholder="Tìm theo mã công ty, tên thuốc công ty, hoạt chất"
-                                                            className="pl-9"
-                                                        />
-                                                    </div>
-                                                    <div className="max-h-72 space-y-2 overflow-auto">
-                                                        {filteredCompanyDrugs.length === 0 ? (
-                                                            <div className="rounded-lg border border-dashed border-slate-200 p-3 text-sm text-slate-500">
-                                                                Công ty này chưa có thuốc phù hợp trong danh mục riêng.
-                                                            </div>
-                                                        ) : (
-                                                            filteredCompanyDrugs.slice(0, 20).map((drug) => (
-                                                                <div
-                                                                    key={drug.id}
-                                                                    className="rounded-lg border border-slate-200 p-3"
-                                                                >
-                                                                    <div className="flex items-start justify-between gap-3">
-                                                                        <div className="min-w-0">
-                                                                            <p className="font-medium text-slate-900">{drug.companyDrugName}</p>
-                                                                            <p className="text-xs text-slate-500">
-                                                                                {drug.companyDrugCode}
-                                                                                {drug.activeIngredient ? ` • ${drug.activeIngredient}` : ""}
-                                                                            </p>
-                                                                            {drug.masterDrug && (
-                                                                                <p className="mt-1 text-xs text-emerald-700">
-                                                                                    Liên kết danh mục chung: {drug.masterDrug.tenThuoc}
-                                                                                </p>
-                                                                            )}
-                                                                        </div>
-                                                                        <Button
-                                                                            size="sm"
-                                                                            variant="outline"
-                                                                            onClick={() => addCompanyDrugLine(drug)}
-                                                                        >
-                                                                            <Plus className="h-4 w-4" />
-                                                                            Thêm
-                                                                        </Button>
-                                                                    </div>
-                                                                </div>
-                                                            ))
-                                                        )}
-                                                    </div>
-                                                </CardContent>
-                                            </Card>
+                                    {canEdit && draftSuggestionsError && (
+                                        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                                            Không tải được gợi ý mới. Bạn vẫn có thể thao tác thủ công hoặc dùng snapshot đang có nếu tồn tại.
                                         </div>
                                     )}
 
@@ -1261,45 +2738,115 @@ export default function FacilityDrugOrdersPage() {
                                                         : "Chưa có dòng thuốc nào trong đơn"}
                                                 </p>
                                             </div>
+                                            {canEdit && (
+                                                <div className="flex flex-wrap gap-2">
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={openAppendCatalogDialog}
+                                                    >
+                                                        <Plus className="h-4 w-4" />
+                                                        Thêm thuốc
+                                                    </Button>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={applyAllSuggestedQty}
+                                                        disabled={!hasApplicableSuggestion}
+                                                    >
+                                                        Dùng tất cả gợi ý
+                                                    </Button>
+                                                </div>
+                                            )}
                                         </div>
+
+                                        {canEdit && invalidDraftLineCount > 0 && (
+                                            <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                                                {invalidDraftLineCount === 1
+                                                    ? "Còn 1 dòng chưa nhập số lượng hợp lệ."
+                                                    : `Còn ${invalidDraftLineCount} dòng chưa nhập số lượng hợp lệ.`}
+                                            </div>
+                                        )}
+
+                                        {canEdit && duplicateMasterLineIds.size > 0 && (
+                                            <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                                                Có nhiều dòng đang trùng cùng một thuốc chuẩn. Hệ thống sẽ chặn áp gợi ý và chặn lưu nháp cho đến khi bạn giữ lại một dòng cho mỗi thuốc chuẩn.
+                                            </div>
+                                        )}
 
                                         {editorLines.length === 0 ? (
                                             <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center text-sm text-slate-500">
-                                                Thêm thuốc từ danh mục dùng chung hoặc danh mục công ty để bắt đầu lập nháp.
+                                                Thêm thuốc từ danh mục công ty để bắt đầu lập nháp.
                                             </div>
                                         ) : (
                                             <div className="overflow-hidden rounded-xl border border-slate-200">
                                                 <Table>
                                                     <TableHeader>
                                                         <TableRow className="bg-slate-50">
-                                                            <TableHead className="w-[28%]">Thuốc</TableHead>
-                                                            <TableHead className="w-[14%]">Nguồn</TableHead>
-                                                            <TableHead className="w-[10%]">Đơn vị</TableHead>
-                                                            <TableHead className="w-[12%]">Yêu cầu</TableHead>
-                                                            <TableHead className="w-[12%]">Gợi ý</TableHead>
-                                                            <TableHead className="w-[16%]">Trạng thái</TableHead>
+                                                            <TableHead className="w-[24%]">Thuốc</TableHead>
+                                                            <TableHead className="w-[12%]">Mã thuốc công ty</TableHead>
+                                                            <TableHead className="w-[18%]">Thuốc chuẩn liên kết</TableHead>
+                                                            <TableHead className="w-[8%]">Đơn vị</TableHead>
+                                                            <TableHead className="w-[14%]">Số lượng yêu cầu</TableHead>
+                                                            <TableHead className="w-[16%]">Gợi ý</TableHead>
+                                                            <TableHead className="w-[12%]">Trạng thái</TableHead>
                                                             <TableHead className="w-[8%] text-right">Thao tác</TableHead>
                                                         </TableRow>
                                                     </TableHeader>
                                                     <TableBody>
                                                         {editorLines.map((line) => {
                                                             const lineStatus = LINE_STATUS_META[line.lineStatus];
+                                                            const companyDrugCode =
+                                                                line.companyDrug?.companyDrugCode || "—";
+                                                            const linkedMasterDrug = line.masterDrug;
+                                                            const invalidRequestedQty =
+                                                                !isValidRequestedQty(line.requestedQty);
+                                                            const isHighlighted =
+                                                                highlightedLineIds.includes(line.localId);
+                                                            const liveSuggestion =
+                                                                lineSuggestionMap[line.localId] ||
+                                                                null;
+                                                            const isDuplicateMasterLine =
+                                                                duplicateMasterLineIds.has(
+                                                                    line.localId
+                                                                );
+                                                            const duplicateSuggestionMessage =
+                                                                liveSuggestion?.isSuppressedDuplicateMasterDrug ||
+                                                                isDuplicateMasterLine
+                                                                    ? "Thuốc chuẩn này đã xuất hiện ở dòng khác nên hệ thống tắt gợi ý để tránh nhân đôi số lượng."
+                                                                    : null;
+                                                            const resolvedSuggestedQty =
+                                                                duplicateSuggestionMessage
+                                                                    ? null
+                                                                    : liveSuggestion?.recommendedQty ??
+                                                                      line.suggestedQty;
+                                                            const resolvedSuggestionReportMonth =
+                                                                duplicateSuggestionMessage
+                                                                    ? null
+                                                                    : liveSuggestion?.suggestionReportMonth ??
+                                                                      line.suggestionReportMonth;
+                                                            const suggestionMeta =
+                                                                liveSuggestion
+                                                                    ? SUGGESTION_STATUS_META[
+                                                                          liveSuggestion.status
+                                                                      ]
+                                                                    : null;
 
                                                             return (
-                                                                <TableRow key={line.localId}>
+                                                                <TableRow
+                                                                    key={line.localId}
+                                                                    className={cn(
+                                                                        isHighlighted && "bg-blue-50/80"
+                                                                    )}
+                                                                >
                                                                     <TableCell className="align-top">
                                                                         <div className="space-y-1">
                                                                             <p className="font-medium text-slate-900">{line.displayName}</p>
-                                                                            <p className="text-xs text-slate-500">
-                                                                                {line.sourceType === "MASTER_DRUG"
-                                                                                    ? line.masterDrug?.maChung || "Danh mục dùng chung"
-                                                                                    : line.companyDrug?.companyDrugCode || "Danh mục công ty"}
-                                                                            </p>
-                                                                            {line.suggestionBasis && (
+                                                                            {line.companyDrug?.activeIngredient ? (
                                                                                 <p className="text-xs text-slate-500">
-                                                                                    {line.suggestionBasis}
+                                                                                    {line.companyDrug.activeIngredient}
                                                                                 </p>
-                                                                            )}
+                                                                            ) : null}
                                                                             {line.companyResponseReason && (
                                                                                 <p className="text-xs text-rose-700">
                                                                                     Lý do công ty: {line.companyResponseReason}
@@ -1308,30 +2855,64 @@ export default function FacilityDrugOrdersPage() {
                                                                         </div>
                                                                     </TableCell>
                                                                     <TableCell className="align-top">
-                                                                        <Badge variant="outline">
-                                                                            {line.sourceType === "MASTER_DRUG"
-                                                                                ? "Danh mục chung"
-                                                                                : "Danh mục công ty"}
-                                                                        </Badge>
+                                                                        <span className="font-medium text-slate-900">
+                                                                            {companyDrugCode}
+                                                                        </span>
+                                                                    </TableCell>
+                                                                    <TableCell className="align-top">
+                                                                        {linkedMasterDrug ? (
+                                                                            <div className="space-y-1">
+                                                                                <p className="font-medium text-slate-900">
+                                                                                    {linkedMasterDrug.maChung}
+                                                                                </p>
+                                                                                <p className="text-xs text-slate-500">
+                                                                                    {linkedMasterDrug.tenThuoc}
+                                                                                </p>
+                                                                            </div>
+                                                                        ) : (
+                                                                            <span className="text-sm text-amber-700">
+                                                                                Chưa liên kết
+                                                                            </span>
+                                                                        )}
                                                                     </TableCell>
                                                                     <TableCell className="align-top text-slate-600">
                                                                         {line.unit || "—"}
                                                                     </TableCell>
                                                                     <TableCell className="align-top">
                                                                         {canEdit ? (
-                                                                            <Input
-                                                                                type="number"
-                                                                                min="0"
-                                                                                step="0.01"
-                                                                                value={line.requestedQty}
-                                                                                onChange={(event) =>
-                                                                                    updateLineQty(
-                                                                                        line.localId,
-                                                                                        event.target.value
-                                                                                    )
-                                                                                }
-                                                                                className="w-28"
-                                                                            />
+                                                                            <div className="space-y-1">
+                                                                                <Input
+                                                                                    ref={(element) => {
+                                                                                        lineInputRefs.current[line.localId] =
+                                                                                            element;
+                                                                                    }}
+                                                                                    type="number"
+                                                                                    min="0"
+                                                                                    step="0.01"
+                                                                                    value={line.requestedQty}
+                                                                                    onChange={(event) => {
+                                                                                        updateLineQty(
+                                                                                            line.localId,
+                                                                                            event.target.value
+                                                                                        );
+                                                                                        if (
+                                                                                            pendingFocusLineId === line.localId
+                                                                                        ) {
+                                                                                            setPendingFocusLineId(null);
+                                                                                        }
+                                                                                    }}
+                                                                                    className={cn(
+                                                                                        "w-32 text-right",
+                                                                                        invalidRequestedQty &&
+                                                                                            "border-amber-400 bg-amber-50 focus-visible:ring-amber-500"
+                                                                                    )}
+                                                                                />
+                                                                                {invalidRequestedQty && (
+                                                                                    <p className="text-xs text-amber-700">
+                                                                                        Cần nhập số lượng &gt; 0
+                                                                                    </p>
+                                                                                )}
+                                                                            </div>
                                                                         ) : (
                                                                             <span className="font-medium text-slate-900">
                                                                                 {formatQuantity(Number(line.requestedQty))}
@@ -1339,13 +2920,106 @@ export default function FacilityDrugOrdersPage() {
                                                                         )}
                                                                     </TableCell>
                                                                     <TableCell className="align-top">
-                                                                        <div className="space-y-1">
+                                                                        <div className="space-y-2">
                                                                             <p className="font-medium text-slate-900">
-                                                                                {formatQuantity(line.suggestedQty)}
+                                                                                {formatQuantity(resolvedSuggestedQty)}
                                                                             </p>
-                                                                            <p className="text-xs text-slate-500">
-                                                                                {line.suggestionReportMonth || "Chưa tính"}
-                                                                            </p>
+                                                                            {liveSuggestion ? (
+                                                                                <div className="space-y-1 text-xs text-slate-500">
+                                                                                    <div className="flex flex-wrap gap-2">
+                                                                                        <Badge
+                                                                                            variant={
+                                                                                                suggestionMeta?.variant ||
+                                                                                                "outline"
+                                                                                            }
+                                                                                            className={
+                                                                                                suggestionMeta?.className
+                                                                                            }
+                                                                                        >
+                                                                                            {liveSuggestion.statusLabel}
+                                                                                        </Badge>
+                                                                                        {liveSuggestion.monthsOfCover !==
+                                                                                        null ? (
+                                                                                            <span>
+                                                                                                Độ phủ:{" "}
+                                                                                                {formatQuantity(
+                                                                                                    liveSuggestion.monthsOfCover
+                                                                                                )}{" "}
+                                                                                                tháng
+                                                                                            </span>
+                                                                                        ) : null}
+                                                                                    </div>
+                                                                                    {liveSuggestion.xntBaseQty !==
+                                                                                    null ? (
+                                                                                        <p>
+                                                                                            Nền XNT:{" "}
+                                                                                            {formatQuantity(
+                                                                                                liveSuggestion.xntBaseQty
+                                                                                            )}
+                                                                                        </p>
+                                                                                    ) : null}
+                                                                                    <p>
+                                                                                        Đang về:{" "}
+                                                                                        {formatQuantity(
+                                                                                            liveSuggestion.incomingAcceptedQty
+                                                                                        )}
+                                                                                    </p>
+                                                                                    <p>
+                                                                                        Tháng tham chiếu:{" "}
+                                                                                        {liveSuggestion.suggestionReportMonth ||
+                                                                                            draftSuggestionEffectiveMonth ||
+                                                                                            "—"}
+                                                                                    </p>
+                                                                                    {(liveSuggestion.status ===
+                                                                                        "UNLINKED" ||
+                                                                                        liveSuggestion.status ===
+                                                                                            "INSUFFICIENT_DATA") &&
+                                                                                    liveSuggestion.basisLines[0] ? (
+                                                                                        <p>
+                                                                                            {
+                                                                                                liveSuggestion.basisLines[0]
+                                                                                            }
+                                                                                        </p>
+                                                                                    ) : null}
+                                                                                    {duplicateSuggestionMessage ? (
+                                                                                        <p className="text-amber-700">
+                                                                                            {duplicateSuggestionMessage}
+                                                                                        </p>
+                                                                                    ) : null}
+                                                                                </div>
+                                                                            ) : (
+                                                                                <div className="space-y-1 text-xs text-slate-500">
+                                                                                    <p>
+                                                                                        Tháng tham chiếu:{" "}
+                                                                                        {resolvedSuggestionReportMonth ||
+                                                                                            "Chưa tính"}
+                                                                                    </p>
+                                                                                    {line.suggestionBasis ? (
+                                                                                        <p>{line.suggestionBasis}</p>
+                                                                                    ) : null}
+                                                                                    {duplicateSuggestionMessage ? (
+                                                                                        <p className="text-amber-700">
+                                                                                            {duplicateSuggestionMessage}
+                                                                                        </p>
+                                                                                    ) : null}
+                                                                                </div>
+                                                                            )}
+                                                                            {canEdit &&
+                                                                            resolvedSuggestedQty !== null &&
+                                                                            resolvedSuggestedQty > 0 ? (
+                                                                                <Button
+                                                                                    variant="ghost"
+                                                                                    size="sm"
+                                                                                    className="h-7 px-2 text-xs"
+                                                                                    onClick={() =>
+                                                                                        applySuggestedQty(
+                                                                                            line.localId
+                                                                                        )
+                                                                                    }
+                                                                                >
+                                                                                    Dùng gợi ý
+                                                                                </Button>
+                                                                            ) : null}
                                                                         </div>
                                                                     </TableCell>
                                                                     <TableCell className="align-top">
@@ -1415,7 +3089,12 @@ export default function FacilityDrugOrdersPage() {
                                                                             Đợt giao #{shipment.shipmentNo}
                                                                         </CardTitle>
                                                                         <CardDescription>
-                                                                            Giao lúc: {formatDateTime(shipment.shippedAt)}
+                                                                            Thời gian giao:{" "}
+                                                                            {formatShipmentDateRangeLabel({
+                                                                                shippedFromDate: shipment.shippedFromDate,
+                                                                                shippedToDate: shipment.shippedToDate,
+                                                                                shippedAt: shipment.shippedAt,
+                                                                            })}
                                                                         </CardDescription>
                                                                     </div>
                                                                     <Badge
@@ -1518,6 +3197,7 @@ export default function FacilityDrugOrdersPage() {
                     </Card>
                 </div>
             </div>
+            </div>
 
             <Dialog open={isReceiptDialogOpen} onOpenChange={setIsReceiptDialogOpen}>
                 <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-5xl">
@@ -1541,7 +3221,12 @@ export default function FacilityDrugOrdersPage() {
                                 <SelectContent>
                                     {pendingReceiptShipments.map((shipment) => (
                                         <SelectItem key={shipment.id} value={shipment.id}>
-                                            Đợt giao #{shipment.shipmentNo} - {formatDateTime(shipment.shippedAt)}
+                                            Đợt giao #{shipment.shipmentNo} -{" "}
+                                            {formatShipmentDateRangeLabel({
+                                                shippedFromDate: shipment.shippedFromDate,
+                                                shippedToDate: shipment.shippedToDate,
+                                                shippedAt: shipment.shippedAt,
+                                            })}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
@@ -1557,9 +3242,29 @@ export default function FacilityDrugOrdersPage() {
                             />
                         </div>
 
+                        {hasInvalidReceiptLine ? (
+                            <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                                Vui lòng sửa các dòng có số lượng thực nhận không hợp lệ hoặc còn thiếu lý do chênh lệch trước khi xác nhận.
+                            </div>
+                        ) : null}
+
                         <div className="space-y-3">
-                            {receiptLines.map((line) => (
-                                <div key={line.shipmentLineId} className="rounded-xl border border-slate-200 p-4">
+                            {receiptLines.map((line) => {
+                                const validation =
+                                    receiptValidationMap.get(line.shipmentLineId) || null;
+
+                                return (
+                                <div
+                                    key={line.shipmentLineId}
+                                    className={cn(
+                                        "rounded-xl border p-4",
+                                        validation?.invalidReceivedQty ||
+                                            validation?.exceedsShippedQty ||
+                                            validation?.missingDifferenceReason
+                                            ? "border-amber-300 bg-amber-50/40"
+                                            : "border-slate-200"
+                                    )}
+                                >
                                     <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_180px_1fr]">
                                         <div>
                                             <p className="font-medium text-slate-900">{line.displayName}</p>
@@ -1584,7 +3289,23 @@ export default function FacilityDrugOrdersPage() {
                                                         )
                                                     );
                                                 }}
+                                                className={cn(
+                                                    validation?.invalidReceivedQty ||
+                                                        validation?.exceedsShippedQty
+                                                        ? "border-amber-400 bg-amber-50 focus-visible:ring-amber-500"
+                                                        : undefined
+                                                )}
                                             />
+                                            {validation?.invalidReceivedQty ? (
+                                                <p className="text-xs text-amber-700">
+                                                    Nhập số lượng thực nhận hợp lệ, lớn hơn hoặc bằng 0.
+                                                </p>
+                                            ) : null}
+                                            {validation?.exceedsShippedQty ? (
+                                                <p className="text-xs text-amber-700">
+                                                    Số lượng thực nhận không được vượt quá số lượng đã giao.
+                                                </p>
+                                            ) : null}
                                         </div>
                                         <div className="space-y-2">
                                             <Label>Lý do chênh lệch nếu có</Label>
@@ -1601,11 +3322,22 @@ export default function FacilityDrugOrdersPage() {
                                                     );
                                                 }}
                                                 placeholder="Bắt buộc nếu thực nhận khác số lượng giao"
+                                                className={cn(
+                                                    validation?.missingDifferenceReason
+                                                        ? "border-amber-400 bg-amber-50 focus-visible:ring-amber-500"
+                                                        : undefined
+                                                )}
                                             />
+                                            {validation?.missingDifferenceReason ? (
+                                                <p className="text-xs text-amber-700">
+                                                    Cần nhập lý do khi số lượng thực nhận khác số lượng giao.
+                                                </p>
+                                            ) : null}
                                         </div>
                                     </div>
                                 </div>
-                            ))}
+                            );
+                            })}
                         </div>
                     </div>
 
@@ -1617,7 +3349,14 @@ export default function FacilityDrugOrdersPage() {
                         >
                             Đóng
                         </Button>
-                        <Button onClick={() => void handleConfirmReceipt()} disabled={isConfirmingReceipt}>
+                        <Button
+                            onClick={() => void handleConfirmReceipt()}
+                            disabled={
+                                isConfirmingReceipt ||
+                                receiptLines.length === 0 ||
+                                hasInvalidReceiptLine
+                            }
+                        >
                             {isConfirmingReceipt ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
                             ) : (
@@ -1629,81 +3368,40 @@ export default function FacilityDrugOrdersPage() {
                 </DialogContent>
             </Dialog>
 
-            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Tạo đơn nháp mới</DialogTitle>
-                        <DialogDescription>
-                            Mỗi đơn chỉ thuộc một công ty. Sau khi tạo, anh/chị có thể thêm thuốc từ danh mục chung hoặc danh mục riêng của công ty.
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    <div className="space-y-4">
-                        <div className="space-y-2">
-                            <Label>Công ty cung ứng</Label>
-                            <Select value={createCompanyId} onValueChange={setCreateCompanyId}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Chọn công ty" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {companies.map((company) => (
-                                        <SelectItem key={company.id} value={company.id}>
-                                            {company.name} ({company.code})
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label>Tháng gốc XNT</Label>
-                            <Select
-                                value={createBaseReportMonth}
-                                onValueChange={setCreateBaseReportMonth}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Không chọn" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value={NONE_VALUE}>Không chọn</SelectItem>
-                                    {reportMonths.map((month) => (
-                                        <SelectItem key={month.value} value={month.value}>
-                                            {month.label}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label>Ghi chú ban đầu</Label>
-                            <Textarea
-                                value={createNote}
-                                onChange={(event) => setCreateNote(event.target.value)}
-                                placeholder="Ghi chú nội bộ nếu cần"
-                            />
-                        </div>
-                    </div>
-
-                    <DialogFooter>
-                        <Button
-                            variant="outline"
-                            onClick={() => setIsCreateDialogOpen(false)}
-                            disabled={isCreating}
-                        >
-                            Hủy
-                        </Button>
-                        <Button onClick={() => void handleCreateDraft()} disabled={isCreating}>
-                            {isCreating ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                                <Plus className="h-4 w-4" />
-                            )}
-                            Tạo nháp
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+            <FacilityDrugOrderCatalogDialog
+                open={isCatalogDialogOpen}
+                mode={catalogMode}
+                noneValue={NONE_VALUE}
+                companies={companies}
+                reportMonths={reportMonths}
+                companyId={catalogCompanyId}
+                baseReportMonth={catalogBaseReportMonth}
+                note={catalogNote}
+                items={catalogItems}
+                suggestedItems={catalogSuggestions}
+                search={catalogSearch}
+                linkedOnly={catalogLinkedOnly}
+                showAllSuggested={includeAllCatalogSuggestions}
+                suggestionEffectiveMonth={catalogSuggestionEffectiveMonth}
+                selectedIds={selectedCatalogDrugIds}
+                existingCompanyDrugIds={blockedCatalogDrugIds}
+                existingMasterDrugIds={blockedCatalogMasterDrugIds}
+                isLoading={isCatalogLoading}
+                suggestionsLoading={isCatalogSuggestionsLoading}
+                isSubmitting={isCatalogSubmitting}
+                suggestionsError={catalogSuggestionsError}
+                onOpenChange={handleCatalogDialogOpenChange}
+                onCompanyChange={handleCatalogCompanyChange}
+                onBaseReportMonthChange={setCatalogBaseReportMonth}
+                onNoteChange={setCatalogNote}
+                onSearchChange={setCatalogSearch}
+                onLinkedOnlyChange={setCatalogLinkedOnly}
+                onShowAllSuggestedChange={setIncludeAllCatalogSuggestions}
+                onToggleSelect={toggleCatalogSelection}
+                onSetVisibleSelection={setVisibleCatalogSelection}
+                onClearSelection={clearCatalogSelection}
+                onSubmit={handleCatalogSubmit}
+            />
         </div>
     );
 }

@@ -16361,6 +16361,8 @@ export namespace Prisma {
     shipmentNo: number | null
     status: $Enums.DrugOrderShipmentStatus | null
     shippedAt: Date | null
+    shippedFromDate: Date | null
+    shippedToDate: Date | null
     companyNote: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -16372,6 +16374,8 @@ export namespace Prisma {
     shipmentNo: number | null
     status: $Enums.DrugOrderShipmentStatus | null
     shippedAt: Date | null
+    shippedFromDate: Date | null
+    shippedToDate: Date | null
     companyNote: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -16383,6 +16387,8 @@ export namespace Prisma {
     shipmentNo: number
     status: number
     shippedAt: number
+    shippedFromDate: number
+    shippedToDate: number
     companyNote: number
     createdAt: number
     updatedAt: number
@@ -16404,6 +16410,8 @@ export namespace Prisma {
     shipmentNo?: true
     status?: true
     shippedAt?: true
+    shippedFromDate?: true
+    shippedToDate?: true
     companyNote?: true
     createdAt?: true
     updatedAt?: true
@@ -16415,6 +16423,8 @@ export namespace Prisma {
     shipmentNo?: true
     status?: true
     shippedAt?: true
+    shippedFromDate?: true
+    shippedToDate?: true
     companyNote?: true
     createdAt?: true
     updatedAt?: true
@@ -16426,6 +16436,8 @@ export namespace Prisma {
     shipmentNo?: true
     status?: true
     shippedAt?: true
+    shippedFromDate?: true
+    shippedToDate?: true
     companyNote?: true
     createdAt?: true
     updatedAt?: true
@@ -16524,6 +16536,8 @@ export namespace Prisma {
     shipmentNo: number
     status: $Enums.DrugOrderShipmentStatus
     shippedAt: Date | null
+    shippedFromDate: Date | null
+    shippedToDate: Date | null
     companyNote: string | null
     createdAt: Date
     updatedAt: Date
@@ -16554,6 +16568,8 @@ export namespace Prisma {
     shipmentNo?: boolean
     status?: boolean
     shippedAt?: boolean
+    shippedFromDate?: boolean
+    shippedToDate?: boolean
     companyNote?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -16569,6 +16585,8 @@ export namespace Prisma {
     shipmentNo?: boolean
     status?: boolean
     shippedAt?: boolean
+    shippedFromDate?: boolean
+    shippedToDate?: boolean
     companyNote?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -16581,6 +16599,8 @@ export namespace Prisma {
     shipmentNo?: boolean
     status?: boolean
     shippedAt?: boolean
+    shippedFromDate?: boolean
+    shippedToDate?: boolean
     companyNote?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -16593,12 +16613,14 @@ export namespace Prisma {
     shipmentNo?: boolean
     status?: boolean
     shippedAt?: boolean
+    shippedFromDate?: boolean
+    shippedToDate?: boolean
     companyNote?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type DrugOrderShipmentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "orderId" | "shipmentNo" | "status" | "shippedAt" | "companyNote" | "createdAt" | "updatedAt", ExtArgs["result"]["drugOrderShipment"]>
+  export type DrugOrderShipmentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "orderId" | "shipmentNo" | "status" | "shippedAt" | "shippedFromDate" | "shippedToDate" | "companyNote" | "createdAt" | "updatedAt", ExtArgs["result"]["drugOrderShipment"]>
   export type DrugOrderShipmentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     order?: boolean | DrugOrderDefaultArgs<ExtArgs>
     lines?: boolean | DrugOrderShipment$linesArgs<ExtArgs>
@@ -16625,6 +16647,8 @@ export namespace Prisma {
       shipmentNo: number
       status: $Enums.DrugOrderShipmentStatus
       shippedAt: Date | null
+      shippedFromDate: Date | null
+      shippedToDate: Date | null
       companyNote: string | null
       createdAt: Date
       updatedAt: Date
@@ -17059,6 +17083,8 @@ export namespace Prisma {
     readonly shipmentNo: FieldRef<"DrugOrderShipment", 'Int'>
     readonly status: FieldRef<"DrugOrderShipment", 'DrugOrderShipmentStatus'>
     readonly shippedAt: FieldRef<"DrugOrderShipment", 'DateTime'>
+    readonly shippedFromDate: FieldRef<"DrugOrderShipment", 'DateTime'>
+    readonly shippedToDate: FieldRef<"DrugOrderShipment", 'DateTime'>
     readonly companyNote: FieldRef<"DrugOrderShipment", 'String'>
     readonly createdAt: FieldRef<"DrugOrderShipment", 'DateTime'>
     readonly updatedAt: FieldRef<"DrugOrderShipment", 'DateTime'>
@@ -32842,6 +32868,8 @@ export namespace Prisma {
     shipmentNo: 'shipmentNo',
     status: 'status',
     shippedAt: 'shippedAt',
+    shippedFromDate: 'shippedFromDate',
+    shippedToDate: 'shippedToDate',
     companyNote: 'companyNote',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -34357,6 +34385,8 @@ export namespace Prisma {
     shipmentNo?: IntFilter<"DrugOrderShipment"> | number
     status?: EnumDrugOrderShipmentStatusFilter<"DrugOrderShipment"> | $Enums.DrugOrderShipmentStatus
     shippedAt?: DateTimeNullableFilter<"DrugOrderShipment"> | Date | string | null
+    shippedFromDate?: DateTimeNullableFilter<"DrugOrderShipment"> | Date | string | null
+    shippedToDate?: DateTimeNullableFilter<"DrugOrderShipment"> | Date | string | null
     companyNote?: StringNullableFilter<"DrugOrderShipment"> | string | null
     createdAt?: DateTimeFilter<"DrugOrderShipment"> | Date | string
     updatedAt?: DateTimeFilter<"DrugOrderShipment"> | Date | string
@@ -34371,6 +34401,8 @@ export namespace Prisma {
     shipmentNo?: SortOrder
     status?: SortOrder
     shippedAt?: SortOrderInput | SortOrder
+    shippedFromDate?: SortOrderInput | SortOrder
+    shippedToDate?: SortOrderInput | SortOrder
     companyNote?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -34389,6 +34421,8 @@ export namespace Prisma {
     shipmentNo?: IntFilter<"DrugOrderShipment"> | number
     status?: EnumDrugOrderShipmentStatusFilter<"DrugOrderShipment"> | $Enums.DrugOrderShipmentStatus
     shippedAt?: DateTimeNullableFilter<"DrugOrderShipment"> | Date | string | null
+    shippedFromDate?: DateTimeNullableFilter<"DrugOrderShipment"> | Date | string | null
+    shippedToDate?: DateTimeNullableFilter<"DrugOrderShipment"> | Date | string | null
     companyNote?: StringNullableFilter<"DrugOrderShipment"> | string | null
     createdAt?: DateTimeFilter<"DrugOrderShipment"> | Date | string
     updatedAt?: DateTimeFilter<"DrugOrderShipment"> | Date | string
@@ -34403,6 +34437,8 @@ export namespace Prisma {
     shipmentNo?: SortOrder
     status?: SortOrder
     shippedAt?: SortOrderInput | SortOrder
+    shippedFromDate?: SortOrderInput | SortOrder
+    shippedToDate?: SortOrderInput | SortOrder
     companyNote?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -34422,6 +34458,8 @@ export namespace Prisma {
     shipmentNo?: IntWithAggregatesFilter<"DrugOrderShipment"> | number
     status?: EnumDrugOrderShipmentStatusWithAggregatesFilter<"DrugOrderShipment"> | $Enums.DrugOrderShipmentStatus
     shippedAt?: DateTimeNullableWithAggregatesFilter<"DrugOrderShipment"> | Date | string | null
+    shippedFromDate?: DateTimeNullableWithAggregatesFilter<"DrugOrderShipment"> | Date | string | null
+    shippedToDate?: DateTimeNullableWithAggregatesFilter<"DrugOrderShipment"> | Date | string | null
     companyNote?: StringNullableWithAggregatesFilter<"DrugOrderShipment"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"DrugOrderShipment"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"DrugOrderShipment"> | Date | string
@@ -36789,6 +36827,8 @@ export namespace Prisma {
     shipmentNo: number
     status?: $Enums.DrugOrderShipmentStatus
     shippedAt?: Date | string | null
+    shippedFromDate?: Date | string | null
+    shippedToDate?: Date | string | null
     companyNote?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -36803,6 +36843,8 @@ export namespace Prisma {
     shipmentNo: number
     status?: $Enums.DrugOrderShipmentStatus
     shippedAt?: Date | string | null
+    shippedFromDate?: Date | string | null
+    shippedToDate?: Date | string | null
     companyNote?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -36815,6 +36857,8 @@ export namespace Prisma {
     shipmentNo?: IntFieldUpdateOperationsInput | number
     status?: EnumDrugOrderShipmentStatusFieldUpdateOperationsInput | $Enums.DrugOrderShipmentStatus
     shippedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    shippedFromDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    shippedToDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     companyNote?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -36829,6 +36873,8 @@ export namespace Prisma {
     shipmentNo?: IntFieldUpdateOperationsInput | number
     status?: EnumDrugOrderShipmentStatusFieldUpdateOperationsInput | $Enums.DrugOrderShipmentStatus
     shippedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    shippedFromDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    shippedToDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     companyNote?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -36842,6 +36888,8 @@ export namespace Prisma {
     shipmentNo: number
     status?: $Enums.DrugOrderShipmentStatus
     shippedAt?: Date | string | null
+    shippedFromDate?: Date | string | null
+    shippedToDate?: Date | string | null
     companyNote?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -36852,6 +36900,8 @@ export namespace Prisma {
     shipmentNo?: IntFieldUpdateOperationsInput | number
     status?: EnumDrugOrderShipmentStatusFieldUpdateOperationsInput | $Enums.DrugOrderShipmentStatus
     shippedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    shippedFromDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    shippedToDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     companyNote?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -36863,6 +36913,8 @@ export namespace Prisma {
     shipmentNo?: IntFieldUpdateOperationsInput | number
     status?: EnumDrugOrderShipmentStatusFieldUpdateOperationsInput | $Enums.DrugOrderShipmentStatus
     shippedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    shippedFromDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    shippedToDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     companyNote?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -39162,6 +39214,8 @@ export namespace Prisma {
     shipmentNo?: SortOrder
     status?: SortOrder
     shippedAt?: SortOrder
+    shippedFromDate?: SortOrder
+    shippedToDate?: SortOrder
     companyNote?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -39177,6 +39231,8 @@ export namespace Prisma {
     shipmentNo?: SortOrder
     status?: SortOrder
     shippedAt?: SortOrder
+    shippedFromDate?: SortOrder
+    shippedToDate?: SortOrder
     companyNote?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -39188,6 +39244,8 @@ export namespace Prisma {
     shipmentNo?: SortOrder
     status?: SortOrder
     shippedAt?: SortOrder
+    shippedFromDate?: SortOrder
+    shippedToDate?: SortOrder
     companyNote?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -44590,6 +44648,8 @@ export namespace Prisma {
     shipmentNo: number
     status?: $Enums.DrugOrderShipmentStatus
     shippedAt?: Date | string | null
+    shippedFromDate?: Date | string | null
+    shippedToDate?: Date | string | null
     companyNote?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -44602,6 +44662,8 @@ export namespace Prisma {
     shipmentNo: number
     status?: $Enums.DrugOrderShipmentStatus
     shippedAt?: Date | string | null
+    shippedFromDate?: Date | string | null
+    shippedToDate?: Date | string | null
     companyNote?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -44794,6 +44856,8 @@ export namespace Prisma {
     shipmentNo?: IntFilter<"DrugOrderShipment"> | number
     status?: EnumDrugOrderShipmentStatusFilter<"DrugOrderShipment"> | $Enums.DrugOrderShipmentStatus
     shippedAt?: DateTimeNullableFilter<"DrugOrderShipment"> | Date | string | null
+    shippedFromDate?: DateTimeNullableFilter<"DrugOrderShipment"> | Date | string | null
+    shippedToDate?: DateTimeNullableFilter<"DrugOrderShipment"> | Date | string | null
     companyNote?: StringNullableFilter<"DrugOrderShipment"> | string | null
     createdAt?: DateTimeFilter<"DrugOrderShipment"> | Date | string
     updatedAt?: DateTimeFilter<"DrugOrderShipment"> | Date | string
@@ -45413,6 +45477,8 @@ export namespace Prisma {
     shipmentNo: number
     status?: $Enums.DrugOrderShipmentStatus
     shippedAt?: Date | string | null
+    shippedFromDate?: Date | string | null
+    shippedToDate?: Date | string | null
     companyNote?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -45426,6 +45492,8 @@ export namespace Prisma {
     shipmentNo: number
     status?: $Enums.DrugOrderShipmentStatus
     shippedAt?: Date | string | null
+    shippedFromDate?: Date | string | null
+    shippedToDate?: Date | string | null
     companyNote?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -45530,6 +45598,8 @@ export namespace Prisma {
     shipmentNo?: IntFieldUpdateOperationsInput | number
     status?: EnumDrugOrderShipmentStatusFieldUpdateOperationsInput | $Enums.DrugOrderShipmentStatus
     shippedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    shippedFromDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    shippedToDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     companyNote?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -45543,6 +45613,8 @@ export namespace Prisma {
     shipmentNo?: IntFieldUpdateOperationsInput | number
     status?: EnumDrugOrderShipmentStatusFieldUpdateOperationsInput | $Enums.DrugOrderShipmentStatus
     shippedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    shippedFromDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    shippedToDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     companyNote?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -45660,6 +45732,8 @@ export namespace Prisma {
     shipmentNo: number
     status?: $Enums.DrugOrderShipmentStatus
     shippedAt?: Date | string | null
+    shippedFromDate?: Date | string | null
+    shippedToDate?: Date | string | null
     companyNote?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -45673,6 +45747,8 @@ export namespace Prisma {
     shipmentNo: number
     status?: $Enums.DrugOrderShipmentStatus
     shippedAt?: Date | string | null
+    shippedFromDate?: Date | string | null
+    shippedToDate?: Date | string | null
     companyNote?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -45828,6 +45904,8 @@ export namespace Prisma {
     shipmentNo?: IntFieldUpdateOperationsInput | number
     status?: EnumDrugOrderShipmentStatusFieldUpdateOperationsInput | $Enums.DrugOrderShipmentStatus
     shippedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    shippedFromDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    shippedToDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     companyNote?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -45841,6 +45919,8 @@ export namespace Prisma {
     shipmentNo?: IntFieldUpdateOperationsInput | number
     status?: EnumDrugOrderShipmentStatusFieldUpdateOperationsInput | $Enums.DrugOrderShipmentStatus
     shippedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    shippedFromDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    shippedToDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     companyNote?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -48739,6 +48819,8 @@ export namespace Prisma {
     shipmentNo: number
     status?: $Enums.DrugOrderShipmentStatus
     shippedAt?: Date | string | null
+    shippedFromDate?: Date | string | null
+    shippedToDate?: Date | string | null
     companyNote?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -48820,6 +48902,8 @@ export namespace Prisma {
     shipmentNo?: IntFieldUpdateOperationsInput | number
     status?: EnumDrugOrderShipmentStatusFieldUpdateOperationsInput | $Enums.DrugOrderShipmentStatus
     shippedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    shippedFromDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    shippedToDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     companyNote?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -48832,6 +48916,8 @@ export namespace Prisma {
     shipmentNo?: IntFieldUpdateOperationsInput | number
     status?: EnumDrugOrderShipmentStatusFieldUpdateOperationsInput | $Enums.DrugOrderShipmentStatus
     shippedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    shippedFromDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    shippedToDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     companyNote?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -48844,6 +48930,8 @@ export namespace Prisma {
     shipmentNo?: IntFieldUpdateOperationsInput | number
     status?: EnumDrugOrderShipmentStatusFieldUpdateOperationsInput | $Enums.DrugOrderShipmentStatus
     shippedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    shippedFromDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    shippedToDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     companyNote?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string

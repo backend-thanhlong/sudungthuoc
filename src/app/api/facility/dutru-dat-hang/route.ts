@@ -3,6 +3,7 @@ import {
     createFacilityDrugOrderDraft,
     loadFacilityDrugOrderListPayload,
     parseBaseReportMonth,
+    parseCreateDraftLineInputs,
     parseDraftNote,
 } from "@/lib/drug-orders/facility";
 import { normalizeText } from "@/lib/drug-orders/utils";
@@ -52,6 +53,7 @@ export async function POST(request: Request) {
             companyId,
             baseReportMonth: parseBaseReportMonth(body.baseReportMonth),
             note: parseDraftNote(body.note),
+            lines: parseCreateDraftLineInputs(body.lines),
         });
 
         logActivity({
@@ -63,6 +65,7 @@ export async function POST(request: Request) {
                 orderNo: response.order.orderNo,
                 companyId: response.order.companyId,
                 companyName: response.order.company.name,
+                lineCount: response.order.lines.length,
             },
         });
 

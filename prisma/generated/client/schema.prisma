@@ -296,15 +296,17 @@ model DrugOrderLine {
 }
 
 model DrugOrderShipment {
-  id          String                  @id @default(cuid())
-  orderId     String                  @map("order_id")
-  order       DrugOrder               @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  shipmentNo  Int                     @map("shipment_no")
-  status      DrugOrderShipmentStatus @default(CREATED)
-  shippedAt   DateTime?               @map("shipped_at")
-  companyNote String?                 @map("company_note")
-  createdAt   DateTime                @default(now()) @map("created_at")
-  updatedAt   DateTime                @updatedAt @map("updated_at")
+  id              String                  @id @default(cuid())
+  orderId         String                  @map("order_id")
+  order           DrugOrder               @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  shipmentNo      Int                     @map("shipment_no")
+  status          DrugOrderShipmentStatus @default(CREATED)
+  shippedAt       DateTime?               @map("shipped_at")
+  shippedFromDate DateTime?               @map("shipped_from_date")
+  shippedToDate   DateTime?               @map("shipped_to_date")
+  companyNote     String?                 @map("company_note")
+  createdAt       DateTime                @default(now()) @map("created_at")
+  updatedAt       DateTime                @updatedAt @map("updated_at")
 
   lines    DrugOrderShipmentLine[]
   receipts DrugOrderReceipt[]

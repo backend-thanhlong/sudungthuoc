@@ -5,6 +5,7 @@ import {
 } from "@/../prisma/generated/client";
 import prisma from "@/lib/prisma";
 import { RouteError } from "@/lib/server-authz";
+import { buildDrugOrderLookupPath } from "@/lib/drug-orders/qr-token";
 import { normalizeText, toNumber } from "@/lib/drug-orders/utils";
 
 const FACILITY_OPTION_SELECT = {
@@ -295,6 +296,7 @@ function serializeOrderSummary(order: AdminOrderSummaryRecord) {
     return {
         id: order.id,
         orderNo: order.orderNo,
+        lookupUrl: buildDrugOrderLookupPath(order.id),
         facilityId: order.facilityId,
         companyId: order.companyId,
         facility: serializeFacilityOption(order.facility),
@@ -369,6 +371,7 @@ function serializeOrderDetail(order: AdminOrderDetailRecord) {
     return {
         id: order.id,
         orderNo: order.orderNo,
+        lookupUrl: buildDrugOrderLookupPath(order.id),
         facilityId: order.facilityId,
         companyId: order.companyId,
         facility: serializeFacilityOption(order.facility),
@@ -599,11 +602,38 @@ export async function deleteAdminDrugOrder(orderId: string) {
         throw new RouteError(404, "Đơn đặt hàng không tồn tại");
     }
 
-    await prisma.drugOrder.delete({
+    if (
+        existing.status !== DrugOrderStatus.DRAFT &&
+        existing.status !== DrugOrderStatus.REJECTED
+    ) {
+        throw new RouteError(
+            400,
+            "Chỉ được xóa cứng đơn nháp hoặc đơn đã bị từ chối"
+        );
+    }
+
+    if (existing._count.shipments > 0 || existing._count.receipts > 0) {
+        throw new RouteError(
+            400,
+            "Không thể xóa cứng đơn đã phát sinh giao hoặc xác nhận thực nhận"
+        );
+    }
+
+    const deleted = await prisma.drugOrder.deleteMany({
         where: {
             id: orderId,
+            status: {
+                in: [DrugOrderStatus.DRAFT, DrugOrderStatus.REJECTED],
+            },
         },
     });
+
+    if (deleted.count === 0) {
+        throw new RouteError(
+            409,
+            "Đơn đặt hàng vừa thay đổi trạng thái. Vui lòng tải lại và thử lại."
+        );
+    }
 
     return {
         deletedOrder: {

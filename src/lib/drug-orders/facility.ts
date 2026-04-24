@@ -4,21 +4,19 @@ import {
     DrugOrderShipmentStatus,
     DrugOrderStatus,
     Prisma,
-    ReportStatus,
 } from "@/../prisma/generated/client";
 import prisma from "@/lib/prisma";
 import { listReportMonthSummaries } from "@/lib/report-submissions";
 import { RouteError } from "@/lib/server-authz";
+import { buildDrugOrderLookupPath } from "@/lib/drug-orders/qr-token";
+import { buildDrugOrderSuggestionSnapshotMap } from "@/lib/drug-orders/suggestions";
 import {
     buildDrugOrderNo,
-    compareReportMonthsDesc,
-    DRUG_ORDER_SUGGESTION_RULE_VERSION,
-    DRUG_ORDER_TARGET_COVERAGE_MONTHS,
-    formatQuantityLabel,
-    isReportMonthAtOrBefore,
+    DRUG_ORDER_SERIALIZABLE_TRANSACTION,
     normalizeOptionalText,
     normalizeText,
     parseReportMonthValue,
+    rethrowDrugOrderConcurrencyError,
     toNumber,
 } from "@/lib/drug-orders/utils";
 
@@ -28,11 +26,23 @@ const COMPANY_OPTION_SELECT = {
     name: true,
 } satisfies Prisma.CompanySelect;
 
+const FACILITY_PRINT_SELECT = {
+    id: true,
+    username: true,
+    facilityName: true,
+    facilityCode: true,
+    facilityType: true,
+    contactPerson: true,
+    phoneNumber: true,
+    address: true,
+} satisfies Prisma.UserSelect;
+
 const COMPANY_DRUG_OPTION_SELECT = {
     id: true,
     companyDrugCode: true,
     companyDrugName: true,
     activeIngredient: true,
+    quyCach: true,
     unit: true,
     masterDrugId: true,
     masterDrug: {
@@ -44,6 +54,7 @@ const COMPANY_DRUG_OPTION_SELECT = {
             hamLuong: true,
             dangBaoChe: true,
             soDangKy: true,
+            quyCach: true,
             donViTinh: true,
         },
     },
@@ -78,6 +89,7 @@ const MASTER_DRUG_LINE_SELECT = {
     hamLuong: true,
     dangBaoChe: true,
     soDangKy: true,
+    quyCach: true,
     donViTinh: true,
 } satisfies Prisma.MasterDrugSelect;
 
@@ -133,6 +145,8 @@ const DRUG_ORDER_DETAIL_SELECT = {
                             id: true,
                             shipmentNo: true,
                             shippedAt: true,
+                            shippedFromDate: true,
+                            shippedToDate: true,
                             status: true,
                         },
                     },
@@ -160,6 +174,8 @@ const DRUG_ORDER_DETAIL_SELECT = {
             shipmentNo: true,
             status: true,
             shippedAt: true,
+            shippedFromDate: true,
+            shippedToDate: true,
             companyNote: true,
             createdAt: true,
             lines: {
@@ -210,8 +226,19 @@ const DRUG_ORDER_DETAIL_SELECT = {
     },
 } satisfies Prisma.DrugOrderSelect;
 
+const DRUG_ORDER_PRINT_SELECT = {
+    ...DRUG_ORDER_DETAIL_SELECT,
+    facility: {
+        select: FACILITY_PRINT_SELECT,
+    },
+} satisfies Prisma.DrugOrderSelect;
+
 type CompanyOptionRecord = Prisma.CompanyGetPayload<{
     select: typeof COMPANY_OPTION_SELECT;
+}>;
+
+type FacilityPrintRecord = Prisma.UserGetPayload<{
+    select: typeof FACILITY_PRINT_SELECT;
 }>;
 
 type CompanyDrugOptionRecord = Prisma.CompanyDrugGetPayload<{
@@ -226,12 +253,9 @@ type DrugOrderDetailRecord = Prisma.DrugOrderGetPayload<{
     select: typeof DRUG_ORDER_DETAIL_SELECT;
 }>;
 
-type SuggestionSnapshot = {
-    suggestedQty: number;
-    suggestionBasis: string;
-    suggestionReportMonth: string;
-    suggestionRuleVersion: string;
-};
+type DrugOrderPrintRecord = Prisma.DrugOrderGetPayload<{
+    select: typeof DRUG_ORDER_PRINT_SELECT;
+}>;
 
 export interface DraftLineInput {
     sourceType: DrugOrderLineSourceType;
@@ -245,16 +269,24 @@ export interface ReceiptLineInput {
     differenceReason: string | null;
 }
 
-const APPROVED_OR_PENDING_REPORT_STATUSES = [
-    ReportStatus.APPROVED,
-    ReportStatus.PENDING,
-] as const;
-
 function serializeCompanyOption(company: CompanyOptionRecord) {
     return {
         id: company.id,
         code: company.code,
         name: company.name,
+    };
+}
+
+function serializeFacilityPrintOption(facility: FacilityPrintRecord) {
+    return {
+        id: facility.id,
+        username: facility.username,
+        facilityName: facility.facilityName || facility.username,
+        facilityCode: facility.facilityCode || facility.username,
+        facilityType: facility.facilityType,
+        contactPerson: facility.contactPerson,
+        phoneNumber: facility.phoneNumber,
+        address: facility.address,
     };
 }
 
@@ -264,6 +296,7 @@ function serializeCompanyDrugOption(drug: CompanyDrugOptionRecord) {
         companyDrugCode: drug.companyDrugCode,
         companyDrugName: drug.companyDrugName,
         activeIngredient: drug.activeIngredient,
+        quyCach: drug.quyCach,
         unit: drug.unit,
         masterDrugId: drug.masterDrugId,
         masterDrug: drug.masterDrug,
@@ -289,6 +322,7 @@ function serializeOrderSummary(order: DrugOrderSummaryRecord) {
     return {
         id: order.id,
         orderNo: order.orderNo,
+        lookupUrl: buildDrugOrderLookupPath(order.id),
         companyId: order.companyId,
         company: serializeCompanyOption(order.company),
         status: order.status,
@@ -308,7 +342,10 @@ function serializeOrderDetail(
     companyDrugs: CompanyDrugOptionRecord[]
 ) {
     const canEdit = order.status === DrugOrderStatus.DRAFT;
-    const canSubmit = canEdit && order.lines.length > 0;
+    const canSubmit =
+        canEdit &&
+        order.lines.length > 0 &&
+        order.lines.every((line) => toNumber(line.requestedQty) > 0);
     const canRecall =
         order.status === DrugOrderStatus.SUBMITTED &&
         order._count.shipments === 0 &&
@@ -355,6 +392,8 @@ function serializeOrderDetail(
                 shipmentId: shipmentLine.shipmentId,
                 shipmentNo: shipmentLine.shipment.shipmentNo,
                 shippedAt: shipmentLine.shipment.shippedAt,
+                shippedFromDate: shipmentLine.shipment.shippedFromDate,
+                shippedToDate: shipmentLine.shipment.shippedToDate,
                 shipmentStatus: shipmentLine.shipment.status,
                 shippedQty: toNumber(shipmentLine.shippedQty),
                 reason: shipmentLine.reason,
@@ -372,6 +411,7 @@ function serializeOrderDetail(
     return {
         id: order.id,
         orderNo: order.orderNo,
+        lookupUrl: buildDrugOrderLookupPath(order.id),
         companyId: order.companyId,
         company: serializeCompanyOption(order.company),
         status: order.status,
@@ -393,6 +433,8 @@ function serializeOrderDetail(
             shipmentNo: shipment.shipmentNo,
             status: shipment.status,
             shippedAt: shipment.shippedAt,
+            shippedFromDate: shipment.shippedFromDate,
+            shippedToDate: shipment.shippedToDate,
             companyNote: shipment.companyNote,
             createdAt: shipment.createdAt,
             lines: shipment.lines.map((line) => ({
@@ -423,6 +465,13 @@ function serializeOrderDetail(
         options: {
             companyDrugs: companyDrugs.map(serializeCompanyDrugOption),
         },
+    };
+}
+
+function serializeOrderPrint(order: DrugOrderPrintRecord) {
+    return {
+        ...serializeOrderDetail(order, []),
+        facility: serializeFacilityPrintOption(order.facility),
     };
 }
 
@@ -463,146 +512,13 @@ async function listActiveCompanyDrugOptions(companyId: string) {
     });
 }
 
-async function loadSuggestionSnapshots(params: {
-    facilityId: string;
-    masterDrugIds: string[];
-    baseReportMonth: string | null;
-}) {
-    const uniqueMasterDrugIds = [...new Set(params.masterDrugIds.filter(Boolean))];
-    if (uniqueMasterDrugIds.length === 0) {
-        return new Map<string, SuggestionSnapshot>();
-    }
+export async function loadFacilityCompanyDrugCatalogPayload(companyId: string) {
+    await getActiveCompanyOrThrow(companyId);
 
-    const rows = await prisma.inventoryReport.findMany({
-        where: {
-            facilityId: params.facilityId,
-            status: {
-                in: [...APPROVED_OR_PENDING_REPORT_STATUSES],
-            },
-            drugMap: {
-                masterDrugId: {
-                    in: uniqueMasterDrugIds,
-                },
-            },
-        },
-        select: {
-            reportMonth: true,
-            status: true,
-            xuat: true,
-            tonCuoi: true,
-            drugMap: {
-                select: {
-                    masterDrugId: true,
-                },
-            },
-        },
-    });
-
-    const grouped = new Map<
-        string,
-        Map<
-            string,
-            {
-                reportMonth: string;
-                status: ReportStatus;
-                totalExport: number;
-                totalEndingStock: number;
-            }
-        >
-    >();
-
-    for (const row of rows) {
-        const masterDrugId = row.drugMap.masterDrugId;
-        if (!masterDrugId) {
-            continue;
-        }
-
-        if (
-            params.baseReportMonth &&
-            !isReportMonthAtOrBefore(row.reportMonth, params.baseReportMonth)
-        ) {
-            continue;
-        }
-
-        const bucketByMonth = grouped.get(masterDrugId) || new Map();
-        const bucket = bucketByMonth.get(row.reportMonth) || {
-            reportMonth: row.reportMonth,
-            status: row.status,
-            totalExport: 0,
-            totalEndingStock: 0,
-        };
-
-        bucket.status =
-            bucket.status === ReportStatus.APPROVED || row.status === ReportStatus.APPROVED
-                ? ReportStatus.APPROVED
-                : ReportStatus.PENDING;
-        bucket.totalExport += toNumber(row.xuat);
-        bucket.totalEndingStock += toNumber(row.tonCuoi);
-
-        bucketByMonth.set(row.reportMonth, bucket);
-        grouped.set(masterDrugId, bucketByMonth);
-    }
-
-    const snapshots = new Map<string, SuggestionSnapshot>();
-
-    for (const [masterDrugId, monthsMap] of grouped.entries()) {
-        const monthBuckets = Array.from(monthsMap.values()).sort((left, right) =>
-            compareReportMonthsDesc(left.reportMonth, right.reportMonth)
-        );
-
-        const approvedMonths = monthBuckets.filter(
-            (bucket) => bucket.status === ReportStatus.APPROVED
-        );
-        const pendingMonths = monthBuckets.filter(
-            (bucket) => bucket.status === ReportStatus.PENDING
-        );
-
-        const selectedBuckets = [
-            ...approvedMonths.slice(0, 3),
-            ...pendingMonths.slice(0, Math.max(0, 3 - approvedMonths.length)),
-        ].sort((left, right) =>
-            compareReportMonthsDesc(left.reportMonth, right.reportMonth)
-        );
-
-        if (selectedBuckets.length === 0) {
-            continue;
-        }
-
-        const averageMonthlyUsage =
-            selectedBuckets.reduce((sum, bucket) => sum + bucket.totalExport, 0) /
-            selectedBuckets.length;
-        const latestBucket = selectedBuckets[0];
-        const suggestedQty = Math.max(
-            0,
-            Math.round(
-                averageMonthlyUsage * DRUG_ORDER_TARGET_COVERAGE_MONTHS -
-                    latestBucket.totalEndingStock
-            )
-        );
-        const usedPendingData = selectedBuckets.some(
-            (bucket) => bucket.status === ReportStatus.PENDING
-        );
-
-        const suggestionBasis = [
-            `Xuất bình quân ${selectedBuckets.length} tháng: ${formatQuantityLabel(
-                averageMonthlyUsage
-            )}`,
-            `Tồn cuối ${latestBucket.reportMonth}: ${formatQuantityLabel(
-                latestBucket.totalEndingStock
-            )}`,
-            `Mức phủ mục tiêu: ${DRUG_ORDER_TARGET_COVERAGE_MONTHS} tháng`,
-            usedPendingData ? "Gợi ý tạm do có dùng dữ liệu chưa duyệt" : "Dữ liệu gợi ý đã duyệt",
-        ].join(" | ");
-
-        snapshots.set(masterDrugId, {
-            suggestedQty,
-            suggestionBasis,
-            suggestionReportMonth: latestBucket.reportMonth,
-            suggestionRuleVersion: DRUG_ORDER_SUGGESTION_RULE_VERSION,
-        });
-    }
-
-    return snapshots;
+    const companyDrugs = await listActiveCompanyDrugOptions(companyId);
+    return {
+        items: companyDrugs.map(serializeCompanyDrugOption),
+    };
 }
 
 async function buildDraftLineCreateInputs(params: {
@@ -689,7 +605,34 @@ async function buildDraftLineCreateInputs(params: {
         throw new RouteError(400, "Có thuốc công ty không tồn tại hoặc không thuộc công ty đã chọn");
     }
 
-    const suggestionSnapshots = await loadSuggestionSnapshots({
+    const duplicateMasterDrugIds = new Set<string>();
+    const seenMasterDrugIds = new Set<string>();
+    for (const line of params.lines) {
+        const resolvedMasterDrugId =
+            line.sourceType === DrugOrderLineSourceType.MASTER_DRUG
+                ? line.sourceId
+                : companyDrugById.get(line.sourceId)?.masterDrugId || null;
+
+        if (!resolvedMasterDrugId) {
+            continue;
+        }
+
+        if (seenMasterDrugIds.has(resolvedMasterDrugId)) {
+            duplicateMasterDrugIds.add(resolvedMasterDrugId);
+        }
+
+        seenMasterDrugIds.add(resolvedMasterDrugId);
+    }
+
+    if (duplicateMasterDrugIds.size > 0) {
+        throw new RouteError(
+            400,
+            "Đơn nháp không được chứa nhiều dòng cùng một thuốc chuẩn"
+        );
+    }
+
+    const { suggestions: suggestionSnapshots } =
+        await buildDrugOrderSuggestionSnapshotMap({
         facilityId: params.facilityId,
         masterDrugIds: [
             ...uniqueMasterDrugIds,
@@ -717,7 +660,7 @@ async function buildDraftLineCreateInputs(params: {
                 unit: masterDrug.donViTinh,
                 requestedQty: line.requestedQty,
                 acceptedQty: 0,
-                suggestedQty: suggestion?.suggestedQty ?? null,
+                suggestedQty: suggestion?.recommendedQty ?? null,
                 lineStatus: declaredMasterDrugIdSet.has(masterDrug.id)
                     ? DrugOrderLineStatus.PENDING
                     : DrugOrderLineStatus.PENDING_CATALOG_CONFIRMATION,
@@ -745,19 +688,27 @@ async function buildDraftLineCreateInputs(params: {
             unit: companyDrug.unit,
             requestedQty: line.requestedQty,
             acceptedQty: 0,
-            suggestedQty: suggestion?.suggestedQty ?? null,
+            suggestedQty: suggestion?.recommendedQty ?? null,
             lineStatus: DrugOrderLineStatus.PENDING,
             companyResponseReason: null,
             suggestionBasis:
                 suggestion?.suggestionBasis ||
-                "Không có dữ liệu gợi ý từ XNT do thuốc công ty chưa liên kết danh mục dùng chung",
+                "Thuốc công ty này chưa liên kết thuốc chuẩn nên chưa có gợi ý.",
             suggestionReportMonth: suggestion?.suggestionReportMonth ?? null,
             suggestionRuleVersion: suggestion?.suggestionRuleVersion ?? null,
         } satisfies Omit<Prisma.DrugOrderLineCreateManyInput, "orderId">;
     });
 }
 
-export function parseDraftLineInputs(value: unknown): DraftLineInput[] {
+type ParseDraftLineInputOptions = {
+    allowZero?: boolean;
+    allowedSourceTypes?: DrugOrderLineSourceType[];
+};
+
+function parseDraftLineInputsWithOptions(
+    value: unknown,
+    options?: ParseDraftLineInputOptions
+): DraftLineInput[] {
     if (value === undefined || value === null) {
         return [];
     }
@@ -765,6 +716,9 @@ export function parseDraftLineInputs(value: unknown): DraftLineInput[] {
     if (!Array.isArray(value)) {
         throw new RouteError(400, "Danh sách dòng thuốc không hợp lệ");
     }
+
+    const allowZero = options?.allowZero ?? false;
+    const allowedSourceTypes = options?.allowedSourceTypes;
 
     return value.map((line, index) => {
         const sourceType =
@@ -786,6 +740,8 @@ export function parseDraftLineInputs(value: unknown): DraftLineInput[] {
             "requestedQty" in line
                 ? line.requestedQty
                 : null;
+        const hasExplicitRequestedQty =
+            requestedQtyRaw !== null && requestedQtyRaw !== undefined && requestedQtyRaw !== "";
         const requestedQty = Number(requestedQtyRaw);
 
         if (
@@ -799,10 +755,27 @@ export function parseDraftLineInputs(value: unknown): DraftLineInput[] {
             throw new RouteError(400, `Thiếu mã thuốc tại vị trí ${index + 1}`);
         }
 
-        if (!Number.isFinite(requestedQty) || requestedQty <= 0) {
+        if (
+            allowedSourceTypes &&
+            !allowedSourceTypes.includes(sourceType)
+        ) {
             throw new RouteError(
                 400,
-                `Số lượng yêu cầu tại vị trí ${index + 1} phải lớn hơn 0`
+                `Loại dòng thuốc tại vị trí ${index + 1} không được phép trong thao tác này`
+            );
+        }
+
+        if (
+            !hasExplicitRequestedQty ||
+            !Number.isFinite(requestedQty) ||
+            requestedQty < 0 ||
+            (!allowZero && requestedQty <= 0)
+        ) {
+            throw new RouteError(
+                400,
+                allowZero
+                    ? `Số lượng yêu cầu tại vị trí ${index + 1} phải lớn hơn hoặc bằng 0`
+                    : `Số lượng yêu cầu tại vị trí ${index + 1} phải lớn hơn 0`
             );
         }
 
@@ -811,6 +784,20 @@ export function parseDraftLineInputs(value: unknown): DraftLineInput[] {
             sourceId,
             requestedQty,
         };
+    });
+}
+
+export function parseDraftLineInputs(
+    value: unknown,
+    options?: ParseDraftLineInputOptions
+) {
+    return parseDraftLineInputsWithOptions(value, options);
+}
+
+export function parseCreateDraftLineInputs(value: unknown) {
+    return parseDraftLineInputsWithOptions(value, {
+        allowZero: true,
+        allowedSourceTypes: [DrugOrderLineSourceType.COMPANY_DRUG],
     });
 }
 
@@ -939,24 +926,70 @@ export async function loadFacilityDrugOrderDetailPayload(params: {
     };
 }
 
+export async function loadFacilityDrugOrderPrintPayload(params: {
+    facilityId: string;
+    orderId: string;
+}) {
+    const order = await prisma.drugOrder.findFirst({
+        where: {
+            id: params.orderId,
+            facilityId: params.facilityId,
+        },
+        select: DRUG_ORDER_PRINT_SELECT,
+    });
+
+    if (!order) {
+        throw new RouteError(404, "Đơn đặt hàng không tồn tại");
+    }
+
+    return {
+        order: serializeOrderPrint(order),
+    };
+}
+
+export type FacilityDrugOrderPrintPayload = Awaited<
+    ReturnType<typeof loadFacilityDrugOrderPrintPayload>
+>;
+
 export async function createFacilityDrugOrderDraft(params: {
     facilityId: string;
     companyId: string;
     baseReportMonth: string | null;
     note: string | null;
+    lines: DraftLineInput[];
 }) {
     await getActiveCompanyOrThrow(params.companyId);
 
-    const created = await prisma.drugOrder.create({
-        data: {
-            orderNo: buildDrugOrderNo(),
-            facilityId: params.facilityId,
-            companyId: params.companyId,
-            status: DrugOrderStatus.DRAFT,
-            baseReportMonth: params.baseReportMonth,
-            note: params.note,
-        },
-        select: { id: true },
+    const lineData = await buildDraftLineCreateInputs({
+        facilityId: params.facilityId,
+        companyId: params.companyId,
+        baseReportMonth: params.baseReportMonth,
+        lines: params.lines,
+    });
+
+    const created = await prisma.$transaction(async (tx) => {
+        const order = await tx.drugOrder.create({
+            data: {
+                orderNo: buildDrugOrderNo(),
+                facilityId: params.facilityId,
+                companyId: params.companyId,
+                status: DrugOrderStatus.DRAFT,
+                baseReportMonth: params.baseReportMonth,
+                note: params.note,
+            },
+            select: { id: true },
+        });
+
+        if (lineData.length > 0) {
+            await tx.drugOrderLine.createMany({
+                data: lineData.map((line) => ({
+                    ...line,
+                    orderId: order.id,
+                })),
+            });
+        }
+
+        return order;
     });
 
     return loadFacilityDrugOrderDetailPayload({
@@ -981,6 +1014,12 @@ export async function updateFacilityDrugOrderDraft(params: {
             id: true,
             companyId: true,
             status: true,
+            lines: {
+                select: {
+                    sourceType: true,
+                    masterDrugId: true,
+                },
+            },
         },
     });
 
@@ -990,6 +1029,24 @@ export async function updateFacilityDrugOrderDraft(params: {
 
     if (order.status !== DrugOrderStatus.DRAFT) {
         throw new RouteError(400, "Chỉ có thể cập nhật đơn ở trạng thái nháp");
+    }
+
+    const existingMasterDrugIds = new Set(
+        order.lines
+            .filter(
+                (line) =>
+                    line.sourceType === DrugOrderLineSourceType.MASTER_DRUG &&
+                    Boolean(line.masterDrugId)
+            )
+            .map((line) => line.masterDrugId as string)
+    );
+    const hasNewMasterDrugLine = params.lines.some(
+        (line) =>
+            line.sourceType === DrugOrderLineSourceType.MASTER_DRUG &&
+            !existingMasterDrugIds.has(line.sourceId)
+    );
+    if (hasNewMasterDrugLine) {
+        throw new RouteError(400, "Đơn nháp chỉ được thêm thuốc từ danh mục công ty");
     }
 
     await getActiveCompanyOrThrow(order.companyId);
@@ -1044,7 +1101,10 @@ export async function submitFacilityDrugOrder(params: {
             companyId: true,
             status: true,
             lines: {
-                select: { id: true },
+                select: {
+                    id: true,
+                    requestedQty: true,
+                },
             },
         },
     });
@@ -1059,6 +1119,18 @@ export async function submitFacilityDrugOrder(params: {
 
     if (order.lines.length === 0) {
         throw new RouteError(400, "Đơn nháp phải có ít nhất một dòng thuốc trước khi gửi");
+    }
+
+    const invalidLineCount = order.lines.filter(
+        (line) => toNumber(line.requestedQty) <= 0
+    ).length;
+    if (invalidLineCount > 0) {
+        throw new RouteError(
+            400,
+            invalidLineCount === 1
+                ? "Còn 1 dòng chưa nhập số lượng hợp lệ"
+                : `Còn ${invalidLineCount} dòng chưa nhập số lượng hợp lệ`
+        );
     }
 
     await getActiveCompanyOrThrow(order.companyId);
@@ -1143,89 +1215,6 @@ export async function confirmFacilityDrugOrderReceipt(params: {
     note: string | null;
     lines: ReceiptLineInput[];
 }) {
-    const order = await prisma.drugOrder.findFirst({
-        where: {
-            id: params.orderId,
-            facilityId: params.facilityId,
-        },
-        select: {
-            id: true,
-            status: true,
-            companyId: true,
-            shipments: {
-                where: {
-                    id: params.shipmentId,
-                },
-                select: {
-                    id: true,
-                    shipmentNo: true,
-                    status: true,
-                    lines: {
-                        orderBy: { createdAt: "asc" },
-                        select: {
-                            id: true,
-                            orderLineId: true,
-                            shippedQty: true,
-                            orderLine: {
-                                select: {
-                                    id: true,
-                                    acceptedQty: true,
-                                    lineStatus: true,
-                                    receiptLines: {
-                                        select: {
-                                            receivedQty: true,
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                    receipts: {
-                        select: {
-                            id: true,
-                        },
-                    },
-                },
-            },
-            lines: {
-                select: {
-                    id: true,
-                    acceptedQty: true,
-                    lineStatus: true,
-                    receiptLines: {
-                        select: {
-                            receivedQty: true,
-                        },
-                    },
-                },
-            },
-        },
-    });
-
-    if (!order) {
-        throw new RouteError(404, "Đơn đặt hàng không tồn tại");
-    }
-
-    if (
-        order.status !== DrugOrderStatus.IN_DELIVERY &&
-        order.status !== DrugOrderStatus.READY_FOR_SHIPMENT
-    ) {
-        throw new RouteError(400, "Chỉ có thể xác nhận đợt giao của đơn đang giao");
-    }
-
-    const shipment = order.shipments[0];
-    if (!shipment) {
-        throw new RouteError(404, "Đợt giao không tồn tại hoặc không thuộc đơn hiện tại");
-    }
-
-    if (shipment.receipts.length > 0) {
-        throw new RouteError(400, "Đợt giao này đã được xác nhận thực nhận");
-    }
-
-    if (shipment.lines.length === 0) {
-        throw new RouteError(400, "Đợt giao không có dòng nào để xác nhận");
-    }
-
     const receiptMap = new Map<string, ReceiptLineInput>();
     params.lines.forEach((line, index) => {
         if (receiptMap.has(line.shipmentLineId)) {
@@ -1238,142 +1227,227 @@ export async function confirmFacilityDrugOrderReceipt(params: {
         receiptMap.set(line.shipmentLineId, line);
     });
 
-    if (receiptMap.size !== shipment.lines.length) {
-        throw new RouteError(
-            400,
-            "Cơ sở phải xác nhận đủ tất cả các dòng của đợt giao"
-        );
-    }
+    try {
+        const orderId = await prisma.$transaction(async (tx) => {
+            const order = await tx.drugOrder.findFirst({
+                where: {
+                    id: params.orderId,
+                    facilityId: params.facilityId,
+                },
+                select: {
+                    id: true,
+                    status: true,
+                    shipments: {
+                        where: {
+                            id: params.shipmentId,
+                        },
+                        select: {
+                            id: true,
+                            shipmentNo: true,
+                            status: true,
+                            lines: {
+                                orderBy: { createdAt: "asc" },
+                                select: {
+                                    id: true,
+                                    orderLineId: true,
+                                    shippedQty: true,
+                                },
+                            },
+                            receipts: {
+                                select: {
+                                    id: true,
+                                },
+                            },
+                        },
+                    },
+                    lines: {
+                        select: {
+                            id: true,
+                            acceptedQty: true,
+                            receiptLines: {
+                                select: {
+                                    receivedQty: true,
+                                },
+                            },
+                        },
+                    },
+                },
+            });
 
-    await prisma.$transaction(async (tx) => {
-        const createdReceipt = await tx.drugOrderReceipt.create({
-            data: {
-                orderId: order.id,
-                shipmentId: shipment.id,
-                facilityId: params.facilityId,
-                note: params.note,
-            },
-            select: {
-                id: true,
-            },
-        });
+            if (!order) {
+                throw new RouteError(404, "Đơn đặt hàng không tồn tại");
+            }
 
-        for (const shipmentLine of shipment.lines) {
-            const receiptLine = receiptMap.get(shipmentLine.id);
-            if (!receiptLine) {
+            if (
+                order.status !== DrugOrderStatus.IN_DELIVERY &&
+                order.status !== DrugOrderStatus.READY_FOR_SHIPMENT
+            ) {
+                throw new RouteError(400, "Chỉ có thể xác nhận đợt giao của đơn đang giao");
+            }
+
+            const shipment = order.shipments[0];
+            if (!shipment) {
+                throw new RouteError(404, "Đợt giao không tồn tại hoặc không thuộc đơn hiện tại");
+            }
+
+            if (shipment.receipts.length > 0) {
+                throw new RouteError(400, "Đợt giao này đã được xác nhận thực nhận");
+            }
+
+            if (shipment.lines.length === 0) {
+                throw new RouteError(400, "Đợt giao không có dòng nào để xác nhận");
+            }
+
+            if (receiptMap.size !== shipment.lines.length) {
                 throw new RouteError(
                     400,
                     "Cơ sở phải xác nhận đủ tất cả các dòng của đợt giao"
                 );
             }
 
-            const shippedQty = toNumber(shipmentLine.shippedQty);
-            if (receiptLine.receivedQty > shippedQty) {
-                throw new RouteError(
-                    400,
-                    "Số lượng thực nhận không được vượt số lượng công ty đã giao"
-                );
-            }
-
-            if (receiptLine.receivedQty !== shippedQty && !receiptLine.differenceReason) {
-                throw new RouteError(
-                    400,
-                    "Vui lòng nhập lý do khi số lượng thực nhận khác số lượng giao"
-                );
-            }
-
-            await tx.drugOrderReceiptLine.create({
+            const createdReceipt = await tx.drugOrderReceipt.create({
                 data: {
-                    receiptId: createdReceipt.id,
-                    shipmentLineId: shipmentLine.id,
-                    orderLineId: shipmentLine.orderLineId,
-                    receivedQty: receiptLine.receivedQty,
-                    differenceReason: receiptLine.differenceReason,
+                    orderId: order.id,
+                    shipmentId: shipment.id,
+                    facilityId: params.facilityId,
+                    note: params.note,
+                },
+                select: {
+                    id: true,
                 },
             });
-        }
 
-        await tx.drugOrderShipment.update({
-            where: {
-                id: shipment.id,
-            },
-            data: {
-                status: shipment.lines.every((line) => {
-                    const receiptLine = receiptMap.get(line.id);
-                    return receiptLine ? receiptLine.receivedQty >= toNumber(line.shippedQty) : false;
-                })
-                    ? DrugOrderShipmentStatus.RECEIVED
-                    : DrugOrderShipmentStatus.PARTIALLY_RECEIVED,
-            },
-        });
+            for (const shipmentLine of shipment.lines) {
+                const receiptLine = receiptMap.get(shipmentLine.id);
+                if (!receiptLine) {
+                    throw new RouteError(
+                        400,
+                        "Cơ sở phải xác nhận đủ tất cả các dòng của đợt giao"
+                    );
+                }
 
-        for (const line of order.lines) {
-            const acceptedQty = toNumber(line.acceptedQty);
-            const currentReceivedQty = line.receiptLines.reduce(
-                (sum, receiptLine) => sum + toNumber(receiptLine.receivedQty),
-                0
-            );
-            const newlyReceivedQty = shipment.lines
-                .filter((shipmentLine) => shipmentLine.orderLineId === line.id)
-                .reduce((sum, shipmentLine) => {
-                    const receiptLine = receiptMap.get(shipmentLine.id);
-                    return sum + (receiptLine ? receiptLine.receivedQty : 0);
-                }, 0);
-            const totalReceivedQty = currentReceivedQty + newlyReceivedQty;
+                const shippedQty = toNumber(shipmentLine.shippedQty);
+                if (receiptLine.receivedQty > shippedQty) {
+                    throw new RouteError(
+                        400,
+                        "Số lượng thực nhận không được vượt số lượng công ty đã giao"
+                    );
+                }
 
-            if (acceptedQty > 0 && totalReceivedQty >= acceptedQty) {
-                await tx.drugOrderLine.update({
-                    where: {
-                        id: line.id,
-                    },
+                if (
+                    receiptLine.receivedQty !== shippedQty &&
+                    !receiptLine.differenceReason
+                ) {
+                    throw new RouteError(
+                        400,
+                        "Vui lòng nhập lý do khi số lượng thực nhận khác số lượng giao"
+                    );
+                }
+
+                await tx.drugOrderReceiptLine.create({
                     data: {
-                        lineStatus: DrugOrderLineStatus.COMPLETED,
+                        receiptId: createdReceipt.id,
+                        shipmentLineId: shipmentLine.id,
+                        orderLineId: shipmentLine.orderLineId,
+                        receivedQty: receiptLine.receivedQty,
+                        differenceReason: receiptLine.differenceReason,
                     },
                 });
             }
-        }
 
-        const refreshedLines = await tx.drugOrderLine.findMany({
-            where: {
-                orderId: order.id,
-            },
-            select: {
-                acceptedQty: true,
-                receiptLines: {
-                    select: {
-                        receivedQty: true,
-                    },
+            await tx.drugOrderShipment.update({
+                where: {
+                    id: shipment.id,
                 },
-            },
-        });
+                data: {
+                    status: shipment.lines.every((line) => {
+                        const receiptLine = receiptMap.get(line.id);
+                        return receiptLine
+                            ? receiptLine.receivedQty >= toNumber(line.shippedQty)
+                            : false;
+                    })
+                        ? DrugOrderShipmentStatus.RECEIVED
+                        : DrugOrderShipmentStatus.PARTIALLY_RECEIVED,
+                },
+            });
 
-        const isCompleted = refreshedLines.every((line) => {
-            const acceptedQty = toNumber(line.acceptedQty);
-            if (acceptedQty <= 0) {
-                return true;
+            for (const line of order.lines) {
+                const acceptedQty = toNumber(line.acceptedQty);
+                const currentReceivedQty = line.receiptLines.reduce(
+                    (sum, receiptLine) => sum + toNumber(receiptLine.receivedQty),
+                    0
+                );
+                const newlyReceivedQty = shipment.lines
+                    .filter((shipmentLine) => shipmentLine.orderLineId === line.id)
+                    .reduce((sum, shipmentLine) => {
+                        const receiptLine = receiptMap.get(shipmentLine.id);
+                        return sum + (receiptLine ? receiptLine.receivedQty : 0);
+                    }, 0);
+                const totalReceivedQty = currentReceivedQty + newlyReceivedQty;
+
+                if (acceptedQty > 0 && totalReceivedQty >= acceptedQty) {
+                    await tx.drugOrderLine.update({
+                        where: {
+                            id: line.id,
+                        },
+                        data: {
+                            lineStatus: DrugOrderLineStatus.COMPLETED,
+                        },
+                    });
+                }
             }
 
-            const totalReceivedQty = line.receiptLines.reduce(
-                (sum, receiptLine) => sum + toNumber(receiptLine.receivedQty),
-                0
-            );
+            const refreshedLines = await tx.drugOrderLine.findMany({
+                where: {
+                    orderId: order.id,
+                },
+                select: {
+                    acceptedQty: true,
+                    receiptLines: {
+                        select: {
+                            receivedQty: true,
+                        },
+                    },
+                },
+            });
 
-            return totalReceivedQty >= acceptedQty;
+            const isCompleted = refreshedLines.every((line) => {
+                const acceptedQty = toNumber(line.acceptedQty);
+                if (acceptedQty <= 0) {
+                    return true;
+                }
+
+                const totalReceivedQty = line.receiptLines.reduce(
+                    (sum, receiptLine) => sum + toNumber(receiptLine.receivedQty),
+                    0
+                );
+
+                return totalReceivedQty >= acceptedQty;
+            });
+
+            await tx.drugOrder.update({
+                where: {
+                    id: order.id,
+                },
+                data: {
+                    status: isCompleted
+                        ? DrugOrderStatus.COMPLETED
+                        : DrugOrderStatus.IN_DELIVERY,
+                    closedAt: isCompleted ? new Date() : null,
+                },
+            });
+
+            return order.id;
+        }, DRUG_ORDER_SERIALIZABLE_TRANSACTION);
+
+        return loadFacilityDrugOrderDetailPayload({
+            facilityId: params.facilityId,
+            orderId,
         });
-
-        await tx.drugOrder.update({
-            where: {
-                id: order.id,
-            },
-            data: {
-                status: isCompleted ? DrugOrderStatus.COMPLETED : DrugOrderStatus.IN_DELIVERY,
-                closedAt: isCompleted ? new Date() : null,
-            },
-        });
-    });
-
-    return loadFacilityDrugOrderDetailPayload({
-        facilityId: params.facilityId,
-        orderId: order.id,
-    });
+    } catch (error) {
+        rethrowDrugOrderConcurrencyError(
+            error,
+            "Đợt giao vừa được xử lý bởi thao tác khác. Vui lòng tải lại và thử lại."
+        );
+    }
 }

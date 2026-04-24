@@ -4,7 +4,7 @@ import {
     createCompanyDrugOrderShipment,
     parseCompanyShipmentLines,
     parseCompanyShipmentNote,
-    parseShipmentTimestamp,
+    parseShipmentDateRange,
 } from "@/lib/drug-orders/company";
 import {
     createNotificationForAdmins,
@@ -42,10 +42,16 @@ export async function POST(
 
         const { id } = await params;
         const body = await request.json();
+        const shipmentDateRange = parseShipmentDateRange(
+            body.shippedFromDate,
+            body.shippedToDate
+        );
         const response = await createCompanyDrugOrderShipment({
             companyId: user.companyId,
             orderId: id,
-            shippedAt: parseShipmentTimestamp(body.shippedAt),
+            shippedAt: shipmentDateRange.shippedAt,
+            shippedFromDate: shipmentDateRange.shippedFromDate,
+            shippedToDate: shipmentDateRange.shippedToDate,
             companyNote: parseCompanyShipmentNote(body.companyNote),
             lines: parseCompanyShipmentLines(body.lines),
         });
@@ -62,6 +68,8 @@ export async function POST(
                 orderNo: response.order.orderNo,
                 shipmentNo: latestShipment?.shipmentNo,
                 shippedAt: latestShipment?.shippedAt,
+                shippedFromDate: latestShipment?.shippedFromDate,
+                shippedToDate: latestShipment?.shippedToDate,
                 lineCount: latestShipment?.lines.length || 0,
             },
         });

@@ -38,6 +38,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import DrugOrderQrCode from "@/components/drug-orders/DrugOrderQrCode";
 
 type OrderStatus =
     | "DRAFT"
@@ -117,6 +118,7 @@ interface OrderSummary {
 interface OrderDetail {
     id: string;
     orderNo: string;
+    lookupUrl: string;
     facilityId: string;
     companyId: string;
     facility: FacilityOption;
@@ -392,13 +394,27 @@ export default function AdminDrugOrdersPage() {
         void loadOrderDetail(selectedOrderId);
     }, [selectedOrderId, loadOrderDetail]);
 
+    const selectedOrderShipmentCount = selectedOrder?.shipments.length || 0;
+    const selectedOrderReceiptCount =
+        selectedOrder?.shipments.reduce(
+            (sum, shipment) => sum + shipment.receipts.length,
+            0
+        ) || 0;
+    const canHardDeleteSelectedOrder = Boolean(
+        selectedOrder &&
+            (selectedOrder.status === "DRAFT" ||
+                selectedOrder.status === "REJECTED") &&
+            selectedOrderShipmentCount === 0 &&
+            selectedOrderReceiptCount === 0
+    );
+
     const handleDeleteOrder = async () => {
-        if (!selectedOrder) {
+        if (!selectedOrder || !canHardDeleteSelectedOrder) {
             return;
         }
 
         const confirmed = window.confirm(
-            `Xóa vĩnh viễn đơn ${selectedOrder.orderNo}?\n\nThao tác này sẽ xóa toàn bộ dòng thuốc, đợt giao và biên nhận liên quan, không thể hoàn tác.`
+            `Xóa vĩnh viễn đơn ${selectedOrder.orderNo}?\n\nChỉ các đơn nháp hoặc đã bị từ chối, chưa phát sinh giao/nhận mới được xóa cứng. Thao tác này không thể hoàn tác.`
         );
 
         if (!confirmed) {
@@ -433,7 +449,7 @@ export default function AdminDrugOrdersPage() {
                 <div>
                     <h2 className="text-3xl font-bold text-gray-800">Giám sát dự trù đặt hàng</h2>
                     <p className="mt-1 text-gray-500">
-                        Theo dõi toàn bộ luồng từ tạo đơn, phản hồi công ty, giao hàng đến xác nhận thực nhận. Admin có thể xóa cứng đơn khi cần xử lý dữ liệu sai.
+                        Theo dõi toàn bộ luồng từ tạo đơn, phản hồi công ty, giao hàng đến xác nhận thực nhận. Chỉ đơn nháp hoặc bị từ chối, chưa phát sinh giao nhận mới được xóa cứng.
                     </p>
                 </div>
 
@@ -624,19 +640,26 @@ export default function AdminDrugOrdersPage() {
                                 <CardDescription>Xem luồng đầy đủ của đơn đã chọn.</CardDescription>
                             </div>
                             {selectedOrder && (
-                                <Button
-                                    type="button"
-                                    variant="destructive"
-                                    onClick={() => void handleDeleteOrder()}
-                                    disabled={isDeleting}
-                                >
-                                    {isDeleting ? (
-                                        <Loader2 className="mr-2 size-4 animate-spin" />
-                                    ) : (
-                                        <Trash2 className="mr-2 size-4" />
-                                    )}
-                                    Xóa đơn
-                                </Button>
+                                <div className="space-y-2">
+                                    <Button
+                                        type="button"
+                                        variant="destructive"
+                                        onClick={() => void handleDeleteOrder()}
+                                        disabled={isDeleting || !canHardDeleteSelectedOrder}
+                                    >
+                                        {isDeleting ? (
+                                            <Loader2 className="mr-2 size-4 animate-spin" />
+                                        ) : (
+                                            <Trash2 className="mr-2 size-4" />
+                                        )}
+                                        Xóa đơn
+                                    </Button>
+                                    {!canHardDeleteSelectedOrder ? (
+                                        <p className="max-w-xs text-right text-xs text-amber-700">
+                                            Đơn đã qua vận hành hoặc chưa ở trạng thái nháp/từ chối nên bị khóa xóa cứng.
+                                        </p>
+                                    ) : null}
+                                </div>
                             )}
                         </div>
                     </CardHeader>
@@ -658,7 +681,7 @@ export default function AdminDrugOrdersPage() {
                             <div className="space-y-6">
                                 <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                                     <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                                        <p className="text-xs uppercase tracking-wide text-slate-500">Số đơn</p>
+                                        <p className="text-xs uppercase tracking-wide text-slate-500">Mã đơn</p>
                                         <p className="mt-2 font-semibold text-slate-900">{selectedOrder.orderNo}</p>
                                     </div>
                                     <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
@@ -698,6 +721,11 @@ export default function AdminDrugOrdersPage() {
                                         <span className="font-medium text-slate-700">Ghi chú:</span> {selectedOrder.note || "Không có"}
                                     </p>
                                 </div>
+
+                                <DrugOrderQrCode
+                                    lookupUrl={selectedOrder.lookupUrl}
+                                    orderNo={selectedOrder.orderNo}
+                                />
 
                                 <div className="overflow-x-auto rounded-xl border border-slate-200">
                                     <Table>
