@@ -30,6 +30,23 @@ const FACILITY_OPTION_SELECT = {
     facilityCode: true,
 } satisfies Prisma.UserSelect;
 
+const FACILITY_PRINT_SELECT = {
+    id: true,
+    username: true,
+    facilityName: true,
+    facilityCode: true,
+    facilityType: true,
+    contactPerson: true,
+    phoneNumber: true,
+    address: true,
+} satisfies Prisma.UserSelect;
+
+const COMPANY_OPTION_SELECT = {
+    id: true,
+    code: true,
+    name: true,
+} satisfies Prisma.CompanySelect;
+
 const MASTER_DRUG_SELECT = {
     id: true,
     maChung: true,
@@ -221,8 +238,26 @@ const ORDER_DETAIL_SELECT = {
     },
 } satisfies Prisma.DrugOrderSelect;
 
+const ORDER_PRINT_SELECT = {
+    ...ORDER_DETAIL_SELECT,
+    facility: {
+        select: FACILITY_PRINT_SELECT,
+    },
+    company: {
+        select: COMPANY_OPTION_SELECT,
+    },
+} satisfies Prisma.DrugOrderSelect;
+
 type FacilityOptionRecord = Prisma.UserGetPayload<{
     select: typeof FACILITY_OPTION_SELECT;
+}>;
+
+type FacilityPrintRecord = Prisma.UserGetPayload<{
+    select: typeof FACILITY_PRINT_SELECT;
+}>;
+
+type CompanyOptionRecord = Prisma.CompanyGetPayload<{
+    select: typeof COMPANY_OPTION_SELECT;
 }>;
 
 type MasterDrugRecord = Prisma.MasterDrugGetPayload<{
@@ -243,6 +278,10 @@ type OrderSummaryRecord = Prisma.DrugOrderGetPayload<{
 
 type OrderDetailRecord = Prisma.DrugOrderGetPayload<{
     select: typeof ORDER_DETAIL_SELECT;
+}>;
+
+type OrderPrintRecord = Prisma.DrugOrderGetPayload<{
+    select: typeof ORDER_PRINT_SELECT;
 }>;
 
 export interface CompanyDrugCatalogInput {
@@ -272,6 +311,27 @@ function serializeFacilityOption(facility: FacilityOptionRecord) {
         id: facility.id,
         facilityName: facility.facilityName || "—",
         facilityCode: facility.facilityCode || "—",
+    };
+}
+
+function serializeFacilityPrintOption(facility: FacilityPrintRecord) {
+    return {
+        id: facility.id,
+        username: facility.username,
+        facilityName: facility.facilityName || facility.username,
+        facilityCode: facility.facilityCode || facility.username,
+        facilityType: facility.facilityType,
+        contactPerson: facility.contactPerson,
+        phoneNumber: facility.phoneNumber,
+        address: facility.address,
+    };
+}
+
+function serializeCompanyOption(company: CompanyOptionRecord) {
+    return {
+        id: company.id,
+        code: company.code,
+        name: company.name,
     };
 }
 
@@ -499,6 +559,17 @@ function serializeOrderDetail(
                 serializeCompanyDrugOption(drug, mappedMasterDrugIds)
             ),
         },
+    };
+}
+
+function serializeOrderPrint(
+    order: OrderPrintRecord,
+    mappedMasterDrugIds: Set<string>
+) {
+    return {
+        ...serializeOrderDetail(order, [], mappedMasterDrugIds),
+        company: serializeCompanyOption(order.company),
+        facility: serializeFacilityPrintOption(order.facility),
     };
 }
 
@@ -1144,6 +1215,39 @@ export async function loadCompanyDrugOrderDetailPayload(params: {
         order: serializeOrderDetail(order, companyDrugs, mappedMasterDrugIds),
     };
 }
+
+export async function loadCompanyDrugOrderPrintPayload(params: {
+    companyId: string;
+    orderId: string;
+}) {
+    await assertCompanyIsActive(params.companyId);
+
+    const order = await prisma.drugOrder.findFirst({
+        where: {
+            id: params.orderId,
+            companyId: params.companyId,
+        },
+        select: ORDER_PRINT_SELECT,
+    });
+
+    if (!order) {
+        throw new RouteError(404, "Đơn đặt hàng không tồn tại");
+    }
+
+    const mappedMasterDrugIds = await loadMappedMasterDrugIds(
+        order.lines
+            .map((line) => line.companyDrug?.masterDrugId)
+            .filter((masterDrugId): masterDrugId is string => Boolean(masterDrugId))
+    );
+
+    return {
+        order: serializeOrderPrint(order, mappedMasterDrugIds),
+    };
+}
+
+export type CompanyDrugOrderPrintPayload = Awaited<
+    ReturnType<typeof loadCompanyDrugOrderPrintPayload>
+>;
 
 export async function respondToCompanyDrugOrder(params: {
     companyId: string;

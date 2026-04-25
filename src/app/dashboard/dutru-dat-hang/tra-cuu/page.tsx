@@ -1,4 +1,5 @@
 import DrugOrderLookupResult from "@/components/drug-orders/DrugOrderLookupResult";
+import DrugOrderQrScannerDialog from "@/components/drug-orders/DrugOrderQrScannerDialog";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -90,7 +91,10 @@ function LookupForm({ defaultOrderNo }: { defaultOrderNo: string }) {
                         placeholder="Nhập mã đơn"
                         className="sm:max-w-md"
                     />
-                    <Button type="submit">Tra cứu</Button>
+                    <div className="flex flex-col gap-3 sm:flex-row">
+                        <Button type="submit">Tra cứu</Button>
+                        <DrugOrderQrScannerDialog />
+                    </div>
                 </form>
             </CardContent>
         </Card>

@@ -1,7 +1,5 @@
 node_modules
-.next/*
-!.next/standalone
-!.next/static
+.next
 .env
 .env.local
 npm-debug.log*

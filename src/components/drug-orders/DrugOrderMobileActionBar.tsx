@@ -21,6 +21,7 @@ export interface DrugOrderMobileAction {
     disabled?: boolean;
     hidden?: boolean;
     variant?: MobileActionVariant;
+    className?: string;
     onClick: () => void;
 }
 
@@ -70,7 +71,7 @@ export default function DrugOrderMobileActionBar({
                                 variant={action.variant || "default"}
                                 onClick={action.onClick}
                                 disabled={action.disabled || action.loading}
-                                className="min-w-0"
+                                className={cn("min-w-0", action.className)}
                             >
                                 {action.loading ? (
                                     <Loader2 className="size-4 animate-spin" />
@@ -96,6 +97,7 @@ export default function DrugOrderMobileActionBar({
                                         disabled={action.disabled || action.loading}
                                         onClick={action.onClick}
                                         variant={action.variant === "destructive" ? "destructive" : "default"}
+                                        className={action.className}
                                     >
                                         {action.loading ? (
                                             <Loader2 className="size-4 animate-spin" />

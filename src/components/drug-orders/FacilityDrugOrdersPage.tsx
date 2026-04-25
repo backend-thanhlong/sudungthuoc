@@ -303,6 +303,8 @@ interface ReceiptDraftLine {
 type CatalogDialogMode = "create" | "append";
 
 const NONE_VALUE = "__none__";
+const CONFIRM_RECEIPT_BUTTON_CLASS =
+    "bg-emerald-600 text-white shadow-sm shadow-emerald-200 hover:bg-emerald-700 focus-visible:ring-emerald-500/40";
 
 const ORDER_STATUS_META: Record<
     OrderStatus,
@@ -574,6 +576,10 @@ export default function FacilityDrugOrdersPage() {
         canEdit && editorLines.length > 0 && invalidDraftLineCount === 0;
     const pendingReceiptShipments =
         selectedOrder?.shipments.filter((shipment) => shipment.receipts.length === 0) || [];
+    const selectedReceiptShipment =
+        pendingReceiptShipments.find(
+            (shipment) => shipment.id === selectedReceiptShipmentId
+        ) || null;
     const enteredQtyLineCount = editorLines.filter((line) =>
         isValidRequestedQty(line.requestedQty)
     ).length;
@@ -1522,6 +1528,19 @@ export default function FacilityDrugOrdersPage() {
         setReceiptLines(buildReceiptDraftLines(selectedOrder, shipmentId));
     };
 
+    const updateReceiptLine = (
+        shipmentLineId: string,
+        changes: Partial<Pick<ReceiptDraftLine, "receivedQty" | "differenceReason">>
+    ) => {
+        setReceiptLines((current) =>
+            current.map((currentLine) =>
+                currentLine.shipmentLineId === shipmentLineId
+                    ? { ...currentLine, ...changes }
+                    : currentLine
+            )
+        );
+    };
+
     const handleConfirmReceipt = async () => {
         if (!selectedOrder || !selectedReceiptShipmentId) {
             return;
@@ -1700,11 +1719,11 @@ export default function FacilityDrugOrdersPage() {
         },
         {
             id: "confirm-receipt",
-            label: "Xác nhận thực nhận",
+            label: "Xác nhận giao hàng",
             icon: <CheckCircle className="size-4" />,
             disabled: pendingReceiptShipments.length === 0,
             hidden: !selectedOrder?.permissions.canConfirmReceipt,
-            variant: "secondary",
+            className: CONFIRM_RECEIPT_BUTTON_CLASS,
             onClick: openReceiptDialog,
         },
         {
@@ -2565,12 +2584,12 @@ export default function FacilityDrugOrdersPage() {
                                         )}
                                         {selectedOrder.permissions.canConfirmReceipt && (
                                             <Button
-                                                variant="secondary"
                                                 onClick={openReceiptDialog}
                                                 disabled={pendingReceiptShipments.length === 0}
+                                                className={CONFIRM_RECEIPT_BUTTON_CLASS}
                                             >
                                                 <CheckCircle className="h-4 w-4" />
-                                                Xác nhận thực nhận
+                                                Xác nhận giao hàng
                                             </Button>
                                         )}
                                     </div>
@@ -3063,12 +3082,12 @@ export default function FacilityDrugOrdersPage() {
                                                 </div>
                                                 {selectedOrder.permissions.canConfirmReceipt && (
                                                     <Button
-                                                        variant="secondary"
                                                         onClick={openReceiptDialog}
                                                         disabled={pendingReceiptShipments.length === 0}
+                                                        className={CONFIRM_RECEIPT_BUTTON_CLASS}
                                                     >
                                                         <CheckCircle className="h-4 w-4" />
-                                                        Xác nhận thực nhận
+                                                        Xác nhận giao hàng
                                                     </Button>
                                                 )}
                                             </div>
@@ -3200,152 +3219,291 @@ export default function FacilityDrugOrdersPage() {
             </div>
 
             <Dialog open={isReceiptDialogOpen} onOpenChange={setIsReceiptDialogOpen}>
-                <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-5xl">
-                    <DialogHeader>
-                        <DialogTitle>Xác nhận thực nhận</DialogTitle>
+                <DialogContent className="!left-0 !top-0 flex !h-[100dvh] !w-screen !max-w-none !translate-x-0 !translate-y-0 flex-col gap-0 overflow-hidden !rounded-none !border-0 !p-0 !shadow-none xl:!left-[50%] xl:!top-[50%] xl:!h-auto xl:!max-h-[90vh] xl:!w-full xl:!max-w-5xl xl:!translate-x-[-50%] xl:!translate-y-[-50%] xl:!rounded-lg xl:!border xl:!shadow-lg">
+                    <DialogHeader className="shrink-0 border-b border-slate-200 px-4 py-4 pr-14 text-left xl:px-6 xl:py-5 xl:pr-16">
+                        <DialogTitle>Xác nhận giao hàng</DialogTitle>
                         <DialogDescription>
                             Chọn đợt giao cần xác nhận và nhập số lượng thực tế cơ sở đã nhận ở từng dòng.
                         </DialogDescription>
                     </DialogHeader>
 
-                    <div className="space-y-4">
-                        <div className="space-y-2">
-                            <Label>Đợt giao</Label>
-                            <Select
-                                value={selectedReceiptShipmentId}
-                                onValueChange={handleReceiptShipmentChange}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Chọn đợt giao" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {pendingReceiptShipments.map((shipment) => (
-                                        <SelectItem key={shipment.id} value={shipment.id}>
-                                            Đợt giao #{shipment.shipmentNo} -{" "}
-                                            {formatShipmentDateRangeLabel({
-                                                shippedFromDate: shipment.shippedFromDate,
-                                                shippedToDate: shipment.shippedToDate,
-                                                shippedAt: shipment.shippedAt,
-                                            })}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label>Ghi chú xác nhận</Label>
-                            <Textarea
-                                value={receiptNote}
-                                onChange={(event) => setReceiptNote(event.target.value)}
-                                placeholder="Ghi chú chung cho lần xác nhận này"
-                            />
-                        </div>
-
-                        {hasInvalidReceiptLine ? (
-                            <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                                Vui lòng sửa các dòng có số lượng thực nhận không hợp lệ hoặc còn thiếu lý do chênh lệch trước khi xác nhận.
-                            </div>
-                        ) : null}
-
-                        <div className="space-y-3">
-                            {receiptLines.map((line) => {
-                                const validation =
-                                    receiptValidationMap.get(line.shipmentLineId) || null;
-
-                                return (
-                                <div
-                                    key={line.shipmentLineId}
-                                    className={cn(
-                                        "rounded-xl border p-4",
-                                        validation?.invalidReceivedQty ||
-                                            validation?.exceedsShippedQty ||
-                                            validation?.missingDifferenceReason
-                                            ? "border-amber-300 bg-amber-50/40"
-                                            : "border-slate-200"
-                                    )}
-                                >
-                                    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_180px_1fr]">
-                                        <div>
-                                            <p className="font-medium text-slate-900">{line.displayName}</p>
-                                            <p className="mt-1 text-sm text-slate-500">
-                                                Công ty giao: {formatQuantity(line.shippedQty)} {line.unit || ""}
-                                            </p>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label>Thực nhận</Label>
-                                            <Input
-                                                type="number"
-                                                min="0"
-                                                step="0.01"
-                                                value={line.receivedQty}
-                                                onChange={(event) => {
-                                                    const nextValue = event.target.value;
-                                                    setReceiptLines((current) =>
-                                                        current.map((currentLine) =>
-                                                            currentLine.shipmentLineId === line.shipmentLineId
-                                                                ? { ...currentLine, receivedQty: nextValue }
-                                                                : currentLine
-                                                        )
-                                                    );
-                                                }}
-                                                className={cn(
-                                                    validation?.invalidReceivedQty ||
-                                                        validation?.exceedsShippedQty
-                                                        ? "border-amber-400 bg-amber-50 focus-visible:ring-amber-500"
-                                                        : undefined
-                                                )}
-                                            />
-                                            {validation?.invalidReceivedQty ? (
-                                                <p className="text-xs text-amber-700">
-                                                    Nhập số lượng thực nhận hợp lệ, lớn hơn hoặc bằng 0.
-                                                </p>
-                                            ) : null}
-                                            {validation?.exceedsShippedQty ? (
-                                                <p className="text-xs text-amber-700">
-                                                    Số lượng thực nhận không được vượt quá số lượng đã giao.
-                                                </p>
-                                            ) : null}
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label>Lý do chênh lệch nếu có</Label>
-                                            <Input
-                                                value={line.differenceReason}
-                                                onChange={(event) => {
-                                                    const nextValue = event.target.value;
-                                                    setReceiptLines((current) =>
-                                                        current.map((currentLine) =>
-                                                            currentLine.shipmentLineId === line.shipmentLineId
-                                                                ? { ...currentLine, differenceReason: nextValue }
-                                                                : currentLine
-                                                        )
-                                                    );
-                                                }}
-                                                placeholder="Bắt buộc nếu thực nhận khác số lượng giao"
-                                                className={cn(
-                                                    validation?.missingDifferenceReason
-                                                        ? "border-amber-400 bg-amber-50 focus-visible:ring-amber-500"
-                                                        : undefined
-                                                )}
-                                            />
-                                            {validation?.missingDifferenceReason ? (
-                                                <p className="text-xs text-amber-700">
-                                                    Cần nhập lý do khi số lượng thực nhận khác số lượng giao.
-                                                </p>
-                                            ) : null}
-                                        </div>
-                                    </div>
+                    <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 xl:px-6">
+                        <div className="space-y-4">
+                            <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+                                <div className="space-y-2">
+                                    <Label>Đợt giao</Label>
+                                    <Select
+                                        value={selectedReceiptShipmentId}
+                                        onValueChange={handleReceiptShipmentChange}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Chọn đợt giao" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {pendingReceiptShipments.map((shipment) => (
+                                                <SelectItem key={shipment.id} value={shipment.id}>
+                                                    Đợt giao #{shipment.shipmentNo} -{" "}
+                                                    {formatShipmentDateRangeLabel({
+                                                        shippedFromDate: shipment.shippedFromDate,
+                                                        shippedToDate: shipment.shippedToDate,
+                                                        shippedAt: shipment.shippedAt,
+                                                    })}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
                                 </div>
-                            );
-                            })}
+
+                                <div className="space-y-2">
+                                    <Label>Ghi chú xác nhận</Label>
+                                    <Textarea
+                                        value={receiptNote}
+                                        onChange={(event) => setReceiptNote(event.target.value)}
+                                        placeholder="Ghi chú chung cho lần xác nhận này"
+                                        className="min-h-20"
+                                    />
+                                </div>
+                            </div>
+
+                            {selectedReceiptShipment ? (
+                                <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm xl:hidden">
+                                    <p className="font-semibold text-slate-900">
+                                        Đợt giao #{selectedReceiptShipment.shipmentNo}
+                                    </p>
+                                    <p className="mt-1 text-slate-600">
+                                        Thời gian giao:{" "}
+                                        {formatShipmentDateRangeLabel({
+                                            shippedFromDate:
+                                                selectedReceiptShipment.shippedFromDate,
+                                            shippedToDate:
+                                                selectedReceiptShipment.shippedToDate,
+                                            shippedAt: selectedReceiptShipment.shippedAt,
+                                        })}
+                                    </p>
+                                </div>
+                            ) : null}
+
+                            {hasInvalidReceiptLine ? (
+                                <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                                    Vui lòng sửa các dòng có số lượng thực nhận không hợp lệ hoặc còn thiếu lý do chênh lệch trước khi xác nhận.
+                                </div>
+                            ) : null}
+
+                            {receiptLines.length === 0 ? (
+                                <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-5 text-sm text-slate-500">
+                                    Chọn đợt giao để nhập số lượng thực nhận.
+                                </div>
+                            ) : (
+                                <>
+                                    <div className="hidden space-y-3 xl:block">
+                                        {receiptLines.map((line) => {
+                                            const validation =
+                                                receiptValidationMap.get(line.shipmentLineId) ||
+                                                null;
+
+                                            return (
+                                                <div
+                                                    key={line.shipmentLineId}
+                                                    className={cn(
+                                                        "rounded-xl border p-4",
+                                                        validation?.invalidReceivedQty ||
+                                                            validation?.exceedsShippedQty ||
+                                                            validation?.missingDifferenceReason
+                                                            ? "border-amber-300 bg-amber-50/40"
+                                                            : "border-slate-200"
+                                                    )}
+                                                >
+                                                    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_180px_1fr]">
+                                                        <div>
+                                                            <p className="font-medium text-slate-900">
+                                                                {line.displayName}
+                                                            </p>
+                                                            <p className="mt-1 text-sm text-slate-500">
+                                                                Công ty giao:{" "}
+                                                                {formatQuantity(line.shippedQty)}{" "}
+                                                                {line.unit || ""}
+                                                            </p>
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <Label>Thực nhận</Label>
+                                                            <Input
+                                                                type="number"
+                                                                min="0"
+                                                                step="0.01"
+                                                                value={line.receivedQty}
+                                                                onChange={(event) =>
+                                                                    updateReceiptLine(
+                                                                        line.shipmentLineId,
+                                                                        {
+                                                                            receivedQty:
+                                                                                event.target.value,
+                                                                        }
+                                                                    )
+                                                                }
+                                                                className={cn(
+                                                                    validation?.invalidReceivedQty ||
+                                                                        validation?.exceedsShippedQty
+                                                                        ? "border-amber-400 bg-amber-50 focus-visible:ring-amber-500"
+                                                                        : undefined
+                                                                )}
+                                                            />
+                                                            {validation?.invalidReceivedQty ? (
+                                                                <p className="text-xs text-amber-700">
+                                                                    Nhập số lượng thực nhận hợp lệ, lớn hơn hoặc bằng 0.
+                                                                </p>
+                                                            ) : null}
+                                                            {validation?.exceedsShippedQty ? (
+                                                                <p className="text-xs text-amber-700">
+                                                                    Số lượng thực nhận không được vượt quá số lượng đã giao.
+                                                                </p>
+                                                            ) : null}
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <Label>Lý do chênh lệch nếu có</Label>
+                                                            <Input
+                                                                value={line.differenceReason}
+                                                                onChange={(event) =>
+                                                                    updateReceiptLine(
+                                                                        line.shipmentLineId,
+                                                                        {
+                                                                            differenceReason:
+                                                                                event.target.value,
+                                                                        }
+                                                                    )
+                                                                }
+                                                                placeholder="Bắt buộc nếu thực nhận khác số lượng giao"
+                                                                className={cn(
+                                                                    validation?.missingDifferenceReason
+                                                                        ? "border-amber-400 bg-amber-50 focus-visible:ring-amber-500"
+                                                                        : undefined
+                                                                )}
+                                                            />
+                                                            {validation?.missingDifferenceReason ? (
+                                                                <p className="text-xs text-amber-700">
+                                                                    Cần nhập lý do khi số lượng thực nhận khác số lượng giao.
+                                                                </p>
+                                                            ) : null}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+
+                                    <div className="space-y-3 xl:hidden">
+                                        {receiptLines.map((line, index) => {
+                                            const validation =
+                                                receiptValidationMap.get(line.shipmentLineId) ||
+                                                null;
+
+                                            return (
+                                                <div
+                                                    key={line.shipmentLineId}
+                                                    className={cn(
+                                                        "rounded-xl border bg-white p-4 shadow-sm",
+                                                        validation?.invalidReceivedQty ||
+                                                            validation?.exceedsShippedQty ||
+                                                            validation?.missingDifferenceReason
+                                                            ? "border-amber-300 bg-amber-50/50"
+                                                            : "border-slate-200"
+                                                    )}
+                                                >
+                                                    <div className="space-y-4">
+                                                        <div className="space-y-1">
+                                                            <div className="flex items-center justify-between gap-3">
+                                                                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">
+                                                                    Dòng {index + 1}
+                                                                </span>
+                                                                <span className="text-sm font-semibold text-slate-900">
+                                                                    {formatQuantity(line.shippedQty)}{" "}
+                                                                    {line.unit || ""}
+                                                                </span>
+                                                            </div>
+                                                            <p className="break-words font-semibold text-slate-900">
+                                                                {line.displayName}
+                                                            </p>
+                                                            <p className="text-sm text-slate-500">
+                                                                Số lượng công ty giao
+                                                            </p>
+                                                        </div>
+
+                                                        <div className="space-y-2">
+                                                            <Label>Thực nhận</Label>
+                                                            <Input
+                                                                type="number"
+                                                                min="0"
+                                                                step="0.01"
+                                                                value={line.receivedQty}
+                                                                onChange={(event) =>
+                                                                    updateReceiptLine(
+                                                                        line.shipmentLineId,
+                                                                        {
+                                                                            receivedQty:
+                                                                                event.target.value,
+                                                                        }
+                                                                    )
+                                                                }
+                                                                className={cn(
+                                                                    validation?.invalidReceivedQty ||
+                                                                        validation?.exceedsShippedQty
+                                                                        ? "border-amber-400 bg-amber-50 focus-visible:ring-amber-500"
+                                                                        : undefined
+                                                                )}
+                                                            />
+                                                            {validation?.invalidReceivedQty ? (
+                                                                <p className="text-xs text-amber-700">
+                                                                    Nhập số lượng thực nhận hợp lệ, lớn hơn hoặc bằng 0.
+                                                                </p>
+                                                            ) : null}
+                                                            {validation?.exceedsShippedQty ? (
+                                                                <p className="text-xs text-amber-700">
+                                                                    Số lượng thực nhận không được vượt quá số lượng đã giao.
+                                                                </p>
+                                                            ) : null}
+                                                        </div>
+
+                                                        <div className="space-y-2">
+                                                            <Label>Lý do chênh lệch nếu có</Label>
+                                                            <Input
+                                                                value={line.differenceReason}
+                                                                onChange={(event) =>
+                                                                    updateReceiptLine(
+                                                                        line.shipmentLineId,
+                                                                        {
+                                                                            differenceReason:
+                                                                                event.target.value,
+                                                                        }
+                                                                    )
+                                                                }
+                                                                placeholder="Bắt buộc nếu thực nhận khác số lượng giao"
+                                                                className={cn(
+                                                                    validation?.missingDifferenceReason
+                                                                        ? "border-amber-400 bg-amber-50 focus-visible:ring-amber-500"
+                                                                        : undefined
+                                                                )}
+                                                            />
+                                                            {validation?.missingDifferenceReason ? (
+                                                                <p className="text-xs text-amber-700">
+                                                                    Cần nhập lý do khi số lượng thực nhận khác số lượng giao.
+                                                                </p>
+                                                            ) : null}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </div>
 
-                    <DialogFooter>
+                    <DialogFooter className="grid shrink-0 grid-cols-2 gap-2 border-t border-slate-200 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:flex sm:flex-row sm:justify-end xl:px-6 xl:py-4">
                         <Button
                             variant="outline"
                             onClick={() => setIsReceiptDialogOpen(false)}
                             disabled={isConfirmingReceipt}
+                            className="w-full sm:w-auto"
                         >
                             Đóng
                         </Button>
@@ -3356,13 +3514,14 @@ export default function FacilityDrugOrdersPage() {
                                 receiptLines.length === 0 ||
                                 hasInvalidReceiptLine
                             }
+                            className={cn(CONFIRM_RECEIPT_BUTTON_CLASS, "w-full sm:w-auto")}
                         >
                             {isConfirmingReceipt ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
                             ) : (
                                 <CheckCircle className="h-4 w-4" />
                             )}
-                            Xác nhận thực nhận
+                            Xác nhận giao hàng
                         </Button>
                     </DialogFooter>
                 </DialogContent>

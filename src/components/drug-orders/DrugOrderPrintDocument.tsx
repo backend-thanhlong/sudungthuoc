@@ -1,8 +1,55 @@
 import { QRCodeSVG } from "qrcode.react";
 import DrugOrderPrintActions from "@/components/drug-orders/DrugOrderPrintActions";
-import type { FacilityDrugOrderPrintPayload } from "@/lib/drug-orders/facility";
 
-type PrintOrder = FacilityDrugOrderPrintPayload["order"];
+interface DrugOrderPrintPayload {
+    order: {
+        orderNo: string;
+        lookupUrl: string;
+        status: string;
+        baseReportMonth: string | null;
+        note: string | null;
+        submittedAt: string | Date | null;
+        createdAt: string | Date;
+        updatedAt: string | Date;
+        facility: {
+            facilityName: string;
+            facilityCode: string;
+            address: string | null;
+            contactPerson: string | null;
+            phoneNumber: string | null;
+        };
+        company: {
+            name: string;
+            code: string;
+        };
+        lines: Array<{
+            id: string;
+            displayName: string;
+            unit: string | null;
+            requestedQty: number;
+            acceptedQty: number;
+            lineStatus: string;
+            companyResponseReason: string | null;
+            masterDrug: {
+                maChung: string;
+                tenThuoc: string;
+                hoatChat: string | null;
+                hamLuong: string | null;
+                dangBaoChe: string | null;
+                soDangKy: string | null;
+                quyCach: string | null;
+            } | null;
+            companyDrug: {
+                companyDrugCode: string;
+                companyDrugName: string;
+                activeIngredient: string | null;
+                quyCach: string | null;
+            } | null;
+        }>;
+    };
+}
+
+type PrintOrder = DrugOrderPrintPayload["order"];
 type PrintLine = PrintOrder["lines"][number];
 
 const ORDER_STATUS_LABELS: Record<string, string> = {
@@ -87,7 +134,7 @@ export default function DrugOrderPrintDocument({
     payload,
     lookupUrl,
 }: {
-    payload: FacilityDrugOrderPrintPayload;
+    payload: DrugOrderPrintPayload;
     lookupUrl: string;
 }) {
     const { order } = payload;

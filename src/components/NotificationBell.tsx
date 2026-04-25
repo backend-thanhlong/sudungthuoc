@@ -145,9 +145,9 @@ export default function NotificationBell() {
 
             {/* Dropdown panel */}
             {isOpen && (
-                <div className="absolute right-0 top-full mt-2 w-96 bg-white rounded-xl shadow-2xl border border-gray-200 z-[100] overflow-hidden">
+                <div className="fixed inset-x-3 top-16 z-[100] mt-2 flex max-h-[calc(100dvh-5rem)] flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-2xl sm:absolute sm:inset-auto sm:right-0 sm:top-full sm:w-96 sm:max-h-none">
                     {/* Header */}
-                    <div className="flex items-center justify-between px-4 py-3 border-b bg-gradient-to-r from-blue-50 to-indigo-50">
+                    <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 px-4 py-3 border-b bg-gradient-to-r from-blue-50 to-indigo-50">
                         <h3 className="font-semibold text-gray-900 text-sm">
                             🔔 Thông báo
                             {unreadCount > 0 && (
@@ -159,7 +159,7 @@ export default function NotificationBell() {
                         {unreadCount > 0 && (
                             <button
                                 onClick={handleMarkAllRead}
-                                className="text-xs text-blue-600 hover:text-blue-800 font-medium hover:underline"
+                                className="text-left text-xs font-medium text-blue-600 hover:text-blue-800 hover:underline"
                             >
                                 Đánh dấu tất cả đã đọc
                             </button>
@@ -167,7 +167,7 @@ export default function NotificationBell() {
                     </div>
 
                     {/* Notifications list */}
-                    <div className="max-h-96 overflow-y-auto">
+                    <div className="min-h-0 flex-1 overflow-y-auto sm:max-h-96">
                         {loading ? (
                             <div className="flex items-center justify-center py-8">
                                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>

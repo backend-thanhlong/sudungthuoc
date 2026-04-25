@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Building2, Loader2, Plus, Search } from "lucide-react";
+import { Building2, Check, Loader2, Plus, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -311,7 +311,7 @@ export default function FacilityDrugOrderCatalogDialog(
         <Dialog open={props.open} onOpenChange={props.onOpenChange}>
             <DialogContent className="!top-0 !left-0 !h-[100dvh] !w-screen !max-w-none !translate-x-0 !translate-y-0 !rounded-none !border-0 !p-0 !shadow-none flex flex-col gap-0 overflow-hidden sm:!max-w-none">
                 <div className="flex h-full min-h-0 flex-col bg-white">
-                    <DialogHeader className="shrink-0 border-b border-slate-200 px-6 py-5 pr-16">
+                    <DialogHeader className="shrink-0 border-b border-slate-200 px-4 py-4 pr-14 text-left xl:px-6 xl:py-5 xl:pr-16">
                         <DialogTitle>
                             {props.mode === "create"
                                 ? "Tạo dự trù đặt hàng"
@@ -324,9 +324,9 @@ export default function FacilityDrugOrderCatalogDialog(
                         </DialogDescription>
                     </DialogHeader>
 
-                    <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-hidden px-6 py-5">
+                    <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-3 py-3 xl:gap-5 xl:overflow-hidden xl:px-6 xl:py-5">
                         {props.mode === "create" ? (
-                            <div className="shrink-0 rounded-xl border border-slate-200 bg-slate-50 px-4 py-4">
+                            <div className="shrink-0 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 xl:px-4 xl:py-4">
                                 <div className="grid gap-4 xl:grid-cols-[280px_240px_minmax(0,1fr)]">
                                     <div className="space-y-2">
                                         <Label>Công ty cung ứng</Label>
@@ -334,10 +334,10 @@ export default function FacilityDrugOrderCatalogDialog(
                                             value={props.companyId}
                                             onValueChange={props.onCompanyChange}
                                         >
-                                            <SelectTrigger className="bg-white">
+                                            <SelectTrigger className="w-full bg-white">
                                                 <SelectValue placeholder="Chọn công ty" />
                                             </SelectTrigger>
-                                            <SelectContent>
+                                            <SelectContent className="z-[70] max-h-[60dvh]">
                                                 {props.companies.map((company) => (
                                                     <SelectItem key={company.id} value={company.id}>
                                                         {company.name} ({company.code})
@@ -353,10 +353,10 @@ export default function FacilityDrugOrderCatalogDialog(
                                             value={props.baseReportMonth}
                                             onValueChange={props.onBaseReportMonthChange}
                                         >
-                                            <SelectTrigger className="bg-white">
+                                            <SelectTrigger className="w-full bg-white">
                                                 <SelectValue placeholder="Không chọn" />
                                             </SelectTrigger>
-                                            <SelectContent>
+                                            <SelectContent className="z-[70] max-h-[60dvh]">
                                                 <SelectItem value={props.noneValue}>Không chọn</SelectItem>
                                                 {props.reportMonths.map((month) => (
                                                     <SelectItem key={month.value} value={month.value}>
@@ -379,7 +379,7 @@ export default function FacilityDrugOrderCatalogDialog(
                                 </div>
                             </div>
                         ) : (
-                            <div className="shrink-0 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+                            <div className="shrink-0 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 xl:px-4">
                                 <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                                     <div className="space-y-1">
                                         <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
@@ -409,9 +409,9 @@ export default function FacilityDrugOrderCatalogDialog(
                             onValueChange={(value) =>
                                 setActiveTab(value as "suggested" | "catalog")
                             }
-                            className="flex min-h-0 flex-1 rounded-xl border border-slate-200 bg-white shadow-sm"
+                            className="flex min-h-0 flex-none overflow-visible rounded-xl border border-slate-200 bg-white shadow-sm xl:flex-1 xl:overflow-hidden"
                         >
-                            <div className="shrink-0 flex flex-col gap-3 border-b border-slate-200 px-4 py-4">
+                            <div className="shrink-0 flex flex-col gap-3 border-b border-slate-200 px-3 py-3 xl:px-4 xl:py-4">
                                 <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                                     <div>
                                         <h3 className="font-semibold text-slate-900">
@@ -445,15 +445,15 @@ export default function FacilityDrugOrderCatalogDialog(
                                     </div>
                                 </div>
 
-                                <TabsList variant="line">
+                                <TabsList variant="line" className="w-full overflow-x-auto justify-start xl:w-fit">
                                     <TabsTrigger value="suggested">Gợi ý nên thêm</TabsTrigger>
                                     <TabsTrigger value="catalog">Danh mục công ty</TabsTrigger>
                                 </TabsList>
                             </div>
 
-                            <div className="flex min-h-0 flex-1 flex-col gap-4 px-4 py-4">
+                            <div className="flex min-h-0 flex-col gap-3 px-3 py-3 xl:flex-1 xl:gap-4 xl:px-4 xl:py-4">
                                 <div className="shrink-0 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                                    <div className="relative w-full max-w-xl">
+                                    <div className="relative w-full xl:max-w-xl">
                                         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                                         <Input
                                             value={props.search}
@@ -492,8 +492,8 @@ export default function FacilityDrugOrderCatalogDialog(
                                     )}
                                 </div>
 
-                                <TabsContent value="suggested" className="min-h-0 flex-1">
-                                    <div className="min-h-0 h-full overflow-y-auto rounded-xl border border-slate-200">
+                                <TabsContent value="suggested" className="min-h-0 xl:flex-1">
+                                    <div className="min-h-0 rounded-xl border border-slate-200 xl:h-full xl:overflow-auto">
                                         {props.suggestionsLoading ? (
                                             <div className="flex items-center gap-2 p-4 text-sm text-slate-500">
                                                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -518,8 +518,10 @@ export default function FacilityDrugOrderCatalogDialog(
                                                 Không tìm thấy thuốc phù hợp với từ khóa.
                                             </div>
                                         ) : (
-                                            <Table className="min-w-[1320px]">
-                                                <TableHeader>
+                                            <>
+                                                <div className="hidden xl:block">
+                                                    <Table className="min-w-[1320px]">
+                                                        <TableHeader>
                                                     <TableRow className="border-slate-200 bg-slate-50">
                                                         <TableHead className="sticky left-0 top-0 z-30 w-12 bg-slate-50">
                                                             <input
@@ -713,14 +715,177 @@ export default function FacilityDrugOrderCatalogDialog(
                                                             </TableRow>
                                                         );
                                                     })}
-                                                </TableBody>
-                                            </Table>
+                                                        </TableBody>
+                                                    </Table>
+                                                </div>
+
+                                                <div className="space-y-3 p-3 xl:hidden">
+                                                    {filteredSuggestedItems.map((item) => {
+                                                        const isExisting =
+                                                            existingCompanyDrugIdSet.has(
+                                                                item.companyDrugId
+                                                            );
+                                                        const masterDrugId =
+                                                            resolveMasterDrugId(item);
+                                                        const isExistingMaster =
+                                                            Boolean(
+                                                                masterDrugId &&
+                                                                    existingMasterDrugIdSet.has(
+                                                                        masterDrugId
+                                                                    )
+                                                            );
+                                                        const isSelected =
+                                                            selectedIdSet.has(item.companyDrugId);
+                                                        const isSelectedMasterConflict =
+                                                            Boolean(
+                                                                masterDrugId &&
+                                                                    selectedMasterDrugIdSet.has(
+                                                                        masterDrugId
+                                                                    ) &&
+                                                                    !isSelected
+                                                            );
+                                                        const isUnavailable =
+                                                            isExisting ||
+                                                            isExistingMaster ||
+                                                            isSelectedMasterConflict;
+                                                        const reason =
+                                                            buildSuggestionReason(item);
+
+                                                        return (
+                                                            <button
+                                                                key={item.companyDrugId}
+                                                                type="button"
+                                                                disabled={isUnavailable}
+                                                                aria-pressed={isSelected}
+                                                                onClick={() =>
+                                                                    props.onToggleSelect(
+                                                                        item.companyDrugId
+                                                                    )
+                                                                }
+                                                                className={cn(
+                                                                    "w-full rounded-xl border p-4 text-left shadow-sm transition",
+                                                                    isSelected
+                                                                        ? "border-blue-400 bg-blue-50"
+                                                                        : "border-slate-200 bg-white hover:border-slate-300",
+                                                                    isUnavailable &&
+                                                                        "cursor-not-allowed opacity-65 hover:border-slate-200"
+                                                                )}
+                                                            >
+                                                                <div className="flex items-start gap-3">
+                                                                    <span
+                                                                        className={cn(
+                                                                            "mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md border",
+                                                                            isSelected
+                                                                                ? "border-blue-600 bg-blue-600 text-white"
+                                                                                : "border-slate-300 bg-white text-transparent"
+                                                                        )}
+                                                                        aria-hidden="true"
+                                                                    >
+                                                                        <Check className="h-4 w-4" />
+                                                                    </span>
+                                                                    <div className="min-w-0 flex-1 space-y-3">
+                                                                        <div className="space-y-1">
+                                                                            <div className="flex flex-wrap items-center gap-2">
+                                                                                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700">
+                                                                                    {item.companyDrugCode}
+                                                                                </span>
+                                                                                <Badge
+                                                                                    variant="outline"
+                                                                                    className={
+                                                                                        SUGGESTION_STATUS_BADGE_CLASS[
+                                                                                            item.status
+                                                                                        ]
+                                                                                    }
+                                                                                >
+                                                                                    {item.statusLabel}
+                                                                                </Badge>
+                                                                            </div>
+                                                                            <p className="break-words font-semibold text-slate-900">
+                                                                                {item.companyDrugName}
+                                                                            </p>
+                                                                            <p className="text-sm text-slate-500">
+                                                                                {item.activeIngredient || "Chưa có hoạt chất"} · Đơn vị:{" "}
+                                                                                {item.unit || item.masterDrug?.donViTinh || "—"}
+                                                                            </p>
+                                                                        </div>
+
+                                                                        <div className="grid grid-cols-2 gap-2 text-sm">
+                                                                            <div className="rounded-lg bg-slate-50 px-3 py-2">
+                                                                                <p className="text-[11px] font-medium uppercase text-slate-500">
+                                                                                    Gợi ý
+                                                                                </p>
+                                                                                <p className="mt-1 font-semibold text-slate-900">
+                                                                                    {formatQuantity(item.recommendedQty)}
+                                                                                </p>
+                                                                            </div>
+                                                                            <div className="rounded-lg bg-slate-50 px-3 py-2">
+                                                                                <p className="text-[11px] font-medium uppercase text-slate-500">
+                                                                                    Độ phủ
+                                                                                </p>
+                                                                                <p className="mt-1 font-semibold text-slate-900">
+                                                                                    {item.monthsOfCover !== null
+                                                                                        ? `${formatQuantity(item.monthsOfCover)} tháng`
+                                                                                        : "—"}
+                                                                                </p>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm">
+                                                                            <p className="text-[11px] font-medium uppercase text-slate-500">
+                                                                                Thuốc chuẩn
+                                                                            </p>
+                                                                            {item.masterDrug ? (
+                                                                                <div className="mt-1">
+                                                                                    <p className="font-medium text-slate-900">
+                                                                                        {item.masterDrug.maChung}
+                                                                                    </p>
+                                                                                    <p className="text-xs text-slate-500">
+                                                                                        {item.masterDrug.tenThuoc}
+                                                                                    </p>
+                                                                                </div>
+                                                                            ) : (
+                                                                                <p className="mt-1 text-amber-700">
+                                                                                    Chưa liên kết
+                                                                                </p>
+                                                                            )}
+                                                                        </div>
+
+                                                                        {reason ? (
+                                                                            <p className="text-sm text-slate-600">
+                                                                                {reason}
+                                                                            </p>
+                                                                        ) : null}
+
+                                                                        <div className="flex flex-wrap gap-2">
+                                                                            {isExisting ? (
+                                                                                <Badge variant="secondary">
+                                                                                    Đã có trong dự trù
+                                                                                </Badge>
+                                                                            ) : null}
+                                                                            {isExistingMaster ? (
+                                                                                <Badge variant="secondary">
+                                                                                    Trùng thuốc chuẩn trong dự trù
+                                                                                </Badge>
+                                                                            ) : null}
+                                                                            {isSelectedMasterConflict ? (
+                                                                                <Badge variant="secondary">
+                                                                                    Đã chọn thuốc cùng thuốc chuẩn
+                                                                                </Badge>
+                                                                            ) : null}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </>
                                         )}
                                     </div>
                                 </TabsContent>
 
-                                <TabsContent value="catalog" className="min-h-0 flex-1">
-                                    <div className="min-h-0 h-full overflow-y-auto rounded-xl border border-slate-200">
+                                <TabsContent value="catalog" className="min-h-0 xl:flex-1">
+                                    <div className="min-h-0 rounded-xl border border-slate-200 xl:h-full xl:overflow-auto">
                                         {props.isLoading ? (
                                             <div className="flex items-center gap-2 p-4 text-sm text-slate-500">
                                                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -739,8 +904,10 @@ export default function FacilityDrugOrderCatalogDialog(
                                                 Không tìm thấy thuốc phù hợp với từ khóa.
                                             </div>
                                         ) : (
-                                            <Table className="min-w-[1560px]">
-                                                <TableHeader>
+                                            <>
+                                                <div className="hidden xl:block">
+                                                    <Table className="min-w-[1560px]">
+                                                        <TableHeader>
                                                     <TableRow className="border-slate-200 bg-slate-50">
                                                         <TableHead className="sticky left-0 top-0 z-30 w-12 bg-slate-50">
                                                             <input
@@ -952,8 +1119,163 @@ export default function FacilityDrugOrderCatalogDialog(
                                                             </TableRow>
                                                         );
                                                     })}
-                                                </TableBody>
-                                            </Table>
+                                                        </TableBody>
+                                                    </Table>
+                                                </div>
+
+                                                <div className="space-y-3 p-3 xl:hidden">
+                                                    {filteredItems.map((item) => {
+                                                        const isExisting =
+                                                            existingCompanyDrugIdSet.has(item.id);
+                                                        const masterDrugId =
+                                                            resolveMasterDrugId(item);
+                                                        const isExistingMaster =
+                                                            Boolean(
+                                                                masterDrugId &&
+                                                                    existingMasterDrugIdSet.has(
+                                                                        masterDrugId
+                                                                    )
+                                                            );
+                                                        const isSelected =
+                                                            selectedIdSet.has(item.id);
+                                                        const isSelectedMasterConflict =
+                                                            Boolean(
+                                                                masterDrugId &&
+                                                                    selectedMasterDrugIdSet.has(
+                                                                        masterDrugId
+                                                                    ) &&
+                                                                    !isSelected
+                                                            );
+                                                        const linked = isLinkedDrug(item);
+                                                        const quyCach =
+                                                            item.quyCach ||
+                                                            item.masterDrug?.quyCach ||
+                                                            "—";
+                                                        const isUnavailable =
+                                                            isExisting ||
+                                                            isExistingMaster ||
+                                                            isSelectedMasterConflict;
+
+                                                        return (
+                                                            <button
+                                                                key={item.id}
+                                                                type="button"
+                                                                disabled={isUnavailable}
+                                                                aria-pressed={isSelected}
+                                                                onClick={() =>
+                                                                    props.onToggleSelect(item.id)
+                                                                }
+                                                                className={cn(
+                                                                    "w-full rounded-xl border p-4 text-left shadow-sm transition",
+                                                                    isSelected
+                                                                        ? "border-blue-400 bg-blue-50"
+                                                                        : "border-slate-200 bg-white hover:border-slate-300",
+                                                                    isUnavailable &&
+                                                                        "cursor-not-allowed opacity-65 hover:border-slate-200"
+                                                                )}
+                                                            >
+                                                                <div className="flex items-start gap-3">
+                                                                    <span
+                                                                        className={cn(
+                                                                            "mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md border",
+                                                                            isSelected
+                                                                                ? "border-blue-600 bg-blue-600 text-white"
+                                                                                : "border-slate-300 bg-white text-transparent"
+                                                                        )}
+                                                                        aria-hidden="true"
+                                                                    >
+                                                                        <Check className="h-4 w-4" />
+                                                                    </span>
+                                                                    <div className="min-w-0 flex-1 space-y-3">
+                                                                        <div className="space-y-1">
+                                                                            <div className="flex flex-wrap items-center gap-2">
+                                                                                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700">
+                                                                                    {item.companyDrugCode}
+                                                                                </span>
+                                                                                {!linked ? (
+                                                                                    <Badge
+                                                                                        variant="outline"
+                                                                                        className="border-amber-300 text-amber-700"
+                                                                                    >
+                                                                                        Chưa liên kết thuốc chuẩn
+                                                                                    </Badge>
+                                                                                ) : null}
+                                                                            </div>
+                                                                            <p className="break-words font-semibold text-slate-900">
+                                                                                {item.companyDrugName}
+                                                                            </p>
+                                                                            <p className="text-sm text-slate-500">
+                                                                                {item.activeIngredient ||
+                                                                                    item.masterDrug?.hoatChat ||
+                                                                                    "Chưa có hoạt chất"}
+                                                                            </p>
+                                                                        </div>
+
+                                                                        <div className="grid gap-2 text-sm sm:grid-cols-2">
+                                                                            <div className="rounded-lg bg-slate-50 px-3 py-2">
+                                                                                <p className="text-[11px] font-medium uppercase text-slate-500">
+                                                                                    Quy cách
+                                                                                </p>
+                                                                                <p className="mt-1 font-medium text-slate-900">
+                                                                                    {quyCach}
+                                                                                </p>
+                                                                            </div>
+                                                                            <div className="rounded-lg bg-slate-50 px-3 py-2">
+                                                                                <p className="text-[11px] font-medium uppercase text-slate-500">
+                                                                                    Đơn vị
+                                                                                </p>
+                                                                                <p className="mt-1 font-medium text-slate-900">
+                                                                                    {item.unit ||
+                                                                                        item.masterDrug?.donViTinh ||
+                                                                                        "—"}
+                                                                                </p>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm">
+                                                                            <p className="text-[11px] font-medium uppercase text-slate-500">
+                                                                                Thuốc chuẩn
+                                                                            </p>
+                                                                            {item.masterDrug ? (
+                                                                                <div className="mt-1">
+                                                                                    <p className="font-medium text-slate-900">
+                                                                                        {item.masterDrug.maChung}
+                                                                                    </p>
+                                                                                    <p className="text-xs text-slate-500">
+                                                                                        {item.masterDrug.tenThuoc}
+                                                                                    </p>
+                                                                                </div>
+                                                                            ) : (
+                                                                                <p className="mt-1 text-amber-700">
+                                                                                    Chưa liên kết
+                                                                                </p>
+                                                                            )}
+                                                                        </div>
+
+                                                                        <div className="flex flex-wrap gap-2">
+                                                                            {isExisting ? (
+                                                                                <Badge variant="secondary">
+                                                                                    Đã có trong dự trù
+                                                                                </Badge>
+                                                                            ) : null}
+                                                                            {isExistingMaster ? (
+                                                                                <Badge variant="secondary">
+                                                                                    Trùng thuốc chuẩn trong dự trù
+                                                                                </Badge>
+                                                                            ) : null}
+                                                                            {isSelectedMasterConflict ? (
+                                                                                <Badge variant="secondary">
+                                                                                    Đã chọn thuốc cùng thuốc chuẩn
+                                                                                </Badge>
+                                                                            ) : null}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </>
                                         )}
                                     </div>
                                 </TabsContent>
@@ -961,22 +1283,24 @@ export default function FacilityDrugOrderCatalogDialog(
                         </Tabs>
                     </div>
 
-                    <DialogFooter className="shrink-0 border-t border-slate-200 px-6 py-4">
+                    <DialogFooter className="shrink-0 border-t border-slate-200 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] xl:px-6 xl:py-4">
                         <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <p className="text-sm text-slate-500">
                                 Đã chọn {selectedCount} thuốc. Số lượng yêu cầu sẽ nhập ở màn chi tiết sau khi thêm.
                             </p>
-                            <div className="flex flex-wrap justify-end gap-2">
+                            <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:justify-end">
                                 <Button
                                     variant="outline"
                                     onClick={() => props.onOpenChange(false)}
                                     disabled={props.isSubmitting}
+                                    className="w-full sm:w-auto"
                                 >
                                     Hủy
                                 </Button>
                                 <Button
                                     onClick={props.onSubmit}
                                     disabled={props.isSubmitting || selectedCount === 0}
+                                    className="w-full sm:w-auto"
                                 >
                                     {props.isSubmitting ? (
                                         <Loader2 className="h-4 w-4 animate-spin" />

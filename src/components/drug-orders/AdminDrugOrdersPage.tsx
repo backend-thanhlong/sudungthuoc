@@ -4,9 +4,13 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
     Activity,
+    ArrowLeft,
     Building2,
     ClipboardList,
+    FileText,
+    ListChecks,
     Loader2,
+    QrCode,
     RefreshCcw,
     Search,
     Trash2,
@@ -38,7 +42,14 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import DrugOrderLineMobileCard from "@/components/drug-orders/DrugOrderLineMobileCard";
+import DrugOrderMobileFilterPanel from "@/components/drug-orders/DrugOrderMobileFilterPanel";
+import DrugOrderMobileSectionTabs, {
+    type DrugOrderMobileSectionTab,
+} from "@/components/drug-orders/DrugOrderMobileSectionTabs";
 import DrugOrderQrCode from "@/components/drug-orders/DrugOrderQrCode";
+import DrugOrderShipmentMobileCard from "@/components/drug-orders/DrugOrderShipmentMobileCard";
+import DrugOrderSummaryCard from "@/components/drug-orders/DrugOrderSummaryCard";
 
 type OrderStatus =
     | "DRAFT"
@@ -203,6 +214,9 @@ interface SummaryMetrics {
     completedOrders: number;
 }
 
+type AdminMobilePane = "list" | "detail";
+type AdminMobileSection = "info" | "lines" | "timeline" | "qr";
+
 const ALL_VALUE = "__all__";
 
 const ORDER_STATUS_META: Record<
@@ -257,6 +271,21 @@ const LINE_STATUS_META: Record<
     },
 };
 
+const SHIPMENT_STATUS_META: Record<
+    ShipmentStatus,
+    { label: string; className: string }
+> = {
+    CREATED: { label: "Đã tạo", className: "border-blue-300 text-blue-700" },
+    PARTIALLY_RECEIVED: {
+        label: "Nhận một phần",
+        className: "border-amber-300 text-amber-700",
+    },
+    RECEIVED: {
+        label: "Đã nhận",
+        className: "border-emerald-300 text-emerald-700",
+    },
+};
+
 function formatQuantity(value: number | null | undefined) {
     if (value === null || value === undefined) {
         return "—";
@@ -274,6 +303,36 @@ function formatDateTime(value: string | null | undefined) {
     }
 
     return new Date(value).toLocaleString("vi-VN");
+}
+
+function OrderStatusBadge({ status }: { status: OrderStatus }) {
+    const meta = ORDER_STATUS_META[status];
+
+    return (
+        <Badge variant={meta.variant} className={meta.className}>
+            {meta.label}
+        </Badge>
+    );
+}
+
+function LineStatusBadge({ status }: { status: LineStatus }) {
+    const meta = LINE_STATUS_META[status];
+
+    return (
+        <Badge variant={meta.variant} className={meta.className}>
+            {meta.label}
+        </Badge>
+    );
+}
+
+function ShipmentStatusBadge({ status }: { status: ShipmentStatus }) {
+    const meta = SHIPMENT_STATUS_META[status];
+
+    return (
+        <Badge variant="outline" className={meta.className}>
+            {meta.label}
+        </Badge>
+    );
 }
 
 export default function AdminDrugOrdersPage() {
@@ -295,6 +354,9 @@ export default function AdminDrugOrdersPage() {
     const [isListLoading, setIsListLoading] = useState(true);
     const [isDetailLoading, setIsDetailLoading] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [mobilePane, setMobilePane] = useState<AdminMobilePane>("list");
+    const [mobileSection, setMobileSection] = useState<AdminMobileSection>("info");
+    const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
     const [search, setSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState(ALL_VALUE);
@@ -364,6 +426,7 @@ export default function AdminDrugOrdersPage() {
 
     const loadOrderDetail = useCallback(async (orderId: string) => {
         setIsDetailLoading(true);
+        setSelectedOrder(null);
         try {
             const res = await fetch(`/api/admin/dutru-dat-hang/${orderId}`);
             const payload = await res.json();
@@ -433,6 +496,7 @@ export default function AdminDrugOrdersPage() {
             }
 
             setSelectedOrder(null);
+            setMobilePane("list");
             await refreshOrders();
             toast.success(payload.message || "Đã xóa đơn dự trù đặt hàng");
         } catch (error) {
@@ -443,8 +507,635 @@ export default function AdminDrugOrdersPage() {
         }
     };
 
+    const mobileAdvancedFilterCount = [
+        facilityFilter !== ALL_VALUE,
+        companyFilter !== ALL_VALUE,
+        statusFilter !== ALL_VALUE,
+        Boolean(dateFrom),
+        Boolean(dateTo),
+    ].filter(Boolean).length;
+    const selectedOrderRequestedQty =
+        selectedOrder?.lines.reduce((sum, line) => sum + line.requestedQty, 0) || 0;
+    const selectedOrderAcceptedQty =
+        selectedOrder?.lines.reduce((sum, line) => sum + line.acceptedQty, 0) || 0;
+    const selectedOrderShippedQty =
+        selectedOrder?.lines.reduce((sum, line) => sum + line.totalShippedQty, 0) || 0;
+    const selectedOrderReceivedQty =
+        selectedOrder?.lines.reduce((sum, line) => sum + line.totalReceivedQty, 0) || 0;
+    const mobileSectionTabs: DrugOrderMobileSectionTab[] = [
+        { value: "info", label: "Thông tin", icon: <FileText className="size-4" /> },
+        { value: "lines", label: "Dòng thuốc", icon: <ListChecks className="size-4" /> },
+        { value: "timeline", label: "Timeline", icon: <Truck className="size-4" /> },
+        { value: "qr", label: "QR", icon: <QrCode className="size-4" /> },
+    ];
+
+    const clearMobileAdvancedFilters = () => {
+        setFacilityFilter(ALL_VALUE);
+        setCompanyFilter(ALL_VALUE);
+        setStatusFilter(ALL_VALUE);
+        setDateFrom("");
+        setDateTo("");
+    };
+
+    const selectMobileOrder = (orderId: string) => {
+        setSelectedOrderId(orderId);
+        setMobilePane("detail");
+        setMobileSection("info");
+    };
+
+    const renderMobileMetrics = () => (
+        <div className="grid grid-cols-1 gap-3 min-[430px]:grid-cols-2">
+            {[
+                {
+                    label: "Tổng đơn",
+                    value: summary.totalOrders,
+                    icon: <ClipboardList className="size-5 text-blue-600" />,
+                },
+                {
+                    label: "Đơn đang mở",
+                    value: summary.openOrders,
+                    icon: <Activity className="size-5 text-emerald-600" />,
+                },
+                {
+                    label: "Đã giao / đã nhận",
+                    value: `${formatQuantity(summary.totalShippedQty)} / ${formatQuantity(summary.totalReceivedQty)}`,
+                    icon: <Truck className="size-5 text-indigo-600" />,
+                },
+                {
+                    label: "Hoàn tất",
+                    value: summary.completedOrders,
+                    icon: <Building2 className="size-5 text-amber-600" />,
+                },
+            ].map((metric) => (
+                <div
+                    key={metric.label}
+                    className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+                >
+                    <div className="flex items-center gap-3">
+                        {metric.icon}
+                        <div className="min-w-0">
+                            <p className="text-xs text-slate-500">{metric.label}</p>
+                            <p className="mt-1 break-words text-lg font-semibold text-slate-900">
+                                {metric.value}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+
+    const renderMobileFilters = () => (
+        <div className="space-y-3">
+            <div className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+                <Input
+                    value={search}
+                    onChange={(event) => setSearch(event.target.value)}
+                    placeholder="Tìm mã đơn, cơ sở, công ty"
+                    className="pl-9"
+                />
+            </div>
+
+            <DrugOrderMobileFilterPanel
+                open={mobileFiltersOpen}
+                onOpenChange={setMobileFiltersOpen}
+                activeCount={mobileAdvancedFilterCount}
+                title="Lọc nâng cao"
+                triggerLabel="Lọc nâng cao"
+                footer={
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={clearMobileAdvancedFilters}
+                        disabled={mobileAdvancedFilterCount === 0}
+                    >
+                        Xóa lọc nâng cao
+                    </Button>
+                }
+            >
+                <Select value={facilityFilter} onValueChange={setFacilityFilter}>
+                    <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Tất cả cơ sở" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value={ALL_VALUE}>Tất cả cơ sở</SelectItem>
+                        {facilities.map((facility) => (
+                            <SelectItem key={facility.id} value={facility.id}>
+                                {facility.facilityName}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+
+                <Select value={companyFilter} onValueChange={setCompanyFilter}>
+                    <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Tất cả công ty" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value={ALL_VALUE}>Tất cả công ty</SelectItem>
+                        {companies.map((company) => (
+                            <SelectItem key={company.id} value={company.id}>
+                                {company.name}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Tất cả trạng thái" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value={ALL_VALUE}>Tất cả trạng thái</SelectItem>
+                        {Object.entries(ORDER_STATUS_META).map(([status, meta]) => (
+                            <SelectItem key={status} value={status}>
+                                {meta.label}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="space-y-2">
+                        <Label>Từ ngày</Label>
+                        <Input
+                            type="date"
+                            value={dateFrom}
+                            onChange={(event) => setDateFrom(event.target.value)}
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Đến ngày</Label>
+                        <Input
+                            type="date"
+                            value={dateTo}
+                            onChange={(event) => setDateTo(event.target.value)}
+                        />
+                    </div>
+                </div>
+            </DrugOrderMobileFilterPanel>
+        </div>
+    );
+
+    const renderMobileOrderList = () => (
+        <div className="space-y-4 pb-6">
+            <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                    <h2 className="text-2xl font-bold text-slate-900">
+                        Giám sát dự trù đặt hàng
+                    </h2>
+                    <p className="mt-1 text-sm text-slate-500">
+                        Lọc, mở chi tiết và theo dõi giao nhận.
+                    </p>
+                </div>
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => void refreshOrders(selectedOrderId)}
+                    disabled={isListLoading}
+                    aria-label="Làm mới danh sách đơn"
+                >
+                    {isListLoading ? (
+                        <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                        <RefreshCcw className="size-4" />
+                    )}
+                </Button>
+            </div>
+
+            {renderMobileMetrics()}
+            {renderMobileFilters()}
+
+            <div className="text-sm text-slate-500">
+                {orders.length} đơn khớp bộ lọc hiện tại.
+            </div>
+
+            {isListLoading ? (
+                <div className="flex items-center gap-2 rounded-xl border border-dashed border-slate-200 bg-white p-4 text-sm text-slate-500">
+                    <Loader2 className="size-4 animate-spin" />
+                    Đang tải danh sách đơn...
+                </div>
+            ) : orders.length === 0 ? (
+                <div className="rounded-xl border border-dashed border-slate-200 bg-white p-6 text-center text-sm text-slate-500">
+                    Không có đơn nào khớp bộ lọc.
+                </div>
+            ) : (
+                <div className="space-y-3">
+                    {orders.map((order) => (
+                        <DrugOrderSummaryCard
+                            key={order.id}
+                            title={order.orderNo}
+                            subtitle={
+                                <>
+                                    <span className="block">{order.facility.facilityName}</span>
+                                    <span className="block">{order.company.name}</span>
+                                </>
+                            }
+                            status={<OrderStatusBadge status={order.status} />}
+                            active={order.id === selectedOrderId}
+                            onClick={() => selectMobileOrder(order.id)}
+                            metrics={[
+                                { label: "Dòng", value: order.lineCount },
+                                {
+                                    label: "Chấp nhận",
+                                    value: formatQuantity(order.totalAcceptedQty),
+                                },
+                                {
+                                    label: "Đã nhận",
+                                    value: formatQuantity(order.totalReceivedQty),
+                                    tone:
+                                        order.totalReceivedQty >= order.totalAcceptedQty
+                                            ? "success"
+                                            : "default",
+                                },
+                                {
+                                    label: "Ngày tạo",
+                                    value: formatDateTime(order.createdAt),
+                                    tone: "muted",
+                                },
+                            ]}
+                            warnings={
+                                order.pendingCatalogCount > 0
+                                    ? [`${order.pendingCatalogCount} dòng chờ xác nhận danh mục`]
+                                    : []
+                            }
+                            footer={`Đã giao: ${formatQuantity(order.totalShippedQty)}`}
+                        />
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+
+    const renderMobileInfoSection = () => {
+        if (!selectedOrder) {
+            return null;
+        }
+
+        return (
+            <div className="space-y-4">
+                <div className="grid grid-cols-1 gap-3 min-[430px]:grid-cols-2">
+                    {[
+                        ["Tổng dòng", selectedOrder.lines.length],
+                        ["Yêu cầu", formatQuantity(selectedOrderRequestedQty)],
+                        ["Chấp nhận", formatQuantity(selectedOrderAcceptedQty)],
+                        ["Đã giao", formatQuantity(selectedOrderShippedQty)],
+                        ["Đã nhận", formatQuantity(selectedOrderReceivedQty)],
+                        ["Tháng XNT", selectedOrder.baseReportMonth || "—"],
+                    ].map(([label, value]) => (
+                        <div key={label} className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+                            <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
+                                {label}
+                            </p>
+                            <p className="mt-1 break-words font-semibold text-slate-900">{value}</p>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="rounded-xl border border-slate-200 bg-white p-4 text-sm">
+                    <h3 className="font-semibold text-slate-900">Thông tin đơn</h3>
+                    <div className="mt-3 grid gap-2">
+                        <div>
+                            <p className="text-xs uppercase tracking-wide text-slate-500">Mã đơn</p>
+                            <p className="mt-1 font-medium text-slate-900">{selectedOrder.orderNo}</p>
+                        </div>
+                        <div>
+                            <p className="text-xs uppercase tracking-wide text-slate-500">Cơ sở</p>
+                            <p className="mt-1 font-medium text-slate-900">
+                                {selectedOrder.facility.facilityName}
+                            </p>
+                            <p className="text-xs text-slate-500">{selectedOrder.facility.facilityCode}</p>
+                        </div>
+                        <div>
+                            <p className="text-xs uppercase tracking-wide text-slate-500">Công ty</p>
+                            <p className="mt-1 font-medium text-slate-900">{selectedOrder.company.name}</p>
+                            <p className="text-xs text-slate-500">{selectedOrder.company.code}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-600">
+                    <h3 className="font-semibold text-slate-900">Mốc thời gian</h3>
+                    <div className="mt-3 grid gap-2">
+                        <p>
+                            <span className="font-medium text-slate-700">Tạo lúc:</span>{" "}
+                            {formatDateTime(selectedOrder.createdAt)}
+                        </p>
+                        <p>
+                            <span className="font-medium text-slate-700">Gửi lúc:</span>{" "}
+                            {formatDateTime(selectedOrder.submittedAt)}
+                        </p>
+                        <p>
+                            <span className="font-medium text-slate-700">Đóng lúc:</span>{" "}
+                            {formatDateTime(selectedOrder.closedAt)}
+                        </p>
+                        <p>
+                            <span className="font-medium text-slate-700">Ghi chú:</span>{" "}
+                            {selectedOrder.note || "Không có"}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    const renderMobileLinesSection = () => {
+        if (!selectedOrder) {
+            return null;
+        }
+
+        return (
+            <div className="space-y-3">
+                {selectedOrder.lines.map((line) => (
+                    <DrugOrderLineMobileCard
+                        key={line.id}
+                        title={line.displayName}
+                        subtitle={`Đơn vị: ${line.unit || "—"}`}
+                        badges={
+                            <>
+                                <LineStatusBadge status={line.lineStatus} />
+                                <Badge variant="outline">
+                                    {line.sourceType === "MASTER_DRUG"
+                                        ? "Danh mục chung"
+                                        : "Danh mục công ty"}
+                                </Badge>
+                            </>
+                        }
+                        fields={[
+                            { label: "Yêu cầu", value: formatQuantity(line.requestedQty) },
+                            { label: "Chấp nhận", value: formatQuantity(line.acceptedQty) },
+                            { label: "Đã giao", value: formatQuantity(line.totalShippedQty) },
+                            { label: "Đã nhận", value: formatQuantity(line.totalReceivedQty) },
+                            { label: "Còn lại", value: formatQuantity(line.remainingAcceptedQty) },
+                            {
+                                label: "Gợi ý",
+                                value: formatQuantity(line.suggestedQty),
+                                tone: line.suggestedQty === null ? "muted" : "default",
+                            },
+                        ]}
+                        suggestion={
+                            line.masterDrug || line.companyDrug ? (
+                                <div className="space-y-2">
+                                    {line.masterDrug ? (
+                                        <div>
+                                            <p className="font-medium">Thuốc chuẩn</p>
+                                            <p className="mt-1">
+                                                {line.masterDrug.maChung} - {line.masterDrug.tenThuoc}
+                                            </p>
+                                        </div>
+                                    ) : null}
+                                    {line.companyDrug ? (
+                                        <div>
+                                            <p className="font-medium">Thuốc công ty</p>
+                                            <p className="mt-1">
+                                                {line.companyDrug.companyDrugCode} -{" "}
+                                                {line.companyDrug.companyDrugName}
+                                            </p>
+                                        </div>
+                                    ) : null}
+                                </div>
+                            ) : null
+                        }
+                        validationMessage={
+                            line.companyResponseReason
+                                ? `Lý do công ty: ${line.companyResponseReason}`
+                                : null
+                        }
+                    />
+                ))}
+            </div>
+        );
+    };
+
+    const renderMobileTimelineSection = () => {
+        if (!selectedOrder) {
+            return null;
+        }
+
+        if (selectedOrder.shipments.length === 0) {
+            return (
+                <div className="rounded-xl border border-dashed border-slate-200 bg-white p-6 text-center text-sm text-slate-500">
+                    Đơn này chưa có đợt giao.
+                </div>
+            );
+        }
+
+        return (
+            <div className="space-y-3">
+                {selectedOrder.shipments.map((shipment) => (
+                    <DrugOrderShipmentMobileCard
+                        key={shipment.id}
+                        title={`Đợt giao #${shipment.shipmentNo}`}
+                        subtitle={`Giao lúc ${formatDateTime(shipment.shippedAt)}`}
+                        status={<ShipmentStatusBadge status={shipment.status} />}
+                        note={shipment.companyNote || undefined}
+                        lines={shipment.lines.map((line) => ({
+                            id: line.id,
+                            title: line.displayName,
+                            subtitle: `Đơn vị: ${line.unit || "—"}`,
+                            metrics: [
+                                { label: "Yêu cầu", value: formatQuantity(line.requestedQty) },
+                                { label: "Duyệt", value: formatQuantity(line.acceptedQty) },
+                                { label: "Giao", value: formatQuantity(line.shippedQty) },
+                                { label: "Thực nhận", value: formatQuantity(line.receivedQty) },
+                            ],
+                            reason: line.reason ? `Lý do: ${line.reason}` : undefined,
+                        }))}
+                        receipts={
+                            shipment.receipts.length > 0 ? (
+                                <div className="space-y-2 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
+                                    {shipment.receipts.map((receipt) => (
+                                        <div key={receipt.id} className="space-y-1">
+                                            <p>Xác nhận lúc: {formatDateTime(receipt.confirmedAt)}</p>
+                                            <p>Ghi chú: {receipt.note || "Không có"}</p>
+                                            {receipt.lines.some((line) => line.differenceReason) ? (
+                                                <div className="pt-1 text-xs">
+                                                    {receipt.lines
+                                                        .filter((line) => line.differenceReason)
+                                                        .map((line) => (
+                                                            <p key={line.shipmentLineId}>
+                                                                Chênh lệch: {line.differenceReason}
+                                                            </p>
+                                                        ))}
+                                                </div>
+                                            ) : null}
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="rounded-lg border border-dashed border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+                                    Cơ sở chưa xác nhận thực nhận.
+                                </div>
+                            )
+                        }
+                    />
+                ))}
+            </div>
+        );
+    };
+
+    const renderMobileQrSection = () => {
+        if (!selectedOrder) {
+            return null;
+        }
+
+        return (
+            <DrugOrderQrCode
+                lookupUrl={selectedOrder.lookupUrl}
+                orderNo={selectedOrder.orderNo}
+            />
+        );
+    };
+
+    const renderMobileSelectedSection = () => {
+        if (mobileSection === "lines") {
+            return renderMobileLinesSection();
+        }
+
+        if (mobileSection === "timeline") {
+            return renderMobileTimelineSection();
+        }
+
+        if (mobileSection === "qr") {
+            return renderMobileQrSection();
+        }
+
+        return renderMobileInfoSection();
+    };
+
+    const renderMobileDeleteAction = () => {
+        if (!selectedOrder) {
+            return null;
+        }
+
+        return (
+            <div className="rounded-xl border border-rose-200 bg-white p-4 shadow-sm">
+                <div className="space-y-1">
+                    <h3 className="font-semibold text-rose-900">Xóa đơn</h3>
+                    <p className="text-sm text-rose-700">
+                        Chỉ đơn nháp hoặc bị từ chối, chưa phát sinh giao/nhận mới được xóa cứng.
+                    </p>
+                </div>
+                {!canHardDeleteSelectedOrder ? (
+                    <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+                        Đơn đã qua vận hành hoặc chưa ở trạng thái nháp/từ chối nên bị khóa xóa cứng.
+                    </p>
+                ) : null}
+                <Button
+                    type="button"
+                    variant="destructive"
+                    className="mt-4 w-full"
+                    onClick={() => void handleDeleteOrder()}
+                    disabled={isDeleting || !canHardDeleteSelectedOrder}
+                >
+                    {isDeleting ? (
+                        <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                        <Trash2 className="size-4" />
+                    )}
+                    Xóa đơn
+                </Button>
+            </div>
+        );
+    };
+
+    const renderMobileOrderDetail = () => {
+        if (!selectedOrderId) {
+            return renderMobileOrderList();
+        }
+
+        if (isDetailLoading || (selectedOrder && selectedOrder.id !== selectedOrderId)) {
+            return (
+                <div className="space-y-4 pb-6">
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setMobilePane("list")}
+                    >
+                        <ArrowLeft className="size-4" />
+                        Danh sách đơn
+                    </Button>
+                    <div className="flex items-center gap-2 rounded-xl border border-dashed border-slate-200 bg-white p-4 text-sm text-slate-500">
+                        <Loader2 className="size-4 animate-spin" />
+                        Đang tải chi tiết đơn...
+                    </div>
+                </div>
+            );
+        }
+
+        if (!selectedOrder) {
+            return (
+                <div className="space-y-4 pb-6">
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setMobilePane("list")}
+                    >
+                        <ArrowLeft className="size-4" />
+                        Danh sách đơn
+                    </Button>
+                    <div className="rounded-xl border border-dashed border-slate-200 bg-white p-6 text-center text-sm text-slate-500">
+                        Không thể tải chi tiết đơn.
+                    </div>
+                </div>
+            );
+        }
+
+        return (
+            <div className="space-y-4 pb-8">
+                <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setMobilePane("list")}
+                        className="-ml-2 mb-3"
+                    >
+                        <ArrowLeft className="size-4" />
+                        Danh sách đơn
+                    </Button>
+                    <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                            <h2 className="break-words text-xl font-bold text-slate-900">
+                                {selectedOrder.orderNo}
+                            </h2>
+                            <p className="mt-1 text-sm text-slate-600">
+                                {selectedOrder.facility.facilityName}
+                            </p>
+                            <p className="text-sm text-slate-600">{selectedOrder.company.name}</p>
+                        </div>
+                        <div className="shrink-0">
+                            <OrderStatusBadge status={selectedOrder.status} />
+                        </div>
+                    </div>
+                </div>
+
+                <DrugOrderMobileSectionTabs
+                    value={mobileSection}
+                    tabs={mobileSectionTabs}
+                    onValueChange={(value) => setMobileSection(value as AdminMobileSection)}
+                    sticky
+                />
+
+                {renderMobileSelectedSection()}
+                {renderMobileDeleteAction()}
+            </div>
+        );
+    };
+
+    const renderMobileView = () =>
+        mobilePane === "detail" ? renderMobileOrderDetail() : renderMobileOrderList();
+
     return (
         <div className="space-y-6">
+            <div className="xl:hidden">{renderMobileView()}</div>
+
+            <div className="hidden space-y-6 xl:block">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                 <div>
                     <h2 className="text-3xl font-bold text-gray-800">Giám sát dự trù đặt hàng</h2>
@@ -881,6 +1572,7 @@ export default function AdminDrugOrdersPage() {
                         )}
                     </CardContent>
                 </Card>
+            </div>
             </div>
         </div>
     );

@@ -3,14 +3,18 @@
 import { useCallback, useDeferredValue, useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
+    ArrowLeft,
     ChevronDown,
     ChevronRight,
     BadgeCheck,
     ClipboardList,
+    FileText,
+    ListChecks,
     Loader2,
     PackagePlus,
     PencilLine,
     Plus,
+    Printer,
     RefreshCcw,
     Search,
     Send,
@@ -54,6 +58,16 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import DrugOrderLineMobileCard from "@/components/drug-orders/DrugOrderLineMobileCard";
+import DrugOrderMobileActionBar, {
+    type DrugOrderMobileAction,
+} from "@/components/drug-orders/DrugOrderMobileActionBar";
+import DrugOrderMobileFilterPanel from "@/components/drug-orders/DrugOrderMobileFilterPanel";
+import DrugOrderMobileSectionTabs, {
+    type DrugOrderMobileSectionTab,
+} from "@/components/drug-orders/DrugOrderMobileSectionTabs";
+import DrugOrderShipmentMobileCard from "@/components/drug-orders/DrugOrderShipmentMobileCard";
+import DrugOrderSummaryCard from "@/components/drug-orders/DrugOrderSummaryCard";
 import DrugOrderQrCode from "@/components/drug-orders/DrugOrderQrCode";
 import {
     formatDateInputValue,
@@ -80,6 +94,8 @@ type ShipmentStatus = "CREATED" | "PARTIALLY_RECEIVED" | "RECEIVED";
 type SourceType = "MASTER_DRUG" | "COMPANY_DRUG";
 type ResponseDecision = "CONFIRMED" | "PARTIAL" | "REJECTED";
 type ResponseFilter = "ALL" | "PENDING" | "CATALOG" | "INVALID";
+type CompanyMobileSection = "overview" | "lines" | "shipments" | "history";
+type CompanyMobilePane = "list" | "detail";
 
 interface FacilityOption {
     id: string;
@@ -505,8 +521,28 @@ function LineStatusBadge({ status }: { status: LineStatus }) {
     );
 }
 
+function ShipmentStatusBadge({ status }: { status: ShipmentStatus }) {
+    const label =
+        status === "CREATED"
+            ? "Đã tạo"
+            : status === "PARTIALLY_RECEIVED"
+                ? "Đã nhận một phần"
+                : "Đã nhận";
+
+    return (
+        <Badge variant="outline" className="border-blue-300 text-blue-700">
+            {label}
+        </Badge>
+    );
+}
+
 export default function CompanyDrugOrdersPage() {
     const [activeTab, setActiveTab] = useState("orders");
+    const [mobilePane, setMobilePane] = useState<CompanyMobilePane>("list");
+    const [mobileSection, setMobileSection] =
+        useState<CompanyMobileSection>("overview");
+    const [mobileOrderFiltersOpen, setMobileOrderFiltersOpen] = useState(false);
+    const [mobileCatalogFiltersOpen, setMobileCatalogFiltersOpen] = useState(false);
 
     const [orders, setOrders] = useState<OrderSummary[]>([]);
     const [facilities, setFacilities] = useState<FacilityOption[]>([]);
@@ -743,6 +779,54 @@ export default function CompanyDrugOrdersPage() {
         setShipmentToDate(formatDateInputValue());
         setShipmentNote("");
         setIsShipmentDialogOpen(true);
+    }
+
+    function openPrintOrder() {
+        if (!selectedOrder) {
+            return;
+        }
+
+        window.open(
+            `/dashboard/company/dutru-dat-hang/${selectedOrder.id}/print`,
+            "_blank",
+            "noopener,noreferrer"
+        );
+    }
+
+    function updateResponseLine(
+        lineId: string,
+        changes: Partial<
+            Pick<
+                ResponseDraftLine,
+                | "decision"
+                | "acceptedQty"
+                | "reason"
+                | "catalogSelection"
+                | "newCompanyDrugCode"
+                | "newQuyCach"
+            >
+        >
+    ) {
+        setResponseLines((current) =>
+            current.map((currentLine) =>
+                currentLine.lineId === lineId
+                    ? { ...currentLine, ...changes }
+                    : currentLine
+            )
+        );
+    }
+
+    function updateShipmentLine(
+        orderLineId: string,
+        changes: Partial<Pick<ShipmentDraftLine, "shippedQty" | "reason">>
+    ) {
+        setShipmentLines((current) =>
+            current.map((currentLine) =>
+                currentLine.orderLineId === orderLineId
+                    ? { ...currentLine, ...changes }
+                    : currentLine
+            )
+        );
     }
 
     function openCreateCatalogDialog() {
@@ -1070,9 +1154,705 @@ export default function CompanyDrugOrdersPage() {
         (sum, line) => sum + line.remainingAcceptedQty,
         0
     );
+    const orderFilterCount =
+        (orderSearch.trim() ? 1 : 0) +
+        (orderStatusFilter !== ALL_VALUE ? 1 : 0) +
+        (facilityFilter !== ALL_VALUE ? 1 : 0);
+    const catalogFilterCount =
+        (catalogSearch.trim() ? 1 : 0) +
+        (catalogKindFilter !== "all" ? 1 : 0) +
+        (catalogActiveFilter !== "active" ? 1 : 0);
+    const mobileSectionTabs: DrugOrderMobileSectionTab[] = [
+        { value: "overview", label: "Tổng quan", icon: <ClipboardList className="size-4" /> },
+        { value: "lines", label: "Dòng thuốc", icon: <ListChecks className="size-4" /> },
+        { value: "shipments", label: "Giao hàng", icon: <Truck className="size-4" /> },
+        { value: "history", label: "Lịch sử", icon: <FileText className="size-4" /> },
+    ];
+    const mobileActionBarActions: DrugOrderMobileAction[] = [
+        {
+            id: "respond",
+            label: "Phản hồi",
+            icon: <Send className="size-4" />,
+            hidden: !selectedOrder?.permissions.canRespond,
+            onClick: openResponseDialog,
+        },
+        {
+            id: "shipment",
+            label: "Tạo giao",
+            icon: <Truck className="size-4" />,
+            hidden: !selectedOrder?.permissions.canCreateShipment,
+            variant: "secondary",
+            onClick: openShipmentDialog,
+        },
+        {
+            id: "print",
+            label: "In đơn",
+            icon: <Printer className="size-4" />,
+            hidden: !selectedOrder,
+            variant: "outline",
+            onClick: openPrintOrder,
+        },
+        {
+            id: "refresh",
+            label: "Làm mới",
+            icon: <RefreshCcw className="size-4" />,
+            disabled: !selectedOrderId || isOrderDetailLoading,
+            loading: isOrderDetailLoading,
+            variant: "outline",
+            onClick: () => {
+                if (selectedOrderId) {
+                    void loadOrderDetail(selectedOrderId);
+                }
+            },
+        },
+    ];
+
+    const selectMobileOrder = (orderId: string) => {
+        setSelectedOrderId(orderId);
+        setMobilePane("detail");
+        setMobileSection("overview");
+    };
+
+    const renderMobileTopTabs = () => (
+        <div className="grid grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-white p-1 shadow-sm">
+            <Button
+                type="button"
+                variant={activeTab === "orders" ? "secondary" : "ghost"}
+                onClick={() => setActiveTab("orders")}
+                className={cn(
+                    "rounded-md",
+                    activeTab === "orders" && "bg-blue-50 text-blue-700 hover:bg-blue-50"
+                )}
+            >
+                <ClipboardList className="size-4" />
+                Đơn hàng
+            </Button>
+            <Button
+                type="button"
+                variant={activeTab === "catalog" ? "secondary" : "ghost"}
+                onClick={() => setActiveTab("catalog")}
+                className={cn(
+                    "rounded-md",
+                    activeTab === "catalog" && "bg-blue-50 text-blue-700 hover:bg-blue-50"
+                )}
+            >
+                <PackagePlus className="size-4" />
+                Danh mục
+            </Button>
+        </div>
+    );
+
+    const renderMobileOrderFilters = () => (
+        <DrugOrderMobileFilterPanel
+            open={mobileOrderFiltersOpen}
+            onOpenChange={setMobileOrderFiltersOpen}
+            activeCount={orderFilterCount}
+            title="Lọc đơn hàng"
+        >
+            <div className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
+                <Input
+                    value={orderSearch}
+                    onChange={(event) => setOrderSearch(event.target.value)}
+                    placeholder="Tìm mã đơn hoặc cơ sở"
+                    className="pl-9"
+                />
+            </div>
+
+            <Select value={orderStatusFilter} onValueChange={setOrderStatusFilter}>
+                <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Tất cả trạng thái" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value={ALL_VALUE}>Tất cả trạng thái</SelectItem>
+                    {Object.entries(ORDER_STATUS_META).map(([status, meta]) => (
+                        <SelectItem key={status} value={status}>
+                            {meta.label}
+                        </SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
+
+            <Select value={facilityFilter} onValueChange={setFacilityFilter}>
+                <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Tất cả cơ sở" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value={ALL_VALUE}>Tất cả cơ sở</SelectItem>
+                    {facilities.map((facility) => (
+                        <SelectItem key={facility.id} value={facility.id}>
+                            {facility.facilityName}
+                        </SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
+        </DrugOrderMobileFilterPanel>
+    );
+
+    const renderMobileOrderList = () => (
+        <div className="space-y-4 pb-6">
+            <div className="flex items-start justify-between gap-3">
+                <div>
+                    <h2 className="text-2xl font-bold text-slate-900">Dự trù đặt hàng</h2>
+                    <p className="mt-1 text-sm text-slate-500">
+                        Phản hồi đơn và theo dõi giao hàng.
+                    </p>
+                </div>
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => void refreshOrders(selectedOrderId)}
+                    disabled={isOrdersLoading}
+                    aria-label="Làm mới danh sách đơn"
+                >
+                    {isOrdersLoading ? (
+                        <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                        <RefreshCcw className="size-4" />
+                    )}
+                </Button>
+            </div>
+
+            {renderMobileTopTabs()}
+            {renderMobileOrderFilters()}
+
+            {isOrdersLoading ? (
+                <div className="flex items-center gap-2 rounded-xl border border-dashed border-slate-200 bg-white p-4 text-sm text-slate-500">
+                    <Loader2 className="size-4 animate-spin" />
+                    Đang tải danh sách đơn...
+                </div>
+            ) : filteredOrders.length === 0 ? (
+                <div className="rounded-xl border border-dashed border-slate-200 bg-white p-6 text-center text-sm text-slate-500">
+                    Không có đơn nào khớp điều kiện lọc.
+                </div>
+            ) : (
+                <div className="space-y-3">
+                    {filteredOrders.map((order) => (
+                        <DrugOrderSummaryCard
+                            key={order.id}
+                            title={order.orderNo}
+                            subtitle={`${order.facility.facilityName} (${order.facility.facilityCode})`}
+                            status={<OrderStatusBadge status={order.status} />}
+                            active={order.id === selectedOrderId}
+                            onClick={() => selectMobileOrder(order.id)}
+                            metrics={[
+                                { label: "Dòng thuốc", value: order.lineCount },
+                                { label: "Yêu cầu", value: formatQuantity(order.totalRequestedQty) },
+                                { label: "Chấp nhận", value: formatQuantity(order.totalAcceptedQty) },
+                                { label: "Đã giao", value: formatQuantity(order.totalShippedQty) },
+                            ]}
+                            warnings={
+                                order.pendingCatalogCount > 0
+                                    ? [`${order.pendingCatalogCount} dòng chờ xác nhận danh mục`]
+                                    : []
+                            }
+                            footer={`Cập nhật: ${formatDateTime(order.updatedAt)}`}
+                        />
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+
+    const renderMobileOverview = () => {
+        if (!selectedOrder) {
+            return null;
+        }
+
+        return (
+            <div className="space-y-4">
+                <DrugOrderQrCode
+                    lookupUrl={selectedOrder.lookupUrl}
+                    orderNo={selectedOrder.orderNo}
+                />
+
+                <div className="grid grid-cols-2 gap-2">
+                    {[
+                        ["Tổng dòng", selectedOrder.lines.length],
+                        ["Tổng yêu cầu", formatQuantity(selectedOrderRequestedQty)],
+                        ["Chấp nhận", formatQuantity(selectedOrderAcceptedQty)],
+                        ["Đã giao", formatQuantity(selectedOrderShippedQty)],
+                        ["Chờ xử lý", selectedOrderPendingLineCount],
+                        ["Tháng XNT", selectedOrder.baseReportMonth || "—"],
+                    ].map(([label, value]) => (
+                        <div key={label} className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+                            <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
+                                {label}
+                            </p>
+                            <p className="mt-1 font-semibold text-slate-900">{value}</p>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="rounded-xl border border-slate-200 bg-white p-4">
+                    <p className="font-semibold text-slate-900">Ghi chú từ cơ sở</p>
+                    <p className="mt-2 text-sm text-slate-600">
+                        {selectedOrder.note || "Không có ghi chú."}
+                    </p>
+                </div>
+            </div>
+        );
+    };
+
+    const renderMobileLines = () => {
+        if (!selectedOrder) {
+            return null;
+        }
+
+        return (
+            <div className="space-y-3">
+                {selectedOrder.lines.map((line) => {
+                    const latestShipment = getLineLatestShipment(line);
+                    const primaryDrugName = getLinePrimaryName(line);
+                    const primaryDrugCode = getLinePrimaryCode(line);
+
+                    return (
+                        <DrugOrderLineMobileCard
+                            key={line.id}
+                            title={primaryDrugName}
+                            subtitle={
+                                primaryDrugCode
+                                    ? `Mã thuốc công ty: ${primaryDrugCode}`
+                                    : "Chưa chốt mã thuốc công ty"
+                            }
+                            badges={
+                                <>
+                                    <LineStatusBadge status={line.lineStatus} />
+                                    {!line.companyDrug ? (
+                                        <Badge
+                                            variant="outline"
+                                            className="border-amber-300 text-amber-700"
+                                        >
+                                            Chờ gắn thuốc công ty
+                                        </Badge>
+                                    ) : null}
+                                </>
+                            }
+                            fields={[
+                                { label: "Yêu cầu", value: formatQuantity(line.requestedQty) },
+                                { label: "Chấp nhận", value: formatQuantity(line.acceptedQty) },
+                                { label: "Đã giao", value: formatQuantity(line.totalShippedQty) },
+                                { label: "Còn lại", value: formatQuantity(line.remainingAcceptedQty) },
+                                { label: "Đã nhận", value: formatQuantity(line.totalReceivedQty) },
+                                {
+                                    label: "Đợt gần nhất",
+                                    value: latestShipment
+                                        ? `#${latestShipment.shipmentNo} | ${formatQuantity(latestShipment.shippedQty)}`
+                                        : "—",
+                                },
+                            ]}
+                            suggestion={
+                                line.masterDrug ? (
+                                    <div>
+                                        <p className="font-medium">Thuốc chuẩn</p>
+                                        <p className="mt-1">
+                                            {line.masterDrug.maChung} - {line.masterDrug.tenThuoc}
+                                        </p>
+                                    </div>
+                                ) : null
+                            }
+                            validationMessage={
+                                line.companyResponseReason
+                                    ? `Lý do phản hồi: ${line.companyResponseReason}`
+                                    : null
+                            }
+                        >
+                            <div className="grid gap-2 text-sm">
+                                <DetailField
+                                    label="Hoạt chất"
+                                    value={
+                                        line.companyDrug?.activeIngredient ||
+                                        line.masterDrug?.hoatChat ||
+                                        "—"
+                                    }
+                                />
+                                <DetailField
+                                    label="Quy cách"
+                                    value={
+                                        line.companyDrug?.quyCach ||
+                                        line.masterDrug?.quyCach ||
+                                        "—"
+                                    }
+                                />
+                            </div>
+                        </DrugOrderLineMobileCard>
+                    );
+                })}
+            </div>
+        );
+    };
+
+    const renderMobileShipments = () => {
+        if (!selectedOrder) {
+            return null;
+        }
+
+        if (selectedOrder.shipments.length === 0) {
+            return (
+                <div className="rounded-xl border border-dashed border-slate-200 bg-white p-6 text-center text-sm text-slate-500">
+                    Chưa có đợt giao nào cho đơn này.
+                </div>
+            );
+        }
+
+        return (
+            <div className="space-y-3">
+                {selectedOrder.shipments.map((shipment) => (
+                    <DrugOrderShipmentMobileCard
+                        key={shipment.id}
+                        title={`Đợt giao #${shipment.shipmentNo}`}
+                        subtitle={`Thời gian giao: ${formatShipmentDateRangeLabel({
+                            shippedFromDate: shipment.shippedFromDate,
+                            shippedToDate: shipment.shippedToDate,
+                            shippedAt: shipment.shippedAt,
+                        })}`}
+                        status={<ShipmentStatusBadge status={shipment.status} />}
+                        note={shipment.companyNote || undefined}
+                        lines={shipment.lines.map((line) => ({
+                            id: line.id,
+                            title: line.displayName,
+                            subtitle: `Đơn vị: ${line.unit || "—"}`,
+                            metrics: [
+                                { label: "Yêu cầu", value: formatQuantity(line.requestedQty) },
+                                { label: "Duyệt", value: formatQuantity(line.acceptedQty) },
+                                { label: "Giao", value: formatQuantity(line.shippedQty) },
+                                { label: "Thực nhận", value: formatQuantity(line.receivedQty) },
+                            ],
+                            reason: line.reason ? `Lý do: ${line.reason}` : undefined,
+                        }))}
+                        receipts={
+                            shipment.receipts.length > 0 ? (
+                                <div className="space-y-2 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
+                                    {shipment.receipts.map((receipt) => (
+                                        <div key={receipt.id} className="space-y-1">
+                                            <p>Xác nhận lúc: {formatDateTime(receipt.confirmedAt)}</p>
+                                            <p>Ghi chú: {receipt.note || "Không có"}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="rounded-lg border border-dashed border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+                                    Cơ sở chưa xác nhận thực nhận.
+                                </div>
+                            )
+                        }
+                    />
+                ))}
+            </div>
+        );
+    };
+
+    const renderMobileHistory = () => {
+        if (!selectedOrder) {
+            return null;
+        }
+
+        return (
+            <div className="space-y-3">
+                <div className="rounded-xl border border-slate-200 bg-white p-4">
+                    <h3 className="font-semibold text-slate-900">Mốc thời gian</h3>
+                    <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
+                        <DetailField label="Ngày tạo" value={formatDateTime(selectedOrder.createdAt)} />
+                        <DetailField label="Ngày gửi" value={formatDateTime(selectedOrder.submittedAt)} />
+                        <DetailField label="Cập nhật" value={formatDateTime(selectedOrder.updatedAt)} />
+                        <DetailField label="Đóng đơn" value={formatDateTime(selectedOrder.closedAt)} />
+                    </div>
+                </div>
+
+                {selectedOrder.shipments.flatMap((shipment) =>
+                    shipment.receipts.map((receipt) => (
+                        <div
+                            key={receipt.id}
+                            className="rounded-xl border border-slate-200 bg-white p-4 text-sm"
+                        >
+                            <p className="font-semibold text-slate-900">
+                                Xác nhận đợt giao #{shipment.shipmentNo}
+                            </p>
+                            <p className="mt-1 text-slate-500">
+                                {formatDateTime(receipt.confirmedAt)}
+                            </p>
+                            <p className="mt-2 text-slate-600">
+                                Ghi chú: {receipt.note || "Không có"}
+                            </p>
+                        </div>
+                    ))
+                )}
+            </div>
+        );
+    };
+
+    const renderMobileSelectedSection = () => {
+        if (mobileSection === "lines") {
+            return renderMobileLines();
+        }
+
+        if (mobileSection === "shipments") {
+            return renderMobileShipments();
+        }
+
+        if (mobileSection === "history") {
+            return renderMobileHistory();
+        }
+
+        return renderMobileOverview();
+    };
+
+    const renderMobileOrderDetail = () => {
+        if (!selectedOrderId) {
+            return renderMobileOrderList();
+        }
+
+        if (isOrderDetailLoading || !selectedOrder) {
+            return (
+                <div className="space-y-4 pb-6">
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setMobilePane("list")}
+                    >
+                        <ArrowLeft className="size-4" />
+                        Danh sách đơn
+                    </Button>
+                    <div className="flex items-center gap-2 rounded-xl border border-dashed border-slate-200 bg-white p-4 text-sm text-slate-500">
+                        <Loader2 className="size-4 animate-spin" />
+                        Đang tải chi tiết đơn...
+                    </div>
+                </div>
+            );
+        }
+
+        return (
+            <div className="space-y-4 pb-32">
+                <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setMobilePane("list")}
+                        className="-ml-2 mb-3"
+                    >
+                        <ArrowLeft className="size-4" />
+                        Danh sách đơn
+                    </Button>
+                    <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                            <h2 className="break-words text-xl font-bold text-slate-900">
+                                {selectedOrder.orderNo}
+                            </h2>
+                            <p className="mt-1 text-sm text-slate-600">
+                                {selectedOrder.facility.facilityName}
+                            </p>
+                            <p className="text-xs text-slate-500">
+                                {selectedOrder.facility.facilityCode}
+                            </p>
+                        </div>
+                        <div className="shrink-0">
+                            <OrderStatusBadge status={selectedOrder.status} />
+                        </div>
+                    </div>
+                </div>
+
+                <DrugOrderMobileSectionTabs
+                    value={mobileSection}
+                    tabs={mobileSectionTabs}
+                    onValueChange={(value) =>
+                        setMobileSection(value as CompanyMobileSection)
+                    }
+                    sticky
+                />
+
+                {renderMobileSelectedSection()}
+
+                <DrugOrderMobileActionBar
+                    actions={mobileActionBarActions}
+                    helperText={
+                        selectedOrder.permissions.canRespond
+                            ? "Đơn còn chờ phản hồi từ công ty."
+                            : selectedOrder.permissions.canCreateShipment
+                                ? "Đơn đã sẵn sàng tạo đợt giao."
+                                : "Không có thao tác cần xử lý cho trạng thái hiện tại."
+                    }
+                />
+            </div>
+        );
+    };
+
+    const renderMobileCatalog = () => (
+        <div className="space-y-4 pb-32">
+            <div className="flex items-start justify-between gap-3">
+                <div>
+                    <h2 className="text-2xl font-bold text-slate-900">Danh mục công ty</h2>
+                    <p className="mt-1 text-sm text-slate-500">
+                        Quản lý thuốc công ty đã chuẩn hóa.
+                    </p>
+                </div>
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => void refreshCatalog()}
+                    disabled={isCatalogLoading}
+                    aria-label="Làm mới danh mục"
+                >
+                    {isCatalogLoading ? (
+                        <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                        <RefreshCcw className="size-4" />
+                    )}
+                </Button>
+            </div>
+
+            {renderMobileTopTabs()}
+
+            <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
+                <DrugOrderMobileFilterPanel
+                    open={mobileCatalogFiltersOpen}
+                    onOpenChange={setMobileCatalogFiltersOpen}
+                    activeCount={catalogFilterCount}
+                    title="Lọc danh mục"
+                >
+                    <div className="relative">
+                        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
+                        <Input
+                            value={catalogSearch}
+                            onChange={(event) => setCatalogSearch(event.target.value)}
+                            placeholder="Tìm mã thuốc, tên thuốc"
+                            className="pl-9"
+                        />
+                    </div>
+                    <Select value={catalogKindFilter} onValueChange={setCatalogKindFilter}>
+                        <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Loại danh mục" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">Tất cả</SelectItem>
+                            <SelectItem value="mapped">Đã chuẩn hóa</SelectItem>
+                            <SelectItem value="legacy">Legacy</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <Select value={catalogActiveFilter} onValueChange={setCatalogActiveFilter}>
+                        <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Trạng thái" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">Tất cả</SelectItem>
+                            <SelectItem value="active">Đang dùng</SelectItem>
+                            <SelectItem value="inactive">Ngừng dùng</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </DrugOrderMobileFilterPanel>
+                <Button type="button" onClick={openCreateCatalogDialog}>
+                    <Plus className="size-4" />
+                    Thêm
+                </Button>
+            </div>
+
+            {isCatalogLoading ? (
+                <div className="flex items-center gap-2 rounded-xl border border-dashed border-slate-200 bg-white p-4 text-sm text-slate-500">
+                    <Loader2 className="size-4 animate-spin" />
+                    Đang tải danh mục thuốc công ty...
+                </div>
+            ) : catalogItems.length === 0 ? (
+                <div className="rounded-xl border border-dashed border-slate-200 bg-white p-6 text-center text-sm text-slate-500">
+                    Chưa có thuốc công ty nào khớp điều kiện lọc.
+                </div>
+            ) : (
+                <div className="space-y-3">
+                    {catalogItems.map((item) => (
+                        <DrugOrderLineMobileCard
+                            key={item.id}
+                            title={item.companyDrugName}
+                            subtitle={`Mã thuốc công ty: ${item.companyDrugCode}`}
+                            badges={
+                                <>
+                                    {item.isLegacy ? <Badge variant="secondary">Legacy</Badge> : null}
+                                    <Badge
+                                        variant={item.isActive ? "outline" : "secondary"}
+                                        className={
+                                            item.isActive
+                                                ? "border-emerald-300 text-emerald-700"
+                                                : undefined
+                                        }
+                                    >
+                                        {item.isActive ? "Đang dùng" : "Ngừng dùng"}
+                                    </Badge>
+                                </>
+                            }
+                            fields={[
+                                {
+                                    label: "Hoạt chất",
+                                    value: item.activeIngredient || item.masterDrug?.hoatChat || "—",
+                                },
+                                {
+                                    label: "Đơn vị",
+                                    value: item.unit || item.masterDrug?.donViTinh || "—",
+                                },
+                                {
+                                    label: "Quy cách",
+                                    value: item.quyCach || item.masterDrug?.quyCach || "—",
+                                },
+                                {
+                                    label: "Thuốc chuẩn",
+                                    value: item.masterDrug?.maChung || "Chưa liên kết",
+                                    tone: item.masterDrug ? "default" : "warning",
+                                },
+                            ]}
+                            validationMessage={
+                                !item.canDelete
+                                    ? `Đã phát sinh trong ${formatQuantity(item.referencedOrderLineCount || 0)} dòng đơn`
+                                    : null
+                            }
+                            actions={[
+                                {
+                                    id: "edit",
+                                    label: "Sửa",
+                                    icon: <PencilLine className="size-4" />,
+                                    disabled:
+                                        catalogActionKey === `toggle:${item.id}` ||
+                                        catalogActionKey === `delete:${item.id}`,
+                                    onClick: () => openEditCatalogDialog(item),
+                                },
+                                {
+                                    id: "toggle",
+                                    label: item.isActive ? "Ngừng dùng" : "Dùng lại",
+                                    loading: catalogActionKey === `toggle:${item.id}`,
+                                    variant: "secondary",
+                                    disabled: catalogActionKey === `delete:${item.id}`,
+                                    onClick: () => void handleToggleCatalogActive(item),
+                                },
+                                {
+                                    id: "delete",
+                                    label: "Xóa",
+                                    icon: <Trash2 className="size-4" />,
+                                    loading: catalogActionKey === `delete:${item.id}`,
+                                    disabled:
+                                        !item.canDelete ||
+                                        catalogActionKey === `toggle:${item.id}`,
+                                    variant: "destructive",
+                                    onClick: () => void handleDeleteCatalogItem(item),
+                                },
+                            ]}
+                        />
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+
+    const renderMobileView = () =>
+        activeTab === "catalog"
+            ? renderMobileCatalog()
+            : mobilePane === "detail"
+                ? renderMobileOrderDetail()
+                : renderMobileOrderList();
 
     return (
         <div className="space-y-6">
+            <div className="xl:hidden">{renderMobileView()}</div>
+
+            <div className="hidden space-y-6 xl:block">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                 <div>
                     <h2 className="text-3xl font-bold text-gray-800">Dự trù đặt hàng</h2>
@@ -1302,6 +2082,13 @@ export default function CompanyDrugOrdersPage() {
                                                 <Button type="button" variant="secondary" onClick={openShipmentDialog}>
                                                     <Truck className="mr-2 size-4" />
                                                     Tạo đợt giao
+                                                </Button>
+                                            )}
+
+                                            {selectedOrder && (
+                                                <Button type="button" variant="outline" onClick={openPrintOrder}>
+                                                    <Printer className="mr-2 size-4" />
+                                                    In đơn
                                                 </Button>
                                             )}
                                         </div>
@@ -2114,17 +2901,18 @@ export default function CompanyDrugOrdersPage() {
                     </Card>
                 </TabsContent>
             </Tabs>
+            </div>
 
             <Dialog open={isResponseDialogOpen} onOpenChange={setIsResponseDialogOpen}>
-                <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-6xl">
-                    <DialogHeader>
+                <DialogContent className="!left-0 !top-0 flex !h-[100dvh] !w-screen !max-w-none !translate-x-0 !translate-y-0 flex-col gap-0 overflow-hidden !rounded-none !border-0 !p-0 !shadow-none xl:!left-[50%] xl:!top-[50%] xl:!h-auto xl:!max-h-[90vh] xl:!w-full xl:!max-w-6xl xl:!translate-x-[-50%] xl:!translate-y-[-50%] xl:!rounded-lg xl:!border xl:!shadow-lg">
+                    <DialogHeader className="shrink-0 border-b border-slate-200 px-4 py-4 pr-14 text-left xl:px-6 xl:py-5 xl:pr-16">
                         <DialogTitle>Phản hồi đơn đặt hàng</DialogTitle>
                         <DialogDescription>
                             Xử lý lần lượt từng dòng, hoàn tất quyết định và lý do trước khi lưu phản hồi cho toàn bộ đơn.
                         </DialogDescription>
                     </DialogHeader>
 
-                    <div className="space-y-4">
+                    <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-4 xl:px-6">
                         <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
                             <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                                 <div>
@@ -2251,22 +3039,15 @@ export default function CompanyDrugOrdersPage() {
                                                 <Select
                                                     value={line.decision}
                                                     onValueChange={(value) => {
-                                                        setResponseLines((current) =>
-                                                            current.map((currentLine) =>
-                                                                currentLine.lineId === line.lineId
-                                                                    ? {
-                                                                        ...currentLine,
-                                                                        decision: value as ResponseDecision,
-                                                                        acceptedQty:
-                                                                            value === "CONFIRMED"
-                                                                                ? String(currentLine.requestedQty)
-                                                                                : value === "REJECTED"
-                                                                                    ? "0"
-                                                                                    : currentLine.acceptedQty,
-                                                                    }
-                                                                    : currentLine
-                                                            )
-                                                        );
+                                                        updateResponseLine(line.lineId, {
+                                                            decision: value as ResponseDecision,
+                                                            acceptedQty:
+                                                                value === "CONFIRMED"
+                                                                    ? String(line.requestedQty)
+                                                                    : value === "REJECTED"
+                                                                        ? "0"
+                                                                        : line.acceptedQty,
+                                                        });
                                                     }}
                                                 >
                                                     <SelectTrigger className="w-full">
@@ -2288,16 +3069,11 @@ export default function CompanyDrugOrdersPage() {
                                                     min="0"
                                                     step="0.01"
                                                     value={line.acceptedQty}
-                                                    onChange={(event) => {
-                                                        const nextValue = event.target.value;
-                                                        setResponseLines((current) =>
-                                                            current.map((currentLine) =>
-                                                                currentLine.lineId === line.lineId
-                                                                    ? { ...currentLine, acceptedQty: nextValue }
-                                                                    : currentLine
-                                                            )
-                                                        );
-                                                    }}
+                                                    onChange={(event) =>
+                                                        updateResponseLine(line.lineId, {
+                                                            acceptedQty: event.target.value,
+                                                        })
+                                                    }
                                                     disabled={line.decision !== "PARTIAL"}
                                                 />
                                             </div>
@@ -2309,16 +3085,11 @@ export default function CompanyDrugOrdersPage() {
                                             <Label>Lý do phản hồi</Label>
                                             <Textarea
                                                 value={line.reason}
-                                                onChange={(event) => {
-                                                    const nextValue = event.target.value;
-                                                    setResponseLines((current) =>
-                                                        current.map((currentLine) =>
-                                                            currentLine.lineId === line.lineId
-                                                                ? { ...currentLine, reason: nextValue }
-                                                                : currentLine
-                                                        )
-                                                    );
-                                                }}
+                                                onChange={(event) =>
+                                                    updateResponseLine(line.lineId, {
+                                                        reason: event.target.value,
+                                                    })
+                                                }
                                                 rows={3}
                                                 placeholder="Nhập lý do xác nhận, giao một phần hoặc từ chối"
                                             />
@@ -2358,15 +3129,11 @@ export default function CompanyDrugOrdersPage() {
                                                 <Label>Liên kết thuốc công ty</Label>
                                                 <Select
                                                     value={line.catalogSelection}
-                                                    onValueChange={(value) => {
-                                                        setResponseLines((current) =>
-                                                            current.map((currentLine) =>
-                                                                currentLine.lineId === line.lineId
-                                                                    ? { ...currentLine, catalogSelection: value }
-                                                                    : currentLine
-                                                            )
-                                                        );
-                                                    }}
+                                                    onValueChange={(value) =>
+                                                        updateResponseLine(line.lineId, {
+                                                            catalogSelection: value,
+                                                        })
+                                                    }
                                                 >
                                                     <SelectTrigger className="w-full">
                                                         <SelectValue placeholder="Chọn thuốc công ty" />
@@ -2396,19 +3163,12 @@ export default function CompanyDrugOrdersPage() {
                                                             <Label>Mã thuốc công ty</Label>
                                                             <Input
                                                                 value={line.newCompanyDrugCode}
-                                                                onChange={(event) => {
-                                                                    const nextValue = event.target.value;
-                                                                    setResponseLines((current) =>
-                                                                        current.map((currentLine) =>
-                                                                            currentLine.lineId === line.lineId
-                                                                                ? {
-                                                                                    ...currentLine,
-                                                                                    newCompanyDrugCode: nextValue,
-                                                                                }
-                                                                                : currentLine
-                                                                        )
-                                                                    );
-                                                                }}
+                                                                onChange={(event) =>
+                                                                    updateResponseLine(line.lineId, {
+                                                                        newCompanyDrugCode:
+                                                                            event.target.value,
+                                                                    })
+                                                                }
                                                                 placeholder="VD: CTY-001"
                                                             />
                                                         </div>
@@ -2417,19 +3177,12 @@ export default function CompanyDrugOrdersPage() {
                                                             <Label>Quy cách</Label>
                                                             <Input
                                                                 value={line.newQuyCach}
-                                                                onChange={(event) => {
-                                                                    const nextValue = event.target.value;
-                                                                    setResponseLines((current) =>
-                                                                        current.map((currentLine) =>
-                                                                            currentLine.lineId === line.lineId
-                                                                                ? {
-                                                                                    ...currentLine,
-                                                                                    newQuyCach: nextValue,
-                                                                                }
-                                                                                : currentLine
-                                                                        )
-                                                                    );
-                                                                }}
+                                                                onChange={(event) =>
+                                                                    updateResponseLine(line.lineId, {
+                                                                        newQuyCach:
+                                                                            event.target.value,
+                                                                    })
+                                                                }
                                                             />
                                                         </div>
                                                     </div>
@@ -2499,12 +3252,13 @@ export default function CompanyDrugOrdersPage() {
                         )}
                     </div>
 
-                    <DialogFooter>
+                    <DialogFooter className="grid shrink-0 grid-cols-2 gap-2 border-t border-slate-200 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:flex sm:flex-row sm:justify-end xl:px-6 xl:py-4">
                         <Button
                             type="button"
                             variant="outline"
                             onClick={() => setIsResponseDialogOpen(false)}
                             disabled={isSubmittingResponse}
+                            className="w-full sm:w-auto"
                         >
                             Đóng
                         </Button>
@@ -2512,6 +3266,7 @@ export default function CompanyDrugOrdersPage() {
                             type="button"
                             onClick={handleSubmitResponse}
                             disabled={isSubmittingResponse || responseRemainingCount > 0}
+                            className="w-full sm:w-auto"
                         >
                             {isSubmittingResponse ? (
                                 <Loader2 className="mr-2 size-4 animate-spin" />
@@ -2525,15 +3280,15 @@ export default function CompanyDrugOrdersPage() {
             </Dialog>
 
             <Dialog open={isShipmentDialogOpen} onOpenChange={setIsShipmentDialogOpen}>
-                <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-5xl">
-                    <DialogHeader>
+                <DialogContent className="!left-0 !top-0 flex !h-[100dvh] !w-screen !max-w-none !translate-x-0 !translate-y-0 flex-col gap-0 overflow-hidden !rounded-none !border-0 !p-0 !shadow-none xl:!left-[50%] xl:!top-[50%] xl:!h-auto xl:!max-h-[90vh] xl:!w-full xl:!max-w-5xl xl:!translate-x-[-50%] xl:!translate-y-[-50%] xl:!rounded-lg xl:!border xl:!shadow-lg">
+                    <DialogHeader className="shrink-0 border-b border-slate-200 px-4 py-4 pr-14 text-left xl:px-6 xl:py-5 xl:pr-16">
                         <DialogTitle>Tạo đợt giao hàng</DialogTitle>
                         <DialogDescription>
                             Chỉ nhập các dòng cần giao ở kỳ này. Hệ thống sẽ bỏ qua các dòng có số lượng giao bằng 0.
                         </DialogDescription>
                     </DialogHeader>
 
-                    <div className="space-y-4">
+                    <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-4 xl:px-6">
                         <div className="grid gap-3 md:grid-cols-3">
                             <div className="rounded-xl border border-gray-200 bg-white px-4 py-3">
                                 <p className="text-xs uppercase tracking-wide text-gray-400">
@@ -2596,7 +3351,8 @@ export default function CompanyDrugOrdersPage() {
                                 Không còn dòng nào đủ điều kiện để tạo đợt giao.
                             </div>
                         ) : (
-                            <div className="overflow-x-auto rounded-xl border border-gray-200">
+                            <>
+                            <div className="hidden overflow-x-auto rounded-xl border border-gray-200 xl:block">
                                 <Table>
                                     <TableHeader>
                                         <TableRow>
@@ -2646,41 +3402,23 @@ export default function CompanyDrugOrdersPage() {
                                                         min="0"
                                                         step="0.01"
                                                         value={line.shippedQty}
-                                                        onChange={(event) => {
-                                                            const nextValue =
-                                                                event.target.value;
-                                                            setShipmentLines((current) =>
-                                                                current.map((currentLine) =>
-                                                                    currentLine.orderLineId ===
-                                                                    line.orderLineId
-                                                                        ? {
-                                                                            ...currentLine,
-                                                                            shippedQty: nextValue,
-                                                                        }
-                                                                        : currentLine
-                                                                )
-                                                            );
-                                                        }}
+                                                        onChange={(event) =>
+                                                            updateShipmentLine(
+                                                                line.orderLineId,
+                                                                { shippedQty: event.target.value }
+                                                            )
+                                                        }
                                                     />
                                                 </TableCell>
                                                 <TableCell>
                                                     <Input
                                                         value={line.reason}
-                                                        onChange={(event) => {
-                                                            const nextValue =
-                                                                event.target.value;
-                                                            setShipmentLines((current) =>
-                                                                current.map((currentLine) =>
-                                                                    currentLine.orderLineId ===
-                                                                    line.orderLineId
-                                                                        ? {
-                                                                            ...currentLine,
-                                                                            reason: nextValue,
-                                                                        }
-                                                                        : currentLine
-                                                                )
-                                                            );
-                                                        }}
+                                                        onChange={(event) =>
+                                                            updateShipmentLine(
+                                                                line.orderLineId,
+                                                                { reason: event.target.value }
+                                                            )
+                                                        }
                                                         placeholder="Ví dụ: chia làm 2 đợt"
                                                     />
                                                 </TableCell>
@@ -2689,19 +3427,70 @@ export default function CompanyDrugOrdersPage() {
                                     </TableBody>
                                 </Table>
                             </div>
+                            <div className="space-y-3 xl:hidden">
+                                {shipmentLines.map((line) => (
+                                    <DrugOrderLineMobileCard
+                                        key={line.orderLineId}
+                                        title={line.companyDrugName || line.displayName}
+                                        subtitle={
+                                            line.companyDrugCode
+                                                ? `Mã thuốc công ty: ${line.companyDrugCode}`
+                                                : "Chưa chốt mã thuốc công ty"
+                                        }
+                                        fields={[
+                                            {
+                                                label: "Đã chấp nhận",
+                                                value: `${formatQuantity(line.acceptedQty)} ${line.unit || ""}`,
+                                            },
+                                            {
+                                                label: "Còn lại",
+                                                value: `${formatQuantity(line.remainingAcceptedQty)} ${line.unit || ""}`,
+                                            },
+                                        ]}
+                                        quantityInput={{
+                                            label: "Số giao kỳ này",
+                                            value: line.shippedQty,
+                                            onChange: (value) =>
+                                                updateShipmentLine(line.orderLineId, {
+                                                    shippedQty: value,
+                                                }),
+                                        }}
+                                    >
+                                        <div className="space-y-2">
+                                            <Label>Lý do giao thiếu nếu có</Label>
+                                            <Input
+                                                value={line.reason}
+                                                onChange={(event) =>
+                                                    updateShipmentLine(line.orderLineId, {
+                                                        reason: event.target.value,
+                                                    })
+                                                }
+                                                placeholder="Ví dụ: chia làm 2 đợt"
+                                            />
+                                        </div>
+                                    </DrugOrderLineMobileCard>
+                                ))}
+                            </div>
+                            </>
                         )}
                     </div>
 
-                    <DialogFooter>
+                    <DialogFooter className="grid shrink-0 grid-cols-2 gap-2 border-t border-slate-200 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:flex sm:flex-row sm:justify-end xl:px-6 xl:py-4">
                         <Button
                             type="button"
                             variant="outline"
                             onClick={() => setIsShipmentDialogOpen(false)}
                             disabled={isCreatingShipment}
+                            className="w-full sm:w-auto"
                         >
                             Đóng
                         </Button>
-                        <Button type="button" onClick={handleCreateShipment} disabled={isCreatingShipment}>
+                        <Button
+                            type="button"
+                            onClick={handleCreateShipment}
+                            disabled={isCreatingShipment}
+                            className="w-full sm:w-auto"
+                        >
                             {isCreatingShipment ? (
                                 <Loader2 className="mr-2 size-4 animate-spin" />
                             ) : (
@@ -2714,8 +3503,8 @@ export default function CompanyDrugOrdersPage() {
             </Dialog>
 
             <Dialog open={isCatalogDialogOpen} onOpenChange={setIsCatalogDialogOpen}>
-                <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-4xl">
-                    <DialogHeader>
+                <DialogContent className="!left-0 !top-0 flex !h-[100dvh] !w-screen !max-w-none !translate-x-0 !translate-y-0 flex-col gap-0 overflow-hidden !rounded-none !border-0 !p-0 !shadow-none xl:!left-[50%] xl:!top-[50%] xl:!h-auto xl:!max-h-[90vh] xl:!w-full xl:!max-w-4xl xl:!translate-x-[-50%] xl:!translate-y-[-50%] xl:!rounded-lg xl:!border xl:!shadow-lg">
+                    <DialogHeader className="shrink-0 border-b border-slate-200 px-4 py-4 pr-14 text-left xl:px-6 xl:py-5 xl:pr-16">
                         <DialogTitle>
                             {catalogDraft.id ? "Cập nhật thuốc công ty" : "Thêm thuốc công ty"}
                         </DialogTitle>
@@ -2724,6 +3513,7 @@ export default function CompanyDrugOrdersPage() {
                         </DialogDescription>
                     </DialogHeader>
 
+                    <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 xl:px-6">
                     <div className="grid gap-4 lg:grid-cols-2">
                         <div className="space-y-2 lg:col-span-2">
                             <Label>Thuốc chuẩn đã được ánh xạ</Label>
@@ -2919,17 +3709,24 @@ export default function CompanyDrugOrdersPage() {
                             </Select>
                         </div>
                     </div>
+                    </div>
 
-                    <DialogFooter>
+                    <DialogFooter className="grid shrink-0 grid-cols-2 gap-2 border-t border-slate-200 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:flex sm:flex-row sm:justify-end xl:px-6 xl:py-4">
                         <Button
                             type="button"
                             variant="outline"
                             onClick={() => setIsCatalogDialogOpen(false)}
                             disabled={isSavingCatalog}
+                            className="w-full sm:w-auto"
                         >
                             Đóng
                         </Button>
-                        <Button type="button" onClick={handleSaveCatalog} disabled={isSavingCatalog}>
+                        <Button
+                            type="button"
+                            onClick={handleSaveCatalog}
+                            disabled={isSavingCatalog}
+                            className="w-full sm:w-auto"
+                        >
                             {isSavingCatalog ? (
                                 <Loader2 className="mr-2 size-4 animate-spin" />
                             ) : catalogDraft.id ? (
