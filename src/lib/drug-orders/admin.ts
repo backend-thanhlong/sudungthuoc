@@ -588,6 +588,22 @@ export async function deleteAdminDrugOrder(orderId: string) {
             company: {
                 select: COMPANY_OPTION_SELECT,
             },
+            lines: {
+                select: {
+                    requestedQty: true,
+                    acceptedQty: true,
+                    shipmentLines: {
+                        select: {
+                            shippedQty: true,
+                        },
+                    },
+                    receiptLines: {
+                        select: {
+                            receivedQty: true,
+                        },
+                    },
+                },
+            },
             _count: {
                 select: {
                     lines: true,
@@ -602,38 +618,76 @@ export async function deleteAdminDrugOrder(orderId: string) {
         throw new RouteError(404, "Đơn đặt hàng không tồn tại");
     }
 
-    if (
-        existing.status !== DrugOrderStatus.DRAFT &&
-        existing.status !== DrugOrderStatus.REJECTED
-    ) {
-        throw new RouteError(
-            400,
-            "Chỉ được xóa cứng đơn nháp hoặc đơn đã bị từ chối"
-        );
-    }
+    const totalRequestedQty = existing.lines.reduce(
+        (sum, line) => sum + toNumber(line.requestedQty),
+        0
+    );
+    const totalAcceptedQty = existing.lines.reduce(
+        (sum, line) => sum + toNumber(line.acceptedQty),
+        0
+    );
+    const totalShippedQty = existing.lines.reduce(
+        (sum, line) =>
+            sum +
+            line.shipmentLines.reduce(
+                (shipmentSum, shipmentLine) => shipmentSum + toNumber(shipmentLine.shippedQty),
+                0
+            ),
+        0
+    );
+    const totalReceivedQty = existing.lines.reduce(
+        (sum, line) =>
+            sum +
+            line.receiptLines.reduce(
+                (receiptSum, receiptLine) => receiptSum + toNumber(receiptLine.receivedQty),
+                0
+            ),
+        0
+    );
 
-    if (existing._count.shipments > 0 || existing._count.receipts > 0) {
-        throw new RouteError(
-            400,
-            "Không thể xóa cứng đơn đã phát sinh giao hoặc xác nhận thực nhận"
-        );
-    }
-
-    const deleted = await prisma.drugOrder.deleteMany({
-        where: {
-            id: orderId,
-            status: {
-                in: [DrugOrderStatus.DRAFT, DrugOrderStatus.REJECTED],
+    await prisma.$transaction(async (tx) => {
+        await tx.drugOrderReceiptLine.deleteMany({
+            where: {
+                receipt: {
+                    orderId,
+                },
             },
-        },
-    });
+        });
+        await tx.drugOrderReceipt.deleteMany({
+            where: {
+                orderId,
+            },
+        });
+        await tx.drugOrderShipmentLine.deleteMany({
+            where: {
+                shipment: {
+                    orderId,
+                },
+            },
+        });
+        await tx.drugOrderShipment.deleteMany({
+            where: {
+                orderId,
+            },
+        });
+        await tx.drugOrderLine.deleteMany({
+            where: {
+                orderId,
+            },
+        });
+        const deleted = await tx.drugOrder.deleteMany({
+            where: {
+                id: orderId,
+            },
+        });
 
-    if (deleted.count === 0) {
-        throw new RouteError(
-            409,
-            "Đơn đặt hàng vừa thay đổi trạng thái. Vui lòng tải lại và thử lại."
-        );
-    }
+        if (deleted.count === 0) {
+            throw new RouteError(
+                409,
+                "Đơn đặt hàng vừa bị thay đổi hoặc đã bị xóa. Vui lòng tải lại và thử lại."
+            );
+        }
+    });
 
     return {
         deletedOrder: {
@@ -647,6 +701,10 @@ export async function deleteAdminDrugOrder(orderId: string) {
             lineCount: existing._count.lines,
             shipmentCount: existing._count.shipments,
             receiptCount: existing._count.receipts,
+            totalRequestedQty,
+            totalAcceptedQty,
+            totalShippedQty,
+            totalReceivedQty,
         },
     };
 }

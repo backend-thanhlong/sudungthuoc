@@ -193,6 +193,7 @@ export default function AdminKetQuaLCNTPage() {
     const [deleteLoading, setDeleteLoading] = useState(false);
 
     const latestRequestId = useRef(0);
+    const initialDetailIdHandled = useRef<string | null>(null);
 
     const loadData = useCallback(async (pageToLoad: number = page) => {
         const requestId = latestRequestId.current + 1;
@@ -287,7 +288,7 @@ export default function AdminKetQuaLCNTPage() {
         });
     };
 
-    const handleViewDetail = async (id: string) => {
+    const handleViewDetail = useCallback(async (id: string) => {
         setDetailOpen(true);
         setDetailLoading(true);
         setDetailData(null);
@@ -306,7 +307,18 @@ export default function AdminKetQuaLCNTPage() {
         } finally {
             setDetailLoading(false);
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        const detailId = new URLSearchParams(window.location.search).get("detailId")?.trim();
+
+        if (!detailId || initialDetailIdHandled.current === detailId) {
+            return;
+        }
+
+        initialDetailIdHandled.current = detailId;
+        void handleViewDetail(detailId);
+    }, [handleViewDetail]);
 
     const handleDelete = async () => {
         if (!deleteId) {

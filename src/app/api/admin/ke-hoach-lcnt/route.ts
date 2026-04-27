@@ -25,6 +25,22 @@ const PLAN_INCLUDE = {
                     stt: "asc",
                 },
             },
+            ketQuaLCNTs: {
+                select: {
+                    id: true,
+                    soQdPheDuyetKQLCNT: true,
+                    ngayPheDuyetKQLCNT: true,
+                },
+                orderBy: [
+                    {
+                        ngayPheDuyetKQLCNT: "desc",
+                    },
+                    {
+                        createdAt: "desc",
+                    },
+                ],
+                take: 1,
+            },
         },
         orderBy: {
             createdAt: "asc",
@@ -133,33 +149,44 @@ function serializePlan(plan: KeHoachWithRelations) {
             facilityName: plan.facility.facilityName || "—",
             facilityCode: plan.facility.facilityCode || "—",
         },
-        goiThaus: plan.goiThaus.map((goiThau) => ({
-            id: goiThau.id,
-            tenGoiThau: goiThau.tenGoiThau || "",
-            giaGoiThau: goiThau.giaGoiThau ? Number(goiThau.giaGoiThau) : null,
-            linhVuc: parseJsonArray(goiThau.linhVuc),
-            hinhThucLCNT: goiThau.hinhThucLCNT || "",
-            phuongThucLCNT: goiThau.phuongThucLCNT || "",
-            loaiHopDong: parseJsonArray(goiThau.loaiHopDong),
-            phanLoaiGoiThau: goiThau.phanLoaiGoiThau || "",
-            chiTietNguonVon: goiThau.chiTietNguonVon || "",
-            soLuongPhanLo: goiThau.soLuongPhanLo,
-            thoiGianToChuc: goiThau.thoiGianToChuc || "",
-            thoiGianBatDau: goiThau.thoiGianBatDau || "",
-            thoiGianThucHien: goiThau.thoiGianThucHien || "",
-            trangThai: goiThau.trangThai || "",
-            maThongBao: goiThau.maThongBao || "",
-            phanLos: goiThau.phanLos.map((phanLo) => ({
-                stt: phanLo.stt,
-                tenPhanLo: phanLo.tenPhanLo || "",
-                donViTinh: phanLo.donViTinh || "",
-                soLuong: phanLo.soLuong ? Number(phanLo.soLuong) : null,
-                donGia: phanLo.donGia ? Number(phanLo.donGia) : null,
-                thanhTien: phanLo.thanhTien ? Number(phanLo.thanhTien) : null,
-                thoiGianThucHien: phanLo.thoiGianThucHien || "",
-                donViTinhThoiGian: phanLo.donViTinhThoiGian || "",
-            })),
-        })),
+        goiThaus: plan.goiThaus.map((goiThau) => {
+            const ketQuaLCNT = goiThau.ketQuaLCNTs[0] || null;
+
+            return {
+                id: goiThau.id,
+                tenGoiThau: goiThau.tenGoiThau || "",
+                giaGoiThau: goiThau.giaGoiThau ? Number(goiThau.giaGoiThau) : null,
+                linhVuc: parseJsonArray(goiThau.linhVuc),
+                hinhThucLCNT: goiThau.hinhThucLCNT || "",
+                phuongThucLCNT: goiThau.phuongThucLCNT || "",
+                loaiHopDong: parseJsonArray(goiThau.loaiHopDong),
+                phanLoaiGoiThau: goiThau.phanLoaiGoiThau || "",
+                chiTietNguonVon: goiThau.chiTietNguonVon || "",
+                soLuongPhanLo: goiThau.soLuongPhanLo,
+                thoiGianToChuc: goiThau.thoiGianToChuc || "",
+                thoiGianBatDau: goiThau.thoiGianBatDau || "",
+                thoiGianThucHien: goiThau.thoiGianThucHien || "",
+                trangThai: goiThau.trangThai || "",
+                maThongBao: goiThau.maThongBao || "",
+                ketQuaLCNT: ketQuaLCNT
+                    ? {
+                        id: ketQuaLCNT.id,
+                        soQdPheDuyetKQLCNT: ketQuaLCNT.soQdPheDuyetKQLCNT,
+                        ngayPheDuyetKQLCNT: serializeDateOnly(ketQuaLCNT.ngayPheDuyetKQLCNT),
+                    }
+                    : null,
+                phanLos: goiThau.phanLos.map((phanLo) => ({
+                    stt: phanLo.stt,
+                    tenPhanLo: phanLo.tenPhanLo || "",
+                    donViTinh: phanLo.donViTinh || "",
+                    soLuong: phanLo.soLuong ? Number(phanLo.soLuong) : null,
+                    donGia: phanLo.donGia ? Number(phanLo.donGia) : null,
+                    thanhTien: phanLo.thanhTien ? Number(phanLo.thanhTien) : null,
+                    thoiGianThucHien: phanLo.thoiGianThucHien || "",
+                    donViTinhThoiGian: phanLo.donViTinhThoiGian || "",
+                })),
+            };
+        }),
     };
 }
 

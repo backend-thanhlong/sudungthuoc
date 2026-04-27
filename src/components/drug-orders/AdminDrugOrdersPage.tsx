@@ -19,6 +19,15 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+    AlertDialog,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
     Card,
     CardContent,
     CardDescription,
@@ -216,6 +225,7 @@ interface SummaryMetrics {
 
 type AdminMobilePane = "list" | "detail";
 type AdminMobileSection = "info" | "lines" | "timeline" | "qr";
+type DrugOrderLine = OrderDetail["lines"][number];
 
 const ALL_VALUE = "__all__";
 
@@ -305,6 +315,54 @@ function formatDateTime(value: string | null | undefined) {
     return new Date(value).toLocaleString("vi-VN");
 }
 
+function formatDrugText(value: string | null | undefined) {
+    const normalized = value?.trim();
+    return normalized || "—";
+}
+
+function getLineCompanyDrugName(line: DrugOrderLine) {
+    return line.companyDrug?.companyDrugName || line.displayName;
+}
+
+function getLineCompanyDrugCode(line: DrugOrderLine) {
+    return line.companyDrug?.companyDrugCode || null;
+}
+
+function getLineActiveIngredient(line: DrugOrderLine) {
+    return (
+        line.companyDrug?.activeIngredient ||
+        line.companyDrug?.masterDrug?.hoatChat ||
+        line.masterDrug?.hoatChat ||
+        null
+    );
+}
+
+function getLineRegistrationNumber(line: DrugOrderLine) {
+    return (
+        line.companyDrug?.masterDrug?.soDangKy ||
+        line.masterDrug?.soDangKy ||
+        null
+    );
+}
+
+function getLineDosageForm(line: DrugOrderLine) {
+    return (
+        line.companyDrug?.masterDrug?.dangBaoChe ||
+        line.masterDrug?.dangBaoChe ||
+        null
+    );
+}
+
+function getLineUnit(line: DrugOrderLine) {
+    return (
+        line.companyDrug?.unit ||
+        line.unit ||
+        line.companyDrug?.masterDrug?.donViTinh ||
+        line.masterDrug?.donViTinh ||
+        null
+    );
+}
+
 function OrderStatusBadge({ status }: { status: OrderStatus }) {
     const meta = ORDER_STATUS_META[status];
 
@@ -354,6 +412,8 @@ export default function AdminDrugOrdersPage() {
     const [isListLoading, setIsListLoading] = useState(true);
     const [isDetailLoading, setIsDetailLoading] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [deleteConfirmationText, setDeleteConfirmationText] = useState("");
     const [mobilePane, setMobilePane] = useState<AdminMobilePane>("list");
     const [mobileSection, setMobileSection] = useState<AdminMobileSection>("info");
     const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
@@ -463,24 +523,34 @@ export default function AdminDrugOrdersPage() {
             (sum, shipment) => sum + shipment.receipts.length,
             0
         ) || 0;
-    const canHardDeleteSelectedOrder = Boolean(
+    const canDeleteSelectedOrder = Boolean(selectedOrder);
+    const deleteConfirmationMatches = Boolean(
         selectedOrder &&
-            (selectedOrder.status === "DRAFT" ||
-                selectedOrder.status === "REJECTED") &&
-            selectedOrderShipmentCount === 0 &&
-            selectedOrderReceiptCount === 0
+            deleteConfirmationText.trim() === selectedOrder.orderNo
     );
 
-    const handleDeleteOrder = async () => {
-        if (!selectedOrder || !canHardDeleteSelectedOrder) {
+    const handleDeleteDialogOpenChange = (open: boolean) => {
+        if (isDeleting) {
             return;
         }
 
-        const confirmed = window.confirm(
-            `Xóa vĩnh viễn đơn ${selectedOrder.orderNo}?\n\nChỉ các đơn nháp hoặc đã bị từ chối, chưa phát sinh giao/nhận mới được xóa cứng. Thao tác này không thể hoàn tác.`
-        );
+        setDeleteDialogOpen(open);
+        if (!open) {
+            setDeleteConfirmationText("");
+        }
+    };
 
-        if (!confirmed) {
+    const openDeleteDialog = () => {
+        if (!selectedOrder) {
+            return;
+        }
+
+        setDeleteConfirmationText("");
+        setDeleteDialogOpen(true);
+    };
+
+    const handleDeleteOrder = async () => {
+        if (!selectedOrder || !deleteConfirmationMatches) {
             return;
         }
 
@@ -495,9 +565,12 @@ export default function AdminDrugOrdersPage() {
                 throw new Error(payload.message || "Không thể xóa đơn");
             }
 
+            setDeleteDialogOpen(false);
+            setDeleteConfirmationText("");
+            setSelectedOrderId(null);
             setSelectedOrder(null);
             setMobilePane("list");
-            await refreshOrders();
+            await refreshOrders(null);
             toast.success(payload.message || "Đã xóa đơn dự trù đặt hàng");
         } catch (error) {
             console.error(error);
@@ -852,19 +925,34 @@ export default function AdminDrugOrdersPage() {
                 {selectedOrder.lines.map((line) => (
                     <DrugOrderLineMobileCard
                         key={line.id}
-                        title={line.displayName}
-                        subtitle={`Đơn vị: ${line.unit || "—"}`}
+                        title={getLineCompanyDrugName(line)}
+                        subtitle={`Hoạt chất: ${formatDrugText(getLineActiveIngredient(line))}`}
                         badges={
                             <>
                                 <LineStatusBadge status={line.lineStatus} />
-                                <Badge variant="outline">
-                                    {line.sourceType === "MASTER_DRUG"
-                                        ? "Danh mục chung"
-                                        : "Danh mục công ty"}
-                                </Badge>
                             </>
                         }
                         fields={[
+                            {
+                                label: "Mã CT",
+                                value: formatDrugText(getLineCompanyDrugCode(line)),
+                                tone: getLineCompanyDrugCode(line) ? "default" : "muted",
+                            },
+                            {
+                                label: "Số đăng ký",
+                                value: formatDrugText(getLineRegistrationNumber(line)),
+                                tone: getLineRegistrationNumber(line) ? "default" : "muted",
+                            },
+                            {
+                                label: "Dạng bào chế",
+                                value: formatDrugText(getLineDosageForm(line)),
+                                tone: getLineDosageForm(line) ? "default" : "muted",
+                            },
+                            {
+                                label: "Đơn vị",
+                                value: formatDrugText(getLineUnit(line)),
+                                tone: getLineUnit(line) ? "default" : "muted",
+                            },
                             { label: "Yêu cầu", value: formatQuantity(line.requestedQty) },
                             { label: "Chấp nhận", value: formatQuantity(line.acceptedQty) },
                             { label: "Đã giao", value: formatQuantity(line.totalShippedQty) },
@@ -876,29 +964,6 @@ export default function AdminDrugOrdersPage() {
                                 tone: line.suggestedQty === null ? "muted" : "default",
                             },
                         ]}
-                        suggestion={
-                            line.masterDrug || line.companyDrug ? (
-                                <div className="space-y-2">
-                                    {line.masterDrug ? (
-                                        <div>
-                                            <p className="font-medium">Thuốc chuẩn</p>
-                                            <p className="mt-1">
-                                                {line.masterDrug.maChung} - {line.masterDrug.tenThuoc}
-                                            </p>
-                                        </div>
-                                    ) : null}
-                                    {line.companyDrug ? (
-                                        <div>
-                                            <p className="font-medium">Thuốc công ty</p>
-                                            <p className="mt-1">
-                                                {line.companyDrug.companyDrugCode} -{" "}
-                                                {line.companyDrug.companyDrugName}
-                                            </p>
-                                        </div>
-                                    ) : null}
-                                </div>
-                            ) : null
-                        }
                         validationMessage={
                             line.companyResponseReason
                                 ? `Lý do công ty: ${line.companyResponseReason}`
@@ -1006,6 +1071,79 @@ export default function AdminDrugOrdersPage() {
         return renderMobileInfoSection();
     };
 
+    const renderDeleteDialog = () => {
+        if (!selectedOrder) {
+            return null;
+        }
+
+        return (
+            <AlertDialog
+                open={deleteDialogOpen}
+                onOpenChange={handleDeleteDialogOpenChange}
+            >
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Xóa vĩnh viễn đơn {selectedOrder.orderNo}</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Thao tác này xóa toàn bộ đơn, dòng thuốc, đợt giao và xác nhận thực nhận liên quan. Không thể hoàn tác.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+
+                    <div className="grid gap-3 rounded-lg border border-rose-100 bg-rose-50 p-3 text-sm text-rose-900 sm:grid-cols-2">
+                        <div>
+                            <p className="text-xs font-medium uppercase text-rose-700">Trạng thái</p>
+                            <p className="mt-1 font-semibold">
+                                {ORDER_STATUS_META[selectedOrder.status].label}
+                            </p>
+                        </div>
+                        <div>
+                            <p className="text-xs font-medium uppercase text-rose-700">Dòng thuốc</p>
+                            <p className="mt-1 font-semibold">{selectedOrder.lines.length}</p>
+                        </div>
+                        <div>
+                            <p className="text-xs font-medium uppercase text-rose-700">Đợt giao</p>
+                            <p className="mt-1 font-semibold">{selectedOrderShipmentCount}</p>
+                        </div>
+                        <div>
+                            <p className="text-xs font-medium uppercase text-rose-700">Phiếu nhận</p>
+                            <p className="mt-1 font-semibold">{selectedOrderReceiptCount}</p>
+                        </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="delete-order-confirmation">
+                            Nhập mã đơn để xác nhận
+                        </Label>
+                        <Input
+                            id="delete-order-confirmation"
+                            value={deleteConfirmationText}
+                            onChange={(event) => setDeleteConfirmationText(event.target.value)}
+                            placeholder={selectedOrder.orderNo}
+                            disabled={isDeleting}
+                        />
+                    </div>
+
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={isDeleting}>Hủy</AlertDialogCancel>
+                        <Button
+                            type="button"
+                            variant="destructive"
+                            disabled={isDeleting || !deleteConfirmationMatches}
+                            onClick={() => void handleDeleteOrder()}
+                        >
+                            {isDeleting ? (
+                                <Loader2 className="size-4 animate-spin" />
+                            ) : (
+                                <Trash2 className="size-4" />
+                            )}
+                            Xóa vĩnh viễn
+                        </Button>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+        );
+    };
+
     const renderMobileDeleteAction = () => {
         if (!selectedOrder) {
             return null;
@@ -1016,20 +1154,15 @@ export default function AdminDrugOrdersPage() {
                 <div className="space-y-1">
                     <h3 className="font-semibold text-rose-900">Xóa đơn</h3>
                     <p className="text-sm text-rose-700">
-                        Chỉ đơn nháp hoặc bị từ chối, chưa phát sinh giao/nhận mới được xóa cứng.
+                        Admin có thể xóa vĩnh viễn mọi đơn, kể cả đơn đã phát sinh giao hoặc nhận.
                     </p>
                 </div>
-                {!canHardDeleteSelectedOrder ? (
-                    <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
-                        Đơn đã qua vận hành hoặc chưa ở trạng thái nháp/từ chối nên bị khóa xóa cứng.
-                    </p>
-                ) : null}
                 <Button
                     type="button"
                     variant="destructive"
                     className="mt-4 w-full"
-                    onClick={() => void handleDeleteOrder()}
-                    disabled={isDeleting || !canHardDeleteSelectedOrder}
+                    onClick={openDeleteDialog}
+                    disabled={isDeleting || !canDeleteSelectedOrder}
                 >
                     {isDeleting ? (
                         <Loader2 className="size-4 animate-spin" />
@@ -1133,6 +1266,7 @@ export default function AdminDrugOrdersPage() {
 
     return (
         <div className="space-y-6">
+            {renderDeleteDialog()}
             <div className="xl:hidden">{renderMobileView()}</div>
 
             <div className="hidden space-y-6 xl:block">
@@ -1140,7 +1274,7 @@ export default function AdminDrugOrdersPage() {
                 <div>
                     <h2 className="text-3xl font-bold text-gray-800">Giám sát dự trù đặt hàng</h2>
                     <p className="mt-1 text-gray-500">
-                        Theo dõi toàn bộ luồng từ tạo đơn, phản hồi công ty, giao hàng đến xác nhận thực nhận. Chỉ đơn nháp hoặc bị từ chối, chưa phát sinh giao nhận mới được xóa cứng.
+                        Theo dõi toàn bộ luồng từ tạo đơn, phản hồi công ty, giao hàng đến xác nhận thực nhận.
                     </p>
                 </div>
 
@@ -1335,8 +1469,8 @@ export default function AdminDrugOrdersPage() {
                                     <Button
                                         type="button"
                                         variant="destructive"
-                                        onClick={() => void handleDeleteOrder()}
-                                        disabled={isDeleting || !canHardDeleteSelectedOrder}
+                                        onClick={openDeleteDialog}
+                                        disabled={isDeleting || !canDeleteSelectedOrder}
                                     >
                                         {isDeleting ? (
                                             <Loader2 className="mr-2 size-4 animate-spin" />
@@ -1345,11 +1479,6 @@ export default function AdminDrugOrdersPage() {
                                         )}
                                         Xóa đơn
                                     </Button>
-                                    {!canHardDeleteSelectedOrder ? (
-                                        <p className="max-w-xs text-right text-xs text-amber-700">
-                                            Đơn đã qua vận hành hoặc chưa ở trạng thái nháp/từ chối nên bị khóa xóa cứng.
-                                        </p>
-                                    ) : null}
                                 </div>
                             )}
                         </div>
@@ -1422,29 +1551,32 @@ export default function AdminDrugOrdersPage() {
                                     <Table>
                                         <TableHeader>
                                             <TableRow>
-                                                <TableHead>Thuốc</TableHead>
-                                                <TableHead>Nguồn</TableHead>
+                                                <TableHead>Thuốc công ty</TableHead>
+                                                <TableHead>Số đăng ký</TableHead>
+                                                <TableHead>Dạng bào chế</TableHead>
+                                                <TableHead>Đơn vị</TableHead>
                                                 <TableHead className="text-right">Yêu cầu</TableHead>
                                                 <TableHead className="text-right">Chấp nhận</TableHead>
                                                 <TableHead className="text-right">Đã giao</TableHead>
                                                 <TableHead className="text-right">Đã nhận</TableHead>
+                                                <TableHead className="text-right">Còn lại</TableHead>
                                                 <TableHead>Trạng thái</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
                                             {selectedOrder.lines.map((line) => (
                                                 <TableRow key={line.id}>
-                                                    <TableCell className="min-w-[320px]">
+                                                    <TableCell className="min-w-[360px]">
                                                         <div className="space-y-1">
-                                                            <p className="font-medium text-slate-900">{line.displayName}</p>
-                                                            <p className="text-xs text-slate-500">
-                                                                Đơn vị: {line.unit || "—"}
+                                                            <p className="font-medium text-slate-900">
+                                                                {getLineCompanyDrugName(line)}
                                                             </p>
-                                                            {line.masterDrug && (
-                                                                <p className="text-xs text-slate-500">
-                                                                    Thuốc chuẩn: {line.masterDrug.maChung} - {line.masterDrug.tenThuoc}
-                                                                </p>
-                                                            )}
+                                                            <p className="text-xs text-slate-500">
+                                                                Mã CT: {formatDrugText(getLineCompanyDrugCode(line))}
+                                                            </p>
+                                                            <p className="text-xs text-slate-500">
+                                                                Hoạt chất: {formatDrugText(getLineActiveIngredient(line))}
+                                                            </p>
                                                             {line.companyResponseReason && (
                                                                 <p className="text-xs text-slate-500">
                                                                     Lý do công ty: {line.companyResponseReason}
@@ -1452,15 +1584,14 @@ export default function AdminDrugOrdersPage() {
                                                             )}
                                                         </div>
                                                     </TableCell>
-                                                    <TableCell>
-                                                        <Badge variant="outline">
-                                                            {line.sourceType === "MASTER_DRUG" ? "Danh mục chung" : "Danh mục công ty"}
-                                                        </Badge>
-                                                    </TableCell>
+                                                    <TableCell>{formatDrugText(getLineRegistrationNumber(line))}</TableCell>
+                                                    <TableCell>{formatDrugText(getLineDosageForm(line))}</TableCell>
+                                                    <TableCell>{formatDrugText(getLineUnit(line))}</TableCell>
                                                     <TableCell className="text-right">{formatQuantity(line.requestedQty)}</TableCell>
                                                     <TableCell className="text-right">{formatQuantity(line.acceptedQty)}</TableCell>
                                                     <TableCell className="text-right">{formatQuantity(line.totalShippedQty)}</TableCell>
                                                     <TableCell className="text-right">{formatQuantity(line.totalReceivedQty)}</TableCell>
+                                                    <TableCell className="text-right">{formatQuantity(line.remainingAcceptedQty)}</TableCell>
                                                     <TableCell>
                                                         <Badge
                                                             variant={LINE_STATUS_META[line.lineStatus].variant}

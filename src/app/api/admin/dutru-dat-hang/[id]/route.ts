@@ -59,6 +59,10 @@ export async function DELETE(
                 lineCount: response.deletedOrder.lineCount,
                 shipmentCount: response.deletedOrder.shipmentCount,
                 receiptCount: response.deletedOrder.receiptCount,
+                totalRequestedQty: response.deletedOrder.totalRequestedQty,
+                totalAcceptedQty: response.deletedOrder.totalAcceptedQty,
+                totalShippedQty: response.deletedOrder.totalShippedQty,
+                totalReceivedQty: response.deletedOrder.totalReceivedQty,
                 message: `Admin xóa đơn dự trù ${response.deletedOrder.orderNo}`,
             },
         });

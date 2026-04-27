@@ -1,6 +1,7 @@
 "use client";
 
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,6 +36,12 @@ interface PhanLo {
     donViTinhThoiGian: string;
 }
 
+interface KetQuaLCNTLink {
+    id: string;
+    soQdPheDuyetKQLCNT: string;
+    ngayPheDuyetKQLCNT: string;
+}
+
 interface GoiThau {
     id: string;
     tenGoiThau: string;
@@ -51,6 +58,7 @@ interface GoiThau {
     thoiGianThucHien: string;
     trangThai: string;
     maThongBao: string;
+    ketQuaLCNT: KetQuaLCNTLink | null;
     phanLos: PhanLo[];
 }
 
@@ -1145,6 +1153,7 @@ export default function AdminKeHoachLCNTPage() {
                                                         <TableHead className="text-white font-bold">Giá gói thầu</TableHead>
                                                         <TableHead className="text-white font-bold">Hình thức</TableHead>
                                                         <TableHead className="text-white font-bold">Phân loại</TableHead>
+                                                        <TableHead className="text-white font-bold">Số QĐ phê duyệt KQLCNT</TableHead>
                                                         <TableHead className="text-white font-bold">Phần lô</TableHead>
                                                         <TableHead className="text-white font-bold">Thao tác</TableHead>
                                                     </TableRow>
@@ -1161,6 +1170,20 @@ export default function AdminKeHoachLCNTPage() {
                                                             </TableCell>
                                                             <TableCell className="text-sm">{gt.hinhThucLCNT || "—"}</TableCell>
                                                             <TableCell className="text-sm max-w-xs truncate">{gt.phanLoaiGoiThau || "—"}</TableCell>
+                                                            <TableCell className="min-w-[190px]">
+                                                                {gt.ketQuaLCNT ? (
+                                                                    <Link
+                                                                        href={`/dashboard/admin/mua-sam/ket-qua-lcnt/${encodeURIComponent(gt.ketQuaLCNT.id)}`}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="font-mono text-sm font-semibold text-blue-600 underline-offset-4 hover:text-blue-800 hover:underline"
+                                                                    >
+                                                                        {gt.ketQuaLCNT.soQdPheDuyetKQLCNT}
+                                                                    </Link>
+                                                                ) : (
+                                                                    <span className="text-gray-400">—</span>
+                                                                )}
+                                                            </TableCell>
                                                             <TableCell className="text-center">
                                                                 <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-100 text-amber-700 font-bold text-xs">
                                                                     {gt.phanLos.length}
