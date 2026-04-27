@@ -1,11 +1,40 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
+import {
+    BarChart3,
+    Building2,
+    CalendarDays,
+    ChevronDown,
+    CircleCheck,
+    ClipboardCheck,
+    ClipboardList,
+    FileBarChart,
+    History,
+    KeyRound,
+    LayoutDashboard,
+    ListTree,
+    LogOut,
+    Megaphone,
+    Menu,
+    PackageCheck,
+    PanelLeftClose,
+    PanelLeftOpen,
+    Pill,
+    QrCode,
+    Search,
+    Settings,
+    ShoppingCart,
+    Sparkles,
+    Users,
+    X,
+    type LucideIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import AIAssistantPanel from "@/components/ai/AIAssistantPanel";
 import ChangePasswordDialog from "@/components/ChangePasswordDialog";
 import NotificationBell from "@/components/NotificationBell";
 import {
@@ -15,11 +44,18 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
 interface NavItem {
     label: string;
     href: string;
-    icon: React.ReactNode;
+    icon: LucideIcon;
     children?: NavItem[];
 }
 
@@ -27,196 +63,111 @@ const adminNavItems: NavItem[] = [
     {
         label: "Tổng quan",
         href: "/dashboard/admin",
-        icon: (
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
-        ),
+        icon: LayoutDashboard,
     },
     {
         label: "Tổng hợp mua sắm",
         href: "#mua-sam-admin",
-        icon: (
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" />
-            </svg>
-        ),
+        icon: ShoppingCart,
         children: [
             {
                 label: "Quản lý KH LCNT",
                 href: "/dashboard/admin/mua-sam/lap-ke-hoach-lcnt",
-                icon: (
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                ),
+                icon: ClipboardList,
             },
             {
                 label: "Thông báo mời thầu",
                 href: "/dashboard/admin/mua-sam/thong-bao-moi-thau",
-                icon: (
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
-                    </svg>
-                ),
+                icon: Megaphone,
             },
             {
                 label: "Kết quả LCNT",
                 href: "/dashboard/admin/mua-sam/ket-qua-lcnt",
-                icon: (
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                ),
+                icon: CircleCheck,
             },
             {
                 label: "Tra cứu",
                 href: "/dashboard/admin/mua-sam/tra-cuu",
-                icon: (
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                ),
+                icon: Search,
             },
             {
                 label: "Thống kê",
                 href: "/dashboard/admin/mua-sam/thong-ke",
-                icon: (
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                ),
+                icon: BarChart3,
             },
         ],
     },
     {
         label: "Danh mục dùng chung",
         href: "/dashboard/admin/master-drugs",
-        icon: (
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-            </svg>
-        ),
+        icon: Pill,
     },
     {
         label: "Duyệt ánh xạ",
         href: "/dashboard/admin/mappings",
-        icon: (
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-            </svg>
-        ),
+        icon: ClipboardCheck,
     },
     {
         label: "Tổng hợp Xuất-Nhập-Tồn",
         href: "/dashboard/admin/reports",
-        icon: (
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-        ),
+        icon: FileBarChart,
     },
     {
         label: "Báo cáo nâng cao",
         href: "/dashboard/admin/reports-advanced",
-        icon: (
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-        ),
+        icon: BarChart3,
     },
     {
         label: "Dự trù đặt hàng",
         href: "#dutru-dat-hang-admin",
-        icon: (
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6M7 4h10a2 2 0 012 2v12a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2z" />
-            </svg>
-        ),
+        icon: PackageCheck,
         children: [
             {
                 label: "Quản lý đơn",
                 href: "/dashboard/admin/dutru-dat-hang",
-                icon: (
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6M7 4h10a2 2 0 012 2v12a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2z" />
-                    </svg>
-                ),
+                icon: ClipboardList,
             },
             {
                 label: "Tra cứu QR đơn",
                 href: "/dashboard/dutru-dat-hang/tra-cuu",
-                icon: (
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m0 14v1m8-8h-1M5 12H4m13.657-5.657-.707.707M7.05 16.95l-.707.707m11.314 0-.707-.707M7.05 7.05l-.707-.707M9 9h6v6H9z" />
-                    </svg>
-                ),
+                icon: QrCode,
             },
         ],
     },
     {
         label: "Tra cứu tồn kho",
         href: "/dashboard/inventory-search",
-        icon: (
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-        ),
+        icon: Search,
     },
     {
         label: "Cài đặt",
         href: "#cai-dat-admin",
-        icon: (
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317a1 1 0 011.35-.936l1.2.48a1 1 0 00.75 0l1.2-.48a1 1 0 011.35.936l.106 1.287a1 1 0 00.53.79l1.115.62a1 1 0 01.37 1.37l-.6 1.04a1 1 0 000 1l.6 1.04a1 1 0 01-.37 1.37l-1.115.62a1 1 0 00-.53.79l-.106 1.287a1 1 0 01-1.35.936l-1.2-.48a1 1 0 00-.75 0l-1.2.48a1 1 0 01-1.35-.936l-.106-1.287a1 1 0 00-.53-.79l-1.115-.62a1 1 0 01-.37-1.37l.6-1.04a1 1 0 000-1l-.6-1.04a1 1 0 01.37-1.37l1.115-.62a1 1 0 00.53-.79l.106-1.287z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15a3 3 0 100-6 3 3 0 000 6z" />
-            </svg>
-        ),
+        icon: Settings,
         children: [
             {
                 label: "Quản lý Users",
                 href: "/dashboard/admin/users",
-                icon: (
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                    </svg>
-                ),
+                icon: Users,
             },
             {
                 label: "Quản lý Companies",
                 href: "/dashboard/admin/companies",
-                icon: (
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21h18M5 21V7l8-4 6 4v14M9 9h.01M9 13h.01M9 17h.01M15 9h.01M15 13h.01M15 17h.01" />
-                    </svg>
-                ),
+                icon: Building2,
             },
             {
                 label: "Quản lý kỳ báo cáo",
                 href: "/dashboard/admin/report-periods",
-                icon: (
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                ),
+                icon: CalendarDays,
             },
             {
                 label: "Danh mục nhóm điều trị",
                 href: "/dashboard/admin/therapeutic-groups",
-                icon: (
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h10M7 12h8M7 17h6M5 4h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z" />
-                    </svg>
-                ),
+                icon: ListTree,
             },
             {
                 label: "Nhật ký hoạt động",
                 href: "/dashboard/admin/activity-logs",
-                icon: (
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                ),
+                icon: History,
             },
         ],
     },
@@ -226,132 +177,76 @@ const facilityNavItems: NavItem[] = [
     {
         label: "Tổng quan",
         href: "/dashboard/facility",
-        icon: (
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
-        ),
+        icon: LayoutDashboard,
     },
     {
         label: "Báo cáo mua sắm",
         href: "#mua-sam",
-        icon: (
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" />
-            </svg>
-        ),
+        icon: ShoppingCart,
         children: [
             {
                 label: "Lập Kế hoạch LCNT",
                 href: "/dashboard/facility/mua-sam/lap-ke-hoach-lcnt",
-                icon: (
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                ),
+                icon: ClipboardList,
             },
             {
                 label: "Thông báo mời thầu",
                 href: "/dashboard/facility/mua-sam/thong-bao-moi-thau",
-                icon: (
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
-                    </svg>
-                ),
+                icon: Megaphone,
             },
             {
                 label: "Kết quả LCNT",
                 href: "/dashboard/facility/mua-sam/ket-qua-lcnt",
-                icon: (
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                ),
+                icon: CircleCheck,
             },
             {
                 label: "Tra cứu",
                 href: "/dashboard/facility/mua-sam/tra-cuu",
-                icon: (
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                ),
+                icon: Search,
             },
             {
                 label: "Thống kê",
                 href: "/dashboard/facility/mua-sam/thong-ke",
-                icon: (
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                ),
+                icon: BarChart3,
             },
         ],
     },
     {
         label: "Danh mục dùng chung",
         href: "/dashboard/admin/master-drugs",
-        icon: (
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-            </svg>
-        ),
+        icon: Pill,
     },
     {
         label: "Ánh xạ danh mục thuốc",
         href: "/dashboard/facility/mappings",
-        icon: (
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-            </svg>
-        ),
+        icon: ListTree,
     },
     {
         label: "Báo cáo Xuất-Nhập-Tồn",
         href: "/dashboard/facility/reports",
-        icon: (
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-        ),
+        icon: FileBarChart,
     },
     {
         label: "Dự trù đặt hàng",
         href: "#dutru-dat-hang-facility",
-        icon: (
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6M7 4h10a2 2 0 012 2v12a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2z" />
-            </svg>
-        ),
+        icon: PackageCheck,
         children: [
             {
                 label: "Quản lý đơn",
                 href: "/dashboard/facility/dutru-dat-hang",
-                icon: (
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6M7 4h10a2 2 0 012 2v12a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2z" />
-                    </svg>
-                ),
+                icon: ClipboardList,
             },
             {
                 label: "Tra cứu QR đơn",
                 href: "/dashboard/dutru-dat-hang/tra-cuu",
-                icon: (
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m0 14v1m8-8h-1M5 12H4m13.657-5.657-.707.707M7.05 16.95l-.707.707m11.314 0-.707-.707M7.05 7.05l-.707-.707M9 9h6v6H9z" />
-                    </svg>
-                ),
+                icon: QrCode,
             },
         ],
     },
     {
         label: "Tra cứu tồn kho",
         href: "/dashboard/inventory-search",
-        icon: (
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-        ),
+        icon: Search,
     },
 ];
 
@@ -359,41 +254,67 @@ const companyNavItems: NavItem[] = [
     {
         label: "Dự trù đặt hàng",
         href: "#dutru-dat-hang-company",
-        icon: (
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6M7 4h10a2 2 0 012 2v12a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2z" />
-            </svg>
-        ),
+        icon: PackageCheck,
         children: [
             {
                 label: "Quản lý đơn",
                 href: "/dashboard/company/dutru-dat-hang",
-                icon: (
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6M7 4h10a2 2 0 012 2v12a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2z" />
-                    </svg>
-                ),
+                icon: ClipboardList,
             },
             {
                 label: "Tra cứu QR đơn",
                 href: "/dashboard/dutru-dat-hang/tra-cuu",
-                icon: (
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m0 14v1m8-8h-1M5 12H4m13.657-5.657-.707.707M7.05 16.95l-.707.707m11.314 0-.707-.707M7.05 7.05l-.707-.707M9 9h6v6H9z" />
-                    </svg>
-                ),
+                icon: QrCode,
             },
         ],
     },
 ];
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+function pathMatchesHref(pathname: string, href: string) {
+    if (href.startsWith("#")) {
+        return false;
+    }
+
+    return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+function NavTooltip({
+    enabled,
+    label,
+    children,
+}: {
+    enabled: boolean;
+    label: string;
+    children: ReactNode;
+}) {
+    if (!enabled) {
+        return children;
+    }
+
+    return (
+        <Tooltip>
+            <TooltipTrigger asChild>{children}</TooltipTrigger>
+            <TooltipContent side="right">{label}</TooltipContent>
+        </Tooltip>
+    );
+}
+
+function BrandMark() {
+    return (
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white shadow-sm shadow-blue-600/20">
+            <Pill className="size-5" />
+        </div>
+    );
+}
+
+export default function DashboardLayout({ children }: { children: ReactNode }) {
     const { data: session } = useSession();
     const pathname = usePathname();
     const isPrintRoute = pathname.endsWith("/print");
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [mobileNavOpen, setMobileNavOpen] = useState(false);
     const [changePasswordOpen, setChangePasswordOpen] = useState(false);
+    const [aiAssistantOpen, setAiAssistantOpen] = useState(false);
     const [openDropdowns, setOpenDropdowns] = useState<string[]>([]);
 
     const toggleDropdown = (label: string) => {
@@ -409,11 +330,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             ? companyNavItems
             : facilityNavItems;
     const roleLabel = role === "ADMIN" ? "Admin" : role === "COMPANY" ? "Công ty" : "Cơ sở";
+    const userName = session?.user?.name || "Người dùng";
+    const userInitial = userName[0]?.toUpperCase() || "U";
+    const canUseAI = role === "ADMIN" || role === "FACILITY";
     const headerTitle = role === "ADMIN"
         ? "Sở Y Tế - Quản trị hệ thống"
         : role === "COMPANY"
             ? `Công ty - ${session?.user?.name || "Tài khoản công ty"}`
-            : session?.user?.name;
+            : session?.user?.name || "Dashboard";
+
+    const isNavItemActive = (item: NavItem) => {
+        if (item.children) {
+            return item.children.some((child) => pathMatchesHref(pathname, child.href));
+        }
+
+        return pathMatchesHref(pathname, item.href);
+    };
 
     const handleLogout = async () => {
         await signOut({ callbackUrl: "/login" });
@@ -421,74 +353,88 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     const renderNavItems = ({
         expanded,
+        collapsedTooltips = false,
         onNavigate,
     }: {
         expanded: boolean;
+        collapsedTooltips?: boolean;
         onNavigate?: () => void;
     }) =>
         navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = isNavItemActive(item);
+
             if (item.children) {
-                const isChildActive = item.children.some(
-                    (child) => pathname === child.href || pathname.startsWith(`${child.href}/`)
+                const isDropdownOpen = openDropdowns.includes(item.label) || isActive;
+                const content = (
+                    <button
+                        type="button"
+                        aria-expanded={isDropdownOpen}
+                        onClick={() => toggleDropdown(item.label)}
+                        className={cn(
+                            "group relative flex h-11 w-full items-center rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40",
+                            expanded ? "gap-3 px-3" : "justify-center px-0",
+                            isActive
+                                ? "bg-blue-50 text-blue-700"
+                                : "text-slate-700 hover:bg-slate-100 hover:text-slate-950"
+                        )}
+                    >
+                        {isActive && (
+                            <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-blue-600" />
+                        )}
+                        <Icon
+                            className={cn(
+                                "size-5 shrink-0 transition-colors",
+                                isActive ? "text-blue-600" : "text-slate-500 group-hover:text-slate-700"
+                            )}
+                        />
+                        {expanded && (
+                            <>
+                                <span className="min-w-0 flex-1 truncate text-left">{item.label}</span>
+                                <ChevronDown
+                                    className={cn(
+                                        "size-4 shrink-0 text-slate-400 transition-transform",
+                                        isDropdownOpen && "rotate-180",
+                                        isActive && "text-blue-500"
+                                    )}
+                                />
+                            </>
+                        )}
+                    </button>
                 );
-                const isDropdownOpen = openDropdowns.includes(item.label) || isChildActive;
 
                 return (
                     <div key={item.label}>
-                        <button
-                            type="button"
-                            onClick={() => toggleDropdown(item.label)}
-                            className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group ${
-                                isChildActive
-                                    ? "bg-white text-blue-700 shadow-sm border border-blue-100"
-                                    : "text-slate-600 hover:text-blue-700 hover:bg-blue-100/50"
-                            }`}
-                        >
-                            <span
-                                className={isChildActive ? "text-blue-600" : "group-hover:text-blue-600"}
-                            >
-                                {item.icon}
-                            </span>
-                            {expanded && (
-                                <>
-                                    <span className="font-medium flex-1 text-left">{item.label}</span>
-                                    <svg
-                                        className={`w-4 h-4 transition-transform duration-200 ${
-                                            isDropdownOpen ? "rotate-180" : ""
-                                        }`}
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M19 9l-7 7-7-7"
-                                        />
-                                    </svg>
-                                </>
-                            )}
-                        </button>
+                        <NavTooltip enabled={collapsedTooltips && !expanded} label={item.label}>
+                            {content}
+                        </NavTooltip>
                         {isDropdownOpen && expanded && (
-                            <div className="ml-4 mt-1 space-y-1 border-l-2 border-blue-200 pl-3">
+                            <div className="mt-1 space-y-1 pl-5">
                                 {item.children.map((child) => {
-                                    const isChildItemActive =
-                                        pathname === child.href || pathname.startsWith(`${child.href}/`);
+                                    const ChildIcon = child.icon;
+                                    const isChildActive = pathMatchesHref(pathname, child.href);
 
                                     return (
                                         <Link
                                             key={child.href}
                                             href={child.href}
                                             onClick={onNavigate}
-                                            className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 text-sm ${
-                                                isChildItemActive
-                                                    ? "bg-blue-100 text-blue-700 font-semibold"
-                                                    : "text-slate-500 hover:text-blue-700 hover:bg-blue-50"
-                                            }`}
+                                            className={cn(
+                                                "group flex h-9 items-center gap-2 rounded-md px-3 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40",
+                                                isChildActive
+                                                    ? "bg-blue-50 text-blue-700 font-semibold"
+                                                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"
+                                            )}
                                         >
-                                            {child.icon}
-                                            <span>{child.label}</span>
+                                            <ChildIcon
+                                                className={cn(
+                                                    "size-4 shrink-0 transition-colors",
+                                                    isChildActive
+                                                        ? "text-blue-600"
+                                                        : "text-slate-400 group-hover:text-slate-600"
+                                                )}
+                                            />
+                                            <span className="min-w-0 truncate">{child.label}</span>
                                         </Link>
                                     );
                                 })}
@@ -498,24 +444,36 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 );
             }
 
-            const isActive = pathname === item.href;
-
-            return (
+            const content = (
                 <Link
                     key={item.href}
                     href={item.href}
                     onClick={onNavigate}
-                    className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group ${
+                    className={cn(
+                        "group relative flex h-11 w-full items-center rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40",
+                        expanded ? "gap-3 px-3" : "justify-center px-0",
                         isActive
-                            ? "bg-white text-blue-700 shadow-sm border border-blue-100"
-                            : "text-slate-600 hover:text-blue-700 hover:bg-blue-100/50"
-                    }`}
+                            ? "bg-blue-50 text-blue-700"
+                            : "text-slate-700 hover:bg-slate-100 hover:text-slate-950"
+                    )}
                 >
-                    <span className={isActive ? "text-blue-600" : "group-hover:text-blue-600"}>
-                        {item.icon}
-                    </span>
-                    {expanded && <span className="font-medium">{item.label}</span>}
+                    {isActive && (
+                        <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-blue-600" />
+                    )}
+                    <Icon
+                        className={cn(
+                            "size-5 shrink-0 transition-colors",
+                            isActive ? "text-blue-600" : "text-slate-500 group-hover:text-slate-700"
+                        )}
+                    />
+                    {expanded && <span className="min-w-0 truncate">{item.label}</span>}
                 </Link>
+            );
+
+            return (
+                <NavTooltip key={item.href} enabled={collapsedTooltips && !expanded} label={item.label}>
+                    {content}
+                </NavTooltip>
             );
         });
 
@@ -524,188 +482,195 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            {mobileNavOpen && (
-                <button
-                    type="button"
-                    aria-label="Đóng menu điều hướng"
-                    className="fixed inset-0 z-40 bg-slate-950/40 xl:hidden"
-                    onClick={() => setMobileNavOpen(false)}
-                />
-            )}
+        <TooltipProvider delayDuration={150}>
+            <div className="min-h-screen bg-slate-50">
+                {mobileNavOpen && (
+                    <button
+                        type="button"
+                        aria-label="Đóng menu điều hướng"
+                        className="fixed inset-0 z-40 bg-slate-950/40 xl:hidden"
+                        onClick={() => setMobileNavOpen(false)}
+                    />
+                )}
 
-            {mobileNavOpen && (
-                <aside className="fixed inset-y-0 left-0 z-50 flex w-72 max-w-[calc(100vw-2rem)] flex-col border-r border-blue-200 bg-gradient-to-b from-blue-50 to-blue-100 shadow-xl xl:hidden">
-                    <div className="flex h-16 items-center justify-between gap-3 border-b border-blue-200 px-4">
-                        <div className="flex min-w-0 items-center gap-3">
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className="h-6 w-6 text-white"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
-                                    />
-                                </svg>
+                {mobileNavOpen && (
+                    <aside className="fixed inset-y-0 left-0 z-50 flex w-80 max-w-[calc(100vw-2rem)] flex-col border-r border-slate-200 bg-white shadow-xl xl:hidden">
+                        <div className="flex h-16 items-center justify-between gap-3 border-b border-slate-200 px-4">
+                            <div className="flex min-w-0 items-center gap-3">
+                                <BrandMark />
+                                <div className="min-w-0">
+                                    <p className="truncate text-sm font-semibold leading-5 text-slate-950">Sử dụng thuốc</p>
+                                    <p className="truncate text-xs text-slate-500">Mua sắm & kho dược</p>
+                                </div>
                             </div>
-                            <span className="min-w-0 text-sm font-bold leading-snug text-blue-900">
-                                Quản lý Mua sắm và Kho Dược
-                            </span>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon-sm"
+                                aria-label="Đóng menu"
+                                className="text-slate-600 hover:bg-slate-100 hover:text-slate-950"
+                                onClick={() => setMobileNavOpen(false)}
+                            >
+                                <X className="size-4" />
+                            </Button>
                         </div>
+
+                        <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto px-3 py-4">
+                            {renderNavItems({
+                                expanded: true,
+                                onNavigate: () => setMobileNavOpen(false),
+                            })}
+                        </nav>
+
+                        <div className="shrink-0 border-t border-slate-200 p-4">
+                            <div className="flex items-center gap-3">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">
+                                    {userInitial}
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                    <p className="truncate text-sm font-medium text-slate-950">{userName}</p>
+                                    <p className="text-xs text-slate-500">{roleLabel}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </aside>
+                )}
+
+                <aside
+                    className={cn(
+                        "fixed inset-y-0 left-0 z-50 hidden flex-col border-r border-slate-200 bg-white transition-[width] duration-300 xl:flex",
+                        sidebarOpen ? "w-72" : "w-[72px]"
+                    )}
+                >
+                    <div
+                        className={cn(
+                            "flex h-16 shrink-0 items-center border-b border-slate-200 px-4",
+                            sidebarOpen ? "justify-between gap-3" : "justify-center"
+                        )}
+                    >
+                        <div className={cn("flex min-w-0 items-center gap-3", !sidebarOpen && "hidden")}>
+                            <BrandMark />
+                            <div className="min-w-0">
+                                <p className="truncate text-sm font-semibold leading-5 text-slate-950">Sử dụng thuốc</p>
+                                <p className="truncate text-xs text-slate-500">Mua sắm & kho dược</p>
+                            </div>
+                        </div>
+                        {!sidebarOpen && <BrandMark />}
                         <Button
                             type="button"
                             variant="ghost"
                             size="icon-sm"
-                            aria-label="Đóng menu"
-                            className="text-blue-700 hover:bg-blue-200/50 hover:text-blue-900"
-                            onClick={() => setMobileNavOpen(false)}
+                            aria-label={sidebarOpen ? "Thu gọn sidebar" : "Mở rộng sidebar"}
+                            onClick={() => setSidebarOpen(!sidebarOpen)}
+                            className={cn(
+                                "text-slate-600 hover:bg-slate-100 hover:text-slate-950",
+                                !sidebarOpen && "absolute right-2 top-4"
+                            )}
                         >
-                            <X className="size-4" />
+                            {sidebarOpen ? <PanelLeftClose className="size-4" /> : <PanelLeftOpen className="size-4" />}
                         </Button>
                     </div>
 
                     <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto px-3 py-4">
-                        {renderNavItems({
-                            expanded: true,
-                            onNavigate: () => setMobileNavOpen(false),
-                        })}
+                        {renderNavItems({ expanded: sidebarOpen, collapsedTooltips: true })}
                     </nav>
 
-                    <div className="border-t border-blue-200 bg-blue-50/50 p-4">
-                        <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 font-bold text-white">
-                                {session?.user?.name?.[0]?.toUpperCase() || "U"}
+                    <div className="shrink-0 border-t border-slate-200 p-4">
+                        <NavTooltip enabled={!sidebarOpen} label={`${userName} - ${roleLabel}`}>
+                            <div className={cn("flex items-center", sidebarOpen ? "gap-3" : "justify-center")}>
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">
+                                    {userInitial}
+                                </div>
+                                {sidebarOpen && (
+                                    <div className="min-w-0 flex-1">
+                                        <p className="truncate text-sm font-medium text-slate-950">{userName}</p>
+                                        <p className="text-xs text-slate-500">{roleLabel}</p>
+                                    </div>
+                                )}
                             </div>
-                            <div className="min-w-0 flex-1">
-                                <p className="truncate text-sm font-medium text-blue-900">{session?.user?.name}</p>
-                                <p className="text-xs text-blue-600">{roleLabel}</p>
-                            </div>
-                        </div>
+                        </NavTooltip>
                     </div>
                 </aside>
-            )}
 
-            {/* Desktop sidebar */}
-            <aside
-                className={`fixed inset-y-0 left-0 z-50 hidden transition-all duration-300 xl:block ${sidebarOpen ? "w-64" : "w-20"
-                    } bg-gradient-to-b from-blue-50 to-blue-100 border-r border-blue-200 shadow-xl`}
-            >
-                <div className="h-16 flex items-center justify-between px-4 border-b border-blue-200">
-                    {sidebarOpen && (
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                                </svg>
-                            </div>
-                            <span className="text-blue-900 font-bold text-lg">Quản lý Mua sắm và Kho Dược</span>
+                <div className={cn("transition-[padding] duration-300", sidebarOpen ? "xl:pl-72" : "xl:pl-[72px]")}>
+                    <header className="flex h-16 items-center justify-between gap-3 border-b border-slate-200 bg-white px-3 shadow-sm shadow-slate-950/[0.03] sm:px-4 xl:px-6">
+                        <div className="flex min-w-0 items-center gap-3">
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon-sm"
+                                aria-label="Mở menu điều hướng"
+                                className="text-slate-700 hover:bg-slate-100 hover:text-slate-950 xl:hidden"
+                                onClick={() => setMobileNavOpen(true)}
+                            >
+                                <Menu className="size-4" />
+                            </Button>
+                            <h1 className="min-w-0 truncate text-base font-semibold text-slate-800 sm:text-lg">
+                                {headerTitle}
+                            </h1>
                         </div>
-                    )}
-                    <button
-                        type="button"
-                        aria-label={sidebarOpen ? "Thu gọn sidebar" : "Mở rộng sidebar"}
-                        onClick={() => setSidebarOpen(!sidebarOpen)}
-                        className="p-2 text-blue-600 hover:text-blue-900 hover:bg-blue-200/50 rounded-lg transition-colors"
-                    >
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={sidebarOpen ? "M11 19l-7-7 7-7m8 14l-7-7 7-7" : "M13 5l7 7-7 7M5 5l7 7-7 7"} />
-                        </svg>
-                    </button>
-                </div>
-
-                {/* Navigation */}
-                <nav className="mt-6 px-3 space-y-1">
-                    {renderNavItems({ expanded: sidebarOpen })}
-                </nav>
-
-                {/* User section at bottom */}
-                <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-blue-200 bg-blue-50/50">
-                    <div className={`flex items-center ${sidebarOpen ? "gap-3" : "justify-center"}`}>
-                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-full flex items-center justify-center text-white font-bold">
-                            {session?.user?.name?.[0]?.toUpperCase() || "U"}
-                        </div>
-                        {sidebarOpen && (
-                            <div className="flex-1 min-w-0">
-                                <p className="text-blue-900 text-sm font-medium truncate">{session?.user?.name}</p>
-                                <p className="text-blue-600 text-xs">{roleLabel}</p>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </aside>
-
-            {/* Main content */}
-            <div className={`transition-all duration-300 ${sidebarOpen ? "xl:pl-64" : "xl:pl-20"}`}>
-                {/* Header */}
-                <header className="h-16 bg-white shadow-sm border-b border-gray-100 flex items-center justify-between gap-3 px-3 sm:px-4 xl:px-6">
-                    <div className="flex min-w-0 items-center gap-3">
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon-sm"
-                            aria-label="Mở menu điều hướng"
-                            className="text-slate-700 hover:bg-blue-50 hover:text-blue-700 xl:hidden"
-                            onClick={() => setMobileNavOpen(true)}
-                        >
-                            <Menu className="size-4" />
-                        </Button>
-                        <h1 className="min-w-0 truncate text-base font-semibold text-gray-800 sm:text-lg">{headerTitle}</h1>
-                    </div>
-                    <div className="flex shrink-0 items-center gap-2 sm:gap-4">
-                        <NotificationBell />
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="flex items-center gap-2 px-2 sm:px-3">
-                                    <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                                        {session?.user?.name?.[0]?.toUpperCase() || "U"}
-                                    </div>
-                                    <svg className="hidden w-4 h-4 sm:block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48">
-                                <div className="px-2 py-1.5">
-                                    <p className="text-sm font-medium">{session?.user?.name}</p>
-                                    <p className="text-xs text-muted-foreground">{session?.user?.email}</p>
-                                </div>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                    onClick={() => setChangePasswordOpen(true)}
-                                    className="cursor-pointer"
+                        <div className="flex shrink-0 items-center gap-2 sm:gap-4">
+                            {canUseAI && (
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    className="gap-2"
+                                    onClick={() => setAiAssistantOpen(true)}
                                 >
-                                    <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-                                    </svg>
-                                    Đổi mật khẩu
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={handleLogout} className="text-red-600 cursor-pointer">
-                                    <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                    </svg>
-                                    Đăng xuất
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </div>
-                </header>
+                                    <Sparkles className="size-4" />
+                                    <span className="hidden sm:inline">Trợ lý AI</span>
+                                </Button>
+                            )}
+                            <NotificationBell />
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" className="flex items-center gap-2 px-2 hover:bg-slate-100 sm:px-3">
+                                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">
+                                            {userInitial}
+                                        </div>
+                                        <ChevronDown className="hidden size-4 text-slate-500 sm:block" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-48">
+                                    <div className="px-2 py-1.5">
+                                        <p className="truncate text-sm font-medium">{userName}</p>
+                                        <p className="truncate text-xs text-muted-foreground">{session?.user?.email}</p>
+                                    </div>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                        onClick={() => setChangePasswordOpen(true)}
+                                        className="cursor-pointer"
+                                    >
+                                        <KeyRound className="mr-2 size-4" />
+                                        Đổi mật khẩu
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600">
+                                        <LogOut className="mr-2 size-4" />
+                                        Đăng xuất
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
+                    </header>
 
-                {/* Page content */}
-                <main className="p-3 sm:p-4 xl:p-6">{children}</main>
+                    <main className="p-3 sm:p-4 xl:p-6">{children}</main>
+                </div>
+
+                <ChangePasswordDialog
+                    open={changePasswordOpen}
+                    onOpenChange={setChangePasswordOpen}
+                />
+                {canUseAI && (
+                    <AIAssistantPanel
+                        open={aiAssistantOpen}
+                        onOpenChange={setAiAssistantOpen}
+                        pathname={pathname}
+                        canUseFallback={role === "ADMIN"}
+                    />
+                )}
             </div>
-
-            {/* Change Password Dialog */}
-            <ChangePasswordDialog
-                open={changePasswordOpen}
-                onOpenChange={setChangePasswordOpen}
-            />
-        </div>
+        </TooltipProvider>
     );
 }

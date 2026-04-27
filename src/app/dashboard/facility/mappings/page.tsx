@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
+import AIReviewButton from "@/components/ai/AIReviewButton";
 import { Input } from "@/components/ui/input";
 import {
     Card,
@@ -564,6 +565,39 @@ export default function FacilityMappingsPage() {
     const waitingMappings = mappings.filter((m) => m.status === "WAITING_APPROVAL");
     const approvedMappings = mappings.filter((m) => m.status === "APPROVED" || m.status === "AUTO_MAPPED");
     const rejectedMappings = mappings.filter((m) => m.status === "REJECTED");
+    const mappingsAIReviewEvidence = {
+        summary: {
+            total: mappings.length,
+            pending: pendingMappings.length,
+            waitingApproval: waitingMappings.length,
+            approved: approvedMappings.length,
+            rejected: rejectedMappings.length,
+            missingInfo: mappings.filter((mapping) =>
+                !mapping.hoatChatNoiBo || !mapping.soDangKyNoiBo || !mapping.donViTinhNoiBo
+            ).length,
+        },
+        rows: [
+            ...mappings
+                .filter((mapping) => !mapping.hoatChatNoiBo || !mapping.soDangKyNoiBo || !mapping.donViTinhNoiBo)
+                .slice(0, 30)
+                .map((mapping) => ({
+                    maNoiBo: mapping.maNoiBo,
+                    tenThuocNoiBo: mapping.tenThuocNoiBo,
+                    hoatChatNoiBo: mapping.hoatChatNoiBo,
+                    soDangKyNoiBo: mapping.soDangKyNoiBo,
+                    donViTinhNoiBo: mapping.donViTinhNoiBo,
+                    status: mapping.status,
+                    type: "MISSING_INFO",
+                })),
+            ...rejectedMappings.slice(0, 30).map((mapping) => ({
+                maNoiBo: mapping.maNoiBo,
+                tenThuocNoiBo: mapping.tenThuocNoiBo,
+                status: mapping.status,
+                adminNote: mapping.adminNote,
+                type: "REJECTED",
+            })),
+        ].slice(0, 30),
+    };
 
     // Ids for disabled/locked statuses
     const LOCKED_STATUSES = ["WAITING_APPROVAL", "APPROVED"];
@@ -682,7 +716,14 @@ export default function FacilityMappingsPage() {
                     <h2 className="text-3xl font-bold text-gray-800">Quản lý danh mục thuốc</h2>
                     <p className="text-gray-500 mt-1">Ánh xạ thuốc nội bộ với danh mục dùng chung</p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap justify-end gap-2">
+                    <AIReviewButton
+                        surface="facility_mappings"
+                        message="Kiểm tra danh mục thuốc nội bộ và ánh xạ hiện tại, nêu lỗi cần xử lý, cảnh báo nên kiểm tra và bước tiếp theo."
+                        evidence={mappingsAIReviewEvidence}
+                        disabled={isLoading || mappings.length === 0}
+                        disabledReason="Cần có dữ liệu danh mục thuốc trước khi kiểm tra bằng AI"
+                    />
                     <Button
                         variant="outline"
                         className="bg-white text-blue-600 border-blue-200 hover:bg-blue-50"

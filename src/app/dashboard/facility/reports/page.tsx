@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import AIReviewButton from "@/components/ai/AIReviewButton";
 import { readExcel } from "@/lib/excel";
 import { triggerBlobDownload } from "@/lib/browser-download";
 import { Badge } from "@/components/ui/badge";
@@ -366,6 +367,42 @@ export default function FacilityReportsPage() {
         && totalErrors === 0
         && hasServerValidatedSuccess
     );
+    const reportAIReviewEvidence = previewRowsWithErrors.length > 0
+        ? {
+            summary: {
+                selectedMonth,
+                totalRows: previewRowsWithErrors.length,
+                reportedRows,
+                skippedRows,
+                localErrorCount,
+                serverErrorCount,
+                totalErrors,
+                serverValidated: hasServerValidatedSuccess,
+            },
+            rows: previewRowsWithErrors
+                .filter(row => row.combinedErrors.length > 0)
+                .slice(0, 30)
+                .map(row => ({
+                    stt: row.stt,
+                    excelRowNumber: row.excelRowNumber,
+                    maNoiBo: row.maNoiBo,
+                    maThuoc: row.maThuoc,
+                    drugName: row.drugName,
+                    tonDau: row.tonDau,
+                    nhap: row.nhap,
+                    xuat: row.xuat,
+                    tonCuoi: row.tonCuoi,
+                    giaVat: row.giaVat,
+                    thanhTienTonCuoi: row.thanhTienTonCuoi,
+                    warnings: row.combinedErrors.map(error => ({
+                        field: error.field,
+                        code: error.code,
+                        message: error.message,
+                    })),
+                })),
+        }
+        : undefined;
+    const canAIReviewReport = Boolean(selectedMonth && (previewRowsWithErrors.length > 0 || currentMonthReport));
 
     const handleUploadReport = async () => {
         if (!selectedFile || !selectedMonth) {
@@ -714,6 +751,17 @@ export default function FacilityReportsPage() {
                                         )}
                                     </div>
                                 )}
+
+                                <div className="flex justify-end">
+                                    <AIReviewButton
+                                        surface="facility_reports"
+                                        message="Kiểm tra báo cáo Xuất-Nhập-Tồn này và chỉ ra lỗi cần xử lý, cảnh báo nên kiểm tra, cùng bước tiếp theo."
+                                        context={{ reportMonth: selectedMonth }}
+                                        evidence={reportAIReviewEvidence}
+                                        disabled={!canAIReviewReport}
+                                        disabledReason="Chọn kỳ báo cáo và có dữ liệu preview hoặc báo cáo đã nộp trước khi kiểm tra bằng AI"
+                                    />
+                                </div>
 
                                 <Button
                                     variant="default"
