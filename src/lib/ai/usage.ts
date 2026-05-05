@@ -2,6 +2,8 @@ import prisma from "@/lib/prisma";
 import type { AILogDetails, AIUsageEstimate } from "@/lib/ai/types";
 
 const MODEL_PRICES_PER_MILLION: Record<string, { input: number; output: number }> = {
+    "gemma-4-26b-a4b-it": { input: 0, output: 0 },
+    "gemma-4-31b-it": { input: 0, output: 0 },
     "gemini-2.5-flash-lite": { input: 0.10, output: 0.40 },
     "gpt-5.4-nano": { input: 0.20, output: 1.25 },
     "gpt-5.4-mini": { input: 0.75, output: 4.50 },

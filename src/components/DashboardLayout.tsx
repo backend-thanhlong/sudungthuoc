@@ -6,6 +6,7 @@ import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import {
     BarChart3,
+    Bot,
     Building2,
     CalendarDays,
     ChevronDown,
@@ -37,6 +38,7 @@ import { Button } from "@/components/ui/button";
 import AIAssistantPanel from "@/components/ai/AIAssistantPanel";
 import ChangePasswordDialog from "@/components/ChangePasswordDialog";
 import NotificationBell from "@/components/NotificationBell";
+import ThemeToggle from "@/components/theme/ThemeToggle";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -168,6 +170,16 @@ const adminNavItems: NavItem[] = [
                 label: "Nhật ký hoạt động",
                 href: "/dashboard/admin/activity-logs",
                 icon: History,
+            },
+            {
+                label: "Quản trị AI",
+                href: "/dashboard/admin/ai-agent",
+                icon: Bot,
+            },
+            {
+                label: "Theo dõi AI",
+                href: "/dashboard/admin/ai-usage",
+                icon: Sparkles,
             },
         ],
     },
@@ -375,8 +387,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                             "group relative flex h-11 w-full items-center rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40",
                             expanded ? "gap-3 px-3" : "justify-center px-0",
                             isActive
-                                ? "bg-blue-50 text-blue-700"
-                                : "text-slate-700 hover:bg-slate-100 hover:text-slate-950"
+                                ? "bg-blue-50 text-blue-700 dark:bg-blue-950/45 dark:text-blue-200"
+                                : "text-muted-foreground hover:bg-muted hover:text-foreground"
                         )}
                     >
                         {isActive && (
@@ -385,7 +397,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                         <Icon
                             className={cn(
                                 "size-5 shrink-0 transition-colors",
-                                isActive ? "text-blue-600" : "text-slate-500 group-hover:text-slate-700"
+                                isActive ? "text-blue-600 dark:text-blue-300" : "text-muted-foreground group-hover:text-foreground"
                             )}
                         />
                         {expanded && (
@@ -393,7 +405,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                                 <span className="min-w-0 flex-1 truncate text-left">{item.label}</span>
                                 <ChevronDown
                                     className={cn(
-                                        "size-4 shrink-0 text-slate-400 transition-transform",
+                                        "size-4 shrink-0 text-muted-foreground transition-transform",
                                         isDropdownOpen && "rotate-180",
                                         isActive && "text-blue-500"
                                     )}
@@ -422,16 +434,16 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                                             className={cn(
                                                 "group flex h-9 items-center gap-2 rounded-md px-3 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40",
                                                 isChildActive
-                                                    ? "bg-blue-50 text-blue-700 font-semibold"
-                                                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"
+                                                    ? "bg-blue-50 text-blue-700 font-semibold dark:bg-blue-950/45 dark:text-blue-200"
+                                                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
                                             )}
                                         >
                                             <ChildIcon
                                                 className={cn(
                                                     "size-4 shrink-0 transition-colors",
                                                     isChildActive
-                                                        ? "text-blue-600"
-                                                        : "text-slate-400 group-hover:text-slate-600"
+                                                        ? "text-blue-600 dark:text-blue-300"
+                                                        : "text-muted-foreground group-hover:text-foreground"
                                                 )}
                                             />
                                             <span className="min-w-0 truncate">{child.label}</span>
@@ -453,8 +465,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                         "group relative flex h-11 w-full items-center rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40",
                         expanded ? "gap-3 px-3" : "justify-center px-0",
                         isActive
-                            ? "bg-blue-50 text-blue-700"
-                            : "text-slate-700 hover:bg-slate-100 hover:text-slate-950"
+                            ? "bg-blue-50 text-blue-700 dark:bg-blue-950/45 dark:text-blue-200"
+                            : "text-muted-foreground hover:bg-muted hover:text-foreground"
                     )}
                 >
                     {isActive && (
@@ -463,7 +475,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                     <Icon
                         className={cn(
                             "size-5 shrink-0 transition-colors",
-                            isActive ? "text-blue-600" : "text-slate-500 group-hover:text-slate-700"
+                            isActive ? "text-blue-600 dark:text-blue-300" : "text-muted-foreground group-hover:text-foreground"
                         )}
                     />
                     {expanded && <span className="min-w-0 truncate">{item.label}</span>}
@@ -483,7 +495,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
     return (
         <TooltipProvider delayDuration={150}>
-            <div className="min-h-screen bg-slate-50">
+            <div className="min-h-screen bg-background">
                 {mobileNavOpen && (
                     <button
                         type="button"
@@ -494,13 +506,13 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 )}
 
                 {mobileNavOpen && (
-                    <aside className="fixed inset-y-0 left-0 z-50 flex w-80 max-w-[calc(100vw-2rem)] flex-col border-r border-slate-200 bg-white shadow-xl xl:hidden">
-                        <div className="flex h-16 items-center justify-between gap-3 border-b border-slate-200 px-4">
+                    <aside className="fixed inset-y-0 left-0 z-50 flex w-80 max-w-[calc(100vw-2rem)] flex-col border-r border-border bg-card shadow-xl xl:hidden">
+                        <div className="flex h-16 items-center justify-between gap-3 border-b border-border px-4">
                             <div className="flex min-w-0 items-center gap-3">
                                 <BrandMark />
                                 <div className="min-w-0">
-                                    <p className="truncate text-sm font-semibold leading-5 text-slate-950">Sử dụng thuốc</p>
-                                    <p className="truncate text-xs text-slate-500">Mua sắm & kho dược</p>
+                                    <p className="truncate text-sm font-semibold leading-5 text-foreground">Sử dụng thuốc</p>
+                                    <p className="truncate text-xs text-muted-foreground">Mua sắm & kho dược</p>
                                 </div>
                             </div>
                             <Button
@@ -508,7 +520,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                                 variant="ghost"
                                 size="icon-sm"
                                 aria-label="Đóng menu"
-                                className="text-slate-600 hover:bg-slate-100 hover:text-slate-950"
+                                className="text-muted-foreground hover:bg-muted hover:text-foreground"
                                 onClick={() => setMobileNavOpen(false)}
                             >
                                 <X className="size-4" />
@@ -522,14 +534,14 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                             })}
                         </nav>
 
-                        <div className="shrink-0 border-t border-slate-200 p-4">
+                        <div className="shrink-0 border-t border-border p-4">
                             <div className="flex items-center gap-3">
                                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">
                                     {userInitial}
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                    <p className="truncate text-sm font-medium text-slate-950">{userName}</p>
-                                    <p className="text-xs text-slate-500">{roleLabel}</p>
+                                    <p className="truncate text-sm font-medium text-foreground">{userName}</p>
+                                    <p className="text-xs text-muted-foreground">{roleLabel}</p>
                                 </div>
                             </div>
                         </div>
@@ -538,21 +550,21 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
                 <aside
                     className={cn(
-                        "fixed inset-y-0 left-0 z-50 hidden flex-col border-r border-slate-200 bg-white transition-[width] duration-300 xl:flex",
+                        "fixed inset-y-0 left-0 z-50 hidden flex-col border-r border-border bg-card transition-[width] duration-300 xl:flex",
                         sidebarOpen ? "w-72" : "w-[72px]"
                     )}
                 >
                     <div
                         className={cn(
-                            "flex h-16 shrink-0 items-center border-b border-slate-200 px-4",
+                            "flex h-16 shrink-0 items-center border-b border-border px-4",
                             sidebarOpen ? "justify-between gap-3" : "justify-center"
                         )}
                     >
                         <div className={cn("flex min-w-0 items-center gap-3", !sidebarOpen && "hidden")}>
                             <BrandMark />
                             <div className="min-w-0">
-                                <p className="truncate text-sm font-semibold leading-5 text-slate-950">Sử dụng thuốc</p>
-                                <p className="truncate text-xs text-slate-500">Mua sắm & kho dược</p>
+                                <p className="truncate text-sm font-semibold leading-5 text-foreground">Sử dụng thuốc</p>
+                                <p className="truncate text-xs text-muted-foreground">Mua sắm & kho dược</p>
                             </div>
                         </div>
                         {!sidebarOpen && <BrandMark />}
@@ -563,7 +575,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                             aria-label={sidebarOpen ? "Thu gọn sidebar" : "Mở rộng sidebar"}
                             onClick={() => setSidebarOpen(!sidebarOpen)}
                             className={cn(
-                                "text-slate-600 hover:bg-slate-100 hover:text-slate-950",
+                                "text-muted-foreground hover:bg-muted hover:text-foreground",
                                 !sidebarOpen && "absolute right-2 top-4"
                             )}
                         >
@@ -575,7 +587,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                         {renderNavItems({ expanded: sidebarOpen, collapsedTooltips: true })}
                     </nav>
 
-                    <div className="shrink-0 border-t border-slate-200 p-4">
+                    <div className="shrink-0 border-t border-border p-4">
                         <NavTooltip enabled={!sidebarOpen} label={`${userName} - ${roleLabel}`}>
                             <div className={cn("flex items-center", sidebarOpen ? "gap-3" : "justify-center")}>
                                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">
@@ -583,8 +595,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                                 </div>
                                 {sidebarOpen && (
                                     <div className="min-w-0 flex-1">
-                                        <p className="truncate text-sm font-medium text-slate-950">{userName}</p>
-                                        <p className="text-xs text-slate-500">{roleLabel}</p>
+                                        <p className="truncate text-sm font-medium text-foreground">{userName}</p>
+                                        <p className="text-xs text-muted-foreground">{roleLabel}</p>
                                     </div>
                                 )}
                             </div>
@@ -593,19 +605,19 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 </aside>
 
                 <div className={cn("transition-[padding] duration-300", sidebarOpen ? "xl:pl-72" : "xl:pl-[72px]")}>
-                    <header className="flex h-16 items-center justify-between gap-3 border-b border-slate-200 bg-white px-3 shadow-sm shadow-slate-950/[0.03] sm:px-4 xl:px-6">
+                    <header className="flex h-16 items-center justify-between gap-3 border-b border-border bg-card px-3 shadow-sm shadow-slate-950/[0.03] sm:px-4 xl:px-6">
                         <div className="flex min-w-0 items-center gap-3">
                             <Button
                                 type="button"
                                 variant="ghost"
                                 size="icon-sm"
                                 aria-label="Mở menu điều hướng"
-                                className="text-slate-700 hover:bg-slate-100 hover:text-slate-950 xl:hidden"
+                                className="text-muted-foreground hover:bg-muted hover:text-foreground xl:hidden"
                                 onClick={() => setMobileNavOpen(true)}
                             >
                                 <Menu className="size-4" />
                             </Button>
-                            <h1 className="min-w-0 truncate text-base font-semibold text-slate-800 sm:text-lg">
+                            <h1 className="min-w-0 truncate text-base font-semibold text-foreground sm:text-lg">
                                 {headerTitle}
                             </h1>
                         </div>
@@ -613,9 +625,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                             {canUseAI && (
                                 <Button
                                     type="button"
-                                    variant="outline"
                                     size="sm"
-                                    className="gap-2"
+                                    className="gap-2 border border-emerald-500/70 bg-emerald-600 text-white shadow-sm shadow-emerald-900/15 hover:border-emerald-600 hover:bg-emerald-700 hover:text-white focus-visible:ring-emerald-500/40 dark:border-emerald-400/40 dark:bg-emerald-500 dark:text-emerald-950 dark:shadow-emerald-950/30 dark:hover:bg-emerald-400"
                                     onClick={() => setAiAssistantOpen(true)}
                                 >
                                     <Sparkles className="size-4" />
@@ -623,13 +634,14 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                                 </Button>
                             )}
                             <NotificationBell />
+                            <ThemeToggle />
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" className="flex items-center gap-2 px-2 hover:bg-slate-100 sm:px-3">
+                                    <Button variant="ghost" className="flex items-center gap-2 px-2 hover:bg-muted sm:px-3">
                                         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">
                                             {userInitial}
                                         </div>
-                                        <ChevronDown className="hidden size-4 text-slate-500 sm:block" />
+                                        <ChevronDown className="hidden size-4 text-muted-foreground sm:block" />
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end" className="w-48">

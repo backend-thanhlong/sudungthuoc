@@ -1,5 +1,7 @@
 import type { ActiveSessionContext } from "@/lib/server-authz";
 import type { AIAgentRequest, AIToolResult, AIToolRunResult } from "@/lib/ai/types";
+import type { AIToolPolicyMap } from "@/lib/ai/admin-config";
+import type { AIToolName } from "@/lib/ai/tool-registry";
 import {
     getDashboardOverview,
     getFacilityReportAnomalies,
@@ -18,6 +20,7 @@ import {
     reviewFacilityReportEvidence,
     reviewStoredFacilityReport,
 } from "@/lib/ai/tools/review";
+import { querySafeDatabase } from "@/lib/ai/tools/safe-database";
 
 function hasAny(text: string, keywords: string[]) {
     const normalized = text.toLowerCase();
@@ -37,9 +40,26 @@ async function runTool(name: string, fn: () => Promise<AIToolResult>): Promise<A
     }
 }
 
+async function runPolicyAwareTool(
+    name: AIToolName,
+    toolPolicyMap: AIToolPolicyMap | undefined,
+    fn: () => Promise<AIToolResult>
+): Promise<AIToolResult> {
+    if (toolPolicyMap?.[name] === false) {
+        return {
+            name,
+            status: "skipped",
+            warning: `AI_TOOL_DISABLED:${name}`,
+        };
+    }
+
+    return runTool(name, fn);
+}
+
 export async function runAITools(
     sessionContext: ActiveSessionContext,
-    request: AIAgentRequest
+    request: AIAgentRequest,
+    toolPolicyMap?: AIToolPolicyMap
 ): Promise<AIToolRunResult> {
     if (sessionContext.user.role === "COMPANY") {
         return {
@@ -52,12 +72,12 @@ export async function runAITools(
         const reviewResults = [];
         if (request.surface === "facility_reports") {
             if (request.evidence?.rows?.length || request.evidence?.summary) {
-                reviewResults.push(await runTool("reviewFacilityReportEvidence", () => reviewFacilityReportEvidence(request)));
+                reviewResults.push(await runPolicyAwareTool("reviewFacilityReportEvidence", toolPolicyMap, () => reviewFacilityReportEvidence(request)));
             }
-            reviewResults.push(await runTool("reviewStoredFacilityReport", () => reviewStoredFacilityReport(sessionContext, request)));
+            reviewResults.push(await runPolicyAwareTool("reviewStoredFacilityReport", toolPolicyMap, () => reviewStoredFacilityReport(sessionContext, request)));
         }
         if (request.surface === "facility_mappings") {
-            reviewResults.push(await runTool("reviewFacilityMappings", () => reviewFacilityMappings(sessionContext)));
+            reviewResults.push(await runPolicyAwareTool("reviewFacilityMappings", toolPolicyMap, () => reviewFacilityMappings(sessionContext)));
         }
 
         return {
@@ -70,31 +90,32 @@ export async function runAITools(
     const results: AIToolResult[] = [];
 
     if (sessionContext.user.role === "ADMIN") {
-        results.push(await runTool("getDashboardOverview", () => getDashboardOverview(request)));
+        results.push(await runPolicyAwareTool("getDashboardOverview", toolPolicyMap, () => getDashboardOverview(request)));
 
         if (hasAny(message, ["thiếu", "thieu", "đứt", "dut", "tồn", "ton", "cung ứng", "cung ung"])) {
-            results.push(await runTool("getSupplyRisk", () => getSupplyRisk(request)));
+            results.push(await runPolicyAwareTool("getSupplyRisk", toolPolicyMap, () => getSupplyRisk(request)));
         }
         if (hasAny(message, ["nộp", "nop", "chậm", "cham", "báo cáo", "bao cao"])) {
-            results.push(await runTool("getReportSubmissionStatus", () => getReportSubmissionStatus(request)));
+            results.push(await runPolicyAwareTool("getReportSubmissionStatus", toolPolicyMap, () => getReportSubmissionStatus(request)));
         }
         if (hasAny(message, ["ánh xạ", "anh xa", "mapping", "danh mục", "danh muc"])) {
-            results.push(await runTool("getMappingBacklog", () => getMappingBacklog(request)));
+            results.push(await runPolicyAwareTool("getMappingBacklog", toolPolicyMap, () => getMappingBacklog(request)));
         }
         if (hasAny(message, ["bất thường", "bat thuong", "lỗi", "loi", "sai", "kiểm tra", "kiem tra"])) {
-            results.push(await runTool("getFacilityReportAnomalies", () => getFacilityReportAnomalies(request)));
+            results.push(await runPolicyAwareTool("getFacilityReportAnomalies", toolPolicyMap, () => getFacilityReportAnomalies(request)));
         }
+        results.push(await runPolicyAwareTool("querySafeDatabase", toolPolicyMap, () => querySafeDatabase(sessionContext, request)));
     } else {
-        results.push(await runTool("getMyReportSummary", () => getMyReportSummary(sessionContext, request)));
+        results.push(await runPolicyAwareTool("getMyReportSummary", toolPolicyMap, () => getMyReportSummary(sessionContext, request)));
 
         if (hasAny(message, ["thiếu", "thieu", "đứt", "dut", "tồn", "ton", "cung ứng", "cung ung"])) {
-            results.push(await runTool("getMySupplyRisks", () => getMySupplyRisks(sessionContext, request)));
+            results.push(await runPolicyAwareTool("getMySupplyRisks", toolPolicyMap, () => getMySupplyRisks(sessionContext, request)));
         }
         if (hasAny(message, ["ánh xạ", "anh xa", "mapping", "danh mục", "danh muc"])) {
-            results.push(await runTool("getMyMappingIssues", () => getMyMappingIssues(sessionContext)));
+            results.push(await runPolicyAwareTool("getMyMappingIssues", toolPolicyMap, () => getMyMappingIssues(sessionContext)));
         }
         if (hasAny(message, ["bất thường", "bat thuong", "lỗi", "loi", "sai", "kiểm tra", "kiem tra", "báo cáo", "bao cao"])) {
-            results.push(await runTool("getMyReportAnomalies", () => getMyReportAnomalies(sessionContext, request)));
+            results.push(await runPolicyAwareTool("getMyReportAnomalies", toolPolicyMap, () => getMyReportAnomalies(sessionContext, request)));
         }
     }
 

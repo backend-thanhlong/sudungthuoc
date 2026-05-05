@@ -51,13 +51,13 @@ ALLOW_PRODUCTION_SEED=false
 
 # AI Agent MVP
 AI_PRIMARY_PROVIDER=google
-AI_PRIMARY_MODEL=gemini-2.5-flash-lite
+AI_PRIMARY_MODEL=gemma-4-26b-a4b-it
 GOOGLE_GENERATIVE_AI_API_KEY="your-google-ai-key"
 AI_ENABLE_FALLBACK=false
 AI_MAX_OUTPUT_TOKENS=1200
 ```
 
-AI Agent dùng `Gemini 2.5 Flash-Lite` mặc định. Khi chưa cấu hình `GOOGLE_GENERATIVE_AI_API_KEY`, chat AI sẽ báo lỗi provider có kiểm soát; riêng nút `AI kiểm tra` vẫn trả được kết quả rule nội bộ cho báo cáo/ánh xạ để không chặn workflow.
+AI Agent dùng `Gemma 4 26B A4B IT` mặc định qua Gemini API. Khi chưa cấu hình `GOOGLE_GENERATIVE_AI_API_KEY`, chat AI sẽ báo lỗi provider có kiểm soát; riêng nút `AI kiểm tra` vẫn trả được kết quả rule nội bộ cho báo cáo/ánh xạ để không chặn workflow.
 
 Chỉ bật fallback sau giai đoạn pilot:
 

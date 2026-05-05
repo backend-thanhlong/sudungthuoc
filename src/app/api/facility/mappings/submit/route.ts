@@ -12,7 +12,25 @@ export async function POST() {
             return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
         }
 
-        // Update all PENDING_MAPPING with masterDrug or isOutOfCatalog to WAITING_APPROVAL
+        const missingNhomTcktCount = await prisma.facilityDrugMap.count({
+            where: {
+                facilityId: session.user.id,
+                status: "PENDING_MAPPING",
+                OR: [
+                    { masterDrugId: { not: null } },
+                    { isOutOfCatalog: true },
+                ],
+                nhomTckt: null,
+            },
+        });
+
+        if (missingNhomTcktCount > 0) {
+            return NextResponse.json({
+                message: `Còn ${missingNhomTcktCount} thuốc chưa thiết lập Nhóm TCKT. Vui lòng thiết lập trước khi gửi duyệt.`,
+            }, { status: 400 });
+        }
+
+        // Update all complete PENDING_MAPPING with masterDrug or isOutOfCatalog to WAITING_APPROVAL
         const result = await prisma.facilityDrugMap.updateMany({
             where: {
                 facilityId: session.user.id,
@@ -21,6 +39,7 @@ export async function POST() {
                     { masterDrugId: { not: null } },
                     { isOutOfCatalog: true },
                 ],
+                nhomTckt: { not: null },
             },
             data: {
                 status: "WAITING_APPROVAL",
@@ -57,4 +76,3 @@ export async function POST() {
         return NextResponse.json({ message: "Internal server error" }, { status: 500 });
     }
 }
-

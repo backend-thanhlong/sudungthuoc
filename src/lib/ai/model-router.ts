@@ -8,6 +8,7 @@ interface ResolveModelParams {
     taskType: AITaskType;
     role: Role;
     useFallback?: boolean;
+    fallbackAllowed?: boolean;
 }
 
 function canUseFallback({ taskType, role, useFallback }: ResolveModelParams) {
@@ -20,7 +21,7 @@ function canUseFallback({ taskType, role, useFallback }: ResolveModelParams) {
 
 export function resolveAIModel(params: ResolveModelParams): AIResolvedModel {
     const config = getAIConfig();
-    if (config.fallbackEnabled && canUseFallback(params)) {
+    if (params.fallbackAllowed === true && canUseFallback(params)) {
         return {
             provider: config.fallbackProvider,
             model: config.fallbackModel,

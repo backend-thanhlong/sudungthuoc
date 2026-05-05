@@ -14,6 +14,7 @@ const DETAIL_SEARCH_FIELDS = [
     "tenThuoc",
     "hoatChat",
     "soDangKy",
+    "nhomTckt",
     "soQdTrungThau",
     "tenCongTy",
 ] as const;
@@ -36,6 +37,7 @@ const getDetailSearchClause = (searchField: DetailSearchField, searchTerm: strin
         tenThuoc: { drugMap: { masterDrug: { tenThuoc: buildContainsFilter(searchTerm) } } },
         hoatChat: { drugMap: { masterDrug: { hoatChat: buildContainsFilter(searchTerm) } } },
         soDangKy: { drugMap: { masterDrug: { soDangKy: buildContainsFilter(searchTerm) } } },
+        nhomTckt: { drugMap: { nhomTckt: buildContainsFilter(searchTerm) } },
         soQdTrungThau: { soQdTrungThau: buildContainsFilter(searchTerm) },
         tenCongTy: { tenCongTy: buildContainsFilter(searchTerm) },
     } as const;
@@ -123,6 +125,7 @@ export async function GET(request: Request) {
             nuocSanXuat: r.drugMap?.masterDrug?.nuocSanXuat || '',
             congTyDangKy: r.drugMap?.masterDrug?.congTyDangKy || '',
             nhomThuoc: r.drugMap?.masterDrug?.nhomThuoc || '',
+            nhomTckt: r.drugMap?.nhomTckt || '',
             // Số liệu báo cáo
             tonDau: r.tonDau,
             nhap: r.nhap,

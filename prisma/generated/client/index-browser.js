@@ -213,6 +213,7 @@ exports.Prisma.FacilityDrugMapScalarFieldEnum = {
   hoatChatNoiBo: 'hoatChatNoiBo',
   soDangKyNoiBo: 'soDangKyNoiBo',
   donViTinhNoiBo: 'donViTinhNoiBo',
+  nhomTckt: 'nhomTckt',
   masterDrugId: 'masterDrugId',
   status: 'status',
   adminNote: 'adminNote',
@@ -471,9 +472,45 @@ exports.Prisma.ActivityLogScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.AISettingScalarFieldEnum = {
+  id: 'id',
+  key: 'key',
+  value: 'value',
+  updatedById: 'updatedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.AIUserPolicyScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  enabled: 'enabled',
+  chatDailyLimit: 'chatDailyLimit',
+  reviewDailyLimit: 'reviewDailyLimit',
+  allowFallback: 'allowFallback',
+  note: 'note',
+  updatedById: 'updatedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.AIToolPolicyScalarFieldEnum = {
+  id: 'id',
+  toolName: 'toolName',
+  role: 'role',
+  enabled: 'enabled',
+  updatedById: 'updatedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
+};
+
+exports.Prisma.JsonNullValueInput = {
+  JsonNull: Prisma.JsonNull
 };
 
 exports.Prisma.QueryMode = {
@@ -484,6 +521,12 @@ exports.Prisma.QueryMode = {
 exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
+};
+
+exports.Prisma.JsonNullValueFilter = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull,
+  AnyNull: Prisma.AnyNull
 };
 exports.Role = exports.$Enums.Role = {
   ADMIN: 'ADMIN',
@@ -558,7 +601,10 @@ exports.Prisma.ModelName = {
   KetQuaLCNT: 'KetQuaLCNT',
   KetQuaPhanLo: 'KetQuaPhanLo',
   Notification: 'Notification',
-  ActivityLog: 'ActivityLog'
+  ActivityLog: 'ActivityLog',
+  AISetting: 'AISetting',
+  AIUserPolicy: 'AIUserPolicy',
+  AIToolPolicy: 'AIToolPolicy'
 };
 
 /**

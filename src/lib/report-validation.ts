@@ -11,6 +11,7 @@ export const REPORT_FIELD_MA_THUOC = "Mã thuốc";
 export const REPORT_FIELD_TEN_THUOC = "Tên thuốc";
 export const REPORT_FIELD_HOAT_CHAT = "Hoạt chất";
 export const REPORT_FIELD_DON_VI_TINH = "Đơn vị tính";
+export const REPORT_FIELD_NHOM_TCKT = "Nhóm TCKT";
 export const REPORT_FIELD_TON_DAU = "Tồn đầu";
 export const REPORT_FIELD_NHAP = "Nhập trong kỳ";
 export const REPORT_FIELD_XUAT = "Xuất trong kỳ";
@@ -56,6 +57,7 @@ export const REPORT_CATEGORICAL_FIELDS = [
 export const REPORT_PRESENCE_FIELDS = [
     REPORT_ROW_TOKEN_COLUMN,
     ...REPORT_IMMUTABLE_FIELDS,
+    REPORT_FIELD_NHOM_TCKT,
     ...REPORT_NUMERIC_FIELDS,
     REPORT_FIELD_SO_QD_TRUNG_THAU,
     REPORT_FIELD_TEN_CONG_TY,
@@ -74,6 +76,8 @@ export const REPORT_VALIDATION_CODES = {
     negativeNumber: "NEGATIVE_NUMBER",
     invalidCategoricalValue: "INVALID_CATEGORICAL_VALUE",
     invalidSkipValue: "INVALID_SKIP_VALUE",
+    missingNhomTckt: "MISSING_NHOM_TCKT",
+    invalidNhomTckt: "INVALID_NHOM_TCKT",
     invalidDate: "INVALID_DATE",
     dateRangeInvalid: "DATE_RANGE_INVALID",
     previousMonthStockMismatch: "PREVIOUS_MONTH_STOCK_MISMATCH",
@@ -87,6 +91,10 @@ export const REPORT_VALIDATION_CODES = {
     rowTokenTargetNotFound: "ROW_TOKEN_TARGET_NOT_FOUND",
     duplicateMapId: "DUPLICATE_MAP_ID",
 } as const;
+
+export const NHOM_TCKT_OPTIONS = ["BĐG", "Nhóm 1", "Nhóm 2", "Nhóm 3", "Nhóm 4", "Nhóm 5"] as const;
+
+export type NhomTcktOption = (typeof NHOM_TCKT_OPTIONS)[number];
 
 export type ReportValidationCode =
     (typeof REPORT_VALIDATION_CODES)[keyof typeof REPORT_VALIDATION_CODES];
@@ -102,6 +110,7 @@ export interface ValidationWarning {
 
 export interface ReportRowInput {
     drugName: string;
+    nhomTckt?: string | null;
     tonDau: number;
     nhap: number;
     xuat: number;
@@ -119,6 +128,8 @@ export interface ReportRowInput {
     invalidDateFields?: string[];
     invalidCategoricalFields?: string[];
     invalidSkipFields?: string[];
+    invalidNhomTckt?: boolean;
+    missingNhomTckt?: boolean;
 }
 
 export interface ParsedReportRow extends ReportRowInput {
@@ -133,6 +144,24 @@ const toCellString = (value: unknown) => {
 
 export const normalizeReportText = (value: unknown) =>
     toCellString(value).replace(/\s+/g, " ");
+
+const normalizeNhomTcktKey = (value: unknown) =>
+    normalizeReportText(value)
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/đ/g, "d")
+        .replace(/Đ/g, "D")
+        .toLowerCase();
+
+const NHOM_TCKT_OPTION_MAP = new Map(
+    NHOM_TCKT_OPTIONS.map((option) => [normalizeNhomTcktKey(option), option])
+);
+
+export const normalizeNhomTckt = (value: unknown): NhomTcktOption | null =>
+    NHOM_TCKT_OPTION_MAP.get(normalizeNhomTcktKey(value)) || null;
+
+export const isValidNhomTckt = (value: unknown): value is NhomTcktOption =>
+    Boolean(normalizeNhomTckt(value));
 
 export const getReportDisplayName = (row: Record<string, unknown>) =>
     normalizeReportText(row[REPORT_FIELD_TEN_THUOC])
@@ -276,6 +305,8 @@ export function parseRawRow(row: any): ParsedReportRow | null {
     const bhyt = toCellString(row[REPORT_FIELD_BHYT]) || null;
     const dichVu = toCellString(row[REPORT_FIELD_DICH_VU]) || null;
     const boQua = toCellString(row[REPORT_FIELD_BO_QUA]) || null;
+    const rawNhomTckt = toCellString(row[REPORT_FIELD_NHOM_TCKT]);
+    const nhomTckt = normalizeNhomTckt(rawNhomTckt);
     if (bhyt && !isCategoryMarked(bhyt)) invalidCategoricalFields.push(REPORT_FIELD_BHYT);
     if (dichVu && !isCategoryMarked(dichVu)) invalidCategoricalFields.push(REPORT_FIELD_DICH_VU);
     if (boQua && !isSkipMarked(boQua)) invalidSkipFields.push(REPORT_FIELD_BO_QUA);
@@ -283,6 +314,7 @@ export function parseRawRow(row: any): ParsedReportRow | null {
     return {
         maNoiBo: toCellString(row[REPORT_FIELD_MA_NOI_BO]) || undefined,
         maThuoc: toCellString(row[REPORT_FIELD_MA_THUOC]) || undefined,
+        nhomTckt: nhomTckt || rawNhomTckt || null,
         rowToken: toCellString(row[REPORT_ROW_TOKEN_COLUMN]) || null,
         drugName: getReportDisplayName(row),
         tonDau: tonDauResult.value,
@@ -301,6 +333,8 @@ export function parseRawRow(row: any): ParsedReportRow | null {
         invalidDateFields,
         invalidCategoricalFields,
         invalidSkipFields,
+        invalidNhomTckt: Boolean(rawNhomTckt && !nhomTckt),
+        missingNhomTckt: !rawNhomTckt,
     };
 }
 
@@ -321,6 +355,7 @@ export function validateReportRow(
         bhyt,
         dichVu,
         boQua,
+        nhomTckt,
         rowToken,
         ngayBatDauHd,
         ngayKetThucHd,
@@ -329,6 +364,8 @@ export function validateReportRow(
         invalidDateFields = [],
         invalidCategoricalFields = [],
         invalidSkipFields = [],
+        invalidNhomTckt = false,
+        missingNhomTckt = false,
     } = row;
     const includeTokenWarning = options?.includeTokenWarning ?? true;
 
@@ -347,6 +384,22 @@ export function validateReportRow(
             field,
             code: REPORT_VALIDATION_CODES.invalidSkipValue,
             message: `${drugName}: ${field} chỉ được nhập "X" hoặc để trống.`,
+        });
+    }
+
+    if (missingNhomTckt) {
+        warnings.push({
+            drug: drugName,
+            field: REPORT_FIELD_NHOM_TCKT,
+            code: REPORT_VALIDATION_CODES.missingNhomTckt,
+            message: `${drugName}: ${REPORT_FIELD_NHOM_TCKT} là bắt buộc. Vui lòng cập nhật nhóm tại danh mục thuốc nội bộ.`,
+        });
+    } else if (invalidNhomTckt || !isValidNhomTckt(nhomTckt)) {
+        warnings.push({
+            drug: drugName,
+            field: REPORT_FIELD_NHOM_TCKT,
+            code: REPORT_VALIDATION_CODES.invalidNhomTckt,
+            message: `${drugName}: ${REPORT_FIELD_NHOM_TCKT} chỉ được chọn một trong: ${NHOM_TCKT_OPTIONS.join(", ")}.`,
         });
     }
 

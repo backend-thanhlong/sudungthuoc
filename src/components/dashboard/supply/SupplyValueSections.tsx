@@ -35,9 +35,9 @@ function ValueRiskTable({
     emptyText: string;
 }) {
     return (
-        <div className="bg-white rounded-xl shadow-lg p-5 border border-gray-100">
-            <h3 className="font-semibold text-gray-800 mb-1">{title}</h3>
-            <p className="text-xs text-gray-500 mb-4">{subtitle}</p>
+        <div className="rounded-xl border border-border bg-card p-5 text-card-foreground shadow-sm">
+            <h3 className="font-semibold text-foreground mb-1">{title}</h3>
+            <p className="text-xs text-muted-foreground mb-4">{subtitle}</p>
             <div className="overflow-x-auto max-h-[340px] overflow-y-auto">
                 <table className="w-full text-sm">
                     <thead className="sticky top-0">
@@ -52,25 +52,25 @@ function ValueRiskTable({
                     </thead>
                     <tbody>
                         {rows.map((row, index) => (
-                            <tr key={`${row.facility}-${row.drugName}-${index}`} className="border-b border-gray-50 hover:bg-gray-50/80 transition-colors">
-                                <td className="p-3 text-gray-500">{index + 1}</td>
-                                {scope === "admin" && <td className="p-3 text-gray-700">{row.facility}</td>}
+                            <tr key={`${row.facility}-${row.drugName}-${index}`} className="border-b border-border hover:bg-muted/40 transition-colors">
+                                <td className="p-3 text-muted-foreground">{index + 1}</td>
+                                {scope === "admin" && <td className="p-3 text-foreground">{row.facility}</td>}
                                 <td className="p-3">
-                                    <p className="font-medium text-gray-800">{row.drugName}</p>
-                                    <p className="text-xs text-gray-500">{row.hoatChat}{row.hamLuong ? ` • ${row.hamLuong}` : ""}</p>
-                                    <p className="text-xs text-gray-400">{row.supplierName}</p>
+                                    <p className="font-medium text-foreground">{row.drugName}</p>
+                                    <p className="text-xs text-muted-foreground">{row.hoatChat}{row.hamLuong ? ` • ${row.hamLuong}` : ""}</p>
+                                    <p className="text-xs text-muted-foreground/70">{row.supplierName}</p>
                                 </td>
-                                <td className="p-3 text-right font-mono font-semibold text-gray-800">
+                                <td className="p-3 text-right font-mono font-semibold text-foreground">
                                     {formatCurrencyCompact(row[valueKey])}
                                 </td>
-                                <td className="p-3 text-right font-mono text-gray-700">{formatNumber(row.demandAvg)}</td>
-                                <td className="p-3 text-right font-mono text-gray-700">{formatNumber(row.monthsOfCover)} tháng</td>
+                                <td className="p-3 text-right font-mono text-foreground">{formatNumber(row.demandAvg)}</td>
+                                <td className="p-3 text-right font-mono text-foreground">{formatNumber(row.monthsOfCover)} tháng</td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
                 {rows.length === 0 && (
-                    <p className="text-center text-gray-400 py-8">{emptyText}</p>
+                    <p className="text-center text-muted-foreground/70 py-8">{emptyText}</p>
                 )}
             </div>
         </div>

@@ -130,8 +130,9 @@ export default function NotificationBell() {
             {/* Bell button */}
             <button
                 onClick={handleToggle}
-                className="relative p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                className="relative rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                 title="Thông báo"
+                aria-label="Thông báo"
             >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -145,10 +146,10 @@ export default function NotificationBell() {
 
             {/* Dropdown panel */}
             {isOpen && (
-                <div className="fixed inset-x-3 top-16 z-[100] mt-2 flex max-h-[calc(100dvh-5rem)] flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-2xl sm:absolute sm:inset-auto sm:right-0 sm:top-full sm:w-96 sm:max-h-none">
+                <div className="fixed inset-x-3 top-16 z-[100] mt-2 flex max-h-[calc(100dvh-5rem)] flex-col overflow-hidden rounded-xl border border-border bg-popover text-popover-foreground shadow-2xl sm:absolute sm:inset-auto sm:right-0 sm:top-full sm:w-96 sm:max-h-none">
                     {/* Header */}
-                    <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 px-4 py-3 border-b bg-gradient-to-r from-blue-50 to-indigo-50">
-                        <h3 className="font-semibold text-gray-900 text-sm">
+                    <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-border bg-blue-50 px-4 py-3 dark:bg-blue-950/35">
+                        <h3 className="text-sm font-semibold text-foreground">
                             🔔 Thông báo
                             {unreadCount > 0 && (
                                 <span className="ml-2 text-xs bg-red-500 text-white px-1.5 py-0.5 rounded-full">
@@ -159,7 +160,7 @@ export default function NotificationBell() {
                         {unreadCount > 0 && (
                             <button
                                 onClick={handleMarkAllRead}
-                                className="text-left text-xs font-medium text-blue-600 hover:text-blue-800 hover:underline"
+                                className="text-left text-xs font-medium text-blue-600 hover:text-blue-800 hover:underline dark:text-blue-300 dark:hover:text-blue-200"
                             >
                                 Đánh dấu tất cả đã đọc
                             </button>
@@ -173,8 +174,8 @@ export default function NotificationBell() {
                                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
                             </div>
                         ) : notifications.length === 0 ? (
-                            <div className="text-center py-8 text-gray-400">
-                                <svg className="w-12 h-12 mx-auto mb-2 text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <div className="py-8 text-center text-muted-foreground">
+                                <svg className="mx-auto mb-2 h-12 w-12 text-muted-foreground/35" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                                 </svg>
                                 <p className="text-sm">Không có thông báo</p>
@@ -184,7 +185,7 @@ export default function NotificationBell() {
                                 <button
                                     key={notification.id}
                                     onClick={() => handleClickNotification(notification)}
-                                    className={`w-full text-left px-4 py-3 border-b border-gray-50 hover:bg-blue-50/50 transition-colors ${!notification.isRead ? "bg-blue-50/30" : ""
+                                    className={`w-full border-b border-border px-4 py-3 text-left transition-colors hover:bg-blue-50/50 dark:hover:bg-blue-950/25 ${!notification.isRead ? "bg-blue-50/50 dark:bg-blue-950/20" : ""
                                         }`}
                                 >
                                     <div className="flex gap-3">
@@ -193,17 +194,17 @@ export default function NotificationBell() {
                                         </span>
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2">
-                                                <p className={`text-sm ${!notification.isRead ? "font-semibold text-gray-900" : "text-gray-700"}`}>
+                                                <p className={`text-sm ${!notification.isRead ? "font-semibold text-foreground" : "text-muted-foreground"}`}>
                                                     {notification.title}
                                                 </p>
                                                 {!notification.isRead && (
                                                     <span className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></span>
                                                 )}
                                             </div>
-                                            <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">
+                                            <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">
                                                 {notification.message}
                                             </p>
-                                            <p className="text-xs text-gray-400 mt-1">
+                                            <p className="mt-1 text-xs text-muted-foreground/70">
                                                 {formatTimeAgo(notification.createdAt)}
                                             </p>
                                         </div>

@@ -31,7 +31,7 @@ const parseProvider = (value: string | undefined, fallback: AIProviderName): AIP
 export function getAIConfig(): AIConfig {
     return {
         primaryProvider: parseProvider(process.env.AI_PRIMARY_PROVIDER, "google"),
-        primaryModel: process.env.AI_PRIMARY_MODEL || "gemini-2.5-flash-lite",
+        primaryModel: process.env.AI_PRIMARY_MODEL || "gemma-4-26b-a4b-it",
         fallbackProvider: parseProvider(process.env.AI_FALLBACK_PROVIDER, "openai"),
         fallbackModel: process.env.AI_FALLBACK_MODEL || "gpt-5.4-mini",
         fallbackEnabled: process.env.AI_ENABLE_FALLBACK === "true",

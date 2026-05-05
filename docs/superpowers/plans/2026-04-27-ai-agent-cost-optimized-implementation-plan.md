@@ -26,7 +26,7 @@ Trien khai MVP AI Agent tiet kiem chi phi de:
 
 - cho `ADMIN` va `FACILITY` hoi dap / phan tich du lieu noi bo theo quyen
 - them `AI kiem tra` cho bao cao Xuat-Nhap-Ton va anh xa danh muc thuoc cua `FACILITY`
-- mac dinh dung `Gemini 2.5 Flash-Lite`
+- mac dinh dung `Gemma 4 26B A4B IT` qua Gemini API
 - chi dung fallback model o Phase 2 khi user chu dong bam `Phan tich sau`
 - khong cho AI ghi DB nghiep vu
 - log usage va audit moi request AI bang `ActivityLog`
@@ -84,6 +84,8 @@ Trien khai MVP AI Agent tiet kiem chi phi de:
 - `src/components/DashboardLayout.tsx`
 - `src/app/dashboard/facility/reports/page.tsx`
 - `src/app/dashboard/facility/mappings/page.tsx`
+- `src/app/api/admin/ai-usage/route.ts`
+- `src/app/dashboard/admin/ai-usage/page.tsx`
 
 ### Docs
 
@@ -479,7 +481,7 @@ Dam bao phan quyen, cost control, UI va provider errors duoc kiem tra truoc clos
 ## Success Criteria
 
 - Co `/api/ai/agent` dung chung cho chat va review
-- Model mac dinh la `Gemini 2.5 Flash-Lite`
+- Model mac dinh la `Gemma 4 26B A4B IT`
 - Fallback khong bat trong pilot
 - `ADMIN` hoi duoc du lieu tong hop theo tool chi doc
 - `FACILITY` hoi va review duoc du lieu cua minh
@@ -488,23 +490,37 @@ Dam bao phan quyen, cost control, UI va provider errors duoc kiem tra truoc clos
 - Khong co thay doi schema Prisma trong MVP
 - Khong co thao tac AI ghi DB nghiep vu
 
+## Phase 2 Follow-up Completed
+
+Sau MVP dau tien, cac phan con lai trong Phase 2 da duoc bo sung:
+
+- tach cache AI thanh module rieng `src/lib/ai/cache.ts`
+- cache key gom role, user scope, surface, reportMonth, filters, message, fallback flag va evidence review
+- ActivityLog ghi them `cacheHit` va `warnings` de debug cost-control
+- them API admin-only `/api/admin/ai-usage` de tong hop usage AI tu ActivityLog
+- them trang `/dashboard/admin/ai-usage` de xem request, token, chi phi uoc tinh, cache hit, fallback, loi/quota theo ngay, role, mode, model va user
+- them menu `Theo doi AI` trong khu vuc Cai dat cua admin
+
 ## Implementation Checklist
 
-- [ ] Tao `src/lib/ai` core types/config/router/providers
-- [ ] Tao AI provider adapter Google bang `fetch`
-- [ ] Tao fallback OpenAI adapter bang `fetch`
-- [ ] Tao prompt builder va sanitizer
-- [ ] Tao tool registry theo role
-- [ ] Implement admin read-only tools
-- [ ] Implement facility read-only tools
-- [ ] Implement review tools cho reports/mappings
-- [ ] Tao `/api/ai/agent`
-- [ ] Implement usage estimate va ActivityLog audit
-- [ ] Implement quota check bang ActivityLog
-- [ ] Tao `AIAssistantPanel`
-- [ ] Chen nut `Tro ly AI` vao `DashboardLayout`
-- [ ] Tao `AIReviewButton`
-- [ ] Chen review vao facility reports page
-- [ ] Chen review vao facility mappings page
-- [ ] Chay lint
-- [ ] Manual verify authz/quota/provider error/UI flows
+- [x] Tao `src/lib/ai` core types/config/router/providers
+- [x] Tao AI provider adapter Google bang `fetch`
+- [x] Tao fallback OpenAI adapter bang `fetch`
+- [x] Tao prompt builder va sanitizer
+- [x] Tao tool registry theo role
+- [x] Implement admin read-only tools
+- [x] Implement facility read-only tools
+- [x] Implement review tools cho reports/mappings
+- [x] Tao `/api/ai/agent`
+- [x] Implement usage estimate va ActivityLog audit
+- [x] Implement quota check bang ActivityLog
+- [x] Implement in-memory cache va `CACHE_HIT` logging
+- [x] Tao admin AI usage dashboard
+- [x] Tao `AIAssistantPanel`
+- [x] Chen nut `Tro ly AI` vao `DashboardLayout`
+- [x] Tao `AIReviewButton`
+- [x] Chen review vao facility reports page
+- [x] Chen review vao facility mappings page
+- [x] Chay lint
+- [x] Automated verify bang lint, typecheck va production build
+- [ ] Manual runtime verify authz/quota/provider success/UI flows khi co session va API key runtime

@@ -133,6 +133,21 @@ export type Notification = $Result.DefaultSelection<Prisma.$NotificationPayload>
  * 
  */
 export type ActivityLog = $Result.DefaultSelection<Prisma.$ActivityLogPayload>
+/**
+ * Model AISetting
+ * 
+ */
+export type AISetting = $Result.DefaultSelection<Prisma.$AISettingPayload>
+/**
+ * Model AIUserPolicy
+ * 
+ */
+export type AIUserPolicy = $Result.DefaultSelection<Prisma.$AIUserPolicyPayload>
+/**
+ * Model AIToolPolicy
+ * 
+ */
+export type AIToolPolicy = $Result.DefaultSelection<Prisma.$AIToolPolicyPayload>
 
 /**
  * Enums
@@ -593,6 +608,36 @@ export class PrismaClient<
     * ```
     */
   get activityLog(): Prisma.ActivityLogDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.aISetting`: Exposes CRUD operations for the **AISetting** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more AISettings
+    * const aISettings = await prisma.aISetting.findMany()
+    * ```
+    */
+  get aISetting(): Prisma.AISettingDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.aIUserPolicy`: Exposes CRUD operations for the **AIUserPolicy** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more AIUserPolicies
+    * const aIUserPolicies = await prisma.aIUserPolicy.findMany()
+    * ```
+    */
+  get aIUserPolicy(): Prisma.AIUserPolicyDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.aIToolPolicy`: Exposes CRUD operations for the **AIToolPolicy** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more AIToolPolicies
+    * const aIToolPolicies = await prisma.aIToolPolicy.findMany()
+    * ```
+    */
+  get aIToolPolicy(): Prisma.AIToolPolicyDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -1050,7 +1095,10 @@ export namespace Prisma {
     KetQuaLCNT: 'KetQuaLCNT',
     KetQuaPhanLo: 'KetQuaPhanLo',
     Notification: 'Notification',
-    ActivityLog: 'ActivityLog'
+    ActivityLog: 'ActivityLog',
+    AISetting: 'AISetting',
+    AIUserPolicy: 'AIUserPolicy',
+    AIToolPolicy: 'AIToolPolicy'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1066,7 +1114,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "company" | "therapeuticGroup" | "masterDrug" | "companyDrug" | "facilityDrugMap" | "inventoryReport" | "facilityReportSubmission" | "drugOrder" | "drugOrderLine" | "drugOrderShipment" | "drugOrderShipmentLine" | "drugOrderReceipt" | "drugOrderReceiptLine" | "reportReviewLog" | "reportPeriod" | "keHoachLCNT" | "goiThau" | "thongBaoMoiThau" | "phanLoGoiThau" | "ketQuaLCNT" | "ketQuaPhanLo" | "notification" | "activityLog"
+      modelProps: "user" | "company" | "therapeuticGroup" | "masterDrug" | "companyDrug" | "facilityDrugMap" | "inventoryReport" | "facilityReportSubmission" | "drugOrder" | "drugOrderLine" | "drugOrderShipment" | "drugOrderShipmentLine" | "drugOrderReceipt" | "drugOrderReceiptLine" | "reportReviewLog" | "reportPeriod" | "keHoachLCNT" | "goiThau" | "thongBaoMoiThau" | "phanLoGoiThau" | "ketQuaLCNT" | "ketQuaPhanLo" | "notification" | "activityLog" | "aISetting" | "aIUserPolicy" | "aIToolPolicy"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2846,6 +2894,228 @@ export namespace Prisma {
           }
         }
       }
+      AISetting: {
+        payload: Prisma.$AISettingPayload<ExtArgs>
+        fields: Prisma.AISettingFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.AISettingFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AISettingPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.AISettingFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AISettingPayload>
+          }
+          findFirst: {
+            args: Prisma.AISettingFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AISettingPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.AISettingFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AISettingPayload>
+          }
+          findMany: {
+            args: Prisma.AISettingFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AISettingPayload>[]
+          }
+          create: {
+            args: Prisma.AISettingCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AISettingPayload>
+          }
+          createMany: {
+            args: Prisma.AISettingCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.AISettingCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AISettingPayload>[]
+          }
+          delete: {
+            args: Prisma.AISettingDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AISettingPayload>
+          }
+          update: {
+            args: Prisma.AISettingUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AISettingPayload>
+          }
+          deleteMany: {
+            args: Prisma.AISettingDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.AISettingUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.AISettingUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AISettingPayload>[]
+          }
+          upsert: {
+            args: Prisma.AISettingUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AISettingPayload>
+          }
+          aggregate: {
+            args: Prisma.AISettingAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAISetting>
+          }
+          groupBy: {
+            args: Prisma.AISettingGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AISettingGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.AISettingCountArgs<ExtArgs>
+            result: $Utils.Optional<AISettingCountAggregateOutputType> | number
+          }
+        }
+      }
+      AIUserPolicy: {
+        payload: Prisma.$AIUserPolicyPayload<ExtArgs>
+        fields: Prisma.AIUserPolicyFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.AIUserPolicyFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AIUserPolicyPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.AIUserPolicyFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AIUserPolicyPayload>
+          }
+          findFirst: {
+            args: Prisma.AIUserPolicyFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AIUserPolicyPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.AIUserPolicyFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AIUserPolicyPayload>
+          }
+          findMany: {
+            args: Prisma.AIUserPolicyFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AIUserPolicyPayload>[]
+          }
+          create: {
+            args: Prisma.AIUserPolicyCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AIUserPolicyPayload>
+          }
+          createMany: {
+            args: Prisma.AIUserPolicyCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.AIUserPolicyCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AIUserPolicyPayload>[]
+          }
+          delete: {
+            args: Prisma.AIUserPolicyDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AIUserPolicyPayload>
+          }
+          update: {
+            args: Prisma.AIUserPolicyUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AIUserPolicyPayload>
+          }
+          deleteMany: {
+            args: Prisma.AIUserPolicyDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.AIUserPolicyUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.AIUserPolicyUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AIUserPolicyPayload>[]
+          }
+          upsert: {
+            args: Prisma.AIUserPolicyUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AIUserPolicyPayload>
+          }
+          aggregate: {
+            args: Prisma.AIUserPolicyAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAIUserPolicy>
+          }
+          groupBy: {
+            args: Prisma.AIUserPolicyGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AIUserPolicyGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.AIUserPolicyCountArgs<ExtArgs>
+            result: $Utils.Optional<AIUserPolicyCountAggregateOutputType> | number
+          }
+        }
+      }
+      AIToolPolicy: {
+        payload: Prisma.$AIToolPolicyPayload<ExtArgs>
+        fields: Prisma.AIToolPolicyFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.AIToolPolicyFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AIToolPolicyPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.AIToolPolicyFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AIToolPolicyPayload>
+          }
+          findFirst: {
+            args: Prisma.AIToolPolicyFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AIToolPolicyPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.AIToolPolicyFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AIToolPolicyPayload>
+          }
+          findMany: {
+            args: Prisma.AIToolPolicyFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AIToolPolicyPayload>[]
+          }
+          create: {
+            args: Prisma.AIToolPolicyCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AIToolPolicyPayload>
+          }
+          createMany: {
+            args: Prisma.AIToolPolicyCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.AIToolPolicyCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AIToolPolicyPayload>[]
+          }
+          delete: {
+            args: Prisma.AIToolPolicyDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AIToolPolicyPayload>
+          }
+          update: {
+            args: Prisma.AIToolPolicyUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AIToolPolicyPayload>
+          }
+          deleteMany: {
+            args: Prisma.AIToolPolicyDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.AIToolPolicyUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.AIToolPolicyUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AIToolPolicyPayload>[]
+          }
+          upsert: {
+            args: Prisma.AIToolPolicyUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AIToolPolicyPayload>
+          }
+          aggregate: {
+            args: Prisma.AIToolPolicyAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAIToolPolicy>
+          }
+          groupBy: {
+            args: Prisma.AIToolPolicyGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AIToolPolicyGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.AIToolPolicyCountArgs<ExtArgs>
+            result: $Utils.Optional<AIToolPolicyCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -2978,6 +3248,9 @@ export namespace Prisma {
     ketQuaPhanLo?: KetQuaPhanLoOmit
     notification?: NotificationOmit
     activityLog?: ActivityLogOmit
+    aISetting?: AISettingOmit
+    aIUserPolicy?: AIUserPolicyOmit
+    aIToolPolicy?: AIToolPolicyOmit
   }
 
   /* Types for Logging */
@@ -3959,6 +4232,7 @@ export namespace Prisma {
     drugOrderReceipts?: boolean | User$drugOrderReceiptsArgs<ExtArgs>
     notifications?: boolean | User$notificationsArgs<ExtArgs>
     activityLogs?: boolean | User$activityLogsArgs<ExtArgs>
+    aiUserPolicy?: boolean | User$aiUserPolicyArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -4029,6 +4303,7 @@ export namespace Prisma {
     drugOrderReceipts?: boolean | User$drugOrderReceiptsArgs<ExtArgs>
     notifications?: boolean | User$notificationsArgs<ExtArgs>
     activityLogs?: boolean | User$activityLogsArgs<ExtArgs>
+    aiUserPolicy?: boolean | User$aiUserPolicyArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -4050,6 +4325,7 @@ export namespace Prisma {
       drugOrderReceipts: Prisma.$DrugOrderReceiptPayload<ExtArgs>[]
       notifications: Prisma.$NotificationPayload<ExtArgs>[]
       activityLogs: Prisma.$ActivityLogPayload<ExtArgs>[]
+      aiUserPolicy: Prisma.$AIUserPolicyPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -4470,6 +4746,7 @@ export namespace Prisma {
     drugOrderReceipts<T extends User$drugOrderReceiptsArgs<ExtArgs> = {}>(args?: Subset<T, User$drugOrderReceiptsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DrugOrderReceiptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     notifications<T extends User$notificationsArgs<ExtArgs> = {}>(args?: Subset<T, User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     activityLogs<T extends User$activityLogsArgs<ExtArgs> = {}>(args?: Subset<T, User$activityLogsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ActivityLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    aiUserPolicy<T extends User$aiUserPolicyArgs<ExtArgs> = {}>(args?: Subset<T, User$aiUserPolicyArgs<ExtArgs>>): Prisma__AIUserPolicyClient<$Result.GetResult<Prisma.$AIUserPolicyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5118,6 +5395,25 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: ActivityLogScalarFieldEnum | ActivityLogScalarFieldEnum[]
+  }
+
+  /**
+   * User.aiUserPolicy
+   */
+  export type User$aiUserPolicyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AIUserPolicy
+     */
+    select?: AIUserPolicySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AIUserPolicy
+     */
+    omit?: AIUserPolicyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AIUserPolicyInclude<ExtArgs> | null
+    where?: AIUserPolicyWhereInput
   }
 
   /**
@@ -10086,6 +10382,7 @@ export namespace Prisma {
     hoatChatNoiBo: string | null
     soDangKyNoiBo: string | null
     donViTinhNoiBo: string | null
+    nhomTckt: string | null
     masterDrugId: string | null
     status: $Enums.MappingStatus | null
     adminNote: string | null
@@ -10102,6 +10399,7 @@ export namespace Prisma {
     hoatChatNoiBo: string | null
     soDangKyNoiBo: string | null
     donViTinhNoiBo: string | null
+    nhomTckt: string | null
     masterDrugId: string | null
     status: $Enums.MappingStatus | null
     adminNote: string | null
@@ -10118,6 +10416,7 @@ export namespace Prisma {
     hoatChatNoiBo: number
     soDangKyNoiBo: number
     donViTinhNoiBo: number
+    nhomTckt: number
     masterDrugId: number
     status: number
     adminNote: number
@@ -10136,6 +10435,7 @@ export namespace Prisma {
     hoatChatNoiBo?: true
     soDangKyNoiBo?: true
     donViTinhNoiBo?: true
+    nhomTckt?: true
     masterDrugId?: true
     status?: true
     adminNote?: true
@@ -10152,6 +10452,7 @@ export namespace Prisma {
     hoatChatNoiBo?: true
     soDangKyNoiBo?: true
     donViTinhNoiBo?: true
+    nhomTckt?: true
     masterDrugId?: true
     status?: true
     adminNote?: true
@@ -10168,6 +10469,7 @@ export namespace Prisma {
     hoatChatNoiBo?: true
     soDangKyNoiBo?: true
     donViTinhNoiBo?: true
+    nhomTckt?: true
     masterDrugId?: true
     status?: true
     adminNote?: true
@@ -10257,6 +10559,7 @@ export namespace Prisma {
     hoatChatNoiBo: string | null
     soDangKyNoiBo: string | null
     donViTinhNoiBo: string | null
+    nhomTckt: string | null
     masterDrugId: string | null
     status: $Enums.MappingStatus
     adminNote: string | null
@@ -10290,6 +10593,7 @@ export namespace Prisma {
     hoatChatNoiBo?: boolean
     soDangKyNoiBo?: boolean
     donViTinhNoiBo?: boolean
+    nhomTckt?: boolean
     masterDrugId?: boolean
     status?: boolean
     adminNote?: boolean
@@ -10310,6 +10614,7 @@ export namespace Prisma {
     hoatChatNoiBo?: boolean
     soDangKyNoiBo?: boolean
     donViTinhNoiBo?: boolean
+    nhomTckt?: boolean
     masterDrugId?: boolean
     status?: boolean
     adminNote?: boolean
@@ -10328,6 +10633,7 @@ export namespace Prisma {
     hoatChatNoiBo?: boolean
     soDangKyNoiBo?: boolean
     donViTinhNoiBo?: boolean
+    nhomTckt?: boolean
     masterDrugId?: boolean
     status?: boolean
     adminNote?: boolean
@@ -10346,6 +10652,7 @@ export namespace Prisma {
     hoatChatNoiBo?: boolean
     soDangKyNoiBo?: boolean
     donViTinhNoiBo?: boolean
+    nhomTckt?: boolean
     masterDrugId?: boolean
     status?: boolean
     adminNote?: boolean
@@ -10354,7 +10661,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type FacilityDrugMapOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "facilityId" | "maNoiBo" | "tenThuocNoiBo" | "hoatChatNoiBo" | "soDangKyNoiBo" | "donViTinhNoiBo" | "masterDrugId" | "status" | "adminNote" | "isOutOfCatalog" | "createdAt" | "updatedAt", ExtArgs["result"]["facilityDrugMap"]>
+  export type FacilityDrugMapOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "facilityId" | "maNoiBo" | "tenThuocNoiBo" | "hoatChatNoiBo" | "soDangKyNoiBo" | "donViTinhNoiBo" | "nhomTckt" | "masterDrugId" | "status" | "adminNote" | "isOutOfCatalog" | "createdAt" | "updatedAt", ExtArgs["result"]["facilityDrugMap"]>
   export type FacilityDrugMapInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     facility?: boolean | UserDefaultArgs<ExtArgs>
     masterDrug?: boolean | FacilityDrugMap$masterDrugArgs<ExtArgs>
@@ -10385,6 +10692,7 @@ export namespace Prisma {
       hoatChatNoiBo: string | null
       soDangKyNoiBo: string | null
       donViTinhNoiBo: string | null
+      nhomTckt: string | null
       masterDrugId: string | null
       status: $Enums.MappingStatus
       adminNote: string | null
@@ -10824,6 +11132,7 @@ export namespace Prisma {
     readonly hoatChatNoiBo: FieldRef<"FacilityDrugMap", 'String'>
     readonly soDangKyNoiBo: FieldRef<"FacilityDrugMap", 'String'>
     readonly donViTinhNoiBo: FieldRef<"FacilityDrugMap", 'String'>
+    readonly nhomTckt: FieldRef<"FacilityDrugMap", 'String'>
     readonly masterDrugId: FieldRef<"FacilityDrugMap", 'String'>
     readonly status: FieldRef<"FacilityDrugMap", 'MappingStatus'>
     readonly adminNote: FieldRef<"FacilityDrugMap", 'String'>
@@ -32650,6 +32959,3192 @@ export namespace Prisma {
 
 
   /**
+   * Model AISetting
+   */
+
+  export type AggregateAISetting = {
+    _count: AISettingCountAggregateOutputType | null
+    _min: AISettingMinAggregateOutputType | null
+    _max: AISettingMaxAggregateOutputType | null
+  }
+
+  export type AISettingMinAggregateOutputType = {
+    id: string | null
+    key: string | null
+    updatedById: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type AISettingMaxAggregateOutputType = {
+    id: string | null
+    key: string | null
+    updatedById: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type AISettingCountAggregateOutputType = {
+    id: number
+    key: number
+    value: number
+    updatedById: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type AISettingMinAggregateInputType = {
+    id?: true
+    key?: true
+    updatedById?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type AISettingMaxAggregateInputType = {
+    id?: true
+    key?: true
+    updatedById?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type AISettingCountAggregateInputType = {
+    id?: true
+    key?: true
+    value?: true
+    updatedById?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type AISettingAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AISetting to aggregate.
+     */
+    where?: AISettingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AISettings to fetch.
+     */
+    orderBy?: AISettingOrderByWithRelationInput | AISettingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: AISettingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AISettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AISettings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned AISettings
+    **/
+    _count?: true | AISettingCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: AISettingMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: AISettingMaxAggregateInputType
+  }
+
+  export type GetAISettingAggregateType<T extends AISettingAggregateArgs> = {
+        [P in keyof T & keyof AggregateAISetting]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateAISetting[P]>
+      : GetScalarType<T[P], AggregateAISetting[P]>
+  }
+
+
+
+
+  export type AISettingGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AISettingWhereInput
+    orderBy?: AISettingOrderByWithAggregationInput | AISettingOrderByWithAggregationInput[]
+    by: AISettingScalarFieldEnum[] | AISettingScalarFieldEnum
+    having?: AISettingScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: AISettingCountAggregateInputType | true
+    _min?: AISettingMinAggregateInputType
+    _max?: AISettingMaxAggregateInputType
+  }
+
+  export type AISettingGroupByOutputType = {
+    id: string
+    key: string
+    value: JsonValue
+    updatedById: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: AISettingCountAggregateOutputType | null
+    _min: AISettingMinAggregateOutputType | null
+    _max: AISettingMaxAggregateOutputType | null
+  }
+
+  type GetAISettingGroupByPayload<T extends AISettingGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<AISettingGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof AISettingGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], AISettingGroupByOutputType[P]>
+            : GetScalarType<T[P], AISettingGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type AISettingSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    key?: boolean
+    value?: boolean
+    updatedById?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["aISetting"]>
+
+  export type AISettingSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    key?: boolean
+    value?: boolean
+    updatedById?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["aISetting"]>
+
+  export type AISettingSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    key?: boolean
+    value?: boolean
+    updatedById?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["aISetting"]>
+
+  export type AISettingSelectScalar = {
+    id?: boolean
+    key?: boolean
+    value?: boolean
+    updatedById?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type AISettingOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "key" | "value" | "updatedById" | "createdAt" | "updatedAt", ExtArgs["result"]["aISetting"]>
+
+  export type $AISettingPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "AISetting"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      key: string
+      value: Prisma.JsonValue
+      updatedById: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["aISetting"]>
+    composites: {}
+  }
+
+  type AISettingGetPayload<S extends boolean | null | undefined | AISettingDefaultArgs> = $Result.GetResult<Prisma.$AISettingPayload, S>
+
+  type AISettingCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<AISettingFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: AISettingCountAggregateInputType | true
+    }
+
+  export interface AISettingDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AISetting'], meta: { name: 'AISetting' } }
+    /**
+     * Find zero or one AISetting that matches the filter.
+     * @param {AISettingFindUniqueArgs} args - Arguments to find a AISetting
+     * @example
+     * // Get one AISetting
+     * const aISetting = await prisma.aISetting.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends AISettingFindUniqueArgs>(args: SelectSubset<T, AISettingFindUniqueArgs<ExtArgs>>): Prisma__AISettingClient<$Result.GetResult<Prisma.$AISettingPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one AISetting that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {AISettingFindUniqueOrThrowArgs} args - Arguments to find a AISetting
+     * @example
+     * // Get one AISetting
+     * const aISetting = await prisma.aISetting.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends AISettingFindUniqueOrThrowArgs>(args: SelectSubset<T, AISettingFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AISettingClient<$Result.GetResult<Prisma.$AISettingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AISetting that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AISettingFindFirstArgs} args - Arguments to find a AISetting
+     * @example
+     * // Get one AISetting
+     * const aISetting = await prisma.aISetting.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends AISettingFindFirstArgs>(args?: SelectSubset<T, AISettingFindFirstArgs<ExtArgs>>): Prisma__AISettingClient<$Result.GetResult<Prisma.$AISettingPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AISetting that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AISettingFindFirstOrThrowArgs} args - Arguments to find a AISetting
+     * @example
+     * // Get one AISetting
+     * const aISetting = await prisma.aISetting.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends AISettingFindFirstOrThrowArgs>(args?: SelectSubset<T, AISettingFindFirstOrThrowArgs<ExtArgs>>): Prisma__AISettingClient<$Result.GetResult<Prisma.$AISettingPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more AISettings that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AISettingFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all AISettings
+     * const aISettings = await prisma.aISetting.findMany()
+     * 
+     * // Get first 10 AISettings
+     * const aISettings = await prisma.aISetting.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const aISettingWithIdOnly = await prisma.aISetting.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends AISettingFindManyArgs>(args?: SelectSubset<T, AISettingFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AISettingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a AISetting.
+     * @param {AISettingCreateArgs} args - Arguments to create a AISetting.
+     * @example
+     * // Create one AISetting
+     * const AISetting = await prisma.aISetting.create({
+     *   data: {
+     *     // ... data to create a AISetting
+     *   }
+     * })
+     * 
+     */
+    create<T extends AISettingCreateArgs>(args: SelectSubset<T, AISettingCreateArgs<ExtArgs>>): Prisma__AISettingClient<$Result.GetResult<Prisma.$AISettingPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many AISettings.
+     * @param {AISettingCreateManyArgs} args - Arguments to create many AISettings.
+     * @example
+     * // Create many AISettings
+     * const aISetting = await prisma.aISetting.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends AISettingCreateManyArgs>(args?: SelectSubset<T, AISettingCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many AISettings and returns the data saved in the database.
+     * @param {AISettingCreateManyAndReturnArgs} args - Arguments to create many AISettings.
+     * @example
+     * // Create many AISettings
+     * const aISetting = await prisma.aISetting.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many AISettings and only return the `id`
+     * const aISettingWithIdOnly = await prisma.aISetting.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends AISettingCreateManyAndReturnArgs>(args?: SelectSubset<T, AISettingCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AISettingPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a AISetting.
+     * @param {AISettingDeleteArgs} args - Arguments to delete one AISetting.
+     * @example
+     * // Delete one AISetting
+     * const AISetting = await prisma.aISetting.delete({
+     *   where: {
+     *     // ... filter to delete one AISetting
+     *   }
+     * })
+     * 
+     */
+    delete<T extends AISettingDeleteArgs>(args: SelectSubset<T, AISettingDeleteArgs<ExtArgs>>): Prisma__AISettingClient<$Result.GetResult<Prisma.$AISettingPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one AISetting.
+     * @param {AISettingUpdateArgs} args - Arguments to update one AISetting.
+     * @example
+     * // Update one AISetting
+     * const aISetting = await prisma.aISetting.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends AISettingUpdateArgs>(args: SelectSubset<T, AISettingUpdateArgs<ExtArgs>>): Prisma__AISettingClient<$Result.GetResult<Prisma.$AISettingPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more AISettings.
+     * @param {AISettingDeleteManyArgs} args - Arguments to filter AISettings to delete.
+     * @example
+     * // Delete a few AISettings
+     * const { count } = await prisma.aISetting.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends AISettingDeleteManyArgs>(args?: SelectSubset<T, AISettingDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AISettings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AISettingUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many AISettings
+     * const aISetting = await prisma.aISetting.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends AISettingUpdateManyArgs>(args: SelectSubset<T, AISettingUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AISettings and returns the data updated in the database.
+     * @param {AISettingUpdateManyAndReturnArgs} args - Arguments to update many AISettings.
+     * @example
+     * // Update many AISettings
+     * const aISetting = await prisma.aISetting.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more AISettings and only return the `id`
+     * const aISettingWithIdOnly = await prisma.aISetting.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends AISettingUpdateManyAndReturnArgs>(args: SelectSubset<T, AISettingUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AISettingPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one AISetting.
+     * @param {AISettingUpsertArgs} args - Arguments to update or create a AISetting.
+     * @example
+     * // Update or create a AISetting
+     * const aISetting = await prisma.aISetting.upsert({
+     *   create: {
+     *     // ... data to create a AISetting
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the AISetting we want to update
+     *   }
+     * })
+     */
+    upsert<T extends AISettingUpsertArgs>(args: SelectSubset<T, AISettingUpsertArgs<ExtArgs>>): Prisma__AISettingClient<$Result.GetResult<Prisma.$AISettingPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of AISettings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AISettingCountArgs} args - Arguments to filter AISettings to count.
+     * @example
+     * // Count the number of AISettings
+     * const count = await prisma.aISetting.count({
+     *   where: {
+     *     // ... the filter for the AISettings we want to count
+     *   }
+     * })
+    **/
+    count<T extends AISettingCountArgs>(
+      args?: Subset<T, AISettingCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], AISettingCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a AISetting.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AISettingAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends AISettingAggregateArgs>(args: Subset<T, AISettingAggregateArgs>): Prisma.PrismaPromise<GetAISettingAggregateType<T>>
+
+    /**
+     * Group by AISetting.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AISettingGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends AISettingGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: AISettingGroupByArgs['orderBy'] }
+        : { orderBy?: AISettingGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, AISettingGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAISettingGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the AISetting model
+   */
+  readonly fields: AISettingFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for AISetting.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__AISettingClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the AISetting model
+   */
+  interface AISettingFieldRefs {
+    readonly id: FieldRef<"AISetting", 'String'>
+    readonly key: FieldRef<"AISetting", 'String'>
+    readonly value: FieldRef<"AISetting", 'Json'>
+    readonly updatedById: FieldRef<"AISetting", 'String'>
+    readonly createdAt: FieldRef<"AISetting", 'DateTime'>
+    readonly updatedAt: FieldRef<"AISetting", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * AISetting findUnique
+   */
+  export type AISettingFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AISetting
+     */
+    select?: AISettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AISetting
+     */
+    omit?: AISettingOmit<ExtArgs> | null
+    /**
+     * Filter, which AISetting to fetch.
+     */
+    where: AISettingWhereUniqueInput
+  }
+
+  /**
+   * AISetting findUniqueOrThrow
+   */
+  export type AISettingFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AISetting
+     */
+    select?: AISettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AISetting
+     */
+    omit?: AISettingOmit<ExtArgs> | null
+    /**
+     * Filter, which AISetting to fetch.
+     */
+    where: AISettingWhereUniqueInput
+  }
+
+  /**
+   * AISetting findFirst
+   */
+  export type AISettingFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AISetting
+     */
+    select?: AISettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AISetting
+     */
+    omit?: AISettingOmit<ExtArgs> | null
+    /**
+     * Filter, which AISetting to fetch.
+     */
+    where?: AISettingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AISettings to fetch.
+     */
+    orderBy?: AISettingOrderByWithRelationInput | AISettingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AISettings.
+     */
+    cursor?: AISettingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AISettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AISettings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AISettings.
+     */
+    distinct?: AISettingScalarFieldEnum | AISettingScalarFieldEnum[]
+  }
+
+  /**
+   * AISetting findFirstOrThrow
+   */
+  export type AISettingFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AISetting
+     */
+    select?: AISettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AISetting
+     */
+    omit?: AISettingOmit<ExtArgs> | null
+    /**
+     * Filter, which AISetting to fetch.
+     */
+    where?: AISettingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AISettings to fetch.
+     */
+    orderBy?: AISettingOrderByWithRelationInput | AISettingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AISettings.
+     */
+    cursor?: AISettingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AISettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AISettings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AISettings.
+     */
+    distinct?: AISettingScalarFieldEnum | AISettingScalarFieldEnum[]
+  }
+
+  /**
+   * AISetting findMany
+   */
+  export type AISettingFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AISetting
+     */
+    select?: AISettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AISetting
+     */
+    omit?: AISettingOmit<ExtArgs> | null
+    /**
+     * Filter, which AISettings to fetch.
+     */
+    where?: AISettingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AISettings to fetch.
+     */
+    orderBy?: AISettingOrderByWithRelationInput | AISettingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing AISettings.
+     */
+    cursor?: AISettingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AISettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AISettings.
+     */
+    skip?: number
+    distinct?: AISettingScalarFieldEnum | AISettingScalarFieldEnum[]
+  }
+
+  /**
+   * AISetting create
+   */
+  export type AISettingCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AISetting
+     */
+    select?: AISettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AISetting
+     */
+    omit?: AISettingOmit<ExtArgs> | null
+    /**
+     * The data needed to create a AISetting.
+     */
+    data: XOR<AISettingCreateInput, AISettingUncheckedCreateInput>
+  }
+
+  /**
+   * AISetting createMany
+   */
+  export type AISettingCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many AISettings.
+     */
+    data: AISettingCreateManyInput | AISettingCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AISetting createManyAndReturn
+   */
+  export type AISettingCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AISetting
+     */
+    select?: AISettingSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AISetting
+     */
+    omit?: AISettingOmit<ExtArgs> | null
+    /**
+     * The data used to create many AISettings.
+     */
+    data: AISettingCreateManyInput | AISettingCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AISetting update
+   */
+  export type AISettingUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AISetting
+     */
+    select?: AISettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AISetting
+     */
+    omit?: AISettingOmit<ExtArgs> | null
+    /**
+     * The data needed to update a AISetting.
+     */
+    data: XOR<AISettingUpdateInput, AISettingUncheckedUpdateInput>
+    /**
+     * Choose, which AISetting to update.
+     */
+    where: AISettingWhereUniqueInput
+  }
+
+  /**
+   * AISetting updateMany
+   */
+  export type AISettingUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update AISettings.
+     */
+    data: XOR<AISettingUpdateManyMutationInput, AISettingUncheckedUpdateManyInput>
+    /**
+     * Filter which AISettings to update
+     */
+    where?: AISettingWhereInput
+    /**
+     * Limit how many AISettings to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AISetting updateManyAndReturn
+   */
+  export type AISettingUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AISetting
+     */
+    select?: AISettingSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AISetting
+     */
+    omit?: AISettingOmit<ExtArgs> | null
+    /**
+     * The data used to update AISettings.
+     */
+    data: XOR<AISettingUpdateManyMutationInput, AISettingUncheckedUpdateManyInput>
+    /**
+     * Filter which AISettings to update
+     */
+    where?: AISettingWhereInput
+    /**
+     * Limit how many AISettings to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AISetting upsert
+   */
+  export type AISettingUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AISetting
+     */
+    select?: AISettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AISetting
+     */
+    omit?: AISettingOmit<ExtArgs> | null
+    /**
+     * The filter to search for the AISetting to update in case it exists.
+     */
+    where: AISettingWhereUniqueInput
+    /**
+     * In case the AISetting found by the `where` argument doesn't exist, create a new AISetting with this data.
+     */
+    create: XOR<AISettingCreateInput, AISettingUncheckedCreateInput>
+    /**
+     * In case the AISetting was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AISettingUpdateInput, AISettingUncheckedUpdateInput>
+  }
+
+  /**
+   * AISetting delete
+   */
+  export type AISettingDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AISetting
+     */
+    select?: AISettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AISetting
+     */
+    omit?: AISettingOmit<ExtArgs> | null
+    /**
+     * Filter which AISetting to delete.
+     */
+    where: AISettingWhereUniqueInput
+  }
+
+  /**
+   * AISetting deleteMany
+   */
+  export type AISettingDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AISettings to delete
+     */
+    where?: AISettingWhereInput
+    /**
+     * Limit how many AISettings to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * AISetting without action
+   */
+  export type AISettingDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AISetting
+     */
+    select?: AISettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AISetting
+     */
+    omit?: AISettingOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model AIUserPolicy
+   */
+
+  export type AggregateAIUserPolicy = {
+    _count: AIUserPolicyCountAggregateOutputType | null
+    _avg: AIUserPolicyAvgAggregateOutputType | null
+    _sum: AIUserPolicySumAggregateOutputType | null
+    _min: AIUserPolicyMinAggregateOutputType | null
+    _max: AIUserPolicyMaxAggregateOutputType | null
+  }
+
+  export type AIUserPolicyAvgAggregateOutputType = {
+    chatDailyLimit: number | null
+    reviewDailyLimit: number | null
+  }
+
+  export type AIUserPolicySumAggregateOutputType = {
+    chatDailyLimit: number | null
+    reviewDailyLimit: number | null
+  }
+
+  export type AIUserPolicyMinAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    enabled: boolean | null
+    chatDailyLimit: number | null
+    reviewDailyLimit: number | null
+    allowFallback: boolean | null
+    note: string | null
+    updatedById: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type AIUserPolicyMaxAggregateOutputType = {
+    id: string | null
+    userId: string | null
+    enabled: boolean | null
+    chatDailyLimit: number | null
+    reviewDailyLimit: number | null
+    allowFallback: boolean | null
+    note: string | null
+    updatedById: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type AIUserPolicyCountAggregateOutputType = {
+    id: number
+    userId: number
+    enabled: number
+    chatDailyLimit: number
+    reviewDailyLimit: number
+    allowFallback: number
+    note: number
+    updatedById: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type AIUserPolicyAvgAggregateInputType = {
+    chatDailyLimit?: true
+    reviewDailyLimit?: true
+  }
+
+  export type AIUserPolicySumAggregateInputType = {
+    chatDailyLimit?: true
+    reviewDailyLimit?: true
+  }
+
+  export type AIUserPolicyMinAggregateInputType = {
+    id?: true
+    userId?: true
+    enabled?: true
+    chatDailyLimit?: true
+    reviewDailyLimit?: true
+    allowFallback?: true
+    note?: true
+    updatedById?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type AIUserPolicyMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    enabled?: true
+    chatDailyLimit?: true
+    reviewDailyLimit?: true
+    allowFallback?: true
+    note?: true
+    updatedById?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type AIUserPolicyCountAggregateInputType = {
+    id?: true
+    userId?: true
+    enabled?: true
+    chatDailyLimit?: true
+    reviewDailyLimit?: true
+    allowFallback?: true
+    note?: true
+    updatedById?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type AIUserPolicyAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AIUserPolicy to aggregate.
+     */
+    where?: AIUserPolicyWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AIUserPolicies to fetch.
+     */
+    orderBy?: AIUserPolicyOrderByWithRelationInput | AIUserPolicyOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: AIUserPolicyWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AIUserPolicies from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AIUserPolicies.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned AIUserPolicies
+    **/
+    _count?: true | AIUserPolicyCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: AIUserPolicyAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: AIUserPolicySumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: AIUserPolicyMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: AIUserPolicyMaxAggregateInputType
+  }
+
+  export type GetAIUserPolicyAggregateType<T extends AIUserPolicyAggregateArgs> = {
+        [P in keyof T & keyof AggregateAIUserPolicy]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateAIUserPolicy[P]>
+      : GetScalarType<T[P], AggregateAIUserPolicy[P]>
+  }
+
+
+
+
+  export type AIUserPolicyGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AIUserPolicyWhereInput
+    orderBy?: AIUserPolicyOrderByWithAggregationInput | AIUserPolicyOrderByWithAggregationInput[]
+    by: AIUserPolicyScalarFieldEnum[] | AIUserPolicyScalarFieldEnum
+    having?: AIUserPolicyScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: AIUserPolicyCountAggregateInputType | true
+    _avg?: AIUserPolicyAvgAggregateInputType
+    _sum?: AIUserPolicySumAggregateInputType
+    _min?: AIUserPolicyMinAggregateInputType
+    _max?: AIUserPolicyMaxAggregateInputType
+  }
+
+  export type AIUserPolicyGroupByOutputType = {
+    id: string
+    userId: string
+    enabled: boolean | null
+    chatDailyLimit: number | null
+    reviewDailyLimit: number | null
+    allowFallback: boolean | null
+    note: string | null
+    updatedById: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: AIUserPolicyCountAggregateOutputType | null
+    _avg: AIUserPolicyAvgAggregateOutputType | null
+    _sum: AIUserPolicySumAggregateOutputType | null
+    _min: AIUserPolicyMinAggregateOutputType | null
+    _max: AIUserPolicyMaxAggregateOutputType | null
+  }
+
+  type GetAIUserPolicyGroupByPayload<T extends AIUserPolicyGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<AIUserPolicyGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof AIUserPolicyGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], AIUserPolicyGroupByOutputType[P]>
+            : GetScalarType<T[P], AIUserPolicyGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type AIUserPolicySelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    enabled?: boolean
+    chatDailyLimit?: boolean
+    reviewDailyLimit?: boolean
+    allowFallback?: boolean
+    note?: boolean
+    updatedById?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["aIUserPolicy"]>
+
+  export type AIUserPolicySelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    enabled?: boolean
+    chatDailyLimit?: boolean
+    reviewDailyLimit?: boolean
+    allowFallback?: boolean
+    note?: boolean
+    updatedById?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["aIUserPolicy"]>
+
+  export type AIUserPolicySelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    enabled?: boolean
+    chatDailyLimit?: boolean
+    reviewDailyLimit?: boolean
+    allowFallback?: boolean
+    note?: boolean
+    updatedById?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["aIUserPolicy"]>
+
+  export type AIUserPolicySelectScalar = {
+    id?: boolean
+    userId?: boolean
+    enabled?: boolean
+    chatDailyLimit?: boolean
+    reviewDailyLimit?: boolean
+    allowFallback?: boolean
+    note?: boolean
+    updatedById?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type AIUserPolicyOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "enabled" | "chatDailyLimit" | "reviewDailyLimit" | "allowFallback" | "note" | "updatedById" | "createdAt" | "updatedAt", ExtArgs["result"]["aIUserPolicy"]>
+  export type AIUserPolicyInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type AIUserPolicyIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type AIUserPolicyIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $AIUserPolicyPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "AIUserPolicy"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      userId: string
+      enabled: boolean | null
+      chatDailyLimit: number | null
+      reviewDailyLimit: number | null
+      allowFallback: boolean | null
+      note: string | null
+      updatedById: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["aIUserPolicy"]>
+    composites: {}
+  }
+
+  type AIUserPolicyGetPayload<S extends boolean | null | undefined | AIUserPolicyDefaultArgs> = $Result.GetResult<Prisma.$AIUserPolicyPayload, S>
+
+  type AIUserPolicyCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<AIUserPolicyFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: AIUserPolicyCountAggregateInputType | true
+    }
+
+  export interface AIUserPolicyDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AIUserPolicy'], meta: { name: 'AIUserPolicy' } }
+    /**
+     * Find zero or one AIUserPolicy that matches the filter.
+     * @param {AIUserPolicyFindUniqueArgs} args - Arguments to find a AIUserPolicy
+     * @example
+     * // Get one AIUserPolicy
+     * const aIUserPolicy = await prisma.aIUserPolicy.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends AIUserPolicyFindUniqueArgs>(args: SelectSubset<T, AIUserPolicyFindUniqueArgs<ExtArgs>>): Prisma__AIUserPolicyClient<$Result.GetResult<Prisma.$AIUserPolicyPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one AIUserPolicy that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {AIUserPolicyFindUniqueOrThrowArgs} args - Arguments to find a AIUserPolicy
+     * @example
+     * // Get one AIUserPolicy
+     * const aIUserPolicy = await prisma.aIUserPolicy.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends AIUserPolicyFindUniqueOrThrowArgs>(args: SelectSubset<T, AIUserPolicyFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AIUserPolicyClient<$Result.GetResult<Prisma.$AIUserPolicyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AIUserPolicy that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AIUserPolicyFindFirstArgs} args - Arguments to find a AIUserPolicy
+     * @example
+     * // Get one AIUserPolicy
+     * const aIUserPolicy = await prisma.aIUserPolicy.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends AIUserPolicyFindFirstArgs>(args?: SelectSubset<T, AIUserPolicyFindFirstArgs<ExtArgs>>): Prisma__AIUserPolicyClient<$Result.GetResult<Prisma.$AIUserPolicyPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AIUserPolicy that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AIUserPolicyFindFirstOrThrowArgs} args - Arguments to find a AIUserPolicy
+     * @example
+     * // Get one AIUserPolicy
+     * const aIUserPolicy = await prisma.aIUserPolicy.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends AIUserPolicyFindFirstOrThrowArgs>(args?: SelectSubset<T, AIUserPolicyFindFirstOrThrowArgs<ExtArgs>>): Prisma__AIUserPolicyClient<$Result.GetResult<Prisma.$AIUserPolicyPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more AIUserPolicies that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AIUserPolicyFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all AIUserPolicies
+     * const aIUserPolicies = await prisma.aIUserPolicy.findMany()
+     * 
+     * // Get first 10 AIUserPolicies
+     * const aIUserPolicies = await prisma.aIUserPolicy.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const aIUserPolicyWithIdOnly = await prisma.aIUserPolicy.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends AIUserPolicyFindManyArgs>(args?: SelectSubset<T, AIUserPolicyFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AIUserPolicyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a AIUserPolicy.
+     * @param {AIUserPolicyCreateArgs} args - Arguments to create a AIUserPolicy.
+     * @example
+     * // Create one AIUserPolicy
+     * const AIUserPolicy = await prisma.aIUserPolicy.create({
+     *   data: {
+     *     // ... data to create a AIUserPolicy
+     *   }
+     * })
+     * 
+     */
+    create<T extends AIUserPolicyCreateArgs>(args: SelectSubset<T, AIUserPolicyCreateArgs<ExtArgs>>): Prisma__AIUserPolicyClient<$Result.GetResult<Prisma.$AIUserPolicyPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many AIUserPolicies.
+     * @param {AIUserPolicyCreateManyArgs} args - Arguments to create many AIUserPolicies.
+     * @example
+     * // Create many AIUserPolicies
+     * const aIUserPolicy = await prisma.aIUserPolicy.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends AIUserPolicyCreateManyArgs>(args?: SelectSubset<T, AIUserPolicyCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many AIUserPolicies and returns the data saved in the database.
+     * @param {AIUserPolicyCreateManyAndReturnArgs} args - Arguments to create many AIUserPolicies.
+     * @example
+     * // Create many AIUserPolicies
+     * const aIUserPolicy = await prisma.aIUserPolicy.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many AIUserPolicies and only return the `id`
+     * const aIUserPolicyWithIdOnly = await prisma.aIUserPolicy.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends AIUserPolicyCreateManyAndReturnArgs>(args?: SelectSubset<T, AIUserPolicyCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AIUserPolicyPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a AIUserPolicy.
+     * @param {AIUserPolicyDeleteArgs} args - Arguments to delete one AIUserPolicy.
+     * @example
+     * // Delete one AIUserPolicy
+     * const AIUserPolicy = await prisma.aIUserPolicy.delete({
+     *   where: {
+     *     // ... filter to delete one AIUserPolicy
+     *   }
+     * })
+     * 
+     */
+    delete<T extends AIUserPolicyDeleteArgs>(args: SelectSubset<T, AIUserPolicyDeleteArgs<ExtArgs>>): Prisma__AIUserPolicyClient<$Result.GetResult<Prisma.$AIUserPolicyPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one AIUserPolicy.
+     * @param {AIUserPolicyUpdateArgs} args - Arguments to update one AIUserPolicy.
+     * @example
+     * // Update one AIUserPolicy
+     * const aIUserPolicy = await prisma.aIUserPolicy.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends AIUserPolicyUpdateArgs>(args: SelectSubset<T, AIUserPolicyUpdateArgs<ExtArgs>>): Prisma__AIUserPolicyClient<$Result.GetResult<Prisma.$AIUserPolicyPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more AIUserPolicies.
+     * @param {AIUserPolicyDeleteManyArgs} args - Arguments to filter AIUserPolicies to delete.
+     * @example
+     * // Delete a few AIUserPolicies
+     * const { count } = await prisma.aIUserPolicy.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends AIUserPolicyDeleteManyArgs>(args?: SelectSubset<T, AIUserPolicyDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AIUserPolicies.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AIUserPolicyUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many AIUserPolicies
+     * const aIUserPolicy = await prisma.aIUserPolicy.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends AIUserPolicyUpdateManyArgs>(args: SelectSubset<T, AIUserPolicyUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AIUserPolicies and returns the data updated in the database.
+     * @param {AIUserPolicyUpdateManyAndReturnArgs} args - Arguments to update many AIUserPolicies.
+     * @example
+     * // Update many AIUserPolicies
+     * const aIUserPolicy = await prisma.aIUserPolicy.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more AIUserPolicies and only return the `id`
+     * const aIUserPolicyWithIdOnly = await prisma.aIUserPolicy.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends AIUserPolicyUpdateManyAndReturnArgs>(args: SelectSubset<T, AIUserPolicyUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AIUserPolicyPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one AIUserPolicy.
+     * @param {AIUserPolicyUpsertArgs} args - Arguments to update or create a AIUserPolicy.
+     * @example
+     * // Update or create a AIUserPolicy
+     * const aIUserPolicy = await prisma.aIUserPolicy.upsert({
+     *   create: {
+     *     // ... data to create a AIUserPolicy
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the AIUserPolicy we want to update
+     *   }
+     * })
+     */
+    upsert<T extends AIUserPolicyUpsertArgs>(args: SelectSubset<T, AIUserPolicyUpsertArgs<ExtArgs>>): Prisma__AIUserPolicyClient<$Result.GetResult<Prisma.$AIUserPolicyPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of AIUserPolicies.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AIUserPolicyCountArgs} args - Arguments to filter AIUserPolicies to count.
+     * @example
+     * // Count the number of AIUserPolicies
+     * const count = await prisma.aIUserPolicy.count({
+     *   where: {
+     *     // ... the filter for the AIUserPolicies we want to count
+     *   }
+     * })
+    **/
+    count<T extends AIUserPolicyCountArgs>(
+      args?: Subset<T, AIUserPolicyCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], AIUserPolicyCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a AIUserPolicy.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AIUserPolicyAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends AIUserPolicyAggregateArgs>(args: Subset<T, AIUserPolicyAggregateArgs>): Prisma.PrismaPromise<GetAIUserPolicyAggregateType<T>>
+
+    /**
+     * Group by AIUserPolicy.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AIUserPolicyGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends AIUserPolicyGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: AIUserPolicyGroupByArgs['orderBy'] }
+        : { orderBy?: AIUserPolicyGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, AIUserPolicyGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAIUserPolicyGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the AIUserPolicy model
+   */
+  readonly fields: AIUserPolicyFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for AIUserPolicy.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__AIUserPolicyClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the AIUserPolicy model
+   */
+  interface AIUserPolicyFieldRefs {
+    readonly id: FieldRef<"AIUserPolicy", 'String'>
+    readonly userId: FieldRef<"AIUserPolicy", 'String'>
+    readonly enabled: FieldRef<"AIUserPolicy", 'Boolean'>
+    readonly chatDailyLimit: FieldRef<"AIUserPolicy", 'Int'>
+    readonly reviewDailyLimit: FieldRef<"AIUserPolicy", 'Int'>
+    readonly allowFallback: FieldRef<"AIUserPolicy", 'Boolean'>
+    readonly note: FieldRef<"AIUserPolicy", 'String'>
+    readonly updatedById: FieldRef<"AIUserPolicy", 'String'>
+    readonly createdAt: FieldRef<"AIUserPolicy", 'DateTime'>
+    readonly updatedAt: FieldRef<"AIUserPolicy", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * AIUserPolicy findUnique
+   */
+  export type AIUserPolicyFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AIUserPolicy
+     */
+    select?: AIUserPolicySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AIUserPolicy
+     */
+    omit?: AIUserPolicyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AIUserPolicyInclude<ExtArgs> | null
+    /**
+     * Filter, which AIUserPolicy to fetch.
+     */
+    where: AIUserPolicyWhereUniqueInput
+  }
+
+  /**
+   * AIUserPolicy findUniqueOrThrow
+   */
+  export type AIUserPolicyFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AIUserPolicy
+     */
+    select?: AIUserPolicySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AIUserPolicy
+     */
+    omit?: AIUserPolicyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AIUserPolicyInclude<ExtArgs> | null
+    /**
+     * Filter, which AIUserPolicy to fetch.
+     */
+    where: AIUserPolicyWhereUniqueInput
+  }
+
+  /**
+   * AIUserPolicy findFirst
+   */
+  export type AIUserPolicyFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AIUserPolicy
+     */
+    select?: AIUserPolicySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AIUserPolicy
+     */
+    omit?: AIUserPolicyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AIUserPolicyInclude<ExtArgs> | null
+    /**
+     * Filter, which AIUserPolicy to fetch.
+     */
+    where?: AIUserPolicyWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AIUserPolicies to fetch.
+     */
+    orderBy?: AIUserPolicyOrderByWithRelationInput | AIUserPolicyOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AIUserPolicies.
+     */
+    cursor?: AIUserPolicyWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AIUserPolicies from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AIUserPolicies.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AIUserPolicies.
+     */
+    distinct?: AIUserPolicyScalarFieldEnum | AIUserPolicyScalarFieldEnum[]
+  }
+
+  /**
+   * AIUserPolicy findFirstOrThrow
+   */
+  export type AIUserPolicyFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AIUserPolicy
+     */
+    select?: AIUserPolicySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AIUserPolicy
+     */
+    omit?: AIUserPolicyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AIUserPolicyInclude<ExtArgs> | null
+    /**
+     * Filter, which AIUserPolicy to fetch.
+     */
+    where?: AIUserPolicyWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AIUserPolicies to fetch.
+     */
+    orderBy?: AIUserPolicyOrderByWithRelationInput | AIUserPolicyOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AIUserPolicies.
+     */
+    cursor?: AIUserPolicyWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AIUserPolicies from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AIUserPolicies.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AIUserPolicies.
+     */
+    distinct?: AIUserPolicyScalarFieldEnum | AIUserPolicyScalarFieldEnum[]
+  }
+
+  /**
+   * AIUserPolicy findMany
+   */
+  export type AIUserPolicyFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AIUserPolicy
+     */
+    select?: AIUserPolicySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AIUserPolicy
+     */
+    omit?: AIUserPolicyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AIUserPolicyInclude<ExtArgs> | null
+    /**
+     * Filter, which AIUserPolicies to fetch.
+     */
+    where?: AIUserPolicyWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AIUserPolicies to fetch.
+     */
+    orderBy?: AIUserPolicyOrderByWithRelationInput | AIUserPolicyOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing AIUserPolicies.
+     */
+    cursor?: AIUserPolicyWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AIUserPolicies from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AIUserPolicies.
+     */
+    skip?: number
+    distinct?: AIUserPolicyScalarFieldEnum | AIUserPolicyScalarFieldEnum[]
+  }
+
+  /**
+   * AIUserPolicy create
+   */
+  export type AIUserPolicyCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AIUserPolicy
+     */
+    select?: AIUserPolicySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AIUserPolicy
+     */
+    omit?: AIUserPolicyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AIUserPolicyInclude<ExtArgs> | null
+    /**
+     * The data needed to create a AIUserPolicy.
+     */
+    data: XOR<AIUserPolicyCreateInput, AIUserPolicyUncheckedCreateInput>
+  }
+
+  /**
+   * AIUserPolicy createMany
+   */
+  export type AIUserPolicyCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many AIUserPolicies.
+     */
+    data: AIUserPolicyCreateManyInput | AIUserPolicyCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AIUserPolicy createManyAndReturn
+   */
+  export type AIUserPolicyCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AIUserPolicy
+     */
+    select?: AIUserPolicySelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AIUserPolicy
+     */
+    omit?: AIUserPolicyOmit<ExtArgs> | null
+    /**
+     * The data used to create many AIUserPolicies.
+     */
+    data: AIUserPolicyCreateManyInput | AIUserPolicyCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AIUserPolicyIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * AIUserPolicy update
+   */
+  export type AIUserPolicyUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AIUserPolicy
+     */
+    select?: AIUserPolicySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AIUserPolicy
+     */
+    omit?: AIUserPolicyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AIUserPolicyInclude<ExtArgs> | null
+    /**
+     * The data needed to update a AIUserPolicy.
+     */
+    data: XOR<AIUserPolicyUpdateInput, AIUserPolicyUncheckedUpdateInput>
+    /**
+     * Choose, which AIUserPolicy to update.
+     */
+    where: AIUserPolicyWhereUniqueInput
+  }
+
+  /**
+   * AIUserPolicy updateMany
+   */
+  export type AIUserPolicyUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update AIUserPolicies.
+     */
+    data: XOR<AIUserPolicyUpdateManyMutationInput, AIUserPolicyUncheckedUpdateManyInput>
+    /**
+     * Filter which AIUserPolicies to update
+     */
+    where?: AIUserPolicyWhereInput
+    /**
+     * Limit how many AIUserPolicies to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AIUserPolicy updateManyAndReturn
+   */
+  export type AIUserPolicyUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AIUserPolicy
+     */
+    select?: AIUserPolicySelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AIUserPolicy
+     */
+    omit?: AIUserPolicyOmit<ExtArgs> | null
+    /**
+     * The data used to update AIUserPolicies.
+     */
+    data: XOR<AIUserPolicyUpdateManyMutationInput, AIUserPolicyUncheckedUpdateManyInput>
+    /**
+     * Filter which AIUserPolicies to update
+     */
+    where?: AIUserPolicyWhereInput
+    /**
+     * Limit how many AIUserPolicies to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AIUserPolicyIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * AIUserPolicy upsert
+   */
+  export type AIUserPolicyUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AIUserPolicy
+     */
+    select?: AIUserPolicySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AIUserPolicy
+     */
+    omit?: AIUserPolicyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AIUserPolicyInclude<ExtArgs> | null
+    /**
+     * The filter to search for the AIUserPolicy to update in case it exists.
+     */
+    where: AIUserPolicyWhereUniqueInput
+    /**
+     * In case the AIUserPolicy found by the `where` argument doesn't exist, create a new AIUserPolicy with this data.
+     */
+    create: XOR<AIUserPolicyCreateInput, AIUserPolicyUncheckedCreateInput>
+    /**
+     * In case the AIUserPolicy was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AIUserPolicyUpdateInput, AIUserPolicyUncheckedUpdateInput>
+  }
+
+  /**
+   * AIUserPolicy delete
+   */
+  export type AIUserPolicyDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AIUserPolicy
+     */
+    select?: AIUserPolicySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AIUserPolicy
+     */
+    omit?: AIUserPolicyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AIUserPolicyInclude<ExtArgs> | null
+    /**
+     * Filter which AIUserPolicy to delete.
+     */
+    where: AIUserPolicyWhereUniqueInput
+  }
+
+  /**
+   * AIUserPolicy deleteMany
+   */
+  export type AIUserPolicyDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AIUserPolicies to delete
+     */
+    where?: AIUserPolicyWhereInput
+    /**
+     * Limit how many AIUserPolicies to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * AIUserPolicy without action
+   */
+  export type AIUserPolicyDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AIUserPolicy
+     */
+    select?: AIUserPolicySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AIUserPolicy
+     */
+    omit?: AIUserPolicyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AIUserPolicyInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model AIToolPolicy
+   */
+
+  export type AggregateAIToolPolicy = {
+    _count: AIToolPolicyCountAggregateOutputType | null
+    _min: AIToolPolicyMinAggregateOutputType | null
+    _max: AIToolPolicyMaxAggregateOutputType | null
+  }
+
+  export type AIToolPolicyMinAggregateOutputType = {
+    id: string | null
+    toolName: string | null
+    role: $Enums.Role | null
+    enabled: boolean | null
+    updatedById: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type AIToolPolicyMaxAggregateOutputType = {
+    id: string | null
+    toolName: string | null
+    role: $Enums.Role | null
+    enabled: boolean | null
+    updatedById: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type AIToolPolicyCountAggregateOutputType = {
+    id: number
+    toolName: number
+    role: number
+    enabled: number
+    updatedById: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type AIToolPolicyMinAggregateInputType = {
+    id?: true
+    toolName?: true
+    role?: true
+    enabled?: true
+    updatedById?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type AIToolPolicyMaxAggregateInputType = {
+    id?: true
+    toolName?: true
+    role?: true
+    enabled?: true
+    updatedById?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type AIToolPolicyCountAggregateInputType = {
+    id?: true
+    toolName?: true
+    role?: true
+    enabled?: true
+    updatedById?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type AIToolPolicyAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AIToolPolicy to aggregate.
+     */
+    where?: AIToolPolicyWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AIToolPolicies to fetch.
+     */
+    orderBy?: AIToolPolicyOrderByWithRelationInput | AIToolPolicyOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: AIToolPolicyWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AIToolPolicies from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AIToolPolicies.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned AIToolPolicies
+    **/
+    _count?: true | AIToolPolicyCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: AIToolPolicyMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: AIToolPolicyMaxAggregateInputType
+  }
+
+  export type GetAIToolPolicyAggregateType<T extends AIToolPolicyAggregateArgs> = {
+        [P in keyof T & keyof AggregateAIToolPolicy]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateAIToolPolicy[P]>
+      : GetScalarType<T[P], AggregateAIToolPolicy[P]>
+  }
+
+
+
+
+  export type AIToolPolicyGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AIToolPolicyWhereInput
+    orderBy?: AIToolPolicyOrderByWithAggregationInput | AIToolPolicyOrderByWithAggregationInput[]
+    by: AIToolPolicyScalarFieldEnum[] | AIToolPolicyScalarFieldEnum
+    having?: AIToolPolicyScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: AIToolPolicyCountAggregateInputType | true
+    _min?: AIToolPolicyMinAggregateInputType
+    _max?: AIToolPolicyMaxAggregateInputType
+  }
+
+  export type AIToolPolicyGroupByOutputType = {
+    id: string
+    toolName: string
+    role: $Enums.Role
+    enabled: boolean
+    updatedById: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: AIToolPolicyCountAggregateOutputType | null
+    _min: AIToolPolicyMinAggregateOutputType | null
+    _max: AIToolPolicyMaxAggregateOutputType | null
+  }
+
+  type GetAIToolPolicyGroupByPayload<T extends AIToolPolicyGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<AIToolPolicyGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof AIToolPolicyGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], AIToolPolicyGroupByOutputType[P]>
+            : GetScalarType<T[P], AIToolPolicyGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type AIToolPolicySelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    toolName?: boolean
+    role?: boolean
+    enabled?: boolean
+    updatedById?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["aIToolPolicy"]>
+
+  export type AIToolPolicySelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    toolName?: boolean
+    role?: boolean
+    enabled?: boolean
+    updatedById?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["aIToolPolicy"]>
+
+  export type AIToolPolicySelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    toolName?: boolean
+    role?: boolean
+    enabled?: boolean
+    updatedById?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["aIToolPolicy"]>
+
+  export type AIToolPolicySelectScalar = {
+    id?: boolean
+    toolName?: boolean
+    role?: boolean
+    enabled?: boolean
+    updatedById?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type AIToolPolicyOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "toolName" | "role" | "enabled" | "updatedById" | "createdAt" | "updatedAt", ExtArgs["result"]["aIToolPolicy"]>
+
+  export type $AIToolPolicyPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "AIToolPolicy"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      toolName: string
+      role: $Enums.Role
+      enabled: boolean
+      updatedById: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["aIToolPolicy"]>
+    composites: {}
+  }
+
+  type AIToolPolicyGetPayload<S extends boolean | null | undefined | AIToolPolicyDefaultArgs> = $Result.GetResult<Prisma.$AIToolPolicyPayload, S>
+
+  type AIToolPolicyCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<AIToolPolicyFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: AIToolPolicyCountAggregateInputType | true
+    }
+
+  export interface AIToolPolicyDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AIToolPolicy'], meta: { name: 'AIToolPolicy' } }
+    /**
+     * Find zero or one AIToolPolicy that matches the filter.
+     * @param {AIToolPolicyFindUniqueArgs} args - Arguments to find a AIToolPolicy
+     * @example
+     * // Get one AIToolPolicy
+     * const aIToolPolicy = await prisma.aIToolPolicy.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends AIToolPolicyFindUniqueArgs>(args: SelectSubset<T, AIToolPolicyFindUniqueArgs<ExtArgs>>): Prisma__AIToolPolicyClient<$Result.GetResult<Prisma.$AIToolPolicyPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one AIToolPolicy that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {AIToolPolicyFindUniqueOrThrowArgs} args - Arguments to find a AIToolPolicy
+     * @example
+     * // Get one AIToolPolicy
+     * const aIToolPolicy = await prisma.aIToolPolicy.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends AIToolPolicyFindUniqueOrThrowArgs>(args: SelectSubset<T, AIToolPolicyFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AIToolPolicyClient<$Result.GetResult<Prisma.$AIToolPolicyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AIToolPolicy that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AIToolPolicyFindFirstArgs} args - Arguments to find a AIToolPolicy
+     * @example
+     * // Get one AIToolPolicy
+     * const aIToolPolicy = await prisma.aIToolPolicy.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends AIToolPolicyFindFirstArgs>(args?: SelectSubset<T, AIToolPolicyFindFirstArgs<ExtArgs>>): Prisma__AIToolPolicyClient<$Result.GetResult<Prisma.$AIToolPolicyPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AIToolPolicy that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AIToolPolicyFindFirstOrThrowArgs} args - Arguments to find a AIToolPolicy
+     * @example
+     * // Get one AIToolPolicy
+     * const aIToolPolicy = await prisma.aIToolPolicy.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends AIToolPolicyFindFirstOrThrowArgs>(args?: SelectSubset<T, AIToolPolicyFindFirstOrThrowArgs<ExtArgs>>): Prisma__AIToolPolicyClient<$Result.GetResult<Prisma.$AIToolPolicyPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more AIToolPolicies that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AIToolPolicyFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all AIToolPolicies
+     * const aIToolPolicies = await prisma.aIToolPolicy.findMany()
+     * 
+     * // Get first 10 AIToolPolicies
+     * const aIToolPolicies = await prisma.aIToolPolicy.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const aIToolPolicyWithIdOnly = await prisma.aIToolPolicy.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends AIToolPolicyFindManyArgs>(args?: SelectSubset<T, AIToolPolicyFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AIToolPolicyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a AIToolPolicy.
+     * @param {AIToolPolicyCreateArgs} args - Arguments to create a AIToolPolicy.
+     * @example
+     * // Create one AIToolPolicy
+     * const AIToolPolicy = await prisma.aIToolPolicy.create({
+     *   data: {
+     *     // ... data to create a AIToolPolicy
+     *   }
+     * })
+     * 
+     */
+    create<T extends AIToolPolicyCreateArgs>(args: SelectSubset<T, AIToolPolicyCreateArgs<ExtArgs>>): Prisma__AIToolPolicyClient<$Result.GetResult<Prisma.$AIToolPolicyPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many AIToolPolicies.
+     * @param {AIToolPolicyCreateManyArgs} args - Arguments to create many AIToolPolicies.
+     * @example
+     * // Create many AIToolPolicies
+     * const aIToolPolicy = await prisma.aIToolPolicy.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends AIToolPolicyCreateManyArgs>(args?: SelectSubset<T, AIToolPolicyCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many AIToolPolicies and returns the data saved in the database.
+     * @param {AIToolPolicyCreateManyAndReturnArgs} args - Arguments to create many AIToolPolicies.
+     * @example
+     * // Create many AIToolPolicies
+     * const aIToolPolicy = await prisma.aIToolPolicy.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many AIToolPolicies and only return the `id`
+     * const aIToolPolicyWithIdOnly = await prisma.aIToolPolicy.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends AIToolPolicyCreateManyAndReturnArgs>(args?: SelectSubset<T, AIToolPolicyCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AIToolPolicyPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a AIToolPolicy.
+     * @param {AIToolPolicyDeleteArgs} args - Arguments to delete one AIToolPolicy.
+     * @example
+     * // Delete one AIToolPolicy
+     * const AIToolPolicy = await prisma.aIToolPolicy.delete({
+     *   where: {
+     *     // ... filter to delete one AIToolPolicy
+     *   }
+     * })
+     * 
+     */
+    delete<T extends AIToolPolicyDeleteArgs>(args: SelectSubset<T, AIToolPolicyDeleteArgs<ExtArgs>>): Prisma__AIToolPolicyClient<$Result.GetResult<Prisma.$AIToolPolicyPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one AIToolPolicy.
+     * @param {AIToolPolicyUpdateArgs} args - Arguments to update one AIToolPolicy.
+     * @example
+     * // Update one AIToolPolicy
+     * const aIToolPolicy = await prisma.aIToolPolicy.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends AIToolPolicyUpdateArgs>(args: SelectSubset<T, AIToolPolicyUpdateArgs<ExtArgs>>): Prisma__AIToolPolicyClient<$Result.GetResult<Prisma.$AIToolPolicyPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more AIToolPolicies.
+     * @param {AIToolPolicyDeleteManyArgs} args - Arguments to filter AIToolPolicies to delete.
+     * @example
+     * // Delete a few AIToolPolicies
+     * const { count } = await prisma.aIToolPolicy.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends AIToolPolicyDeleteManyArgs>(args?: SelectSubset<T, AIToolPolicyDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AIToolPolicies.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AIToolPolicyUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many AIToolPolicies
+     * const aIToolPolicy = await prisma.aIToolPolicy.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends AIToolPolicyUpdateManyArgs>(args: SelectSubset<T, AIToolPolicyUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AIToolPolicies and returns the data updated in the database.
+     * @param {AIToolPolicyUpdateManyAndReturnArgs} args - Arguments to update many AIToolPolicies.
+     * @example
+     * // Update many AIToolPolicies
+     * const aIToolPolicy = await prisma.aIToolPolicy.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more AIToolPolicies and only return the `id`
+     * const aIToolPolicyWithIdOnly = await prisma.aIToolPolicy.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends AIToolPolicyUpdateManyAndReturnArgs>(args: SelectSubset<T, AIToolPolicyUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AIToolPolicyPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one AIToolPolicy.
+     * @param {AIToolPolicyUpsertArgs} args - Arguments to update or create a AIToolPolicy.
+     * @example
+     * // Update or create a AIToolPolicy
+     * const aIToolPolicy = await prisma.aIToolPolicy.upsert({
+     *   create: {
+     *     // ... data to create a AIToolPolicy
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the AIToolPolicy we want to update
+     *   }
+     * })
+     */
+    upsert<T extends AIToolPolicyUpsertArgs>(args: SelectSubset<T, AIToolPolicyUpsertArgs<ExtArgs>>): Prisma__AIToolPolicyClient<$Result.GetResult<Prisma.$AIToolPolicyPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of AIToolPolicies.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AIToolPolicyCountArgs} args - Arguments to filter AIToolPolicies to count.
+     * @example
+     * // Count the number of AIToolPolicies
+     * const count = await prisma.aIToolPolicy.count({
+     *   where: {
+     *     // ... the filter for the AIToolPolicies we want to count
+     *   }
+     * })
+    **/
+    count<T extends AIToolPolicyCountArgs>(
+      args?: Subset<T, AIToolPolicyCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], AIToolPolicyCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a AIToolPolicy.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AIToolPolicyAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends AIToolPolicyAggregateArgs>(args: Subset<T, AIToolPolicyAggregateArgs>): Prisma.PrismaPromise<GetAIToolPolicyAggregateType<T>>
+
+    /**
+     * Group by AIToolPolicy.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AIToolPolicyGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends AIToolPolicyGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: AIToolPolicyGroupByArgs['orderBy'] }
+        : { orderBy?: AIToolPolicyGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, AIToolPolicyGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAIToolPolicyGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the AIToolPolicy model
+   */
+  readonly fields: AIToolPolicyFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for AIToolPolicy.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__AIToolPolicyClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the AIToolPolicy model
+   */
+  interface AIToolPolicyFieldRefs {
+    readonly id: FieldRef<"AIToolPolicy", 'String'>
+    readonly toolName: FieldRef<"AIToolPolicy", 'String'>
+    readonly role: FieldRef<"AIToolPolicy", 'Role'>
+    readonly enabled: FieldRef<"AIToolPolicy", 'Boolean'>
+    readonly updatedById: FieldRef<"AIToolPolicy", 'String'>
+    readonly createdAt: FieldRef<"AIToolPolicy", 'DateTime'>
+    readonly updatedAt: FieldRef<"AIToolPolicy", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * AIToolPolicy findUnique
+   */
+  export type AIToolPolicyFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AIToolPolicy
+     */
+    select?: AIToolPolicySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AIToolPolicy
+     */
+    omit?: AIToolPolicyOmit<ExtArgs> | null
+    /**
+     * Filter, which AIToolPolicy to fetch.
+     */
+    where: AIToolPolicyWhereUniqueInput
+  }
+
+  /**
+   * AIToolPolicy findUniqueOrThrow
+   */
+  export type AIToolPolicyFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AIToolPolicy
+     */
+    select?: AIToolPolicySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AIToolPolicy
+     */
+    omit?: AIToolPolicyOmit<ExtArgs> | null
+    /**
+     * Filter, which AIToolPolicy to fetch.
+     */
+    where: AIToolPolicyWhereUniqueInput
+  }
+
+  /**
+   * AIToolPolicy findFirst
+   */
+  export type AIToolPolicyFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AIToolPolicy
+     */
+    select?: AIToolPolicySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AIToolPolicy
+     */
+    omit?: AIToolPolicyOmit<ExtArgs> | null
+    /**
+     * Filter, which AIToolPolicy to fetch.
+     */
+    where?: AIToolPolicyWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AIToolPolicies to fetch.
+     */
+    orderBy?: AIToolPolicyOrderByWithRelationInput | AIToolPolicyOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AIToolPolicies.
+     */
+    cursor?: AIToolPolicyWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AIToolPolicies from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AIToolPolicies.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AIToolPolicies.
+     */
+    distinct?: AIToolPolicyScalarFieldEnum | AIToolPolicyScalarFieldEnum[]
+  }
+
+  /**
+   * AIToolPolicy findFirstOrThrow
+   */
+  export type AIToolPolicyFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AIToolPolicy
+     */
+    select?: AIToolPolicySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AIToolPolicy
+     */
+    omit?: AIToolPolicyOmit<ExtArgs> | null
+    /**
+     * Filter, which AIToolPolicy to fetch.
+     */
+    where?: AIToolPolicyWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AIToolPolicies to fetch.
+     */
+    orderBy?: AIToolPolicyOrderByWithRelationInput | AIToolPolicyOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AIToolPolicies.
+     */
+    cursor?: AIToolPolicyWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AIToolPolicies from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AIToolPolicies.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AIToolPolicies.
+     */
+    distinct?: AIToolPolicyScalarFieldEnum | AIToolPolicyScalarFieldEnum[]
+  }
+
+  /**
+   * AIToolPolicy findMany
+   */
+  export type AIToolPolicyFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AIToolPolicy
+     */
+    select?: AIToolPolicySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AIToolPolicy
+     */
+    omit?: AIToolPolicyOmit<ExtArgs> | null
+    /**
+     * Filter, which AIToolPolicies to fetch.
+     */
+    where?: AIToolPolicyWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AIToolPolicies to fetch.
+     */
+    orderBy?: AIToolPolicyOrderByWithRelationInput | AIToolPolicyOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing AIToolPolicies.
+     */
+    cursor?: AIToolPolicyWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AIToolPolicies from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AIToolPolicies.
+     */
+    skip?: number
+    distinct?: AIToolPolicyScalarFieldEnum | AIToolPolicyScalarFieldEnum[]
+  }
+
+  /**
+   * AIToolPolicy create
+   */
+  export type AIToolPolicyCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AIToolPolicy
+     */
+    select?: AIToolPolicySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AIToolPolicy
+     */
+    omit?: AIToolPolicyOmit<ExtArgs> | null
+    /**
+     * The data needed to create a AIToolPolicy.
+     */
+    data: XOR<AIToolPolicyCreateInput, AIToolPolicyUncheckedCreateInput>
+  }
+
+  /**
+   * AIToolPolicy createMany
+   */
+  export type AIToolPolicyCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many AIToolPolicies.
+     */
+    data: AIToolPolicyCreateManyInput | AIToolPolicyCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AIToolPolicy createManyAndReturn
+   */
+  export type AIToolPolicyCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AIToolPolicy
+     */
+    select?: AIToolPolicySelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AIToolPolicy
+     */
+    omit?: AIToolPolicyOmit<ExtArgs> | null
+    /**
+     * The data used to create many AIToolPolicies.
+     */
+    data: AIToolPolicyCreateManyInput | AIToolPolicyCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AIToolPolicy update
+   */
+  export type AIToolPolicyUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AIToolPolicy
+     */
+    select?: AIToolPolicySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AIToolPolicy
+     */
+    omit?: AIToolPolicyOmit<ExtArgs> | null
+    /**
+     * The data needed to update a AIToolPolicy.
+     */
+    data: XOR<AIToolPolicyUpdateInput, AIToolPolicyUncheckedUpdateInput>
+    /**
+     * Choose, which AIToolPolicy to update.
+     */
+    where: AIToolPolicyWhereUniqueInput
+  }
+
+  /**
+   * AIToolPolicy updateMany
+   */
+  export type AIToolPolicyUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update AIToolPolicies.
+     */
+    data: XOR<AIToolPolicyUpdateManyMutationInput, AIToolPolicyUncheckedUpdateManyInput>
+    /**
+     * Filter which AIToolPolicies to update
+     */
+    where?: AIToolPolicyWhereInput
+    /**
+     * Limit how many AIToolPolicies to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AIToolPolicy updateManyAndReturn
+   */
+  export type AIToolPolicyUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AIToolPolicy
+     */
+    select?: AIToolPolicySelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AIToolPolicy
+     */
+    omit?: AIToolPolicyOmit<ExtArgs> | null
+    /**
+     * The data used to update AIToolPolicies.
+     */
+    data: XOR<AIToolPolicyUpdateManyMutationInput, AIToolPolicyUncheckedUpdateManyInput>
+    /**
+     * Filter which AIToolPolicies to update
+     */
+    where?: AIToolPolicyWhereInput
+    /**
+     * Limit how many AIToolPolicies to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AIToolPolicy upsert
+   */
+  export type AIToolPolicyUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AIToolPolicy
+     */
+    select?: AIToolPolicySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AIToolPolicy
+     */
+    omit?: AIToolPolicyOmit<ExtArgs> | null
+    /**
+     * The filter to search for the AIToolPolicy to update in case it exists.
+     */
+    where: AIToolPolicyWhereUniqueInput
+    /**
+     * In case the AIToolPolicy found by the `where` argument doesn't exist, create a new AIToolPolicy with this data.
+     */
+    create: XOR<AIToolPolicyCreateInput, AIToolPolicyUncheckedCreateInput>
+    /**
+     * In case the AIToolPolicy was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AIToolPolicyUpdateInput, AIToolPolicyUncheckedUpdateInput>
+  }
+
+  /**
+   * AIToolPolicy delete
+   */
+  export type AIToolPolicyDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AIToolPolicy
+     */
+    select?: AIToolPolicySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AIToolPolicy
+     */
+    omit?: AIToolPolicyOmit<ExtArgs> | null
+    /**
+     * Filter which AIToolPolicy to delete.
+     */
+    where: AIToolPolicyWhereUniqueInput
+  }
+
+  /**
+   * AIToolPolicy deleteMany
+   */
+  export type AIToolPolicyDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AIToolPolicies to delete
+     */
+    where?: AIToolPolicyWhereInput
+    /**
+     * Limit how many AIToolPolicies to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * AIToolPolicy without action
+   */
+  export type AIToolPolicyDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AIToolPolicy
+     */
+    select?: AIToolPolicySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AIToolPolicy
+     */
+    omit?: AIToolPolicyOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -32771,6 +36266,7 @@ export namespace Prisma {
     hoatChatNoiBo: 'hoatChatNoiBo',
     soDangKyNoiBo: 'soDangKyNoiBo',
     donViTinhNoiBo: 'donViTinhNoiBo',
+    nhomTckt: 'nhomTckt',
     masterDrugId: 'masterDrugId',
     status: 'status',
     adminNote: 'adminNote',
@@ -33086,12 +36582,60 @@ export namespace Prisma {
   export type ActivityLogScalarFieldEnum = (typeof ActivityLogScalarFieldEnum)[keyof typeof ActivityLogScalarFieldEnum]
 
 
+  export const AISettingScalarFieldEnum: {
+    id: 'id',
+    key: 'key',
+    value: 'value',
+    updatedById: 'updatedById',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type AISettingScalarFieldEnum = (typeof AISettingScalarFieldEnum)[keyof typeof AISettingScalarFieldEnum]
+
+
+  export const AIUserPolicyScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    enabled: 'enabled',
+    chatDailyLimit: 'chatDailyLimit',
+    reviewDailyLimit: 'reviewDailyLimit',
+    allowFallback: 'allowFallback',
+    note: 'note',
+    updatedById: 'updatedById',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type AIUserPolicyScalarFieldEnum = (typeof AIUserPolicyScalarFieldEnum)[keyof typeof AIUserPolicyScalarFieldEnum]
+
+
+  export const AIToolPolicyScalarFieldEnum: {
+    id: 'id',
+    toolName: 'toolName',
+    role: 'role',
+    enabled: 'enabled',
+    updatedById: 'updatedById',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type AIToolPolicyScalarFieldEnum = (typeof AIToolPolicyScalarFieldEnum)[keyof typeof AIToolPolicyScalarFieldEnum]
+
+
   export const SortOrder: {
     asc: 'asc',
     desc: 'desc'
   };
 
   export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+  export const JsonNullValueInput: {
+    JsonNull: typeof JsonNull
+  };
+
+  export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
   export const QueryMode: {
@@ -33108,6 +36652,15 @@ export namespace Prisma {
   };
 
   export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+  export const JsonNullValueFilter: {
+    DbNull: typeof DbNull,
+    JsonNull: typeof JsonNull,
+    AnyNull: typeof AnyNull
+  };
+
+  export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 
 
   /**
@@ -33277,6 +36830,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'Json'
+   */
+  export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+  /**
+   * Reference to a field of type 'QueryMode'
+   */
+  export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
+
+
+  /**
    * Reference to a field of type 'Float'
    */
   export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -33321,6 +36888,7 @@ export namespace Prisma {
     drugOrderReceipts?: DrugOrderReceiptListRelationFilter
     notifications?: NotificationListRelationFilter
     activityLogs?: ActivityLogListRelationFilter
+    aiUserPolicy?: XOR<AIUserPolicyNullableScalarRelationFilter, AIUserPolicyWhereInput> | null
   }
 
   export type UserOrderByWithRelationInput = {
@@ -33348,6 +36916,7 @@ export namespace Prisma {
     drugOrderReceipts?: DrugOrderReceiptOrderByRelationAggregateInput
     notifications?: NotificationOrderByRelationAggregateInput
     activityLogs?: ActivityLogOrderByRelationAggregateInput
+    aiUserPolicy?: AIUserPolicyOrderByWithRelationInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -33378,6 +36947,7 @@ export namespace Prisma {
     drugOrderReceipts?: DrugOrderReceiptListRelationFilter
     notifications?: NotificationListRelationFilter
     activityLogs?: ActivityLogListRelationFilter
+    aiUserPolicy?: XOR<AIUserPolicyNullableScalarRelationFilter, AIUserPolicyWhereInput> | null
   }, "id" | "username" | "facilityCode">
 
   export type UserOrderByWithAggregationInput = {
@@ -33850,6 +37420,7 @@ export namespace Prisma {
     hoatChatNoiBo?: StringNullableFilter<"FacilityDrugMap"> | string | null
     soDangKyNoiBo?: StringNullableFilter<"FacilityDrugMap"> | string | null
     donViTinhNoiBo?: StringNullableFilter<"FacilityDrugMap"> | string | null
+    nhomTckt?: StringNullableFilter<"FacilityDrugMap"> | string | null
     masterDrugId?: StringNullableFilter<"FacilityDrugMap"> | string | null
     status?: EnumMappingStatusFilter<"FacilityDrugMap"> | $Enums.MappingStatus
     adminNote?: StringNullableFilter<"FacilityDrugMap"> | string | null
@@ -33869,6 +37440,7 @@ export namespace Prisma {
     hoatChatNoiBo?: SortOrderInput | SortOrder
     soDangKyNoiBo?: SortOrderInput | SortOrder
     donViTinhNoiBo?: SortOrderInput | SortOrder
+    nhomTckt?: SortOrderInput | SortOrder
     masterDrugId?: SortOrderInput | SortOrder
     status?: SortOrder
     adminNote?: SortOrderInput | SortOrder
@@ -33892,6 +37464,7 @@ export namespace Prisma {
     hoatChatNoiBo?: StringNullableFilter<"FacilityDrugMap"> | string | null
     soDangKyNoiBo?: StringNullableFilter<"FacilityDrugMap"> | string | null
     donViTinhNoiBo?: StringNullableFilter<"FacilityDrugMap"> | string | null
+    nhomTckt?: StringNullableFilter<"FacilityDrugMap"> | string | null
     masterDrugId?: StringNullableFilter<"FacilityDrugMap"> | string | null
     status?: EnumMappingStatusFilter<"FacilityDrugMap"> | $Enums.MappingStatus
     adminNote?: StringNullableFilter<"FacilityDrugMap"> | string | null
@@ -33911,6 +37484,7 @@ export namespace Prisma {
     hoatChatNoiBo?: SortOrderInput | SortOrder
     soDangKyNoiBo?: SortOrderInput | SortOrder
     donViTinhNoiBo?: SortOrderInput | SortOrder
+    nhomTckt?: SortOrderInput | SortOrder
     masterDrugId?: SortOrderInput | SortOrder
     status?: SortOrder
     adminNote?: SortOrderInput | SortOrder
@@ -33933,6 +37507,7 @@ export namespace Prisma {
     hoatChatNoiBo?: StringNullableWithAggregatesFilter<"FacilityDrugMap"> | string | null
     soDangKyNoiBo?: StringNullableWithAggregatesFilter<"FacilityDrugMap"> | string | null
     donViTinhNoiBo?: StringNullableWithAggregatesFilter<"FacilityDrugMap"> | string | null
+    nhomTckt?: StringNullableWithAggregatesFilter<"FacilityDrugMap"> | string | null
     masterDrugId?: StringNullableWithAggregatesFilter<"FacilityDrugMap"> | string | null
     status?: EnumMappingStatusWithAggregatesFilter<"FacilityDrugMap"> | $Enums.MappingStatus
     adminNote?: StringNullableWithAggregatesFilter<"FacilityDrugMap"> | string | null
@@ -35565,6 +39140,208 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"ActivityLog"> | Date | string
   }
 
+  export type AISettingWhereInput = {
+    AND?: AISettingWhereInput | AISettingWhereInput[]
+    OR?: AISettingWhereInput[]
+    NOT?: AISettingWhereInput | AISettingWhereInput[]
+    id?: StringFilter<"AISetting"> | string
+    key?: StringFilter<"AISetting"> | string
+    value?: JsonFilter<"AISetting">
+    updatedById?: StringNullableFilter<"AISetting"> | string | null
+    createdAt?: DateTimeFilter<"AISetting"> | Date | string
+    updatedAt?: DateTimeFilter<"AISetting"> | Date | string
+  }
+
+  export type AISettingOrderByWithRelationInput = {
+    id?: SortOrder
+    key?: SortOrder
+    value?: SortOrder
+    updatedById?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AISettingWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    key?: string
+    AND?: AISettingWhereInput | AISettingWhereInput[]
+    OR?: AISettingWhereInput[]
+    NOT?: AISettingWhereInput | AISettingWhereInput[]
+    value?: JsonFilter<"AISetting">
+    updatedById?: StringNullableFilter<"AISetting"> | string | null
+    createdAt?: DateTimeFilter<"AISetting"> | Date | string
+    updatedAt?: DateTimeFilter<"AISetting"> | Date | string
+  }, "id" | "key">
+
+  export type AISettingOrderByWithAggregationInput = {
+    id?: SortOrder
+    key?: SortOrder
+    value?: SortOrder
+    updatedById?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: AISettingCountOrderByAggregateInput
+    _max?: AISettingMaxOrderByAggregateInput
+    _min?: AISettingMinOrderByAggregateInput
+  }
+
+  export type AISettingScalarWhereWithAggregatesInput = {
+    AND?: AISettingScalarWhereWithAggregatesInput | AISettingScalarWhereWithAggregatesInput[]
+    OR?: AISettingScalarWhereWithAggregatesInput[]
+    NOT?: AISettingScalarWhereWithAggregatesInput | AISettingScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"AISetting"> | string
+    key?: StringWithAggregatesFilter<"AISetting"> | string
+    value?: JsonWithAggregatesFilter<"AISetting">
+    updatedById?: StringNullableWithAggregatesFilter<"AISetting"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"AISetting"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"AISetting"> | Date | string
+  }
+
+  export type AIUserPolicyWhereInput = {
+    AND?: AIUserPolicyWhereInput | AIUserPolicyWhereInput[]
+    OR?: AIUserPolicyWhereInput[]
+    NOT?: AIUserPolicyWhereInput | AIUserPolicyWhereInput[]
+    id?: StringFilter<"AIUserPolicy"> | string
+    userId?: StringFilter<"AIUserPolicy"> | string
+    enabled?: BoolNullableFilter<"AIUserPolicy"> | boolean | null
+    chatDailyLimit?: IntNullableFilter<"AIUserPolicy"> | number | null
+    reviewDailyLimit?: IntNullableFilter<"AIUserPolicy"> | number | null
+    allowFallback?: BoolNullableFilter<"AIUserPolicy"> | boolean | null
+    note?: StringNullableFilter<"AIUserPolicy"> | string | null
+    updatedById?: StringNullableFilter<"AIUserPolicy"> | string | null
+    createdAt?: DateTimeFilter<"AIUserPolicy"> | Date | string
+    updatedAt?: DateTimeFilter<"AIUserPolicy"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }
+
+  export type AIUserPolicyOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    enabled?: SortOrderInput | SortOrder
+    chatDailyLimit?: SortOrderInput | SortOrder
+    reviewDailyLimit?: SortOrderInput | SortOrder
+    allowFallback?: SortOrderInput | SortOrder
+    note?: SortOrderInput | SortOrder
+    updatedById?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    user?: UserOrderByWithRelationInput
+  }
+
+  export type AIUserPolicyWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    userId?: string
+    AND?: AIUserPolicyWhereInput | AIUserPolicyWhereInput[]
+    OR?: AIUserPolicyWhereInput[]
+    NOT?: AIUserPolicyWhereInput | AIUserPolicyWhereInput[]
+    enabled?: BoolNullableFilter<"AIUserPolicy"> | boolean | null
+    chatDailyLimit?: IntNullableFilter<"AIUserPolicy"> | number | null
+    reviewDailyLimit?: IntNullableFilter<"AIUserPolicy"> | number | null
+    allowFallback?: BoolNullableFilter<"AIUserPolicy"> | boolean | null
+    note?: StringNullableFilter<"AIUserPolicy"> | string | null
+    updatedById?: StringNullableFilter<"AIUserPolicy"> | string | null
+    createdAt?: DateTimeFilter<"AIUserPolicy"> | Date | string
+    updatedAt?: DateTimeFilter<"AIUserPolicy"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }, "id" | "userId">
+
+  export type AIUserPolicyOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    enabled?: SortOrderInput | SortOrder
+    chatDailyLimit?: SortOrderInput | SortOrder
+    reviewDailyLimit?: SortOrderInput | SortOrder
+    allowFallback?: SortOrderInput | SortOrder
+    note?: SortOrderInput | SortOrder
+    updatedById?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: AIUserPolicyCountOrderByAggregateInput
+    _avg?: AIUserPolicyAvgOrderByAggregateInput
+    _max?: AIUserPolicyMaxOrderByAggregateInput
+    _min?: AIUserPolicyMinOrderByAggregateInput
+    _sum?: AIUserPolicySumOrderByAggregateInput
+  }
+
+  export type AIUserPolicyScalarWhereWithAggregatesInput = {
+    AND?: AIUserPolicyScalarWhereWithAggregatesInput | AIUserPolicyScalarWhereWithAggregatesInput[]
+    OR?: AIUserPolicyScalarWhereWithAggregatesInput[]
+    NOT?: AIUserPolicyScalarWhereWithAggregatesInput | AIUserPolicyScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"AIUserPolicy"> | string
+    userId?: StringWithAggregatesFilter<"AIUserPolicy"> | string
+    enabled?: BoolNullableWithAggregatesFilter<"AIUserPolicy"> | boolean | null
+    chatDailyLimit?: IntNullableWithAggregatesFilter<"AIUserPolicy"> | number | null
+    reviewDailyLimit?: IntNullableWithAggregatesFilter<"AIUserPolicy"> | number | null
+    allowFallback?: BoolNullableWithAggregatesFilter<"AIUserPolicy"> | boolean | null
+    note?: StringNullableWithAggregatesFilter<"AIUserPolicy"> | string | null
+    updatedById?: StringNullableWithAggregatesFilter<"AIUserPolicy"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"AIUserPolicy"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"AIUserPolicy"> | Date | string
+  }
+
+  export type AIToolPolicyWhereInput = {
+    AND?: AIToolPolicyWhereInput | AIToolPolicyWhereInput[]
+    OR?: AIToolPolicyWhereInput[]
+    NOT?: AIToolPolicyWhereInput | AIToolPolicyWhereInput[]
+    id?: StringFilter<"AIToolPolicy"> | string
+    toolName?: StringFilter<"AIToolPolicy"> | string
+    role?: EnumRoleFilter<"AIToolPolicy"> | $Enums.Role
+    enabled?: BoolFilter<"AIToolPolicy"> | boolean
+    updatedById?: StringNullableFilter<"AIToolPolicy"> | string | null
+    createdAt?: DateTimeFilter<"AIToolPolicy"> | Date | string
+    updatedAt?: DateTimeFilter<"AIToolPolicy"> | Date | string
+  }
+
+  export type AIToolPolicyOrderByWithRelationInput = {
+    id?: SortOrder
+    toolName?: SortOrder
+    role?: SortOrder
+    enabled?: SortOrder
+    updatedById?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AIToolPolicyWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    toolName_role?: AIToolPolicyToolNameRoleCompoundUniqueInput
+    AND?: AIToolPolicyWhereInput | AIToolPolicyWhereInput[]
+    OR?: AIToolPolicyWhereInput[]
+    NOT?: AIToolPolicyWhereInput | AIToolPolicyWhereInput[]
+    toolName?: StringFilter<"AIToolPolicy"> | string
+    role?: EnumRoleFilter<"AIToolPolicy"> | $Enums.Role
+    enabled?: BoolFilter<"AIToolPolicy"> | boolean
+    updatedById?: StringNullableFilter<"AIToolPolicy"> | string | null
+    createdAt?: DateTimeFilter<"AIToolPolicy"> | Date | string
+    updatedAt?: DateTimeFilter<"AIToolPolicy"> | Date | string
+  }, "id" | "toolName_role">
+
+  export type AIToolPolicyOrderByWithAggregationInput = {
+    id?: SortOrder
+    toolName?: SortOrder
+    role?: SortOrder
+    enabled?: SortOrder
+    updatedById?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: AIToolPolicyCountOrderByAggregateInput
+    _max?: AIToolPolicyMaxOrderByAggregateInput
+    _min?: AIToolPolicyMinOrderByAggregateInput
+  }
+
+  export type AIToolPolicyScalarWhereWithAggregatesInput = {
+    AND?: AIToolPolicyScalarWhereWithAggregatesInput | AIToolPolicyScalarWhereWithAggregatesInput[]
+    OR?: AIToolPolicyScalarWhereWithAggregatesInput[]
+    NOT?: AIToolPolicyScalarWhereWithAggregatesInput | AIToolPolicyScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"AIToolPolicy"> | string
+    toolName?: StringWithAggregatesFilter<"AIToolPolicy"> | string
+    role?: EnumRoleWithAggregatesFilter<"AIToolPolicy"> | $Enums.Role
+    enabled?: BoolWithAggregatesFilter<"AIToolPolicy"> | boolean
+    updatedById?: StringNullableWithAggregatesFilter<"AIToolPolicy"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"AIToolPolicy"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"AIToolPolicy"> | Date | string
+  }
+
   export type UserCreateInput = {
     id?: string
     username: string
@@ -35589,6 +39366,7 @@ export namespace Prisma {
     drugOrderReceipts?: DrugOrderReceiptCreateNestedManyWithoutFacilityInput
     notifications?: NotificationCreateNestedManyWithoutUserInput
     activityLogs?: ActivityLogCreateNestedManyWithoutUserInput
+    aiUserPolicy?: AIUserPolicyCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -35615,6 +39393,7 @@ export namespace Prisma {
     drugOrderReceipts?: DrugOrderReceiptUncheckedCreateNestedManyWithoutFacilityInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
     activityLogs?: ActivityLogUncheckedCreateNestedManyWithoutUserInput
+    aiUserPolicy?: AIUserPolicyUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserUpdateInput = {
@@ -35641,6 +39420,7 @@ export namespace Prisma {
     drugOrderReceipts?: DrugOrderReceiptUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUpdateManyWithoutUserNestedInput
     activityLogs?: ActivityLogUpdateManyWithoutUserNestedInput
+    aiUserPolicy?: AIUserPolicyUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -35667,6 +39447,7 @@ export namespace Prisma {
     drugOrderReceipts?: DrugOrderReceiptUncheckedUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
     activityLogs?: ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+    aiUserPolicy?: AIUserPolicyUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -36227,6 +40008,7 @@ export namespace Prisma {
     hoatChatNoiBo?: string | null
     soDangKyNoiBo?: string | null
     donViTinhNoiBo?: string | null
+    nhomTckt?: string | null
     status?: $Enums.MappingStatus
     adminNote?: string | null
     isOutOfCatalog?: boolean
@@ -36245,6 +40027,7 @@ export namespace Prisma {
     hoatChatNoiBo?: string | null
     soDangKyNoiBo?: string | null
     donViTinhNoiBo?: string | null
+    nhomTckt?: string | null
     masterDrugId?: string | null
     status?: $Enums.MappingStatus
     adminNote?: string | null
@@ -36261,6 +40044,7 @@ export namespace Prisma {
     hoatChatNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     soDangKyNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     donViTinhNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
+    nhomTckt?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumMappingStatusFieldUpdateOperationsInput | $Enums.MappingStatus
     adminNote?: NullableStringFieldUpdateOperationsInput | string | null
     isOutOfCatalog?: BoolFieldUpdateOperationsInput | boolean
@@ -36279,6 +40063,7 @@ export namespace Prisma {
     hoatChatNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     soDangKyNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     donViTinhNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
+    nhomTckt?: NullableStringFieldUpdateOperationsInput | string | null
     masterDrugId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumMappingStatusFieldUpdateOperationsInput | $Enums.MappingStatus
     adminNote?: NullableStringFieldUpdateOperationsInput | string | null
@@ -36296,6 +40081,7 @@ export namespace Prisma {
     hoatChatNoiBo?: string | null
     soDangKyNoiBo?: string | null
     donViTinhNoiBo?: string | null
+    nhomTckt?: string | null
     masterDrugId?: string | null
     status?: $Enums.MappingStatus
     adminNote?: string | null
@@ -36311,6 +40097,7 @@ export namespace Prisma {
     hoatChatNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     soDangKyNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     donViTinhNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
+    nhomTckt?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumMappingStatusFieldUpdateOperationsInput | $Enums.MappingStatus
     adminNote?: NullableStringFieldUpdateOperationsInput | string | null
     isOutOfCatalog?: BoolFieldUpdateOperationsInput | boolean
@@ -36326,6 +40113,7 @@ export namespace Prisma {
     hoatChatNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     soDangKyNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     donViTinhNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
+    nhomTckt?: NullableStringFieldUpdateOperationsInput | string | null
     masterDrugId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumMappingStatusFieldUpdateOperationsInput | $Enums.MappingStatus
     adminNote?: NullableStringFieldUpdateOperationsInput | string | null
@@ -38121,6 +41909,229 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type AISettingCreateInput = {
+    id?: string
+    key: string
+    value: JsonNullValueInput | InputJsonValue
+    updatedById?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AISettingUncheckedCreateInput = {
+    id?: string
+    key: string
+    value: JsonNullValueInput | InputJsonValue
+    updatedById?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AISettingUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    key?: StringFieldUpdateOperationsInput | string
+    value?: JsonNullValueInput | InputJsonValue
+    updatedById?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AISettingUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    key?: StringFieldUpdateOperationsInput | string
+    value?: JsonNullValueInput | InputJsonValue
+    updatedById?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AISettingCreateManyInput = {
+    id?: string
+    key: string
+    value: JsonNullValueInput | InputJsonValue
+    updatedById?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AISettingUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    key?: StringFieldUpdateOperationsInput | string
+    value?: JsonNullValueInput | InputJsonValue
+    updatedById?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AISettingUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    key?: StringFieldUpdateOperationsInput | string
+    value?: JsonNullValueInput | InputJsonValue
+    updatedById?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AIUserPolicyCreateInput = {
+    id?: string
+    enabled?: boolean | null
+    chatDailyLimit?: number | null
+    reviewDailyLimit?: number | null
+    allowFallback?: boolean | null
+    note?: string | null
+    updatedById?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutAiUserPolicyInput
+  }
+
+  export type AIUserPolicyUncheckedCreateInput = {
+    id?: string
+    userId: string
+    enabled?: boolean | null
+    chatDailyLimit?: number | null
+    reviewDailyLimit?: number | null
+    allowFallback?: boolean | null
+    note?: string | null
+    updatedById?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AIUserPolicyUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    enabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    chatDailyLimit?: NullableIntFieldUpdateOperationsInput | number | null
+    reviewDailyLimit?: NullableIntFieldUpdateOperationsInput | number | null
+    allowFallback?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    updatedById?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutAiUserPolicyNestedInput
+  }
+
+  export type AIUserPolicyUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    enabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    chatDailyLimit?: NullableIntFieldUpdateOperationsInput | number | null
+    reviewDailyLimit?: NullableIntFieldUpdateOperationsInput | number | null
+    allowFallback?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    updatedById?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AIUserPolicyCreateManyInput = {
+    id?: string
+    userId: string
+    enabled?: boolean | null
+    chatDailyLimit?: number | null
+    reviewDailyLimit?: number | null
+    allowFallback?: boolean | null
+    note?: string | null
+    updatedById?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AIUserPolicyUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    enabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    chatDailyLimit?: NullableIntFieldUpdateOperationsInput | number | null
+    reviewDailyLimit?: NullableIntFieldUpdateOperationsInput | number | null
+    allowFallback?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    updatedById?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AIUserPolicyUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    enabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    chatDailyLimit?: NullableIntFieldUpdateOperationsInput | number | null
+    reviewDailyLimit?: NullableIntFieldUpdateOperationsInput | number | null
+    allowFallback?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    updatedById?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AIToolPolicyCreateInput = {
+    id?: string
+    toolName: string
+    role: $Enums.Role
+    enabled?: boolean
+    updatedById?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AIToolPolicyUncheckedCreateInput = {
+    id?: string
+    toolName: string
+    role: $Enums.Role
+    enabled?: boolean
+    updatedById?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AIToolPolicyUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    toolName?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    updatedById?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AIToolPolicyUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    toolName?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    updatedById?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AIToolPolicyCreateManyInput = {
+    id?: string
+    toolName: string
+    role: $Enums.Role
+    enabled?: boolean
+    updatedById?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AIToolPolicyUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    toolName?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    updatedById?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AIToolPolicyUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    toolName?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    updatedById?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -38225,6 +42236,11 @@ export namespace Prisma {
     every?: ActivityLogWhereInput
     some?: ActivityLogWhereInput
     none?: ActivityLogWhereInput
+  }
+
+  export type AIUserPolicyNullableScalarRelationFilter = {
+    is?: AIUserPolicyWhereInput | null
+    isNot?: AIUserPolicyWhereInput | null
   }
 
   export type SortOrderInput = {
@@ -38672,6 +42688,7 @@ export namespace Prisma {
     hoatChatNoiBo?: SortOrder
     soDangKyNoiBo?: SortOrder
     donViTinhNoiBo?: SortOrder
+    nhomTckt?: SortOrder
     masterDrugId?: SortOrder
     status?: SortOrder
     adminNote?: SortOrder
@@ -38688,6 +42705,7 @@ export namespace Prisma {
     hoatChatNoiBo?: SortOrder
     soDangKyNoiBo?: SortOrder
     donViTinhNoiBo?: SortOrder
+    nhomTckt?: SortOrder
     masterDrugId?: SortOrder
     status?: SortOrder
     adminNote?: SortOrder
@@ -38704,6 +42722,7 @@ export namespace Prisma {
     hoatChatNoiBo?: SortOrder
     soDangKyNoiBo?: SortOrder
     donViTinhNoiBo?: SortOrder
+    nhomTckt?: SortOrder
     masterDrugId?: SortOrder
     status?: SortOrder
     adminNote?: SortOrder
@@ -39983,6 +44002,177 @@ export namespace Prisma {
     details?: SortOrder
     createdAt?: SortOrder
   }
+  export type JsonFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type AISettingCountOrderByAggregateInput = {
+    id?: SortOrder
+    key?: SortOrder
+    value?: SortOrder
+    updatedById?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AISettingMaxOrderByAggregateInput = {
+    id?: SortOrder
+    key?: SortOrder
+    updatedById?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AISettingMinOrderByAggregateInput = {
+    id?: SortOrder
+    key?: SortOrder
+    updatedById?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+  export type JsonWithAggregatesFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedJsonFilter<$PrismaModel>
+    _max?: NestedJsonFilter<$PrismaModel>
+  }
+
+  export type BoolNullableFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
+    not?: NestedBoolNullableFilter<$PrismaModel> | boolean | null
+  }
+
+  export type AIUserPolicyCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    enabled?: SortOrder
+    chatDailyLimit?: SortOrder
+    reviewDailyLimit?: SortOrder
+    allowFallback?: SortOrder
+    note?: SortOrder
+    updatedById?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AIUserPolicyAvgOrderByAggregateInput = {
+    chatDailyLimit?: SortOrder
+    reviewDailyLimit?: SortOrder
+  }
+
+  export type AIUserPolicyMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    enabled?: SortOrder
+    chatDailyLimit?: SortOrder
+    reviewDailyLimit?: SortOrder
+    allowFallback?: SortOrder
+    note?: SortOrder
+    updatedById?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AIUserPolicyMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    enabled?: SortOrder
+    chatDailyLimit?: SortOrder
+    reviewDailyLimit?: SortOrder
+    allowFallback?: SortOrder
+    note?: SortOrder
+    updatedById?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AIUserPolicySumOrderByAggregateInput = {
+    chatDailyLimit?: SortOrder
+    reviewDailyLimit?: SortOrder
+  }
+
+  export type BoolNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
+    not?: NestedBoolNullableWithAggregatesFilter<$PrismaModel> | boolean | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedBoolNullableFilter<$PrismaModel>
+    _max?: NestedBoolNullableFilter<$PrismaModel>
+  }
+
+  export type AIToolPolicyToolNameRoleCompoundUniqueInput = {
+    toolName: string
+    role: $Enums.Role
+  }
+
+  export type AIToolPolicyCountOrderByAggregateInput = {
+    id?: SortOrder
+    toolName?: SortOrder
+    role?: SortOrder
+    enabled?: SortOrder
+    updatedById?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AIToolPolicyMaxOrderByAggregateInput = {
+    id?: SortOrder
+    toolName?: SortOrder
+    role?: SortOrder
+    enabled?: SortOrder
+    updatedById?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AIToolPolicyMinOrderByAggregateInput = {
+    id?: SortOrder
+    toolName?: SortOrder
+    role?: SortOrder
+    enabled?: SortOrder
+    updatedById?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
 
   export type CompanyCreateNestedOneWithoutUsersInput = {
     create?: XOR<CompanyCreateWithoutUsersInput, CompanyUncheckedCreateWithoutUsersInput>
@@ -40046,6 +44236,12 @@ export namespace Prisma {
     connect?: ActivityLogWhereUniqueInput | ActivityLogWhereUniqueInput[]
   }
 
+  export type AIUserPolicyCreateNestedOneWithoutUserInput = {
+    create?: XOR<AIUserPolicyCreateWithoutUserInput, AIUserPolicyUncheckedCreateWithoutUserInput>
+    connectOrCreate?: AIUserPolicyCreateOrConnectWithoutUserInput
+    connect?: AIUserPolicyWhereUniqueInput
+  }
+
   export type FacilityDrugMapUncheckedCreateNestedManyWithoutFacilityInput = {
     create?: XOR<FacilityDrugMapCreateWithoutFacilityInput, FacilityDrugMapUncheckedCreateWithoutFacilityInput> | FacilityDrugMapCreateWithoutFacilityInput[] | FacilityDrugMapUncheckedCreateWithoutFacilityInput[]
     connectOrCreate?: FacilityDrugMapCreateOrConnectWithoutFacilityInput | FacilityDrugMapCreateOrConnectWithoutFacilityInput[]
@@ -40100,6 +44296,12 @@ export namespace Prisma {
     connectOrCreate?: ActivityLogCreateOrConnectWithoutUserInput | ActivityLogCreateOrConnectWithoutUserInput[]
     createMany?: ActivityLogCreateManyUserInputEnvelope
     connect?: ActivityLogWhereUniqueInput | ActivityLogWhereUniqueInput[]
+  }
+
+  export type AIUserPolicyUncheckedCreateNestedOneWithoutUserInput = {
+    create?: XOR<AIUserPolicyCreateWithoutUserInput, AIUserPolicyUncheckedCreateWithoutUserInput>
+    connectOrCreate?: AIUserPolicyCreateOrConnectWithoutUserInput
+    connect?: AIUserPolicyWhereUniqueInput
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -40244,6 +44446,16 @@ export namespace Prisma {
     deleteMany?: ActivityLogScalarWhereInput | ActivityLogScalarWhereInput[]
   }
 
+  export type AIUserPolicyUpdateOneWithoutUserNestedInput = {
+    create?: XOR<AIUserPolicyCreateWithoutUserInput, AIUserPolicyUncheckedCreateWithoutUserInput>
+    connectOrCreate?: AIUserPolicyCreateOrConnectWithoutUserInput
+    upsert?: AIUserPolicyUpsertWithoutUserInput
+    disconnect?: AIUserPolicyWhereInput | boolean
+    delete?: AIUserPolicyWhereInput | boolean
+    connect?: AIUserPolicyWhereUniqueInput
+    update?: XOR<XOR<AIUserPolicyUpdateToOneWithWhereWithoutUserInput, AIUserPolicyUpdateWithoutUserInput>, AIUserPolicyUncheckedUpdateWithoutUserInput>
+  }
+
   export type FacilityDrugMapUncheckedUpdateManyWithoutFacilityNestedInput = {
     create?: XOR<FacilityDrugMapCreateWithoutFacilityInput, FacilityDrugMapUncheckedCreateWithoutFacilityInput> | FacilityDrugMapCreateWithoutFacilityInput[] | FacilityDrugMapUncheckedCreateWithoutFacilityInput[]
     connectOrCreate?: FacilityDrugMapCreateOrConnectWithoutFacilityInput | FacilityDrugMapCreateOrConnectWithoutFacilityInput[]
@@ -40354,6 +44566,16 @@ export namespace Prisma {
     update?: ActivityLogUpdateWithWhereUniqueWithoutUserInput | ActivityLogUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: ActivityLogUpdateManyWithWhereWithoutUserInput | ActivityLogUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: ActivityLogScalarWhereInput | ActivityLogScalarWhereInput[]
+  }
+
+  export type AIUserPolicyUncheckedUpdateOneWithoutUserNestedInput = {
+    create?: XOR<AIUserPolicyCreateWithoutUserInput, AIUserPolicyUncheckedCreateWithoutUserInput>
+    connectOrCreate?: AIUserPolicyCreateOrConnectWithoutUserInput
+    upsert?: AIUserPolicyUpsertWithoutUserInput
+    disconnect?: AIUserPolicyWhereInput | boolean
+    delete?: AIUserPolicyWhereInput | boolean
+    connect?: AIUserPolicyWhereUniqueInput
+    update?: XOR<XOR<AIUserPolicyUpdateToOneWithWhereWithoutUserInput, AIUserPolicyUpdateWithoutUserInput>, AIUserPolicyUncheckedUpdateWithoutUserInput>
   }
 
   export type UserCreateNestedManyWithoutCompanyInput = {
@@ -41924,6 +46146,24 @@ export namespace Prisma {
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutActivityLogsInput, UserUpdateWithoutActivityLogsInput>, UserUncheckedUpdateWithoutActivityLogsInput>
   }
 
+  export type UserCreateNestedOneWithoutAiUserPolicyInput = {
+    create?: XOR<UserCreateWithoutAiUserPolicyInput, UserUncheckedCreateWithoutAiUserPolicyInput>
+    connectOrCreate?: UserCreateOrConnectWithoutAiUserPolicyInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type NullableBoolFieldUpdateOperationsInput = {
+    set?: boolean | null
+  }
+
+  export type UserUpdateOneRequiredWithoutAiUserPolicyNestedInput = {
+    create?: XOR<UserCreateWithoutAiUserPolicyInput, UserUncheckedCreateWithoutAiUserPolicyInput>
+    connectOrCreate?: UserCreateOrConnectWithoutAiUserPolicyInput
+    upsert?: UserUpsertWithoutAiUserPolicyInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutAiUserPolicyInput, UserUpdateWithoutAiUserPolicyInput>, UserUncheckedUpdateWithoutAiUserPolicyInput>
+  }
+
   export type NestedStringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -42297,6 +46537,42 @@ export namespace Prisma {
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
+  export type NestedJsonFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<NestedJsonFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type NestedBoolNullableFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
+    not?: NestedBoolNullableFilter<$PrismaModel> | boolean | null
+  }
+
+  export type NestedBoolNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
+    not?: NestedBoolNullableWithAggregatesFilter<$PrismaModel> | boolean | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedBoolNullableFilter<$PrismaModel>
+    _max?: NestedBoolNullableFilter<$PrismaModel>
+  }
 
   export type CompanyCreateWithoutUsersInput = {
     id?: string
@@ -42340,6 +46616,7 @@ export namespace Prisma {
     hoatChatNoiBo?: string | null
     soDangKyNoiBo?: string | null
     donViTinhNoiBo?: string | null
+    nhomTckt?: string | null
     status?: $Enums.MappingStatus
     adminNote?: string | null
     isOutOfCatalog?: boolean
@@ -42356,6 +46633,7 @@ export namespace Prisma {
     hoatChatNoiBo?: string | null
     soDangKyNoiBo?: string | null
     donViTinhNoiBo?: string | null
+    nhomTckt?: string | null
     masterDrugId?: string | null
     status?: $Enums.MappingStatus
     adminNote?: string | null
@@ -42645,6 +46923,35 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type AIUserPolicyCreateWithoutUserInput = {
+    id?: string
+    enabled?: boolean | null
+    chatDailyLimit?: number | null
+    reviewDailyLimit?: number | null
+    allowFallback?: boolean | null
+    note?: string | null
+    updatedById?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AIUserPolicyUncheckedCreateWithoutUserInput = {
+    id?: string
+    enabled?: boolean | null
+    chatDailyLimit?: number | null
+    reviewDailyLimit?: number | null
+    allowFallback?: boolean | null
+    note?: string | null
+    updatedById?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AIUserPolicyCreateOrConnectWithoutUserInput = {
+    where: AIUserPolicyWhereUniqueInput
+    create: XOR<AIUserPolicyCreateWithoutUserInput, AIUserPolicyUncheckedCreateWithoutUserInput>
+  }
+
   export type CompanyUpsertWithoutUsersInput = {
     update: XOR<CompanyUpdateWithoutUsersInput, CompanyUncheckedUpdateWithoutUsersInput>
     create: XOR<CompanyCreateWithoutUsersInput, CompanyUncheckedCreateWithoutUsersInput>
@@ -42713,6 +47020,7 @@ export namespace Prisma {
     hoatChatNoiBo?: StringNullableFilter<"FacilityDrugMap"> | string | null
     soDangKyNoiBo?: StringNullableFilter<"FacilityDrugMap"> | string | null
     donViTinhNoiBo?: StringNullableFilter<"FacilityDrugMap"> | string | null
+    nhomTckt?: StringNullableFilter<"FacilityDrugMap"> | string | null
     masterDrugId?: StringNullableFilter<"FacilityDrugMap"> | string | null
     status?: EnumMappingStatusFilter<"FacilityDrugMap"> | $Enums.MappingStatus
     adminNote?: StringNullableFilter<"FacilityDrugMap"> | string | null
@@ -42956,6 +47264,41 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"ActivityLog"> | Date | string
   }
 
+  export type AIUserPolicyUpsertWithoutUserInput = {
+    update: XOR<AIUserPolicyUpdateWithoutUserInput, AIUserPolicyUncheckedUpdateWithoutUserInput>
+    create: XOR<AIUserPolicyCreateWithoutUserInput, AIUserPolicyUncheckedCreateWithoutUserInput>
+    where?: AIUserPolicyWhereInput
+  }
+
+  export type AIUserPolicyUpdateToOneWithWhereWithoutUserInput = {
+    where?: AIUserPolicyWhereInput
+    data: XOR<AIUserPolicyUpdateWithoutUserInput, AIUserPolicyUncheckedUpdateWithoutUserInput>
+  }
+
+  export type AIUserPolicyUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    enabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    chatDailyLimit?: NullableIntFieldUpdateOperationsInput | number | null
+    reviewDailyLimit?: NullableIntFieldUpdateOperationsInput | number | null
+    allowFallback?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    updatedById?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AIUserPolicyUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    enabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    chatDailyLimit?: NullableIntFieldUpdateOperationsInput | number | null
+    reviewDailyLimit?: NullableIntFieldUpdateOperationsInput | number | null
+    allowFallback?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    updatedById?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type UserCreateWithoutCompanyInput = {
     id?: string
     username: string
@@ -42979,6 +47322,7 @@ export namespace Prisma {
     drugOrderReceipts?: DrugOrderReceiptCreateNestedManyWithoutFacilityInput
     notifications?: NotificationCreateNestedManyWithoutUserInput
     activityLogs?: ActivityLogCreateNestedManyWithoutUserInput
+    aiUserPolicy?: AIUserPolicyCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutCompanyInput = {
@@ -43004,6 +47348,7 @@ export namespace Prisma {
     drugOrderReceipts?: DrugOrderReceiptUncheckedCreateNestedManyWithoutFacilityInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
     activityLogs?: ActivityLogUncheckedCreateNestedManyWithoutUserInput
+    aiUserPolicy?: AIUserPolicyUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutCompanyInput = {
@@ -43338,6 +47683,7 @@ export namespace Prisma {
     hoatChatNoiBo?: string | null
     soDangKyNoiBo?: string | null
     donViTinhNoiBo?: string | null
+    nhomTckt?: string | null
     status?: $Enums.MappingStatus
     adminNote?: string | null
     isOutOfCatalog?: boolean
@@ -43355,6 +47701,7 @@ export namespace Prisma {
     hoatChatNoiBo?: string | null
     soDangKyNoiBo?: string | null
     donViTinhNoiBo?: string | null
+    nhomTckt?: string | null
     status?: $Enums.MappingStatus
     adminNote?: string | null
     isOutOfCatalog?: boolean
@@ -43878,6 +48225,7 @@ export namespace Prisma {
     drugOrderReceipts?: DrugOrderReceiptCreateNestedManyWithoutFacilityInput
     notifications?: NotificationCreateNestedManyWithoutUserInput
     activityLogs?: ActivityLogCreateNestedManyWithoutUserInput
+    aiUserPolicy?: AIUserPolicyCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutDrugMapsInput = {
@@ -43903,6 +48251,7 @@ export namespace Prisma {
     drugOrderReceipts?: DrugOrderReceiptUncheckedCreateNestedManyWithoutFacilityInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
     activityLogs?: ActivityLogUncheckedCreateNestedManyWithoutUserInput
+    aiUserPolicy?: AIUserPolicyUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutDrugMapsInput = {
@@ -44069,6 +48418,7 @@ export namespace Prisma {
     drugOrderReceipts?: DrugOrderReceiptUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUpdateManyWithoutUserNestedInput
     activityLogs?: ActivityLogUpdateManyWithoutUserNestedInput
+    aiUserPolicy?: AIUserPolicyUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutDrugMapsInput = {
@@ -44094,6 +48444,7 @@ export namespace Prisma {
     drugOrderReceipts?: DrugOrderReceiptUncheckedUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
     activityLogs?: ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+    aiUserPolicy?: AIUserPolicyUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type MasterDrugUpsertWithoutDrugMapsInput = {
@@ -44212,6 +48563,7 @@ export namespace Prisma {
     drugOrderReceipts?: DrugOrderReceiptCreateNestedManyWithoutFacilityInput
     notifications?: NotificationCreateNestedManyWithoutUserInput
     activityLogs?: ActivityLogCreateNestedManyWithoutUserInput
+    aiUserPolicy?: AIUserPolicyCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutReportsInput = {
@@ -44237,6 +48589,7 @@ export namespace Prisma {
     drugOrderReceipts?: DrugOrderReceiptUncheckedCreateNestedManyWithoutFacilityInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
     activityLogs?: ActivityLogUncheckedCreateNestedManyWithoutUserInput
+    aiUserPolicy?: AIUserPolicyUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutReportsInput = {
@@ -44251,6 +48604,7 @@ export namespace Prisma {
     hoatChatNoiBo?: string | null
     soDangKyNoiBo?: string | null
     donViTinhNoiBo?: string | null
+    nhomTckt?: string | null
     status?: $Enums.MappingStatus
     adminNote?: string | null
     isOutOfCatalog?: boolean
@@ -44268,6 +48622,7 @@ export namespace Prisma {
     hoatChatNoiBo?: string | null
     soDangKyNoiBo?: string | null
     donViTinhNoiBo?: string | null
+    nhomTckt?: string | null
     masterDrugId?: string | null
     status?: $Enums.MappingStatus
     adminNote?: string | null
@@ -44315,6 +48670,7 @@ export namespace Prisma {
     drugOrderReceipts?: DrugOrderReceiptUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUpdateManyWithoutUserNestedInput
     activityLogs?: ActivityLogUpdateManyWithoutUserNestedInput
+    aiUserPolicy?: AIUserPolicyUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutReportsInput = {
@@ -44340,6 +48696,7 @@ export namespace Prisma {
     drugOrderReceipts?: DrugOrderReceiptUncheckedUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
     activityLogs?: ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+    aiUserPolicy?: AIUserPolicyUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type FacilityDrugMapUpsertWithoutReportsInput = {
@@ -44360,6 +48717,7 @@ export namespace Prisma {
     hoatChatNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     soDangKyNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     donViTinhNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
+    nhomTckt?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumMappingStatusFieldUpdateOperationsInput | $Enums.MappingStatus
     adminNote?: NullableStringFieldUpdateOperationsInput | string | null
     isOutOfCatalog?: BoolFieldUpdateOperationsInput | boolean
@@ -44377,6 +48735,7 @@ export namespace Prisma {
     hoatChatNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     soDangKyNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     donViTinhNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
+    nhomTckt?: NullableStringFieldUpdateOperationsInput | string | null
     masterDrugId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumMappingStatusFieldUpdateOperationsInput | $Enums.MappingStatus
     adminNote?: NullableStringFieldUpdateOperationsInput | string | null
@@ -44408,6 +48767,7 @@ export namespace Prisma {
     drugOrderReceipts?: DrugOrderReceiptCreateNestedManyWithoutFacilityInput
     notifications?: NotificationCreateNestedManyWithoutUserInput
     activityLogs?: ActivityLogCreateNestedManyWithoutUserInput
+    aiUserPolicy?: AIUserPolicyCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutReportSubmissionsInput = {
@@ -44433,6 +48793,7 @@ export namespace Prisma {
     drugOrderReceipts?: DrugOrderReceiptUncheckedCreateNestedManyWithoutFacilityInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
     activityLogs?: ActivityLogUncheckedCreateNestedManyWithoutUserInput
+    aiUserPolicy?: AIUserPolicyUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutReportSubmissionsInput = {
@@ -44474,6 +48835,7 @@ export namespace Prisma {
     drugOrderReceipts?: DrugOrderReceiptUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUpdateManyWithoutUserNestedInput
     activityLogs?: ActivityLogUpdateManyWithoutUserNestedInput
+    aiUserPolicy?: AIUserPolicyUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutReportSubmissionsInput = {
@@ -44499,6 +48861,7 @@ export namespace Prisma {
     drugOrderReceipts?: DrugOrderReceiptUncheckedUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
     activityLogs?: ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+    aiUserPolicy?: AIUserPolicyUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type UserCreateWithoutDrugOrdersInput = {
@@ -44524,6 +48887,7 @@ export namespace Prisma {
     drugOrderReceipts?: DrugOrderReceiptCreateNestedManyWithoutFacilityInput
     notifications?: NotificationCreateNestedManyWithoutUserInput
     activityLogs?: ActivityLogCreateNestedManyWithoutUserInput
+    aiUserPolicy?: AIUserPolicyCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutDrugOrdersInput = {
@@ -44549,6 +48913,7 @@ export namespace Prisma {
     drugOrderReceipts?: DrugOrderReceiptUncheckedCreateNestedManyWithoutFacilityInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
     activityLogs?: ActivityLogUncheckedCreateNestedManyWithoutUserInput
+    aiUserPolicy?: AIUserPolicyUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutDrugOrdersInput = {
@@ -44747,6 +49112,7 @@ export namespace Prisma {
     drugOrderReceipts?: DrugOrderReceiptUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUpdateManyWithoutUserNestedInput
     activityLogs?: ActivityLogUpdateManyWithoutUserNestedInput
+    aiUserPolicy?: AIUserPolicyUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutDrugOrdersInput = {
@@ -44772,6 +49138,7 @@ export namespace Prisma {
     drugOrderReceipts?: DrugOrderReceiptUncheckedUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
     activityLogs?: ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+    aiUserPolicy?: AIUserPolicyUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type CompanyUpsertWithoutDrugOrdersInput = {
@@ -45783,6 +50150,7 @@ export namespace Prisma {
     drugOrders?: DrugOrderCreateNestedManyWithoutFacilityInput
     notifications?: NotificationCreateNestedManyWithoutUserInput
     activityLogs?: ActivityLogCreateNestedManyWithoutUserInput
+    aiUserPolicy?: AIUserPolicyCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutDrugOrderReceiptsInput = {
@@ -45808,6 +50176,7 @@ export namespace Prisma {
     drugOrders?: DrugOrderUncheckedCreateNestedManyWithoutFacilityInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
     activityLogs?: ActivityLogUncheckedCreateNestedManyWithoutUserInput
+    aiUserPolicy?: AIUserPolicyUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutDrugOrderReceiptsInput = {
@@ -45961,6 +50330,7 @@ export namespace Prisma {
     drugOrders?: DrugOrderUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUpdateManyWithoutUserNestedInput
     activityLogs?: ActivityLogUpdateManyWithoutUserNestedInput
+    aiUserPolicy?: AIUserPolicyUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutDrugOrderReceiptsInput = {
@@ -45986,6 +50356,7 @@ export namespace Prisma {
     drugOrders?: DrugOrderUncheckedUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
     activityLogs?: ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+    aiUserPolicy?: AIUserPolicyUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type DrugOrderReceiptLineUpsertWithWhereUniqueWithoutReceiptInput = {
@@ -46243,6 +50614,7 @@ export namespace Prisma {
     drugOrderReceipts?: DrugOrderReceiptCreateNestedManyWithoutFacilityInput
     notifications?: NotificationCreateNestedManyWithoutUserInput
     activityLogs?: ActivityLogCreateNestedManyWithoutUserInput
+    aiUserPolicy?: AIUserPolicyCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutKeHoachLCNTsInput = {
@@ -46268,6 +50640,7 @@ export namespace Prisma {
     drugOrderReceipts?: DrugOrderReceiptUncheckedCreateNestedManyWithoutFacilityInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
     activityLogs?: ActivityLogUncheckedCreateNestedManyWithoutUserInput
+    aiUserPolicy?: AIUserPolicyUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutKeHoachLCNTsInput = {
@@ -46365,6 +50738,7 @@ export namespace Prisma {
     drugOrderReceipts?: DrugOrderReceiptUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUpdateManyWithoutUserNestedInput
     activityLogs?: ActivityLogUpdateManyWithoutUserNestedInput
+    aiUserPolicy?: AIUserPolicyUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutKeHoachLCNTsInput = {
@@ -46390,6 +50764,7 @@ export namespace Prisma {
     drugOrderReceipts?: DrugOrderReceiptUncheckedUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
     activityLogs?: ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+    aiUserPolicy?: AIUserPolicyUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type GoiThauUpsertWithWhereUniqueWithoutKeHoachInput = {
@@ -47448,6 +51823,7 @@ export namespace Prisma {
     drugOrders?: DrugOrderCreateNestedManyWithoutFacilityInput
     drugOrderReceipts?: DrugOrderReceiptCreateNestedManyWithoutFacilityInput
     activityLogs?: ActivityLogCreateNestedManyWithoutUserInput
+    aiUserPolicy?: AIUserPolicyCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutNotificationsInput = {
@@ -47473,6 +51849,7 @@ export namespace Prisma {
     drugOrders?: DrugOrderUncheckedCreateNestedManyWithoutFacilityInput
     drugOrderReceipts?: DrugOrderReceiptUncheckedCreateNestedManyWithoutFacilityInput
     activityLogs?: ActivityLogUncheckedCreateNestedManyWithoutUserInput
+    aiUserPolicy?: AIUserPolicyUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutNotificationsInput = {
@@ -47514,6 +51891,7 @@ export namespace Prisma {
     drugOrders?: DrugOrderUpdateManyWithoutFacilityNestedInput
     drugOrderReceipts?: DrugOrderReceiptUpdateManyWithoutFacilityNestedInput
     activityLogs?: ActivityLogUpdateManyWithoutUserNestedInput
+    aiUserPolicy?: AIUserPolicyUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutNotificationsInput = {
@@ -47539,6 +51917,7 @@ export namespace Prisma {
     drugOrders?: DrugOrderUncheckedUpdateManyWithoutFacilityNestedInput
     drugOrderReceipts?: DrugOrderReceiptUncheckedUpdateManyWithoutFacilityNestedInput
     activityLogs?: ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+    aiUserPolicy?: AIUserPolicyUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type UserCreateWithoutActivityLogsInput = {
@@ -47564,6 +51943,7 @@ export namespace Prisma {
     drugOrders?: DrugOrderCreateNestedManyWithoutFacilityInput
     drugOrderReceipts?: DrugOrderReceiptCreateNestedManyWithoutFacilityInput
     notifications?: NotificationCreateNestedManyWithoutUserInput
+    aiUserPolicy?: AIUserPolicyCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutActivityLogsInput = {
@@ -47589,6 +51969,7 @@ export namespace Prisma {
     drugOrders?: DrugOrderUncheckedCreateNestedManyWithoutFacilityInput
     drugOrderReceipts?: DrugOrderReceiptUncheckedCreateNestedManyWithoutFacilityInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
+    aiUserPolicy?: AIUserPolicyUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutActivityLogsInput = {
@@ -47630,6 +52011,7 @@ export namespace Prisma {
     drugOrders?: DrugOrderUpdateManyWithoutFacilityNestedInput
     drugOrderReceipts?: DrugOrderReceiptUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUpdateManyWithoutUserNestedInput
+    aiUserPolicy?: AIUserPolicyUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutActivityLogsInput = {
@@ -47655,6 +52037,127 @@ export namespace Prisma {
     drugOrders?: DrugOrderUncheckedUpdateManyWithoutFacilityNestedInput
     drugOrderReceipts?: DrugOrderReceiptUncheckedUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
+    aiUserPolicy?: AIUserPolicyUncheckedUpdateOneWithoutUserNestedInput
+  }
+
+  export type UserCreateWithoutAiUserPolicyInput = {
+    id?: string
+    username: string
+    passwordHash: string
+    role?: $Enums.Role
+    facilityName?: string | null
+    facilityCode?: string | null
+    isActive?: boolean
+    autonomyGroup?: string | null
+    facilityType?: string | null
+    contactPerson?: string | null
+    phoneNumber?: string | null
+    address?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    company?: CompanyCreateNestedOneWithoutUsersInput
+    drugMaps?: FacilityDrugMapCreateNestedManyWithoutFacilityInput
+    reports?: InventoryReportCreateNestedManyWithoutFacilityInput
+    reportSubmissions?: FacilityReportSubmissionCreateNestedManyWithoutFacilityInput
+    keHoachLCNTs?: KeHoachLCNTCreateNestedManyWithoutFacilityInput
+    drugOrders?: DrugOrderCreateNestedManyWithoutFacilityInput
+    drugOrderReceipts?: DrugOrderReceiptCreateNestedManyWithoutFacilityInput
+    notifications?: NotificationCreateNestedManyWithoutUserInput
+    activityLogs?: ActivityLogCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutAiUserPolicyInput = {
+    id?: string
+    username: string
+    passwordHash: string
+    role?: $Enums.Role
+    facilityName?: string | null
+    facilityCode?: string | null
+    companyId?: string | null
+    isActive?: boolean
+    autonomyGroup?: string | null
+    facilityType?: string | null
+    contactPerson?: string | null
+    phoneNumber?: string | null
+    address?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    drugMaps?: FacilityDrugMapUncheckedCreateNestedManyWithoutFacilityInput
+    reports?: InventoryReportUncheckedCreateNestedManyWithoutFacilityInput
+    reportSubmissions?: FacilityReportSubmissionUncheckedCreateNestedManyWithoutFacilityInput
+    keHoachLCNTs?: KeHoachLCNTUncheckedCreateNestedManyWithoutFacilityInput
+    drugOrders?: DrugOrderUncheckedCreateNestedManyWithoutFacilityInput
+    drugOrderReceipts?: DrugOrderReceiptUncheckedCreateNestedManyWithoutFacilityInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
+    activityLogs?: ActivityLogUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutAiUserPolicyInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutAiUserPolicyInput, UserUncheckedCreateWithoutAiUserPolicyInput>
+  }
+
+  export type UserUpsertWithoutAiUserPolicyInput = {
+    update: XOR<UserUpdateWithoutAiUserPolicyInput, UserUncheckedUpdateWithoutAiUserPolicyInput>
+    create: XOR<UserCreateWithoutAiUserPolicyInput, UserUncheckedCreateWithoutAiUserPolicyInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutAiUserPolicyInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutAiUserPolicyInput, UserUncheckedUpdateWithoutAiUserPolicyInput>
+  }
+
+  export type UserUpdateWithoutAiUserPolicyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    facilityName?: NullableStringFieldUpdateOperationsInput | string | null
+    facilityCode?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    autonomyGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    facilityType?: NullableStringFieldUpdateOperationsInput | string | null
+    contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    company?: CompanyUpdateOneWithoutUsersNestedInput
+    drugMaps?: FacilityDrugMapUpdateManyWithoutFacilityNestedInput
+    reports?: InventoryReportUpdateManyWithoutFacilityNestedInput
+    reportSubmissions?: FacilityReportSubmissionUpdateManyWithoutFacilityNestedInput
+    keHoachLCNTs?: KeHoachLCNTUpdateManyWithoutFacilityNestedInput
+    drugOrders?: DrugOrderUpdateManyWithoutFacilityNestedInput
+    drugOrderReceipts?: DrugOrderReceiptUpdateManyWithoutFacilityNestedInput
+    notifications?: NotificationUpdateManyWithoutUserNestedInput
+    activityLogs?: ActivityLogUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutAiUserPolicyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    facilityName?: NullableStringFieldUpdateOperationsInput | string | null
+    facilityCode?: NullableStringFieldUpdateOperationsInput | string | null
+    companyId?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    autonomyGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    facilityType?: NullableStringFieldUpdateOperationsInput | string | null
+    contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    drugMaps?: FacilityDrugMapUncheckedUpdateManyWithoutFacilityNestedInput
+    reports?: InventoryReportUncheckedUpdateManyWithoutFacilityNestedInput
+    reportSubmissions?: FacilityReportSubmissionUncheckedUpdateManyWithoutFacilityNestedInput
+    keHoachLCNTs?: KeHoachLCNTUncheckedUpdateManyWithoutFacilityNestedInput
+    drugOrders?: DrugOrderUncheckedUpdateManyWithoutFacilityNestedInput
+    drugOrderReceipts?: DrugOrderReceiptUncheckedUpdateManyWithoutFacilityNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
+    activityLogs?: ActivityLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type FacilityDrugMapCreateManyFacilityInput = {
@@ -47664,6 +52167,7 @@ export namespace Prisma {
     hoatChatNoiBo?: string | null
     soDangKyNoiBo?: string | null
     donViTinhNoiBo?: string | null
+    nhomTckt?: string | null
     masterDrugId?: string | null
     status?: $Enums.MappingStatus
     adminNote?: string | null
@@ -47774,6 +52278,7 @@ export namespace Prisma {
     hoatChatNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     soDangKyNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     donViTinhNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
+    nhomTckt?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumMappingStatusFieldUpdateOperationsInput | $Enums.MappingStatus
     adminNote?: NullableStringFieldUpdateOperationsInput | string | null
     isOutOfCatalog?: BoolFieldUpdateOperationsInput | boolean
@@ -47790,6 +52295,7 @@ export namespace Prisma {
     hoatChatNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     soDangKyNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     donViTinhNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
+    nhomTckt?: NullableStringFieldUpdateOperationsInput | string | null
     masterDrugId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumMappingStatusFieldUpdateOperationsInput | $Enums.MappingStatus
     adminNote?: NullableStringFieldUpdateOperationsInput | string | null
@@ -47806,6 +52312,7 @@ export namespace Prisma {
     hoatChatNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     soDangKyNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     donViTinhNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
+    nhomTckt?: NullableStringFieldUpdateOperationsInput | string | null
     masterDrugId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumMappingStatusFieldUpdateOperationsInput | $Enums.MappingStatus
     adminNote?: NullableStringFieldUpdateOperationsInput | string | null
@@ -48175,6 +52682,7 @@ export namespace Prisma {
     drugOrderReceipts?: DrugOrderReceiptUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUpdateManyWithoutUserNestedInput
     activityLogs?: ActivityLogUpdateManyWithoutUserNestedInput
+    aiUserPolicy?: AIUserPolicyUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCompanyInput = {
@@ -48200,6 +52708,7 @@ export namespace Prisma {
     drugOrderReceipts?: DrugOrderReceiptUncheckedUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
     activityLogs?: ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+    aiUserPolicy?: AIUserPolicyUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateManyWithoutCompanyInput = {
@@ -48439,6 +52948,7 @@ export namespace Prisma {
     hoatChatNoiBo?: string | null
     soDangKyNoiBo?: string | null
     donViTinhNoiBo?: string | null
+    nhomTckt?: string | null
     status?: $Enums.MappingStatus
     adminNote?: string | null
     isOutOfCatalog?: boolean
@@ -48485,6 +52995,7 @@ export namespace Prisma {
     hoatChatNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     soDangKyNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     donViTinhNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
+    nhomTckt?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumMappingStatusFieldUpdateOperationsInput | $Enums.MappingStatus
     adminNote?: NullableStringFieldUpdateOperationsInput | string | null
     isOutOfCatalog?: BoolFieldUpdateOperationsInput | boolean
@@ -48502,6 +53013,7 @@ export namespace Prisma {
     hoatChatNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     soDangKyNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     donViTinhNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
+    nhomTckt?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumMappingStatusFieldUpdateOperationsInput | $Enums.MappingStatus
     adminNote?: NullableStringFieldUpdateOperationsInput | string | null
     isOutOfCatalog?: BoolFieldUpdateOperationsInput | boolean
@@ -48518,6 +53030,7 @@ export namespace Prisma {
     hoatChatNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     soDangKyNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     donViTinhNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
+    nhomTckt?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumMappingStatusFieldUpdateOperationsInput | $Enums.MappingStatus
     adminNote?: NullableStringFieldUpdateOperationsInput | string | null
     isOutOfCatalog?: BoolFieldUpdateOperationsInput | boolean

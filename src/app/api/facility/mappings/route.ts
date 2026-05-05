@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
+import { NHOM_TCKT_OPTIONS, normalizeNhomTckt } from "@/lib/report-validation";
 
 // GET facility's mappings
 export async function GET() {
@@ -64,11 +65,22 @@ export async function POST(request: Request) {
             if (!drug.tenThuocNoiBo || String(drug.tenThuocNoiBo).trim() === "") {
                 errors.push({ row: rowNum, maNoiBo: drug.maNoiBo || "", message: "Thiếu tên thuốc (bắt buộc)" });
             }
+            if (!normalizeNhomTckt(drug.nhomTckt)) {
+                errors.push({
+                    row: rowNum,
+                    maNoiBo: drug.maNoiBo || "",
+                    message: `Nhóm TCKT là bắt buộc và chỉ được chọn: ${NHOM_TCKT_OPTIONS.join(", ")}`,
+                });
+            }
         }
 
         // Only proceed with valid entries
         const validDrugs = drugs.filter(
-            (d) => d.maNoiBo && String(d.maNoiBo).trim() !== "" && d.tenThuocNoiBo && String(d.tenThuocNoiBo).trim() !== ""
+            (d) => d.maNoiBo
+                && String(d.maNoiBo).trim() !== ""
+                && d.tenThuocNoiBo
+                && String(d.tenThuocNoiBo).trim() !== ""
+                && normalizeNhomTckt(d.nhomTckt)
         );
 
         // Fetch all existing mappings for this facility in ONE query
@@ -125,6 +137,7 @@ export async function POST(request: Request) {
                     hoatChatNoiBo: drug.hoatChatNoiBo ? String(drug.hoatChatNoiBo).trim() : null,
                     soDangKyNoiBo: drug.soDangKyNoiBo ? String(drug.soDangKyNoiBo).trim() : null,
                     donViTinhNoiBo: drug.donViTinhNoiBo ? String(drug.donViTinhNoiBo).trim() : null,
+                    nhomTckt: normalizeNhomTckt(drug.nhomTckt),
                     masterDrugId,
                     status,
                 };

@@ -46,6 +46,12 @@ next-env.d.ts
 
 # Database backups
 *.sql
+*.dump
+*.dump.gpg
+*.dump.age
+backups/
+scripts/backup/backup.env
+!prisma/migrations/**/migration.sql
 
 # Log files
 *.txt

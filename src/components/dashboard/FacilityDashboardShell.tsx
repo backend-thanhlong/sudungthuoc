@@ -30,17 +30,17 @@ export default function FacilityDashboardShell({ reportPeriods, facilityName }: 
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
                 <div>
-                    <h2 className="text-2xl font-bold text-gray-800">Dashboard - {facilityName}</h2>
-                    <p className="text-gray-500 text-sm mt-0.5">Phân tích và giám sát hoạt động dược của đơn vị</p>
+                    <h2 className="text-2xl font-bold text-foreground">Dashboard - {facilityName}</h2>
+                    <p className="text-muted-foreground text-sm mt-0.5">Phân tích và giám sát hoạt động dược của đơn vị</p>
                 </div>
                 <div className="flex items-center gap-3 flex-wrap">
                     {/* Report Period Filter */}
                     <div className="flex items-center gap-2">
-                        <label className="text-sm font-medium text-gray-600">Kỳ báo cáo:</label>
+                        <label className="text-sm font-medium text-muted-foreground">Kỳ báo cáo:</label>
                         <select
                             value={selectedMonth}
                             onChange={(e) => setSelectedMonth(e.target.value)}
-                            className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 min-w-[150px]"
+                            className="px-3 py-2 border border-border rounded-lg text-sm bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 min-w-[150px]"
                         >
                             <option value="all">Tất cả các kỳ</option>
                             {reportPeriods.map(month => (
@@ -53,7 +53,7 @@ export default function FacilityDashboardShell({ reportPeriods, facilityName }: 
 
             {/* Tabs */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="w-full bg-white border border-gray-200 rounded-xl p-1 shadow-sm h-auto flex-wrap">
+                <TabsList className="w-full bg-card border border-border rounded-xl p-1 shadow-sm h-auto flex-wrap">
                     <TabsTrigger
                         value="overview"
                         className="flex-1 min-w-[140px] data-[state=active]:bg-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-md rounded-lg py-2.5 px-3 text-sm font-medium transition-all"

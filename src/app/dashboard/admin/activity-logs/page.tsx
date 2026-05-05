@@ -36,6 +36,13 @@ const ACTION_LABELS: Record<string, string> = {
     EXPORT: "Xuất file",
     IMPORT: "Nhập file",
     SUBMIT: "Gửi",
+    AI_AGENT: "AI Agent",
+    AI_AGENT_SETTINGS_UPDATED: "Cấu hình AI",
+    AI_AGENT_USER_POLICY_UPDATED: "Policy user AI",
+    AI_AGENT_USER_POLICY_RESET: "Reset policy user AI",
+    AI_AGENT_TOOL_POLICY_UPDATED: "Policy tool AI",
+    AI_AGENT_HEALTH_CHECK: "Health check AI",
+    AI_AGENT_DB_QUERY: "Truy vấn DB AI",
 };
 
 const ENTITY_TYPE_LABELS: Record<string, string> = {
@@ -49,6 +56,12 @@ const ENTITY_TYPE_LABELS: Record<string, string> = {
     ket_qua: "Kết quả LCNT",
     report_period: "Kỳ báo cáo",
     notification: "Thông báo",
+    ai_agent: "AI Agent",
+    ai_agent_settings: "Cấu hình AI",
+    ai_agent_user_policy: "Policy user AI",
+    ai_agent_tool_policy: "Policy tool AI",
+    ai_agent_health_check: "Health check AI",
+    ai_agent_db_query: "Truy vấn DB AI",
 };
 
 const ACTION_COLORS: Record<string, string> = {
@@ -61,6 +74,13 @@ const ACTION_COLORS: Record<string, string> = {
     EXPORT: "bg-purple-100 text-purple-700",
     IMPORT: "bg-indigo-100 text-indigo-700",
     SUBMIT: "bg-cyan-100 text-cyan-700",
+    AI_AGENT: "bg-blue-100 text-blue-700",
+    AI_AGENT_SETTINGS_UPDATED: "bg-blue-100 text-blue-700",
+    AI_AGENT_USER_POLICY_UPDATED: "bg-amber-100 text-amber-700",
+    AI_AGENT_USER_POLICY_RESET: "bg-slate-100 text-slate-700",
+    AI_AGENT_TOOL_POLICY_UPDATED: "bg-indigo-100 text-indigo-700",
+    AI_AGENT_HEALTH_CHECK: "bg-emerald-100 text-emerald-700",
+    AI_AGENT_DB_QUERY: "bg-violet-100 text-violet-700",
 };
 
 export default function ActivityLogsPage() {

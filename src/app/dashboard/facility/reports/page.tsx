@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import AIReviewButton from "@/components/ai/AIReviewButton";
 import { readExcel } from "@/lib/excel";
-import { triggerBlobDownload } from "@/lib/browser-download";
+import { getDownloadFileName, triggerBlobDownload } from "@/lib/browser-download";
 import { Badge } from "@/components/ui/badge";
 import {
     Card,
@@ -37,7 +37,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { toast } from "sonner";
-import { Eye, Loader2, CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import { Download, Eye, Loader2, CheckCircle, XCircle, AlertCircle } from "lucide-react";
 import {
     findDuplicateRowTokens,
     parseRawRow,
@@ -56,6 +56,7 @@ interface PreviewRow {
     maThuoc?: string;
     rowToken?: string | null;
     drugName: string;
+    nhomTckt?: string | null;
     tonDau: number;
     nhap: number;
     xuat: number;
@@ -89,6 +90,7 @@ const DETAIL_SEARCH_FIELDS = [
     { value: "tenThuoc", label: "Tên thuốc (DM)" },
     { value: "hoatChat", label: "Hoạt chất" },
     { value: "soDangKy", label: "Số đăng ký" },
+    { value: "nhomTckt", label: "Nhóm TCKT" },
     { value: "soQdTrungThau", label: "Số QĐ TT" },
     { value: "tenCongTy", label: "Tên công ty" },
 ] as const;
@@ -120,6 +122,7 @@ interface DetailReportRow {
     nuocSanXuat: string;
     congTyDangKy: string;
     nhomThuoc: string;
+    nhomTckt: string;
     tonDau: number;
     nhap: number;
     xuat: number;
@@ -137,6 +140,7 @@ interface DetailReportRow {
 export default function FacilityReportsPage() {
     const [selectedMonth, setSelectedMonth] = useState("");
     const [isDownloading, setIsDownloading] = useState(false);
+    const [exportingMonth, setExportingMonth] = useState<string | null>(null);
     const [periods, setPeriods] = useState<{ value: string; label: string; deadline?: string | null }[]>([]);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [isUploading, setIsUploading] = useState(false);
@@ -298,6 +302,7 @@ export default function FacilityReportsPage() {
                         maThuoc: parsed.maThuoc,
                         rowToken: parsed.rowToken,
                         drugName: parsed.drugName,
+                        nhomTckt: parsed.nhomTckt,
                         tonDau: parsed.tonDau,
                         nhap: parsed.nhap,
                         xuat: parsed.xuat,
@@ -388,6 +393,7 @@ export default function FacilityReportsPage() {
                     maNoiBo: row.maNoiBo,
                     maThuoc: row.maThuoc,
                     drugName: row.drugName,
+                    nhomTckt: row.nhomTckt,
                     tonDau: row.tonDau,
                     nhap: row.nhap,
                     xuat: row.xuat,
@@ -524,6 +530,30 @@ export default function FacilityReportsPage() {
         setDetailSearchInput("");
         setDetailSearchTerm("");
         void fetchDetailPage(month, 1, { field: "all", term: "" });
+    };
+
+    const handleExportReport = async (month: string) => {
+        setExportingMonth(month);
+        try {
+            const params = new URLSearchParams({ month });
+            const res = await fetch(`/api/facility/reports/export?${params.toString()}`);
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => null);
+                toast.error(errorData?.message || "Không thể xuất Excel báo cáo");
+                return;
+            }
+
+            const blob = await res.blob();
+            const contentDisposition = res.headers.get("Content-Disposition");
+            const fallbackFileName = `Bao_Cao_${month.replace("/", "_")}.xlsx`;
+            const fileName = getDownloadFileName(contentDisposition, fallbackFileName);
+            triggerBlobDownload(blob, fileName);
+            toast.success(`Đã xuất Excel báo cáo tháng ${month}`);
+        } catch {
+            toast.error("Lỗi kết nối khi xuất Excel báo cáo");
+        } finally {
+            setExportingMonth(null);
+        }
     };
 
     const handleDetailPageChange = (page: number) => {
@@ -814,6 +844,7 @@ export default function FacilityReportsPage() {
                                     <th className="px-3 py-3">STT</th>
                                     <th className="px-3 py-3">Mã NB</th>
                                     <th className="px-3 py-3 min-w-[200px]">Tên thuốc</th>
+                                    <th className="px-3 py-3 text-center whitespace-nowrap">Nhóm TCKT</th>
                                     <th className="px-3 py-3 text-right">Tồn đầu</th>
                                     <th className="px-3 py-3 text-right">Nhập</th>
                                     <th className="px-3 py-3 text-right">Xuất</th>
@@ -831,6 +862,7 @@ export default function FacilityReportsPage() {
                                         <td className="px-3 py-2 text-gray-500">{row.stt}</td>
                                         <td className="px-3 py-2 text-xs text-gray-500">{row.maNoiBo}</td>
                                         <td className="px-3 py-2 font-medium text-gray-800">{row.drugName}</td>
+                                        <td className="px-3 py-2 text-center whitespace-nowrap">{row.nhomTckt || "—"}</td>
                                         <td className="px-3 py-2 text-right">{row.tonDau.toLocaleString("vi-VN")}</td>
                                         <td className="px-3 py-2 text-right text-blue-600">{row.nhap.toLocaleString("vi-VN")}</td>
                                         <td className="px-3 py-2 text-right text-orange-600">{row.xuat.toLocaleString("vi-VN")}</td>
@@ -921,15 +953,31 @@ export default function FacilityReportsPage() {
                                             </div>
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                className="text-gray-600 hover:text-gray-800"
-                                                onClick={() => handleViewDetail(report.month)}
-                                            >
-                                                <Eye className="w-4 h-4 mr-1" />
-                                                Xem chi tiết
-                                            </Button>
+                                            <div className="flex flex-wrap justify-end gap-2">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="text-gray-600 hover:text-gray-800"
+                                                    onClick={() => handleViewDetail(report.month)}
+                                                >
+                                                    <Eye className="w-4 h-4 mr-1" />
+                                                    Xem chi tiết
+                                                </Button>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="border-emerald-600 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800"
+                                                    disabled={exportingMonth !== null}
+                                                    onClick={() => handleExportReport(report.month)}
+                                                >
+                                                    {exportingMonth === report.month ? (
+                                                        <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                                                    ) : (
+                                                        <Download className="w-4 h-4 mr-1" />
+                                                    )}
+                                                    Xuất Excel
+                                                </Button>
+                                            </div>
                                         </TableCell>
                                     </TableRow>
                                 ))}
@@ -1058,6 +1106,7 @@ export default function FacilityReportsPage() {
                                                 <th className="px-2 py-2 text-left font-medium text-gray-500 w-[75px] bg-blue-50">Nước SX</th>
                                                 <th className="px-2 py-2 text-left font-medium text-gray-500 w-[130px] bg-blue-50">Công ty ĐK</th>
                                                 <th className="px-2 py-2 text-left font-medium text-gray-500 w-[100px] bg-blue-50">Nhóm thuốc</th>
+                                                <th className="px-2 py-2 text-left font-medium text-gray-500 w-[90px] whitespace-nowrap bg-indigo-50">Nhóm TCKT</th>
                                                 <th className="px-2 py-2 text-right font-medium text-gray-500 w-[70px] whitespace-nowrap bg-emerald-50">Tồn đầu</th>
                                                 <th className="px-2 py-2 text-right font-medium text-gray-500 w-[65px] whitespace-nowrap bg-emerald-50">Nhập</th>
                                                 <th className="px-2 py-2 text-right font-medium text-gray-500 w-[65px] whitespace-nowrap bg-emerald-50">Xuất</th>
@@ -1095,6 +1144,7 @@ export default function FacilityReportsPage() {
                                                     <td className="px-2 py-1.5 break-words">{renderDetailText(item.nuocSanXuat)}</td>
                                                     <td className="px-2 py-1.5 break-words">{renderDetailText(item.congTyDangKy)}</td>
                                                     <td className="px-2 py-1.5 break-words">{renderDetailText(item.nhomThuoc)}</td>
+                                                    <td className="px-2 py-1.5 whitespace-nowrap">{renderDetailText(item.nhomTckt)}</td>
                                                     <td className="px-2 py-1.5 text-right tabular-nums">{formatDetailNumber(item.tonDau)}</td>
                                                     <td className="px-2 py-1.5 text-right text-blue-600 tabular-nums">{formatDetailNumber(item.nhap)}</td>
                                                     <td className="px-2 py-1.5 text-right text-red-600 tabular-nums">{formatDetailNumber(item.xuat)}</td>

@@ -9,35 +9,14 @@ import { buildUsageEstimate, logAIActivity } from "@/lib/ai/usage";
 import { runAITools } from "@/lib/ai/tools";
 import { AIProviderError } from "@/lib/ai/providers/google";
 import { buildDeterministicReviewResponse } from "@/lib/ai/fallback-answer";
+import { buildAIResponseCacheKey, getCachedAIResponse, setCachedAIResponse } from "@/lib/ai/cache";
+import {
+    AIPolicyError,
+    assertAIEnabledForRequest,
+    getEffectiveAIPolicy,
+    type AIEffectivePolicy,
+} from "@/lib/ai/admin-config";
 import type { AIAgentRequest, AIAgentResponse, AIResolvedModel, AIToolResult } from "@/lib/ai/types";
-
-const responseCache = new Map<string, { expiresAt: number; response: AIAgentResponse }>();
-const CACHE_TTL_MS = 5 * 60 * 1000;
-
-function buildCacheKey(userId: string, body: unknown) {
-    return JSON.stringify({ userId, body });
-}
-
-function getCachedResponse(key: string) {
-    const cached = responseCache.get(key);
-    if (!cached) return null;
-    if (cached.expiresAt < Date.now()) {
-        responseCache.delete(key);
-        return null;
-    }
-
-    return {
-        ...cached.response,
-        warnings: [...cached.response.warnings, "CACHE_HIT"],
-    };
-}
-
-function setCachedResponse(key: string, response: AIAgentResponse) {
-    responseCache.set(key, {
-        expiresAt: Date.now() + CACHE_TTL_MS,
-        response,
-    });
-}
 
 function makeTimeoutSignal(timeoutMs: number) {
     const controller = new AbortController();
@@ -69,6 +48,7 @@ export async function POST(rawRequest: Request) {
     let currentRequest: AIAgentRequest | undefined;
     let currentToolResults: AIToolResult[] = [];
     let currentResolvedModel: AIResolvedModel | undefined;
+    let currentPolicy: AIEffectivePolicy | undefined;
     try {
         const body = await rawRequest.json().catch(() => null);
         const request = normalizeAgentRequest(body);
@@ -83,10 +63,12 @@ export async function POST(rawRequest: Request) {
         sessionUserId = sessionContext.user.id;
         sessionRole = sessionContext.user.role;
         ensureRoleAndSurface(request, sessionContext.user.role);
-        await assertWithinAIQuota(sessionContext.user.id, sessionContext.user.role, request.mode);
+        currentPolicy = await getEffectiveAIPolicy(sessionContext, request);
+        assertAIEnabledForRequest(currentPolicy);
+        await assertWithinAIQuota(sessionContext.user.id, sessionContext.user.role, request.mode, currentPolicy.quotaLimit);
 
-        const cacheKey = buildCacheKey(sessionContext.user.id, request);
-        const cached = getCachedResponse(cacheKey);
+        const cacheKey = buildAIResponseCacheKey(sessionContext, request, currentPolicy.policyVersion);
+        const cached = getCachedAIResponse(cacheKey);
         if (cached) {
             await logAIActivity(sessionContext.user.id, {
                 role: sessionContext.user.role,
@@ -98,18 +80,21 @@ export async function POST(rawRequest: Request) {
                 inputTokens: cached.usage?.inputTokens,
                 outputTokens: cached.usage?.outputTokens,
                 estimatedCostUsd: cached.usage?.estimatedCostUsd,
+                cacheHit: true,
+                warnings: cached.warnings,
                 status: "success",
             });
             return NextResponse.json(cached);
         }
 
-        const toolRun = await runAITools(sessionContext, request);
+        const toolRun = await runAITools(sessionContext, request, currentPolicy.toolPolicyMap);
         currentToolResults = toolRun.results;
         const taskType = inferTaskType(request);
         const resolvedModel = resolveAIModel({
             taskType,
             role: sessionContext.user.role,
             useFallback: request.useFallback,
+            fallbackAllowed: currentPolicy.fallbackAllowed,
         });
         currentResolvedModel = resolvedModel;
         const routingWarnings = [
@@ -117,8 +102,11 @@ export async function POST(rawRequest: Request) {
             ...(request.useFallback && sessionContext.user.role !== "ADMIN"
                 ? ["FALLBACK_ADMIN_ONLY"]
                 : []),
-            ...(request.useFallback && sessionContext.user.role === "ADMIN" && !resolvedModel.usedFallback
-                ? ["FALLBACK_NOT_ENABLED"]
+            ...(request.useFallback && sessionContext.user.role === "ADMIN" && !currentPolicy.fallbackAllowed
+                ? ["FALLBACK_NOT_ALLOWED_BY_POLICY"]
+                : []),
+            ...(request.useFallback && currentPolicy.fallbackAllowed && !resolvedModel.usedFallback
+                ? ["FALLBACK_TASK_NOT_ELIGIBLE"]
                 : []),
         ];
         const systemPrompt = buildSystemPrompt();
@@ -167,9 +155,11 @@ export async function POST(rawRequest: Request) {
                 inputTokens: usage.inputTokens,
                 outputTokens: usage.outputTokens,
                 estimatedCostUsd: usage.estimatedCostUsd,
+                cacheHit: false,
+                warnings: routingWarnings,
                 status: "success",
             });
-            setCachedResponse(cacheKey, response);
+            setCachedAIResponse(cacheKey, response);
             return NextResponse.json(response);
         } finally {
             timeout.clear();
@@ -186,6 +176,20 @@ export async function POST(rawRequest: Request) {
                 });
             }
             return jsonError(`Đã vượt giới hạn ${error.limit} lượt AI hôm nay`, 429, "AI_QUOTA_EXCEEDED");
+        }
+
+        if (error instanceof AIPolicyError) {
+            if (sessionUserId && sessionRole && requestMode) {
+                await logAIActivity(sessionUserId, {
+                    role: sessionRole,
+                    mode: requestMode,
+                    surface: requestSurface,
+                    toolNames: [],
+                    status: "error",
+                    errorCode: error.code,
+                });
+            }
+            return jsonError(error.message, error.status, error.code);
         }
 
         if (isRouteError(error)) {

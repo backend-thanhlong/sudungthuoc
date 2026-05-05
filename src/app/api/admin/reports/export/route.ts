@@ -14,6 +14,7 @@ const COL_WIDTHS_DETAIL = [
     { wch: 15 },  // Hàm lượng
     { wch: 15 },  // Dạng bào chế
     { wch: 12 },  // Đơn vị tính
+    { wch: 12 },  // Nhóm TCKT
     { wch: 12 },  // Tồn đầu
     { wch: 12 },  // Nhập trong kỳ
     { wch: 12 },  // Xuất trong kỳ
@@ -29,28 +30,30 @@ const COL_WIDTHS_DETAIL = [
 ];
 
 const COL_WIDTHS_SUMMARY = [
-    { wch: 5 },
-    { wch: 30 },
-    { wch: 12 },
-    { wch: 15 },
-    { wch: 15 },
-    { wch: 35 },
-    { wch: 25 },
-    { wch: 15 },
-    { wch: 15 },
-    { wch: 12 },
-    { wch: 12 },
-    { wch: 12 },
-    { wch: 12 },
-    { wch: 12 },
-    { wch: 15 },
-    { wch: 18 },
-    { wch: 18 },
-    { wch: 25 },
-    { wch: 15 },
-    { wch: 15 },
-    { wch: 8 },
-    { wch: 8 },
+    { wch: 5 },   // STT
+    { wch: 30 },  // Cơ sở y tế
+    { wch: 12 },  // Tháng báo cáo
+    { wch: 15 },  // Mã nội bộ
+    { wch: 15 },  // Mã thuốc
+    { wch: 15 },  // Mã BHYT
+    { wch: 35 },  // Tên thuốc
+    { wch: 25 },  // Hoạt chất
+    { wch: 15 },  // Hàm lượng
+    { wch: 15 },  // Dạng bào chế
+    { wch: 12 },  // Đơn vị tính
+    { wch: 12 },  // Nhóm TCKT
+    { wch: 12 },  // Tồn đầu
+    { wch: 12 },  // Nhập trong kỳ
+    { wch: 12 },  // Xuất trong kỳ
+    { wch: 12 },  // Tồn cuối
+    { wch: 15 },  // Giá VAT
+    { wch: 18 },  // Thành tiền tồn cuối
+    { wch: 18 },  // Số QĐ trúng thầu
+    { wch: 25 },  // Tên Công ty
+    { wch: 15 },  // Ngày bắt đầu HĐ
+    { wch: 15 },  // Ngày kết thúc HĐ
+    { wch: 8 },   // BHYT
+    { wch: 8 },   // Dịch vụ
 ];
 
 function applyHeaderStyle(ws: XLSX.WorkSheet, numCols: number) {
@@ -122,6 +125,7 @@ function buildRowFromReport(r: any, index: number, includesFacility = true) {
         "Hàm lượng": r.drugMap?.masterDrug?.hamLuong || "",
         "Dạng bào chế": r.drugMap?.masterDrug?.dangBaoChe || "",
         "Đơn vị tính": r.drugMap?.donViTinhNoiBo || r.drugMap?.masterDrug?.donViTinh || "",
+        "Nhóm TCKT": r.drugMap?.nhomTckt || "",
         "Tồn đầu": Number(r.tonDau),
         "Nhập trong kỳ": Number(r.nhap),
         "Xuất trong kỳ": Number(r.xuat),

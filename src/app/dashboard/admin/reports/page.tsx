@@ -24,6 +24,7 @@ const DETAIL_SEARCH_FIELDS = [
     { value: "tenThuoc", label: "Tên thuốc (DM)" },
     { value: "hoatChat", label: "Hoạt chất" },
     { value: "soDangKy", label: "Số đăng ký" },
+    { value: "nhomTckt", label: "Nhóm TCKT" },
     { value: "soQdTrungThau", label: "Số QĐ TT" },
     { value: "tenCongTy", label: "Tên công ty" },
 ] as const;
@@ -894,6 +895,7 @@ export default function AdminReportsPage() {
                                                     <th className="px-2 py-2 text-left font-medium text-gray-500 w-[75px] bg-blue-50">Nước SX</th>
                                                     <th className="px-2 py-2 text-left font-medium text-gray-500 w-[130px] bg-blue-50">Công ty ĐK</th>
                                                     <th className="px-2 py-2 text-left font-medium text-gray-500 w-[100px] bg-blue-50">Nhóm thuốc</th>
+                                                    <th className="px-2 py-2 text-left font-medium text-gray-500 w-[90px] whitespace-nowrap bg-indigo-50">Nhóm TCKT</th>
                                                     <th className="px-2 py-2 text-right font-medium text-gray-500 w-[70px] whitespace-nowrap bg-emerald-50">Tồn đầu</th>
                                                     <th className="px-2 py-2 text-right font-medium text-gray-500 w-[65px] whitespace-nowrap bg-emerald-50">Nhập</th>
                                                     <th className="px-2 py-2 text-right font-medium text-gray-500 w-[65px] whitespace-nowrap bg-emerald-50">Xuất</th>
@@ -931,6 +933,7 @@ export default function AdminReportsPage() {
                                                         <td className="px-2 py-1.5 break-words">{item.nuocSanXuat || <span className="text-gray-300">—</span>}</td>
                                                         <td className="px-2 py-1.5 break-words">{item.congTyDangKy || <span className="text-gray-300">—</span>}</td>
                                                         <td className="px-2 py-1.5 break-words">{item.nhomThuoc || <span className="text-gray-300">—</span>}</td>
+                                                        <td className="px-2 py-1.5 whitespace-nowrap">{item.nhomTckt || <span className="text-gray-300">—</span>}</td>
                                                         <td className="px-2 py-1.5 text-right tabular-nums">{new Intl.NumberFormat("vi-VN").format(Number(item.tonDau))}</td>
                                                         <td className="px-2 py-1.5 text-right text-blue-600 tabular-nums">{new Intl.NumberFormat("vi-VN").format(Number(item.nhap))}</td>
                                                         <td className="px-2 py-1.5 text-right text-red-600 tabular-nums">{new Intl.NumberFormat("vi-VN").format(Number(item.xuat))}</td>

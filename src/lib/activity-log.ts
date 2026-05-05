@@ -42,6 +42,7 @@ export const ACTIONS = {
     IMPORT: "IMPORT",
     SUBMIT: "SUBMIT",
     RECALL: "RECALL",
+    AI_AGENT_DB_QUERY: "AI_AGENT_DB_QUERY",
 } as const;
 
 // Entity type constants
@@ -61,6 +62,7 @@ export const ENTITY_TYPES = {
     REPORT_PERIOD: "report_period",
     NOTIFICATION: "notification",
     DRUG_ORDER: "drug_order",
+    AI_AGENT_DB_QUERY: "ai_agent_db_query",
 } as const;
 
 // Vietnamese labels for display
@@ -77,6 +79,7 @@ export const ACTION_LABELS: Record<string, string> = {
     IMPORT: "Nhập file",
     SUBMIT: "Gửi",
     RECALL: "Thu hồi",
+    AI_AGENT_DB_QUERY: "Truy vấn DB AI",
 };
 
 export const ENTITY_TYPE_LABELS: Record<string, string> = {
@@ -95,4 +98,5 @@ export const ENTITY_TYPE_LABELS: Record<string, string> = {
     report_period: "Kỳ báo cáo",
     notification: "Thông báo",
     drug_order: "Dự trù đặt hàng",
+    ai_agent_db_query: "Truy vấn DB AI",
 };

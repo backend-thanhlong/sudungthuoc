@@ -13,6 +13,7 @@ import {
     REPORT_FIELD_HOAT_CHAT,
     REPORT_FIELD_MA_NOI_BO,
     REPORT_FIELD_MA_THUOC,
+    REPORT_FIELD_NHOM_TCKT,
     REPORT_FIELD_NGAY_BAT_DAU_HD,
     REPORT_FIELD_NGAY_KET_THUC_HD,
     REPORT_FIELD_NHAP,
@@ -96,6 +97,7 @@ const TEXT_ALIGNMENT = {
 
 const CENTER_ALIGNED_COLUMNS = new Set([
     REPORT_FIELD_STT,
+    REPORT_FIELD_NHOM_TCKT,
     REPORT_FIELD_TON_DAU,
     REPORT_FIELD_NHAP,
     REPORT_FIELD_XUAT,
@@ -113,6 +115,7 @@ const TEMPLATE_COLUMNS: TemplateColumn[] = [
     { header: REPORT_FIELD_TEN_THUOC, key: REPORT_FIELD_TEN_THUOC, width: 30, locked: true },
     { header: REPORT_FIELD_HOAT_CHAT, key: REPORT_FIELD_HOAT_CHAT, width: 20, locked: true },
     { header: REPORT_FIELD_DON_VI_TINH, key: REPORT_FIELD_DON_VI_TINH, width: 10, locked: true },
+    { header: REPORT_FIELD_NHOM_TCKT, key: REPORT_FIELD_NHOM_TCKT, width: 12, locked: true },
     { header: REPORT_FIELD_TON_DAU, key: REPORT_FIELD_TON_DAU, width: 10, locked: false },
     { header: REPORT_FIELD_NHAP, key: REPORT_FIELD_NHAP, width: 10, locked: false },
     { header: REPORT_FIELD_XUAT, key: REPORT_FIELD_XUAT, width: 10, locked: false },
@@ -141,8 +144,14 @@ const INSTRUCTIONS: InstructionRow[] = [
     {
         "Tên trường": "Cột bị khóa",
         "Kiểu dữ liệu": "Văn bản",
-        "Định dạng/Ví dụ": "STT / Mã nội bộ / Mã thuốc / Tên thuốc / Hoạt chất / Đơn vị tính",
+        "Định dạng/Ví dụ": "STT / Mã nội bộ / Mã thuốc / Tên thuốc / Hoạt chất / Đơn vị tính / Nhóm TCKT",
         "Ghi chú": "Các cột này đã bị khóa để tránh sửa nhầm. Có thể chọn ô để copy hoặc dùng filter, nhưng không được chỉnh sửa.",
+    },
+    {
+        "Tên trường": "Nhóm TCKT",
+        "Kiểu dữ liệu": "Danh mục",
+        "Định dạng/Ví dụ": "BĐG / Nhóm 1 / Nhóm 2 / Nhóm 3 / Nhóm 4 / Nhóm 5",
+        "Ghi chú": "Giá trị cố định theo Mã nội bộ, được thiết lập tại màn Danh mục thuốc nội bộ. Không chỉnh sửa trong file báo cáo.",
     },
     {
         "Tên trường": "Điều chỉnh hiển thị",

@@ -39,6 +39,7 @@ model User {
   drugOrderReceipts DrugOrderReceipt[] @relation("FacilityDrugOrderReceipts")
   notifications Notification[]
   activityLogs  ActivityLog[]
+  aiUserPolicy AIUserPolicy?
 
   @@index([companyId])
   @@map("users")
@@ -160,6 +161,7 @@ model FacilityDrugMap {
   hoatChatNoiBo  String? @map("hoat_chat_noi_bo")
   soDangKyNoiBo  String? @map("so_dang_ky_noi_bo")
   donViTinhNoiBo String? @map("don_vi_tinh_noi_bo")
+  nhomTckt       String? @map("nhom_tckt")
 
   masterDrugId String?     @map("master_drug_id")
   masterDrug   MasterDrug? @relation(fields: [masterDrugId], references: [id])
@@ -619,4 +621,46 @@ model ActivityLog {
   @@index([createdAt])
   @@index([entityType])
   @@map("activity_logs")
+}
+
+model AISetting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       Json
+  updatedById String?  @map("updated_by_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("ai_settings")
+}
+
+model AIUserPolicy {
+  id               String   @id @default(cuid())
+  userId           String   @unique @map("user_id")
+  enabled          Boolean?
+  chatDailyLimit   Int?     @map("chat_daily_limit")
+  reviewDailyLimit Int?     @map("review_daily_limit")
+  allowFallback    Boolean? @map("allow_fallback")
+  note             String?
+  updatedById      String?  @map("updated_by_id")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("ai_user_policies")
+}
+
+model AIToolPolicy {
+  id          String   @id @default(cuid())
+  toolName    String   @map("tool_name")
+  role        Role
+  enabled     Boolean  @default(true)
+  updatedById String?  @map("updated_by_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@unique([toolName, role])
+  @@index([role, enabled])
+  @@map("ai_tool_policies")
 }

@@ -18,32 +18,32 @@ export default function SupplySummaryCards({ metrics }: SupplySummaryCardsProps)
         {
             label: "Giá trị tồn cuối",
             value: formatCurrencyCompact(metrics.endingInventoryValue),
-            tone: "text-emerald-700 bg-emerald-50 border-emerald-100",
+            tone: "border-emerald-100 bg-emerald-50 text-emerald-700 dark:border-emerald-900/70 dark:bg-emerald-950/35 dark:text-emerald-200",
         },
         {
             label: "Giá trị xuất",
             value: formatCurrencyCompact(metrics.exportValue),
-            tone: "text-blue-700 bg-blue-50 border-blue-100",
+            tone: "border-blue-100 bg-blue-50 text-blue-700 dark:border-blue-900/70 dark:bg-blue-950/35 dark:text-blue-200",
         },
         {
             label: "Số thuốc hết hàng",
             value: formatCount(metrics.stockoutCount),
-            tone: "text-red-700 bg-red-50 border-red-100",
+            tone: "border-red-100 bg-red-50 text-red-700 dark:border-red-900/70 dark:bg-red-950/35 dark:text-red-200",
         },
         {
             label: "Thuốc dưới 1 tháng",
             value: formatCount(metrics.shortageUnderOneMonthCount),
-            tone: "text-amber-700 bg-amber-50 border-amber-100",
+            tone: "border-amber-100 bg-amber-50 text-amber-700 dark:border-amber-900/70 dark:bg-amber-950/35 dark:text-amber-200",
         },
         {
             label: "Tồn không nhu cầu",
             value: formatCount(metrics.deadStockCount),
-            tone: "text-slate-700 bg-slate-50 border-slate-100",
+            tone: "text-foreground bg-muted/40 border-border",
         },
         {
             label: "Hợp đồng sắp hết",
             value: formatCount(metrics.contractExpiringCount),
-            tone: "text-fuchsia-700 bg-fuchsia-50 border-fuchsia-100",
+            tone: "border-fuchsia-100 bg-fuchsia-50 text-fuchsia-700 dark:border-fuchsia-900/70 dark:bg-fuchsia-950/35 dark:text-fuchsia-200",
         },
     ];
 

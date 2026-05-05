@@ -10,6 +10,7 @@ import {
     REPORT_FIELD_HOAT_CHAT,
     REPORT_FIELD_MA_NOI_BO,
     REPORT_FIELD_MA_THUOC,
+    REPORT_FIELD_NHOM_TCKT,
     REPORT_FIELD_NGAY_BAT_DAU_HD,
     REPORT_FIELD_NGAY_KET_THUC_HD,
     REPORT_FIELD_NHAP,
@@ -77,6 +78,7 @@ export interface CanonicalFacilityReportRow {
     tenThuoc: string;
     hoatChat: string;
     donViTinh: string;
+    nhomTckt: string;
     prevTonCuoi?: number;
     prevGiaVat: number;
     prevSoQdTrungThau: string;
@@ -113,6 +115,7 @@ const buildCanonicalRow = (
     tenThuoc: mapping.masterDrug?.tenThuoc || mapping.tenThuocNoiBo || "",
     hoatChat: mapping.masterDrug?.hoatChat || mapping.hoatChatNoiBo || "",
     donViTinh: mapping.masterDrug?.donViTinh || mapping.donViTinhNoiBo || "",
+    nhomTckt: mapping.nhomTckt || "",
     prevTonCuoi: previousReport ? Number(previousReport.tonCuoi) : undefined,
     prevGiaVat: previousReport ? Number(previousReport.giaVat) : 0,
     prevSoQdTrungThau: previousReport?.soQdTrungThau || "",
@@ -163,6 +166,7 @@ const compareImmutableFields = (
         [REPORT_FIELD_TEN_THUOC, canonicalRow.tenThuoc],
         [REPORT_FIELD_HOAT_CHAT, canonicalRow.hoatChat],
         [REPORT_FIELD_DON_VI_TINH, canonicalRow.donViTinh],
+        [REPORT_FIELD_NHOM_TCKT, canonicalRow.nhomTckt],
     ] as const;
 
     return fieldChecks
@@ -291,6 +295,7 @@ export const buildFacilityReportTemplateRows = (context: FacilityReportCanonical
         [REPORT_FIELD_TEN_THUOC]: row.tenThuoc,
         [REPORT_FIELD_HOAT_CHAT]: row.hoatChat,
         [REPORT_FIELD_DON_VI_TINH]: row.donViTinh,
+        [REPORT_FIELD_NHOM_TCKT]: row.nhomTckt,
         [REPORT_FIELD_TON_DAU]: row.prevTonCuoi ?? 0,
         [REPORT_FIELD_NHAP]: 0,
         [REPORT_FIELD_XUAT]: 0,
@@ -403,6 +408,14 @@ export const validateFacilityReportRows = (
         }
 
         if (canonicalRow) {
+            if (!canonicalRow.nhomTckt) {
+                rowErrors.push(buildValidationError(
+                    rowNumber,
+                    REPORT_FIELD_NHOM_TCKT,
+                    REPORT_VALIDATION_CODES.missingNhomTckt,
+                    `Dòng ${rowNumber}: Mã nội bộ ${canonicalRow.maNoiBo} chưa có Nhóm TCKT. Vui lòng thiết lập tại trang danh mục thuốc nội bộ trước khi nộp báo cáo.`
+                ));
+            }
             rowErrors.push(...compareImmutableFields(rawRow, canonicalRow, rowNumber));
         }
 

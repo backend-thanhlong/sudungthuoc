@@ -96,6 +96,8 @@ export interface AILogDetails {
     inputTokens?: number;
     outputTokens?: number;
     estimatedCostUsd?: number;
+    cacheHit?: boolean;
+    warnings?: string[];
     status: "success" | "error" | "quota_exceeded";
     errorCode?: string;
 }

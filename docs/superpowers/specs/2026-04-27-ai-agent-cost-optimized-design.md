@@ -120,11 +120,11 @@ MVP se gom:
 
 ### Primary model
 
-Dung `Gemini 2.5 Flash-Lite` lam model mac dinh.
+Dung `Gemma 4 26B A4B IT` lam model mac dinh qua Gemini API.
 
 Ly do:
 
-- chi phi thap
+- chi phi thap theo free-tier hien hanh cua Gemini API
 - toc do tot
 - du dung cho tieng Viet, tom tat, phan loai loi, va phan tich du lieu da duoc backend tong hop
 - phu hop cho chat va kiem tra ho so o MVP
@@ -153,7 +153,7 @@ De xuat routing:
 Tat ca model id va provider key phai cau hinh qua env:
 
 - `AI_PRIMARY_PROVIDER=google`
-- `AI_PRIMARY_MODEL=gemini-2.5-flash-lite`
+- `AI_PRIMARY_MODEL=gemma-4-26b-a4b-it`
 - `AI_FALLBACK_PROVIDER=openai`
 - `AI_FALLBACK_MODEL=gpt-5.4-mini`
 - `AI_MAX_OUTPUT_TOKENS=1200`

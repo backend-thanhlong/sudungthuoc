@@ -13,6 +13,7 @@ const DETAIL_SEARCH_FIELDS = [
     "tenThuoc",
     "hoatChat",
     "soDangKy",
+    "nhomTckt",
     "soQdTrungThau",
     "tenCongTy",
 ] as const;
@@ -35,6 +36,7 @@ const getDetailSearchClause = (searchField: DetailSearchField, searchTerm: strin
         tenThuoc: { drugMap: { masterDrug: { tenThuoc: buildContainsFilter(searchTerm) } } },
         hoatChat: { drugMap: { masterDrug: { hoatChat: buildContainsFilter(searchTerm) } } },
         soDangKy: { drugMap: { masterDrug: { soDangKy: buildContainsFilter(searchTerm) } } },
+        nhomTckt: { drugMap: { nhomTckt: buildContainsFilter(searchTerm) } },
         soQdTrungThau: { soQdTrungThau: buildContainsFilter(searchTerm) },
         tenCongTy: { tenCongTy: buildContainsFilter(searchTerm) },
     } as const;
@@ -119,6 +121,7 @@ export async function GET(request: Request) {
             nuocSanXuat: report.drugMap?.masterDrug?.nuocSanXuat || "",
             congTyDangKy: report.drugMap?.masterDrug?.congTyDangKy || "",
             nhomThuoc: report.drugMap?.masterDrug?.nhomThuoc || "",
+            nhomTckt: report.drugMap?.nhomTckt || "",
             tonDau: Number(report.tonDau),
             nhap: Number(report.nhap),
             xuat: Number(report.xuat),

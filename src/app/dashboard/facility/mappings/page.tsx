@@ -27,11 +27,25 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Pencil, Trash2, Download, RotateCcw, AlertCircle, CheckCircle2, Lock, FileWarning } from "lucide-react";
 import { readExcel, exportMultiSheetExcelAdvanced } from "@/lib/excel";
+import { NHOM_TCKT_OPTIONS, normalizeNhomTckt } from "@/lib/report-validation";
 
 interface DrugMapping {
     id: string;
@@ -40,6 +54,7 @@ interface DrugMapping {
     hoatChatNoiBo: string | null;
     soDangKyNoiBo: string | null;
     donViTinhNoiBo: string | null;
+    nhomTckt: string | null;
     status: string;
     adminNote: string | null;
     isOutOfCatalog: boolean;
@@ -69,6 +84,38 @@ interface MasterDrug {
     donViTinh: string | null;
 }
 
+function CompactMappingText({
+    value,
+    className = "",
+    lines = 1,
+}: {
+    value?: string | null;
+    className?: string;
+    lines?: 1 | 2;
+}) {
+    const text = value?.trim();
+
+    if (!text) {
+        return <span className="text-gray-400">-</span>;
+    }
+
+    return (
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <span
+                    tabIndex={0}
+                    className={`block min-w-0 cursor-help ${lines === 2 ? "line-clamp-2 whitespace-normal break-words" : "truncate"} ${className}`}
+                >
+                    {text}
+                </span>
+            </TooltipTrigger>
+            <TooltipContent side="top" align="start" className="max-w-md whitespace-normal break-words leading-relaxed">
+                {text}
+            </TooltipContent>
+        </Tooltip>
+    );
+}
+
 export default function FacilityMappingsPage() {
     const [mappings, setMappings] = useState<DrugMapping[]>([]);
     const [masterDrugs, setMasterDrugs] = useState<MasterDrug[]>([]);
@@ -80,6 +127,8 @@ export default function FacilityMappingsPage() {
     const [isProcessing, setIsProcessing] = useState(false);
     const [isImporting, setIsImporting] = useState(false);
     const [searchMaster, setSearchMaster] = useState("");
+    const [isNhomTcktDialogOpen, setIsNhomTcktDialogOpen] = useState(false);
+    const [nhomTcktDraft, setNhomTcktDraft] = useState("");
 
     // Import error reporting
     const [importErrors, setImportErrors] = useState<{ row: number; maNoiBo: string; message: string; type: 'error' | 'warning' | 'skip' }[]>([]);
@@ -214,6 +263,44 @@ export default function FacilityMappingsPage() {
         }
     };
 
+    const handleOpenNhomTcktDialog = (mapping: DrugMapping) => {
+        setSelectedMapping(mapping);
+        setNhomTcktDraft("");
+        setIsNhomTcktDialogOpen(true);
+    };
+
+    const handleSaveNhomTckt = async () => {
+        if (!selectedMapping) return;
+        const normalized = normalizeNhomTckt(nhomTcktDraft);
+        if (!normalized) {
+            toast.error("Vui lòng chọn Nhóm TCKT hợp lệ");
+            return;
+        }
+
+        setIsProcessing(true);
+        try {
+            const res = await fetch(`/api/facility/mappings/${selectedMapping.id}/nhom-tckt`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ nhomTckt: normalized }),
+            });
+
+            if (res.ok) {
+                toast.success("Đã thiết lập Nhóm TCKT");
+                setIsNhomTcktDialogOpen(false);
+                fetchMappings();
+                return;
+            }
+
+            const errorData = await res.json().catch(() => null);
+            toast.error(errorData?.message || "Không thể thiết lập Nhóm TCKT");
+        } catch {
+            toast.error("Đã xảy ra lỗi");
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
     const handleDelete = async (id: string) => {
         if (!confirm("Bạn có chắc chắn muốn xóa thuốc này không?")) return;
 
@@ -286,6 +373,13 @@ export default function FacilityMappingsPage() {
                 "Đơn vị tính của thuốc (Viên, Lọ, Ống, Chai, Gói, Hộp, v.v.).",
                 "Viên"
             ],
+            [
+                "Nhóm TCKT (*)",
+                "Có",
+                "Danh mục",
+                `Nhóm TCKT cố định theo mã nội bộ. Chỉ được nhập một trong: ${NHOM_TCKT_OPTIONS.join(", ")}.`,
+                "Nhóm 1"
+            ],
             [""],
             ["Quy trình sau khi upload:"],
             ["  1. Upload file Excel này lên hệ thống."],
@@ -301,14 +395,16 @@ export default function FacilityMappingsPage() {
                 "Tên thuốc": "Paracetamol 500mg",
                 "Hoạt chất": "Paracetamol",
                 "Số đăng ký": "VD-12345-23",
-                "Đơn vị tính": "Viên"
+                "Đơn vị tính": "Viên",
+                "Nhóm TCKT": "Nhóm 1"
             },
             {
                 "Mã nội bộ": "T002",
                 "Tên thuốc": "Vitamin C 500mg",
                 "Hoạt chất": "Ascorbic acid",
                 "Số đăng ký": "",
-                "Đơn vị tính": "Viên"
+                "Đơn vị tính": "Viên",
+                "Nhóm TCKT": "Nhóm 2"
             }
         ];
 
@@ -322,7 +418,7 @@ export default function FacilityMappingsPage() {
                 // Column widths for instruction sheet
                 [{ wch: 22 }, { wch: 10 }, { wch: 18 }, { wch: 70 }, { wch: 20 }],
                 // Column widths for data sheet
-                [{ wch: 15 }, { wch: 30 }, { wch: 20 }, { wch: 18 }, { wch: 14 }],
+                [{ wch: 15 }, { wch: 30 }, { wch: 20 }, { wch: 18 }, { wch: 14 }, { wch: 14 }],
             ]
         );
         toast.success("Đã tải xuống file mẫu");
@@ -356,6 +452,8 @@ export default function FacilityMappingsPage() {
                 const hoatChatNoiBo = row['Hoạt chất'] || row['hoatChatNoiBo'] || row['HoatChat'] || '';
                 const soDangKyNoiBo = row['Số đăng ký'] || row['soDangKyNoiBo'] || row['SoDangKy'] || '';
                 const donViTinhNoiBo = row['Đơn vị tính'] || row['donViTinhNoiBo'] || row['DVT'] || '';
+                const nhomTcktRaw = row['Nhóm TCKT'] || row['nhomTckt'] || row['NhomTCKT'] || '';
+                const nhomTckt = normalizeNhomTckt(nhomTcktRaw);
 
                 const maNoiBoStr = String(maNoiBo).trim();
                 const tenThuocStr = String(tenThuocNoiBo).trim();
@@ -366,6 +464,14 @@ export default function FacilityMappingsPage() {
                 }
                 if (!tenThuocStr) {
                     clientErrors.push({ row: rowNum, maNoiBo: maNoiBoStr, message: 'Thiếu tên thuốc (bắt buộc)', type: 'error' });
+                }
+                if (!nhomTckt) {
+                    clientErrors.push({
+                        row: rowNum,
+                        maNoiBo: maNoiBoStr,
+                        message: `Thiếu hoặc sai Nhóm TCKT. Chỉ được nhập: ${NHOM_TCKT_OPTIONS.join(", ")}`,
+                        type: 'error',
+                    });
                 }
 
                 // Duplicate maNoiBo within the same file
@@ -389,6 +495,7 @@ export default function FacilityMappingsPage() {
                     hoatChatNoiBo: String(hoatChatNoiBo).trim() || null,
                     soDangKyNoiBo: String(soDangKyNoiBo).trim() || null,
                     donViTinhNoiBo: String(donViTinhNoiBo).trim() || null,
+                    nhomTckt,
                 };
             });
 
@@ -521,7 +628,8 @@ export default function FacilityMappingsPage() {
             "Tên thuốc nội bộ": m.tenThuocNoiBo,
             "Hoạt chất nội bộ": m.hoatChatNoiBo,
             "SĐK nội bộ": m.soDangKyNoiBo,
-            "ĐVT nội bộ": m.donViTinhNoiBo
+            "ĐVT nội bộ": m.donViTinhNoiBo,
+            "Nhóm TCKT": m.nhomTckt || "",
         }));
 
         const sheet2Data = approvedMappings.map((m, index) => ({
@@ -573,12 +681,12 @@ export default function FacilityMappingsPage() {
             approved: approvedMappings.length,
             rejected: rejectedMappings.length,
             missingInfo: mappings.filter((mapping) =>
-                !mapping.hoatChatNoiBo || !mapping.soDangKyNoiBo || !mapping.donViTinhNoiBo
+                !mapping.hoatChatNoiBo || !mapping.soDangKyNoiBo || !mapping.donViTinhNoiBo || !mapping.nhomTckt
             ).length,
         },
         rows: [
             ...mappings
-                .filter((mapping) => !mapping.hoatChatNoiBo || !mapping.soDangKyNoiBo || !mapping.donViTinhNoiBo)
+                .filter((mapping) => !mapping.hoatChatNoiBo || !mapping.soDangKyNoiBo || !mapping.donViTinhNoiBo || !mapping.nhomTckt)
                 .slice(0, 30)
                 .map((mapping) => ({
                     maNoiBo: mapping.maNoiBo,
@@ -586,6 +694,7 @@ export default function FacilityMappingsPage() {
                     hoatChatNoiBo: mapping.hoatChatNoiBo,
                     soDangKyNoiBo: mapping.soDangKyNoiBo,
                     donViTinhNoiBo: mapping.donViTinhNoiBo,
+                    nhomTckt: mapping.nhomTckt,
                     status: mapping.status,
                     type: "MISSING_INFO",
                 })),
@@ -601,24 +710,27 @@ export default function FacilityMappingsPage() {
 
     // Ids for disabled/locked statuses
     const LOCKED_STATUSES = ["WAITING_APPROVAL", "APPROVED"];
+    const readyPendingMappings = pendingMappings.filter((m) => (m.masterDrug || m.isOutOfCatalog) && m.nhomTckt);
 
     // Use server-side results directly
     const filteredMasterDrugs = masterDrugs;
 
     const MappingTable = ({ items, showAction = false }: { items: DrugMapping[]; showAction?: boolean }) => (
-        <Table>
+        <TooltipProvider delayDuration={300}>
+            <Table className={`${showAction ? "w-[1480px]" : "w-[1310px]"} table-fixed`}>
             <TableHeader>
                 <TableRow className="bg-blue-600 hover:bg-blue-600">
-                    <TableHead className="text-white font-bold">Mã nội bộ</TableHead>
-                    <TableHead className="text-white font-bold">Tên thuốc nội bộ</TableHead>
-                    <TableHead className="text-white font-bold">SĐK nội bộ</TableHead>
-                    <TableHead className="bg-emerald-50/50 text-white font-bold">Mã chung</TableHead>
-                    <TableHead className="bg-emerald-50/50 text-white font-bold">Tên thuốc mapping</TableHead>
-                    <TableHead className="bg-emerald-50/50 text-white font-bold">Hàm lượng</TableHead>
-                    <TableHead className="bg-emerald-50/50 text-white font-bold">Dạng bào chế</TableHead>
-                    <TableHead className="bg-emerald-50/50 text-white font-bold">SĐK mapping</TableHead>
-                    <TableHead className="text-white font-bold">Trạng thái</TableHead>
-                    {showAction && <TableHead className="text-right text-white font-bold">Thao tác</TableHead>}
+                    <TableHead className="w-[115px] text-white font-bold">Mã nội bộ</TableHead>
+                    <TableHead className="w-[180px] text-white font-bold">Tên thuốc nội bộ</TableHead>
+                    <TableHead className="w-[110px] text-white font-bold">SĐK nội bộ</TableHead>
+                    <TableHead className="w-[110px] text-white font-bold">Nhóm TCKT</TableHead>
+                    <TableHead className="w-[110px] bg-emerald-50/50 text-white font-bold">Mã chung</TableHead>
+                    <TableHead className="w-[180px] bg-emerald-50/50 text-white font-bold">Tên thuốc mapping</TableHead>
+                    <TableHead className="w-[110px] bg-emerald-50/50 text-white font-bold">Hàm lượng</TableHead>
+                    <TableHead className="w-[120px] bg-emerald-50/50 text-white font-bold">Dạng bào chế</TableHead>
+                    <TableHead className="w-[120px] bg-emerald-50/50 text-white font-bold">SĐK mapping</TableHead>
+                    <TableHead className="w-[150px] text-white font-bold">Trạng thái</TableHead>
+                    {showAction && <TableHead className="w-[170px] text-right text-white font-bold">Thao tác</TableHead>}
                 </TableRow>
             </TableHeader>
             <TableBody>
@@ -627,8 +739,28 @@ export default function FacilityMappingsPage() {
                         <TableCell>
                             <code className="px-2 py-1 bg-gray-100 rounded text-sm">{mapping.maNoiBo}</code>
                         </TableCell>
-                        <TableCell className="font-medium">{mapping.tenThuocNoiBo}</TableCell>
+                        <TableCell className="w-[180px] max-w-[180px] whitespace-normal font-medium">
+                            <CompactMappingText value={mapping.tenThuocNoiBo} lines={2} />
+                        </TableCell>
                         <TableCell>{mapping.soDangKyNoiBo || "-"}</TableCell>
+                        <TableCell>
+                            {mapping.nhomTckt ? (
+                                <Badge className="bg-indigo-100 text-indigo-700 border-0">{mapping.nhomTckt}</Badge>
+                            ) : (
+                                <div className="flex flex-col items-start gap-1.5">
+                                    <Badge className="bg-amber-100 text-amber-700 border-0">Chưa thiết lập</Badge>
+                                    <Button
+                                        type="button"
+                                        size="xs"
+                                        variant="outline"
+                                        className="border-amber-300 text-amber-700 hover:bg-amber-50"
+                                        onClick={() => handleOpenNhomTcktDialog(mapping)}
+                                    >
+                                        Thiết lập
+                                    </Button>
+                                </div>
+                            )}
+                        </TableCell>
                         <TableCell className="bg-emerald-50/50">
                             {mapping.masterDrug ? (
                                 <code className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-sm">
@@ -636,20 +768,20 @@ export default function FacilityMappingsPage() {
                                 </code>
                             ) : "-"}
                         </TableCell>
-                        <TableCell className="bg-emerald-50/50">
+                        <TableCell className="w-[180px] max-w-[180px] whitespace-normal bg-emerald-50/50">
                             {mapping.isOutOfCatalog ? (
-                                <span className="text-amber-600 italic">Ngoài danh mục</span>
+                                <CompactMappingText value="Ngoài danh mục" lines={1} className="text-amber-600 italic" />
                             ) : mapping.masterDrug ? (
-                                <span className="text-emerald-600 font-medium">{mapping.masterDrug.tenThuoc}</span>
+                                <CompactMappingText value={mapping.masterDrug.tenThuoc} lines={2} className="text-emerald-600 font-medium" />
                             ) : (
-                                <span className="text-gray-400">Chưa mapping</span>
+                                <CompactMappingText value="Chưa mapping" lines={1} className="text-gray-400" />
                             )}
                         </TableCell>
-                        <TableCell className="bg-emerald-50/50">
-                            {mapping.masterDrug?.hamLuong || "-"}
+                        <TableCell className="w-[110px] max-w-[110px] bg-emerald-50/50">
+                            <CompactMappingText value={mapping.masterDrug?.hamLuong} />
                         </TableCell>
-                        <TableCell className="bg-emerald-50/50">
-                            {mapping.masterDrug?.dangBaoChe || "-"}
+                        <TableCell className="w-[120px] max-w-[120px] bg-emerald-50/50">
+                            <CompactMappingText value={mapping.masterDrug?.dangBaoChe} />
                         </TableCell>
                         <TableCell className="bg-emerald-50/50">
                             {mapping.masterDrug?.soDangKy || "-"}
@@ -700,13 +832,14 @@ export default function FacilityMappingsPage() {
                 ))}
                 {items.length === 0 && (
                     <TableRow>
-                        <TableCell colSpan={showAction ? 8 : 7} className="text-center text-gray-500 py-8">
+                        <TableCell colSpan={showAction ? 11 : 10} className="text-center text-gray-500 py-8">
                             Không có dữ liệu
                         </TableCell>
                     </TableRow>
                 )}
             </TableBody>
-        </Table>
+            </Table>
+        </TooltipProvider>
     );
 
     return (
@@ -758,7 +891,7 @@ export default function FacilityMappingsPage() {
                     <Button
                         className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
                         onClick={handleSubmitForApproval}
-                        disabled={isProcessing || pendingMappings.filter((m) => m.masterDrug || m.isOutOfCatalog).length === 0}
+                        disabled={isProcessing || readyPendingMappings.length === 0}
                     >
                         <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -1138,6 +1271,45 @@ export default function FacilityMappingsPage() {
                         <Button variant="ghost" onClick={() => setIsEditInfoDialogOpen(false)}>Hủy</Button>
                         <Button onClick={handleSaveInfo} disabled={isProcessing}>
                             {isProcessing ? "Đang lưu..." : "Lưu thay đổi"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Dialog Setup Nhóm TCKT */}
+            <Dialog open={isNhomTcktDialogOpen} onOpenChange={setIsNhomTcktDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Thiết lập Nhóm TCKT</DialogTitle>
+                        <DialogDescription>
+                            Nhóm TCKT cố định theo mã nội bộ. Sau khi lưu, cơ sở không thể tự thay đổi lại.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-2">
+                        <div className="rounded-lg border bg-slate-50 p-3 text-sm">
+                            <p className="text-slate-500">Mã nội bộ</p>
+                            <p className="font-semibold text-slate-900">{selectedMapping?.maNoiBo}</p>
+                            <p className="mt-2 text-slate-500">Tên thuốc</p>
+                            <p className="font-medium text-slate-900">{selectedMapping?.tenThuocNoiBo}</p>
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Nhóm TCKT</label>
+                            <Select value={nhomTcktDraft} onValueChange={setNhomTcktDraft}>
+                                <SelectTrigger className="bg-white">
+                                    <SelectValue placeholder="Chọn nhóm..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {NHOM_TCKT_OPTIONS.map((option) => (
+                                        <SelectItem key={option} value={option}>{option}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="ghost" onClick={() => setIsNhomTcktDialogOpen(false)}>Hủy</Button>
+                        <Button onClick={handleSaveNhomTckt} disabled={isProcessing || !nhomTcktDraft}>
+                            {isProcessing ? "Đang lưu..." : "Lưu Nhóm TCKT"}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
