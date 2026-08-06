@@ -5,6 +5,8 @@ import {
     BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
     ResponsiveContainer, Legend,
 } from "recharts";
+import ChartColorShortcut from "@/components/dashboard/ChartColorShortcut";
+import { useChartColors } from "@/components/dashboard/ChartColorProvider";
 
 // ========================= TAB 1: SO SÁNH CƠ SỞ =========================
 
@@ -15,6 +17,10 @@ function ComparisonTab() {
     const [months, setMonths] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
     const [searched, setSearched] = useState(false);
+    const chartColors = useChartColors();
+    const inventoryColor = chartColors.resolveColor({ chartId: "reportsAdvanced.importExport", key: "inventory", semanticKey: "inventory" });
+    const importColor = chartColors.resolveColor({ chartId: "reportsAdvanced.importExport", key: "import", semanticKey: "import" });
+    const exportColor = chartColors.resolveColor({ chartId: "reportsAdvanced.importExport", key: "export", semanticKey: "export" });
 
     const handleSearch = async () => {
         if (!drugName.trim()) return;
@@ -91,16 +97,19 @@ function ComparisonTab() {
                 <>
                     {/* Chart */}
                     <div className="bg-gray-50 rounded-xl p-4">
-                        <h3 className="text-sm font-semibold text-gray-700 mb-3">Biểu đồ so sánh tồn cuối</h3>
+                        <div className="mb-3 flex items-center justify-between gap-3">
+                            <h3 className="text-sm font-semibold text-gray-700">Biểu đồ so sánh tồn cuối</h3>
+                            <ChartColorShortcut chartId="reportsAdvanced.importExport" />
+                        </div>
                         <ResponsiveContainer width="100%" height={300}>
                             <BarChart data={data} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                                 <XAxis dataKey="facilityName" tick={{ fontSize: 11 }} angle={-15} textAnchor="end" height={60} />
                                 <YAxis tick={{ fontSize: 11 }} />
                                 <Tooltip formatter={(value: number | undefined) => formatCurrency(value ?? 0)} />
-                                <Bar dataKey="tonCuoi" name="Tồn cuối" fill="#6366f1" radius={[4, 4, 0, 0]} />
-                                <Bar dataKey="nhap" name="Nhập" fill="#10b981" radius={[4, 4, 0, 0]} />
-                                <Bar dataKey="xuat" name="Xuất" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+                                <Bar dataKey="tonCuoi" name="Tồn cuối" fill={inventoryColor} radius={[4, 4, 0, 0]} />
+                                <Bar dataKey="nhap" name="Nhập" fill={importColor} radius={[4, 4, 0, 0]} />
+                                <Bar dataKey="xuat" name="Xuất" fill={exportColor} radius={[4, 4, 0, 0]} />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
@@ -151,6 +160,10 @@ function TrendsTab() {
     const [facilities, setFacilities] = useState<any[]>([]);
     const [summary, setSummary] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const chartColors = useChartColors();
+    const importColor = chartColors.resolveColor({ chartId: "reportsAdvanced.importExport", key: "import", semanticKey: "import" });
+    const exportColor = chartColors.resolveColor({ chartId: "reportsAdvanced.importExport", key: "export", semanticKey: "export" });
+    const valueColor = chartColors.resolveColor({ chartId: "reportsAdvanced.importExport", key: "value", semanticKey: "value" });
 
     const fetchTrends = useCallback(async () => {
         setLoading(true);
@@ -246,7 +259,10 @@ function TrendsTab() {
                 <>
                     {/* Nhập/Xuất Line chart */}
                     <div className="bg-gray-50 rounded-xl p-4">
-                        <h3 className="text-sm font-semibold text-gray-700 mb-3">Biểu đồ Nhập - Xuất</h3>
+                        <div className="mb-3 flex items-center justify-between gap-3">
+                            <h3 className="text-sm font-semibold text-gray-700">Biểu đồ Nhập - Xuất</h3>
+                            <ChartColorShortcut chartId="reportsAdvanced.importExport" />
+                        </div>
                         <ResponsiveContainer width="100%" height={300}>
                             <LineChart data={data} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -254,22 +270,25 @@ function TrendsTab() {
                                 <YAxis tick={{ fontSize: 11 }} tickFormatter={formatCompact} />
                                 <Tooltip formatter={(value: number | undefined) => formatCurrency(value ?? 0)} />
                                 <Legend />
-                                <Line type="monotone" dataKey="nhap" name="Nhập" stroke="#10b981" strokeWidth={2} dot={{ r: 4 }} />
-                                <Line type="monotone" dataKey="xuat" name="Xuất" stroke="#f59e0b" strokeWidth={2} dot={{ r: 4 }} />
+                                <Line type="monotone" dataKey="nhap" name="Nhập" stroke={importColor} strokeWidth={2} dot={{ r: 4 }} />
+                                <Line type="monotone" dataKey="xuat" name="Xuất" stroke={exportColor} strokeWidth={2} dot={{ r: 4 }} />
                             </LineChart>
                         </ResponsiveContainer>
                     </div>
 
                     {/* Giá trị tồn kho Bar chart */}
                     <div className="bg-gray-50 rounded-xl p-4">
-                        <h3 className="text-sm font-semibold text-gray-700 mb-3">Giá trị tồn kho theo tháng</h3>
+                        <div className="mb-3 flex items-center justify-between gap-3">
+                            <h3 className="text-sm font-semibold text-gray-700">Giá trị tồn kho theo tháng</h3>
+                            <ChartColorShortcut chartId="reportsAdvanced.importExport" />
+                        </div>
                         <ResponsiveContainer width="100%" height={300}>
                             <BarChart data={data} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                                 <XAxis dataKey="month" tick={{ fontSize: 12 }} />
                                 <YAxis tick={{ fontSize: 11 }} tickFormatter={formatCompact} />
                                 <Tooltip formatter={(value: number | undefined) => formatCurrency(value ?? 0)} />
-                                <Bar dataKey="giaTriTonKho" name="Giá trị tồn kho" fill="#6366f1" radius={[4, 4, 0, 0]} />
+                                <Bar dataKey="giaTriTonKho" name="Giá trị tồn kho" fill={valueColor} radius={[4, 4, 0, 0]} />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>

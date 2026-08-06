@@ -26,6 +26,7 @@ export async function GET() {
                     tenGoiThau: true,
                     giaGoiThau: true,
                     hinhThucLCNT: true,
+                    yeuCauTBMT: true,
                     createdAt: true,
                     keHoach: {
                         select: {
@@ -133,6 +134,7 @@ export async function GET() {
                 tenKHLCNT: g.keHoach.tenKHLCNT,
                 maKHLCNT: g.keHoach.maKHLCNT,
                 quyTrinh: g.keHoach.quyTrinh,
+                yeuCauTBMT: g.yeuCauTBMT,
                 tbmtCount: g._count.thongBaoMoiThaus,
                 kqlcntCount: g._count.ketQuaLCNTs,
                 facilityId: g.keHoach.facility.id,

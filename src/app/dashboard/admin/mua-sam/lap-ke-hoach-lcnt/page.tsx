@@ -65,6 +65,7 @@ interface GoiThau {
 interface KeHoachLCNT {
     id: string;
     quyTrinh: number;
+    loaiMuaSam?: string;
     maKHLCNT: string;
     tenKHLCNT: string;
     soQuyetDinh: string;
@@ -100,6 +101,7 @@ interface FacilityPlanGroup {
 }
 
 type ListTab = "quyTrinh1" | "quyTrinh2";
+type ProcurementTypeFilter = "all" | "Thuốc" | "Hóa chất, vật tư, thiết bị y tế";
 
 interface FacilityOption {
     id: string;
@@ -149,6 +151,14 @@ const EMPTY_SUMMARY: KeHoachSummary = {
     totalGoiThaus: 0,
     publishedPlans: 0,
 };
+const PROCUREMENT_TYPE_FILTER_OPTIONS: Array<{
+    value: ProcurementTypeFilter;
+    label: string;
+}> = [
+    { value: "all", label: "Tất cả loại mua sắm" },
+    { value: "Thuốc", label: "Thuốc" },
+    { value: "Hóa chất, vật tư, thiết bị y tế", label: "Hóa chất, vật tư, thiết bị y tế" },
+];
 
 const formatDate = (value?: string | null) => (
     value ? new Date(value).toLocaleDateString("vi-VN") : "—"
@@ -220,6 +230,7 @@ export default function AdminKeHoachLCNTPage() {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [filterFacility, setFilterFacility] = useState("all");
+    const [procurementTypeFilter, setProcurementTypeFilter] = useState<ProcurementTypeFilter>("all");
     const [listTab, setListTab] = useState<ListTab>("quyTrinh1");
     const [pageByTab, setPageByTab] = useState<Record<ListTab, number>>(INITIAL_PAGE_STATE);
     const [totalPagesByTab, setTotalPagesByTab] = useState<Record<ListTab, number>>(INITIAL_TOTAL_PAGES);
@@ -254,6 +265,10 @@ export default function AdminKeHoachLCNTPage() {
 
             if (filterFacility !== "all") {
                 params.set("facilityId", filterFacility);
+            }
+
+            if (procurementTypeFilter !== "all") {
+                params.set("procurementType", procurementTypeFilter);
             }
 
             const res = await fetch(`/api/admin/ke-hoach-lcnt?${params.toString()}`);
@@ -296,7 +311,7 @@ export default function AdminKeHoachLCNTPage() {
                 setLoading(false);
             }
         }
-    }, [filterFacility, listTab, pageByTab, searchTerm]);
+    }, [filterFacility, listTab, pageByTab, procurementTypeFilter, searchTerm]);
 
     useEffect(() => {
         loadData();
@@ -378,6 +393,11 @@ export default function AdminKeHoachLCNTPage() {
 
     const handleFacilityFilterChange = (value: string) => {
         setFilterFacility(value);
+        setPageByTab(INITIAL_PAGE_STATE);
+    };
+
+    const handleProcurementTypeFilterChange = (value: string) => {
+        setProcurementTypeFilter(value as ProcurementTypeFilter);
         setPageByTab(INITIAL_PAGE_STATE);
     };
 
@@ -480,6 +500,7 @@ export default function AdminKeHoachLCNTPage() {
 
     const groupedQuyTrinh1Plans = groupedPlansByTab.quyTrinh1;
     const groupedQuyTrinh2Plans = groupedPlansByTab.quyTrinh2;
+    const hasActiveFilters = Boolean(searchTerm) || filterFacility !== "all" || procurementTypeFilter !== "all";
 
     return (
         <div className="space-y-6">
@@ -589,13 +610,28 @@ export default function AdminKeHoachLCNTPage() {
                                 </SelectContent>
                             </Select>
                         </div>
-                        {(searchTerm || filterFacility !== "all") && (
+                        <div className="w-full lg:w-72">
+                            <Select value={procurementTypeFilter} onValueChange={handleProcurementTypeFilterChange}>
+                                <SelectTrigger className="w-full" aria-label="Loại mua sắm">
+                                    <SelectValue placeholder="Loại mua sắm" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {PROCUREMENT_TYPE_FILTER_OPTIONS.map((option) => (
+                                        <SelectItem key={option.value} value={option.value}>
+                                            {option.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        {hasActiveFilters && (
                             <Button
                                 variant="ghost"
                                 className="justify-start text-gray-500 lg:justify-center"
                                 onClick={() => {
                                     handleSearchTermChange("");
                                     handleFacilityFilterChange("all");
+                                    handleProcurementTypeFilterChange("all");
                                 }}
                             >
                                 Xóa bộ lọc
@@ -1075,6 +1111,10 @@ export default function AdminKeHoachLCNTPage() {
                                             <div>
                                                 <Label className="text-xs text-gray-500">Tên KHLCNT</Label>
                                                 <p className="font-medium">{selectedPlan.tenKHLCNT || "—"}</p>
+                                            </div>
+                                            <div>
+                                                <Label className="text-xs text-gray-500">Loại mua sắm</Label>
+                                                <p className="font-medium">{selectedPlan.loaiMuaSam || "—"}</p>
                                             </div>
                                             <div>
                                                 <Label className="text-xs text-gray-500">Số QĐ phê duyệt</Label>

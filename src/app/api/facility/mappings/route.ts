@@ -1,7 +1,52 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
-import { NHOM_TCKT_OPTIONS, normalizeNhomTckt } from "@/lib/report-validation";
+import {
+    NHOM_TCKT_OPTIONS,
+    compareReportDates,
+    isCategoryMarked,
+    normalizeNhomTckt,
+    normalizeReportText,
+    parseStrictNumber,
+    parseReportDateValue,
+} from "@/lib/report-validation";
+
+const hasNhomTcktInput = (value: unknown) =>
+    value !== null && value !== undefined && String(value).trim() !== "";
+
+const isValidOptionalNhomTckt = (value: unknown) =>
+    !hasNhomTcktInput(value) || Boolean(normalizeNhomTckt(value));
+
+const normalizeOptionalText = (value: unknown) => {
+    if (value === null || value === undefined) return null;
+    const normalized = String(value).trim().replace(/\s+/g, " ");
+    return normalized || null;
+};
+
+const normalizeOptionalDate = (value: unknown) => {
+    const parsed = parseReportDateValue(value);
+    return {
+        value: parsed.value,
+        valid: parsed.valid,
+        blank: parsed.blank,
+    };
+};
+
+const normalizeRequiredGiaVat = (value: unknown) => {
+    const parsed = parseStrictNumber(value);
+    return {
+        value: parsed.value,
+        valid: parsed.valid && !parsed.blank && parsed.value >= 0,
+        blank: parsed.blank,
+        negative: parsed.valid && !parsed.blank && parsed.value < 0,
+    };
+};
+
+const normalizeOptionalCategory = (value: unknown) => {
+    const normalized = normalizeReportText(value);
+    if (!normalized) return { value: null, valid: true };
+    return { value: isCategoryMarked(normalized) ? "X" : normalized, valid: isCategoryMarked(normalized) };
+};
 
 // GET facility's mappings
 export async function GET() {
@@ -27,11 +72,21 @@ export async function GET() {
                         quyCach: true,
                     },
                 },
+                _count: {
+                    select: {
+                        reports: true,
+                    },
+                },
             },
             orderBy: { updatedAt: "desc" },
         });
 
-        return NextResponse.json(mappings);
+        return NextResponse.json(
+            mappings.map(({ _count, ...mapping }) => ({
+                ...mapping,
+                reportCount: _count.reports,
+            }))
+        );
     } catch (error) {
         console.error("Error fetching mappings:", error);
         return NextResponse.json({ message: "Internal server error" }, { status: 500 });
@@ -65,22 +120,111 @@ export async function POST(request: Request) {
             if (!drug.tenThuocNoiBo || String(drug.tenThuocNoiBo).trim() === "") {
                 errors.push({ row: rowNum, maNoiBo: drug.maNoiBo || "", message: "Thiếu tên thuốc (bắt buộc)" });
             }
-            if (!normalizeNhomTckt(drug.nhomTckt)) {
+            if (!isValidOptionalNhomTckt(drug.nhomTckt)) {
                 errors.push({
                     row: rowNum,
                     maNoiBo: drug.maNoiBo || "",
-                    message: `Nhóm TCKT là bắt buộc và chỉ được chọn: ${NHOM_TCKT_OPTIONS.join(", ")}`,
+                    message: `Nhóm TCKT không hợp lệ. Nếu có nhập, chỉ được chọn: ${NHOM_TCKT_OPTIONS.join(", ")}`,
+                });
+            }
+
+            const giaVat = normalizeRequiredGiaVat(drug.giaVat);
+            const bhyt = normalizeOptionalCategory(drug.bhyt);
+            const dichVu = normalizeOptionalCategory(drug.dichVu);
+
+            if (!giaVat.valid) {
+                errors.push({
+                    row: rowNum,
+                    maNoiBo: drug.maNoiBo || "",
+                    message: giaVat.blank
+                        ? "Thiếu Giá VAT (bắt buộc)"
+                        : giaVat.negative
+                            ? "Giá VAT không được âm"
+                            : "Giá VAT phải là số hợp lệ",
+                });
+            }
+            if (!bhyt.valid) {
+                errors.push({
+                    row: rowNum,
+                    maNoiBo: drug.maNoiBo || "",
+                    message: 'BHYT chỉ được nhập "X" hoặc để trống',
+                });
+            }
+            if (!dichVu.valid) {
+                errors.push({
+                    row: rowNum,
+                    maNoiBo: drug.maNoiBo || "",
+                    message: 'Dịch vụ chỉ được nhập "X" hoặc để trống',
+                });
+            }
+            if (bhyt.valid && dichVu.valid && !bhyt.value && !dichVu.value) {
+                errors.push({
+                    row: rowNum,
+                    maNoiBo: drug.maNoiBo || "",
+                    message: "Phải đánh dấu X ở ít nhất một trong hai cột BHYT hoặc Dịch vụ",
+                });
+            }
+
+            const ngayBatDau = normalizeOptionalDate(drug.ngayBatDauHd);
+            const ngayKetThuc = normalizeOptionalDate(drug.ngayKetThucHd);
+            if (!ngayBatDau.valid) {
+                errors.push({
+                    row: rowNum,
+                    maNoiBo: drug.maNoiBo || "",
+                    message: "Ngày bắt đầu HĐ phải theo định dạng YYYYMMDD và là ngày hợp lệ",
+                });
+            }
+            if (!ngayKetThuc.valid) {
+                errors.push({
+                    row: rowNum,
+                    maNoiBo: drug.maNoiBo || "",
+                    message: "Ngày kết thúc HĐ phải theo định dạng YYYYMMDD và là ngày hợp lệ",
+                });
+            }
+            if (
+                ngayBatDau.valid
+                && ngayKetThuc.valid
+                && ngayBatDau.value
+                && ngayKetThuc.value
+                && compareReportDates(ngayBatDau.value, ngayKetThuc.value) > 0
+            ) {
+                errors.push({
+                    row: rowNum,
+                    maNoiBo: drug.maNoiBo || "",
+                    message: "Ngày bắt đầu HĐ không được lớn hơn Ngày kết thúc HĐ",
                 });
             }
         }
 
         // Only proceed with valid entries
         const validDrugs = drugs.filter(
-            (d) => d.maNoiBo
-                && String(d.maNoiBo).trim() !== ""
-                && d.tenThuocNoiBo
-                && String(d.tenThuocNoiBo).trim() !== ""
-                && normalizeNhomTckt(d.nhomTckt)
+            (d) => {
+                const ngayBatDau = normalizeOptionalDate(d.ngayBatDauHd);
+                const ngayKetThuc = normalizeOptionalDate(d.ngayKetThucHd);
+                const giaVat = normalizeRequiredGiaVat(d.giaVat);
+                const bhyt = normalizeOptionalCategory(d.bhyt);
+                const dichVu = normalizeOptionalCategory(d.dichVu);
+                const validDateRange = !(
+                    ngayBatDau.valid
+                    && ngayKetThuc.valid
+                    && ngayBatDau.value
+                    && ngayKetThuc.value
+                    && compareReportDates(ngayBatDau.value, ngayKetThuc.value) > 0
+                );
+
+                return d.maNoiBo
+                    && String(d.maNoiBo).trim() !== ""
+                    && d.tenThuocNoiBo
+                    && String(d.tenThuocNoiBo).trim() !== ""
+                    && isValidOptionalNhomTckt(d.nhomTckt)
+                    && giaVat.valid
+                    && bhyt.valid
+                    && dichVu.valid
+                    && Boolean(bhyt.value || dichVu.value)
+                    && ngayBatDau.valid
+                    && ngayKetThuc.valid
+                    && validDateRange;
+            }
         );
 
         // Fetch all existing mappings for this facility in ONE query
@@ -138,6 +282,13 @@ export async function POST(request: Request) {
                     soDangKyNoiBo: drug.soDangKyNoiBo ? String(drug.soDangKyNoiBo).trim() : null,
                     donViTinhNoiBo: drug.donViTinhNoiBo ? String(drug.donViTinhNoiBo).trim() : null,
                     nhomTckt: normalizeNhomTckt(drug.nhomTckt),
+                    giaVat: normalizeRequiredGiaVat(drug.giaVat).value,
+                    bhyt: normalizeOptionalCategory(drug.bhyt).value,
+                    dichVu: normalizeOptionalCategory(drug.dichVu).value,
+                    soQdTrungThau: normalizeOptionalText(drug.soQdTrungThau),
+                    tenCongTy: normalizeOptionalText(drug.tenCongTy),
+                    ngayBatDauHd: normalizeOptionalDate(drug.ngayBatDauHd).value,
+                    ngayKetThucHd: normalizeOptionalDate(drug.ngayKetThucHd).value,
                     masterDrugId,
                     status,
                 };

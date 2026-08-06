@@ -221,6 +221,7 @@ export async function getFacilityReportAnomalies(request: AIAgentRequest): Promi
             reportMonth: true,
             tonDau: true,
             nhap: true,
+            nhapHoanTra: true,
             xuat: true,
             tonCuoi: true,
             giaVat: true,
@@ -241,9 +242,10 @@ export async function getFacilityReportAnomalies(request: AIAgentRequest): Promi
     const anomalies = reports.flatMap(report => {
         const tonDau = Number(report.tonDau);
         const nhap = Number(report.nhap);
+        const nhapHoanTra = Number(report.nhapHoanTra);
         const xuat = Number(report.xuat);
         const tonCuoi = Number(report.tonCuoi);
-        const expectedTonCuoi = tonDau + nhap - xuat;
+        const expectedTonCuoi = tonDau + nhap + nhapHoanTra - xuat;
         const drugName = report.drugMap.masterDrug?.tenThuoc || report.drugMap.tenThuocNoiBo;
         const base = {
             facility: report.facility.facilityName || report.facility.username,
@@ -254,8 +256,8 @@ export async function getFacilityReportAnomalies(request: AIAgentRequest): Promi
         if (Math.abs(expectedTonCuoi - tonCuoi) > 0.01) {
             items.push({ ...base, type: "BALANCE_MISMATCH", expectedTonCuoi, actualTonCuoi: tonCuoi });
         }
-        if (xuat > tonDau + nhap) {
-            items.push({ ...base, type: "EXPORT_EXCEEDS_AVAILABLE", tonDau, nhap, xuat });
+        if (xuat > tonDau + nhap + nhapHoanTra) {
+            items.push({ ...base, type: "EXPORT_EXCEEDS_AVAILABLE", tonDau, nhap, nhapHoanTra, xuat });
         }
         if (!report.drugMap.masterDrugId) {
             items.push({ ...base, type: "UNMAPPED_DRUG" });

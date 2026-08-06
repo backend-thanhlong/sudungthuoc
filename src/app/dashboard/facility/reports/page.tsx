@@ -59,6 +59,7 @@ interface PreviewRow {
     nhomTckt?: string | null;
     tonDau: number;
     nhap: number;
+    nhapHoanTra: number;
     xuat: number;
     tonCuoi: number;
     giaVat: number;
@@ -125,6 +126,7 @@ interface DetailReportRow {
     nhomTckt: string;
     tonDau: number;
     nhap: number;
+    nhapHoanTra: number;
     xuat: number;
     tonCuoi: number;
     giaVat: number;
@@ -305,6 +307,7 @@ export default function FacilityReportsPage() {
                         nhomTckt: parsed.nhomTckt,
                         tonDau: parsed.tonDau,
                         nhap: parsed.nhap,
+                        nhapHoanTra: parsed.nhapHoanTra,
                         xuat: parsed.xuat,
                         tonCuoi: parsed.tonCuoi,
                         giaVat: parsed.giaVat,
@@ -396,6 +399,7 @@ export default function FacilityReportsPage() {
                     nhomTckt: row.nhomTckt,
                     tonDau: row.tonDau,
                     nhap: row.nhap,
+                    nhapHoanTra: row.nhapHoanTra,
                     xuat: row.xuat,
                     tonCuoi: row.tonCuoi,
                     giaVat: row.giaVat,
@@ -847,6 +851,7 @@ export default function FacilityReportsPage() {
                                     <th className="px-3 py-3 text-center whitespace-nowrap">Nhóm TCKT</th>
                                     <th className="px-3 py-3 text-right">Tồn đầu</th>
                                     <th className="px-3 py-3 text-right">Nhập</th>
+                                    <th className="px-3 py-3 text-right whitespace-nowrap">Nhập do Hoàn trả</th>
                                     <th className="px-3 py-3 text-right">Xuất</th>
                                     <th className="px-3 py-3 text-right">Tồn cuối</th>
                                     <th className="px-3 py-3 text-right">Giá VAT</th>
@@ -865,6 +870,7 @@ export default function FacilityReportsPage() {
                                         <td className="px-3 py-2 text-center whitespace-nowrap">{row.nhomTckt || "—"}</td>
                                         <td className="px-3 py-2 text-right">{row.tonDau.toLocaleString("vi-VN")}</td>
                                         <td className="px-3 py-2 text-right text-blue-600">{row.nhap.toLocaleString("vi-VN")}</td>
+                                        <td className="px-3 py-2 text-right text-cyan-700">{row.nhapHoanTra.toLocaleString("vi-VN")}</td>
                                         <td className="px-3 py-2 text-right text-orange-600">{row.xuat.toLocaleString("vi-VN")}</td>
                                         <td className={`px-3 py-2 text-right font-semibold ${row.combinedErrors.some((warning) => warning.field === "Tồn cuối") ? "text-red-600" : "text-gray-800"}`}>
                                             {row.tonCuoi.toLocaleString("vi-VN")}
@@ -995,24 +1001,24 @@ export default function FacilityReportsPage() {
                     if (!open) resetDetailState();
                 }}
             >
-                <DialogContent className="max-w-[95vw] sm:max-w-[95vw] w-[95vw] h-[90vh] flex flex-col p-0">
-                    <DialogHeader className="p-6 pb-2">
-                        <DialogTitle>Chi tiết báo cáo tháng {detailMonth}</DialogTitle>
+                <DialogContent className="!left-0 !top-0 flex !h-[100dvh] !w-screen !max-w-none !translate-x-0 !translate-y-0 flex-col gap-0 overflow-hidden !rounded-none !border-0 !p-0 !shadow-none sm:!max-w-none">
+                    <DialogHeader className="shrink-0 border-b border-gray-200 bg-white px-4 py-4 pr-14 text-left sm:px-6 sm:py-5 sm:pr-16">
+                        <DialogTitle className="text-xl">Chi tiết báo cáo tháng {detailMonth}</DialogTitle>
                         <DialogDescription>
                             Tổng số mặt hàng: {formatDetailNumber(detailTotal)}
                         </DialogDescription>
                     </DialogHeader>
 
-                    <div className="flex flex-1 flex-col overflow-hidden px-6 pb-6">
+                    <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
                         <form
-                            className="flex flex-wrap items-center gap-2 pb-3"
+                            className="grid shrink-0 gap-2 border-b border-gray-200 bg-white px-4 py-3 sm:grid-cols-[220px_minmax(260px,1fr)_auto_auto] sm:px-6"
                             onSubmit={(event) => {
                                 event.preventDefault();
                                 handleDetailSearch();
                             }}
                         >
                             <Select value={detailSearchField} onValueChange={(value) => setDetailSearchField(value as DetailSearchField)}>
-                                <SelectTrigger className="w-[220px] bg-white">
+                                <SelectTrigger className="w-full bg-white">
                                     <SelectValue placeholder="Chọn trường tìm kiếm" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -1026,7 +1032,7 @@ export default function FacilityReportsPage() {
                                 value={detailSearchInput}
                                 onChange={(event) => setDetailSearchInput(event.target.value)}
                                 placeholder="Nhập từ khóa tìm kiếm..."
-                                className="min-w-[260px] flex-1 bg-white"
+                                className="min-w-0 bg-white"
                             />
 
                             <Button type="submit" disabled={isDetailLoading}>
@@ -1043,7 +1049,7 @@ export default function FacilityReportsPage() {
                         </form>
 
                         {hasActiveDetailSearch && (
-                            <div className="pb-3 text-sm text-gray-600">
+                            <div className="shrink-0 border-b border-gray-100 px-4 py-2 text-sm text-gray-600 sm:px-6">
                                 Kết quả tìm kiếm cho <span className="font-medium">&quot;{detailSearchTerm}&quot;</span> trong trường{" "}
                                 <span className="font-medium">{detailSearchFieldLabel}</span>
                             </div>
@@ -1077,12 +1083,12 @@ export default function FacilityReportsPage() {
                             </div>
                         ) : (
                             <>
-                                <div className="flex items-center justify-between pb-3 text-sm text-gray-600">
+                                <div className="flex shrink-0 flex-col gap-1 border-b border-gray-100 px-4 py-2 text-sm text-gray-600 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                                     <span>Hiển thị {detailRangeStart}-{detailRangeEnd} / {formatDetailNumber(detailTotal)} dòng</span>
                                     <span>Trang {detailPage} / {detailTotalPages}</span>
                                 </div>
 
-                                <div className="overflow-auto flex-1">
+                                <div className="min-h-0 flex-1 overflow-auto bg-white">
                                     <table className="text-xs border-collapse w-max min-w-full">
                                         <thead className="sticky top-0 bg-white z-10">
                                             <tr className="border-b border-gray-200">
@@ -1109,6 +1115,7 @@ export default function FacilityReportsPage() {
                                                 <th className="px-2 py-2 text-left font-medium text-gray-500 w-[90px] whitespace-nowrap bg-indigo-50">Nhóm TCKT</th>
                                                 <th className="px-2 py-2 text-right font-medium text-gray-500 w-[70px] whitespace-nowrap bg-emerald-50">Tồn đầu</th>
                                                 <th className="px-2 py-2 text-right font-medium text-gray-500 w-[65px] whitespace-nowrap bg-emerald-50">Nhập</th>
+                                                <th className="px-2 py-2 text-right font-medium text-gray-500 w-[95px] whitespace-nowrap bg-emerald-50">Nhập HT</th>
                                                 <th className="px-2 py-2 text-right font-medium text-gray-500 w-[65px] whitespace-nowrap bg-emerald-50">Xuất</th>
                                                 <th className="px-2 py-2 text-right font-semibold text-gray-700 w-[70px] whitespace-nowrap bg-emerald-50">Tồn cuối</th>
                                                 <th className="px-2 py-2 text-right font-medium text-gray-500 w-[90px] whitespace-nowrap bg-emerald-50">Giá VAT</th>
@@ -1147,6 +1154,7 @@ export default function FacilityReportsPage() {
                                                     <td className="px-2 py-1.5 whitespace-nowrap">{renderDetailText(item.nhomTckt)}</td>
                                                     <td className="px-2 py-1.5 text-right tabular-nums">{formatDetailNumber(item.tonDau)}</td>
                                                     <td className="px-2 py-1.5 text-right text-blue-600 tabular-nums">{formatDetailNumber(item.nhap)}</td>
+                                                    <td className="px-2 py-1.5 text-right text-cyan-700 tabular-nums">{formatDetailNumber(item.nhapHoanTra)}</td>
                                                     <td className="px-2 py-1.5 text-right text-red-600 tabular-nums">{formatDetailNumber(item.xuat)}</td>
                                                     <td className="px-2 py-1.5 text-right font-bold tabular-nums">{formatDetailNumber(item.tonCuoi)}</td>
                                                     <td className="px-2 py-1.5 text-right tabular-nums">{formatDetailNumber(item.giaVat)}</td>
@@ -1163,34 +1171,32 @@ export default function FacilityReportsPage() {
                                     </table>
                                 </div>
 
-                                {detailTotalPages > 1 && (
-                                    <div className="flex items-center justify-between border-t pt-3">
-                                        <p className="text-sm text-gray-600">
-                                            Hiển thị {detailRangeStart}-{detailRangeEnd} / {formatDetailNumber(detailTotal)} dòng
-                                        </p>
-                                        <div className="flex gap-2">
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={() => handleDetailPageChange(detailPage - 1)}
-                                                disabled={isDetailLoading || detailPage <= 1}
-                                            >
-                                                Trước
-                                            </Button>
-                                            <Button variant="outline" size="sm" disabled>
-                                                Trang {detailPage} / {detailTotalPages}
-                                            </Button>
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={() => handleDetailPageChange(detailPage + 1)}
-                                                disabled={isDetailLoading || detailPage >= detailTotalPages}
-                                            >
-                                                Sau
-                                            </Button>
-                                        </div>
+                                <div className="flex shrink-0 flex-col gap-3 border-t border-gray-200 bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                                    <p className="text-sm text-gray-600">
+                                        Hiển thị {detailRangeStart}-{detailRangeEnd} / {formatDetailNumber(detailTotal)} dòng
+                                    </p>
+                                    <div className="grid grid-cols-3 gap-2 sm:flex">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => handleDetailPageChange(detailPage - 1)}
+                                            disabled={isDetailLoading || detailPage <= 1}
+                                        >
+                                            Trước
+                                        </Button>
+                                        <Button variant="outline" size="sm" disabled>
+                                            Trang {detailPage} / {detailTotalPages}
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => handleDetailPageChange(detailPage + 1)}
+                                            disabled={isDetailLoading || detailPage >= detailTotalPages}
+                                        >
+                                            Sau
+                                        </Button>
                                     </div>
-                                )}
+                                </div>
                             </>
                         )}
                     </div>

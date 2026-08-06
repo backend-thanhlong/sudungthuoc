@@ -20,6 +20,11 @@ export type {
 
 export type InventoryViewMode = "drug" | "facility" | "compare";
 
+export interface InventoryDrugTypeFilters {
+    controlledSpecial: boolean;
+    rareDrug: boolean;
+}
+
 export const VIEW_MODE_OPTIONS: Array<{ value: InventoryViewMode; label: string }> = [
     { value: "drug", label: "Theo thuốc" },
     { value: "facility", label: "Theo cơ sở" },

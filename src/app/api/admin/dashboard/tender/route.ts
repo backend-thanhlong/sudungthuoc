@@ -56,6 +56,8 @@ export async function GET(request: Request) {
                         tenThuocNoiBo: true,
                         masterDrug: {
                             select: {
+                                id: true,
+                                maChung: true,
                                 tenThuoc: true,
                                 hoatChat: true,
                                 hamLuong: true,
@@ -148,42 +150,52 @@ export async function GET(request: Request) {
             .sort((a, b) => b.value - a.value)
             .slice(0, 10);
 
-        // 4. Price comparison: same hoatChat + hamLuong, different soQd or congTy
+        // 4. Price comparison: same master drug across facilities / tenders
         const priceGroups = new Map<string, Array<{
+            masterDrugId: string;
+            maChung: string;
             hoatChat: string;
             hamLuong: string;
             soQd: string;
             congTy: string;
+            facilityId: string;
+            facility: string;
             giaVat: number;
             drugName: string;
         }>>();
 
         allReports.forEach(r => {
-            const hc = r.drugMap?.masterDrug?.hoatChat;
-            const hl = r.drugMap?.masterDrug?.hamLuong;
-            if (!hc || !hl) return;
+            const masterDrug = r.drugMap?.masterDrug;
+            if (!masterDrug?.id || !masterDrug.maChung) return;
 
-            const key = `${hc}|||${hl}`;
+            const key = masterDrug.id;
             if (!priceGroups.has(key)) {
                 priceGroups.set(key, []);
             }
             priceGroups.get(key)!.push({
-                hoatChat: hc,
-                hamLuong: hl,
+                masterDrugId: masterDrug.id,
+                maChung: masterDrug.maChung,
+                hoatChat: masterDrug.hoatChat || "N/A",
+                hamLuong: masterDrug.hamLuong || "N/A",
                 soQd: r.soQdTrungThau || "N/A",
                 congTy: r.tenCongTy || "N/A",
+                facilityId: r.facilityId,
+                facility: r.facility?.facilityName || "Unknown",
                 giaVat: Number(r.giaVat),
-                drugName: r.drugMap?.masterDrug?.tenThuoc || r.drugMap?.tenThuocNoiBo || "N/A",
+                drugName: masterDrug.tenThuoc || r.drugMap?.tenThuocNoiBo || "N/A",
             });
         });
 
         // Only keep groups with price variance
         const priceComparison: Array<{
+            maChung: string;
+            drugName: string;
             hoatChat: string;
             hamLuong: string;
             items: Array<{
                 soQd: string;
                 congTy: string;
+                facility: string;
                 giaVat: number;
                 drugName: string;
             }>;
@@ -193,10 +205,10 @@ export async function GET(request: Request) {
         }> = [];
 
         priceGroups.forEach((items) => {
-            // Deduplicate by soQd + congTy
+            // Deduplicate by facility + soQd + congTy. Keep highest price if repeated.
             const uniqueItems = new Map<string, typeof items[0]>();
             items.forEach(item => {
-                const ukey = `${item.soQd}|||${item.congTy}`;
+                const ukey = `${item.facilityId}|||${item.soQd}|||${item.congTy}`;
                 if (!uniqueItems.has(ukey) || item.giaVat > uniqueItems.get(ukey)!.giaVat) {
                     uniqueItems.set(ukey, item);
                 }
@@ -214,11 +226,14 @@ export async function GET(request: Request) {
 
             if (variance > 5) { // Only show if variance > 5%
                 priceComparison.push({
+                    maChung: deduped[0].maChung,
+                    drugName: deduped[0].drugName,
                     hoatChat: deduped[0].hoatChat,
                     hamLuong: deduped[0].hamLuong,
                     items: deduped.map(i => ({
                         soQd: i.soQd,
                         congTy: i.congTy,
+                        facility: i.facility,
                         giaVat: i.giaVat,
                         drugName: i.drugName,
                     })),

@@ -24,12 +24,16 @@ export async function GET(req: NextRequest) {
         const limit = Math.min(parsePositiveInt(searchParams.get("limit"), 20), 100);
         const requestedSort = (searchParams.get("sort") || "drugNameAsc") as DrugSortOption;
         const sort = DRUG_SORTS.includes(requestedSort) ? requestedSort : "drugNameAsc";
+        const controlledSpecial = searchParams.get("controlledSpecial") === "true";
+        const rareDrug = searchParams.get("rareDrug") === "true";
 
         const data = await searchInventoryByDrug({
             query,
             page,
             limit,
             sort,
+            controlledSpecial,
+            rareDrug,
         });
 
         return NextResponse.json(data);

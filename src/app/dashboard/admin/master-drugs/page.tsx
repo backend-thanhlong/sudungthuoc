@@ -5,6 +5,30 @@ import { useSession } from "next-auth/react";
 import TherapeuticGroupPicker, {
     type TherapeuticGroupOption,
 } from "@/components/master-drugs/TherapeuticGroupPicker";
+import DuplicateDrugsReviewDialog, {
+    type DuplicateRegistrationResponse,
+} from "@/components/master-drugs/DuplicateDrugsReviewDialog";
+import MasterDrugsPagination from "@/components/master-drugs/MasterDrugsPagination";
+import MasterDrugsTable from "@/components/master-drugs/MasterDrugsTable";
+import MasterDrugsViewOptions from "@/components/master-drugs/MasterDrugsViewOptions";
+import {
+    areColumnFiltersEqual,
+    clearColumnFilterForColumn,
+    COLUMN_FILTER_FIELDS,
+    createEmptyColumnFilters,
+    DEFAULT_VISIBLE_COLUMNS,
+    DEFAULT_WRAPPED_COLUMNS,
+    DOMESTIC_OPTIONS,
+    DRUG_GROUP_OPTIONS,
+    hasAnyColumnFilters,
+    PRESCRIPTION_OPTIONS,
+    TABLE_COLUMNS,
+    type ColumnFilterKey,
+    type ColumnFilters,
+    type MasterDrug,
+    type TableColumnId,
+    type WrappableColumnId,
+} from "@/components/master-drugs/master-drugs-config";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,30 +40,13 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
-import {
     Dialog,
     DialogPortal,
     DialogOverlay,
     DialogTrigger,
 } from "@/components/ui/dialog";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { X } from "lucide-react";
-import {
-    DropdownMenu,
-    DropdownMenuCheckboxItem,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Search, Trash, X } from "lucide-react";
 import {
     Select,
     SelectContent,
@@ -47,15 +54,12 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { readExcel, exportExcel } from "@/lib/excel";
-import { Settings2, Pencil, Trash2, Trash, Search } from "lucide-react";
+import {
+    normalizeSpecialControlValue,
+    SPECIAL_CONTROL_OPTIONS,
+} from "@/lib/master-drugs/special-control";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -66,172 +70,10 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { cn } from "@/lib/utils";
-
-interface MasterDrug {
-    id: string;
-    maChung: string;
-    maBhyt: string | null;
-    tenThuoc: string;
-    hoatChat: string | null;
-    hamLuong: string | null;
-    dangBaoChe: string | null;
-    soDangKy: string | null;
-    quyCach: string | null;
-    donViTinh: string | null;
-
-    tieuChuan: string | null;
-    tuoiTho: string | null;
-    duongDung: string | null;
-    nguonGoc: string | null;
-
-    congTySanXuat: string | null;
-    nuocSanXuat: string | null;
-    diaChiSanXuat: string | null;
-
-    congTyDangKy: string | null;
-    nuocDangKy: string | null;
-    diaChiDangKy: string | null;
-
-    nhomThuoc: string | null;
-    therapeuticGroupId: string | null;
-    therapeuticGroup: TherapeuticGroupOption | null;
-    isKeDon: string | null;
-    kiemSoatDacBiet: string | null;
-    isTrongNuoc: string | null;
-
-    isActive: boolean;
-}
-
-const TABLE_COLUMNS = [
-    { id: "stt", label: "STT", required: true, defaultVisible: true },
-    { id: "maBhyt", label: "Mã BHYT", required: false, defaultVisible: true },
-    { id: "tenThuoc", label: "Tên thuốc", required: true, defaultVisible: true },
-    { id: "hoatChat", label: "Hoạt chất", required: true, defaultVisible: true },
-    { id: "hamLuong", label: "Hàm lượng", required: true, defaultVisible: true },
-    { id: "soDangKy", label: "Số đăng ký", required: true, defaultVisible: true },
-    { id: "dangBaoChe", label: "Dạng bào chế", required: true, defaultVisible: true },
-    { id: "quyCach", label: "Quy cách", required: false, defaultVisible: true },
-    { id: "duongDung", label: "Đường dùng", required: true, defaultVisible: true },
-    { id: "donViTinh", label: "Đơn vị tính", required: false, defaultVisible: true },
-    { id: "nhomThuoc", label: "Nhóm thuốc", required: false, defaultVisible: true },
-    { id: "therapeuticGroup", label: "Nhóm điều trị", required: false, defaultVisible: true },
-    { id: "actions", label: "Thao tác", required: true, defaultVisible: true },
-] as const;
-
-type TableColumnId = (typeof TABLE_COLUMNS)[number]["id"];
-
-const COLUMN_FILTER_FIELDS = [
-    "maBhyt",
-    "tenThuoc",
-    "hoatChat",
-    "hamLuong",
-    "soDangKy",
-    "dangBaoChe",
-    "quyCach",
-    "duongDung",
-    "donViTinh",
-    "nhomThuoc",
-    "therapeuticGroupId",
-] as const;
-
-type ColumnFilterKey = (typeof COLUMN_FILTER_FIELDS)[number];
-type ColumnFilters = Record<ColumnFilterKey, string>;
-
-const COLUMN_FILTER_KEY_BY_COLUMN_ID: Partial<Record<TableColumnId, ColumnFilterKey>> = {
-    maBhyt: "maBhyt",
-    tenThuoc: "tenThuoc",
-    hoatChat: "hoatChat",
-    hamLuong: "hamLuong",
-    soDangKy: "soDangKy",
-    dangBaoChe: "dangBaoChe",
-    quyCach: "quyCach",
-    duongDung: "duongDung",
-    donViTinh: "donViTinh",
-    nhomThuoc: "nhomThuoc",
-    therapeuticGroup: "therapeuticGroupId",
-};
-
-const createEmptyColumnFilters = (): ColumnFilters => ({
-    maBhyt: "",
-    tenThuoc: "",
-    hoatChat: "",
-    hamLuong: "",
-    soDangKy: "",
-    dangBaoChe: "",
-    quyCach: "",
-    duongDung: "",
-    donViTinh: "",
-    nhomThuoc: "",
-    therapeuticGroupId: "",
-});
-
-const hasAnyColumnFilters = (filters: ColumnFilters) =>
-    COLUMN_FILTER_FIELDS.some((field) => filters[field].trim() !== "");
-
-const areColumnFiltersEqual = (left: ColumnFilters, right: ColumnFilters) =>
-    COLUMN_FILTER_FIELDS.every((field) => left[field] === right[field]);
-
-const clearColumnFilterForColumn = (filters: ColumnFilters, columnId: TableColumnId) => {
-    const filterKey = COLUMN_FILTER_KEY_BY_COLUMN_ID[columnId];
-    if (!filterKey || !filters[filterKey]) {
-        return filters;
-    }
-
-    return {
-        ...filters,
-        [filterKey]: "",
-    };
-};
-
-const WRAPPABLE_COLUMN_CONFIG = [
-    { id: "tenThuoc", label: "Tên thuốc" },
-    { id: "hoatChat", label: "Hoạt chất" },
-    { id: "hamLuong", label: "Hàm lượng" },
-    { id: "soDangKy", label: "Số đăng ký" },
-    { id: "dangBaoChe", label: "Dạng bào chế" },
-    { id: "quyCach", label: "Quy cách" },
-    { id: "duongDung", label: "Đường dùng" },
-    { id: "donViTinh", label: "Đơn vị tính" },
-] as const;
-
-type WrappableColumnId = (typeof WRAPPABLE_COLUMN_CONFIG)[number]["id"];
-
-const DEFAULT_VISIBLE_COLUMNS = TABLE_COLUMNS.reduce((acc, column) => {
-    acc[column.id] = column.defaultVisible;
-    return acc;
-}, {} as Record<TableColumnId, boolean>);
-
-const DEFAULT_WRAPPED_COLUMNS: Record<WrappableColumnId, boolean> = {
-    tenThuoc: false,
-    hoatChat: false,
-    hamLuong: false,
-    soDangKy: false,
-    dangBaoChe: false,
-    quyCach: false,
-    duongDung: false,
-    donViTinh: false,
-};
-
-const PAGE_SIZE_OPTIONS = [20, 50, 100] as const;
-const DRUG_GROUP_OPTIONS = [
-    "Hóa dược",
-    "Dược liệu",
-    "Vắc xin",
-    "Sinh phẩm",
-    "Nguyên liệu làm thuốc",
-] as const;
-const PRESCRIPTION_OPTIONS = [
-    "Thuốc kê đơn",
-    "Thuốc không kê đơn",
-] as const;
-const DOMESTIC_OPTIONS = [
-    "Trong nước",
-    "Nước ngoài",
-] as const;
 
 const INITIAL_FORM_DATA = {
     maChung: "",
+    maAtc: "",
     maBhyt: "",
     tenThuoc: "",
     hoatChat: "",
@@ -258,8 +100,11 @@ const INITIAL_FORM_DATA = {
     therapeuticGroupId: "",
     isKeDon: "",
     kiemSoatDacBiet: "",
+    isThuocHiem: false,
     isTrongNuoc: "",
 };
+
+const SPECIAL_CONTROL_NONE_VALUE = "__none__";
 
 const normalizePrescriptionValue = (value: string | null | undefined) => {
     if (!value) return "";
@@ -303,51 +148,22 @@ const normalizeDomesticValue = (value: string | null | undefined) => {
     return "";
 };
 
-const SHARED_WIDE_TEXT_COLUMN_CLASS = "w-[220px] min-w-[220px] max-w-[220px]";
+const normalizeImportedBooleanFlag = (value: unknown) => {
+    if (typeof value === "boolean") {
+        return value;
+    }
 
-type DataTableTextCellProps = {
-    value: string | null | undefined;
-    wrapped?: boolean;
-    cellClassName?: string;
-    contentClassName?: string;
-    codeStyle?: boolean;
+    if (typeof value === "number") {
+        return value === 1;
+    }
+
+    if (typeof value !== "string") {
+        return false;
+    }
+
+    const normalizedValue = value.trim().toLowerCase();
+    return ["1", "true", "yes", "y", "có", "co", "x"].includes(normalizedValue);
 };
-
-function DataTableTextCell({
-    value,
-    wrapped = false,
-    cellClassName,
-    contentClassName,
-    codeStyle = false,
-}: DataTableTextCellProps) {
-    const rawValue = typeof value === "string" ? value : "";
-    const hasValue = rawValue.trim().length > 0;
-    const displayValue = hasValue ? rawValue : "-";
-    const contentClasses = cn(
-        "block max-w-full",
-        wrapped ? "whitespace-normal break-words" : "truncate",
-        codeStyle && "rounded bg-gray-100 px-2 py-1 text-sm font-mono",
-        contentClassName,
-    );
-    const content = codeStyle ? (
-        <code className={contentClasses}>{displayValue}</code>
-    ) : (
-        <span className={contentClasses}>{displayValue}</span>
-    );
-
-    return (
-        <TableCell className={cellClassName}>
-            {hasValue ? (
-                <Tooltip>
-                    <TooltipTrigger asChild>{content}</TooltipTrigger>
-                    <TooltipContent align="start" className="max-w-sm whitespace-pre-wrap break-words">
-                        {rawValue}
-                    </TooltipContent>
-                </Tooltip>
-            ) : content}
-        </TableCell>
-    );
-}
 
 export default function MasterDrugsPage() {
     const { data: session } = useSession();
@@ -376,21 +192,18 @@ export default function MasterDrugsPage() {
     const [visibleColumns, setVisibleColumns] = useState<Record<TableColumnId, boolean>>(DEFAULT_VISIBLE_COLUMNS);
     const [wrappedColumns, setWrappedColumns] = useState<Record<WrappableColumnId, boolean>>(DEFAULT_WRAPPED_COLUMNS);
     const [isDeleteAllOpen, setIsDeleteAllOpen] = useState(false);
+    const [isDeleteSelectedOpen, setIsDeleteSelectedOpen] = useState(false);
+    const [isDeleteDuplicatesOpen, setIsDeleteDuplicatesOpen] = useState(false);
+    const [isDuplicateReviewOpen, setIsDuplicateReviewOpen] = useState(false);
+    const [isDeletingSelected, setIsDeletingSelected] = useState(false);
+    const [isDeletingDuplicates, setIsDeletingDuplicates] = useState(false);
+    const [selectedDrugIds, setSelectedDrugIds] = useState<Set<string>>(() => new Set());
     const [columnFiltersDraft, setColumnFiltersDraft] = useState<ColumnFilters>(() => createEmptyColumnFilters());
     const [columnFiltersApplied, setColumnFiltersApplied] = useState<ColumnFilters>(() => createEmptyColumnFilters());
     const [selectedTherapeuticGroupFilter, setSelectedTherapeuticGroupFilter] = useState<TherapeuticGroupOption | null>(null);
     const [therapeuticGroupFilterResetKey, setTherapeuticGroupFilterResetKey] = useState(0);
-
-    const isColumnVisible = useCallback((columnId: TableColumnId) => {
-        const column = TABLE_COLUMNS.find((item) => item.id === columnId);
-        if (!column) {
-            return true;
-        }
-
-        return column.required || visibleColumns[columnId];
-    }, [visibleColumns]);
-
-    const visibleColumnCount = TABLE_COLUMNS.filter((column) => isColumnVisible(column.id)).length;
+    const [duplicateRegistrations, setDuplicateRegistrations] = useState<DuplicateRegistrationResponse | null>(null);
+    const [isDuplicateRegistrationsLoading, setIsDuplicateRegistrationsLoading] = useState(false);
 
     const handleColumnVisibilityChange = (columnId: TableColumnId, checked: boolean) => {
         const column = TABLE_COLUMNS.find((item) => item.id === columnId);
@@ -463,14 +276,51 @@ export default function MasterDrugsPage() {
         }
     }, [limit]);
 
+    const fetchDuplicateRegistrations = useCallback(async () => {
+        if (!isAdmin) return;
+
+        setIsDuplicateRegistrationsLoading(true);
+        try {
+            const res = await fetch("/api/admin/master-drugs/duplicate-registrations");
+            if (!res.ok) {
+                throw new Error("Unable to fetch duplicate registrations");
+            }
+
+            const result = await res.json() as DuplicateRegistrationResponse;
+            setDuplicateRegistrations(result);
+        } catch (error) {
+            console.error("Error fetching duplicate registrations:", error);
+        } finally {
+            setIsDuplicateRegistrationsLoading(false);
+        }
+    }, [isAdmin]);
+
     // Only fetch when page changes or when activeSearchTerm changes (from button/Enter)
     useEffect(() => {
         fetchDrugs(page, activeSearchTerm, searchField, mappingStatus, limit, columnFiltersApplied);
     }, [fetchDrugs, page, activeSearchTerm, searchField, mappingStatus, limit, columnFiltersApplied]);
 
+    useEffect(() => {
+        if (isAdmin) {
+            fetchDuplicateRegistrations();
+        }
+    }, [fetchDuplicateRegistrations, isAdmin]);
+
+    useEffect(() => {
+        setSelectedDrugIds((previousIds) => {
+            const visibleIds = new Set(drugs.map((drug) => drug.id));
+            const nextIds = new Set(Array.from(previousIds).filter((id) => visibleIds.has(id)));
+
+            return nextIds.size === previousIds.size ? previousIds : nextIds;
+        });
+    }, [drugs]);
+
     const refetchCurrentPage = useCallback(() => {
         fetchDrugs(page, activeSearchTerm, searchField, mappingStatus, limit, columnFiltersApplied);
-    }, [fetchDrugs, page, activeSearchTerm, searchField, mappingStatus, limit, columnFiltersApplied]);
+        if (isAdmin) {
+            fetchDuplicateRegistrations();
+        }
+    }, [fetchDrugs, fetchDuplicateRegistrations, isAdmin, page, activeSearchTerm, searchField, mappingStatus, limit, columnFiltersApplied]);
 
     // Handle search execution
     const handleSearch = () => {
@@ -495,6 +345,11 @@ export default function MasterDrugsPage() {
         }));
     };
 
+    const handleTherapeuticGroupColumnFilterChange = (value: TherapeuticGroupOption | null) => {
+        setSelectedTherapeuticGroupFilter(value);
+        handleColumnFilterChange("therapeuticGroupId", value?.id || "");
+    };
+
     const handleApplyColumnFilters = () => {
         setColumnFiltersApplied({ ...columnFiltersDraft });
         setPage(1);
@@ -511,6 +366,33 @@ export default function MasterDrugsPage() {
     const hasActiveDataFilters = Boolean(activeSearchTerm.trim())
         || mappingStatus !== "all"
         || hasAnyColumnFilters(columnFiltersApplied);
+    const selectedDrugCount = selectedDrugIds.size;
+
+    const handleToggleSelectedDrug = useCallback((id: string, checked: boolean) => {
+        setSelectedDrugIds((previousIds) => {
+            const nextIds = new Set(previousIds);
+            if (checked) {
+                nextIds.add(id);
+            } else {
+                nextIds.delete(id);
+            }
+            return nextIds;
+        });
+    }, []);
+
+    const handleToggleCurrentPageSelected = useCallback((checked: boolean) => {
+        setSelectedDrugIds((previousIds) => {
+            const nextIds = new Set(previousIds);
+            for (const drug of drugs) {
+                if (checked) {
+                    nextIds.add(drug.id);
+                } else {
+                    nextIds.delete(drug.id);
+                }
+            }
+            return nextIds;
+        });
+    }, [drugs]);
 
     // Handle Enter key press
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -594,6 +476,7 @@ export default function MasterDrugsPage() {
             // Map headers to data model
             const mappedData = rawData.map(row => ({
                 maChung: row['Mã chung'] || row['maChung'] || row['MaChung'],
+                maAtc: row['Mã ATC'] || row['maAtc'] || row['MaATC'],
                 maBhyt: row['Mã BHYT'] || row['maBhyt'] || row['MaBHYT'],
                 tenThuoc: row['Tên thuốc'] || row['tenThuoc'] || row['TenThuoc'],
                 hoatChat: row['Hoạt chất'] || row['hoatChat'] || row['HoatChat'],
@@ -619,7 +502,8 @@ export default function MasterDrugsPage() {
                 nhomThuoc: row['Nhóm thuốc'] || row['nhomThuoc'],
                 therapeuticGroupName: row['Nhóm điều trị'] || row['therapeuticGroupName'] || row['nhomDieuTri'],
                 isKeDon: row['Thuốc kê đơn'] || row['thuocKeDon'],
-                kiemSoatDacBiet: row['Thuốc kiểm soát đặc biệt'] || row['kiemSoatDacBiet'],
+                kiemSoatDacBiet: row['Thuốc kiểm soát đặc biệt'] ?? row['kiemSoatDacBiet'],
+                isThuocHiem: normalizeImportedBooleanFlag(row['Thuốc hiếm'] ?? row['thuocHiem'] ?? row['isThuocHiem']),
                 isTrongNuoc: row['Thuốc trong nước'] || row['thuocTrongNuoc'],
             })).filter(item => item.maChung && item.tenThuoc);
 
@@ -642,10 +526,17 @@ export default function MasterDrugsPage() {
                 const therapeuticGroupText = createdTherapeuticGroups > 0
                     ? `, Tạo mới nhóm điều trị: ${createdTherapeuticGroups}`
                     : "";
-                toast.success(`Nhập thành công: ${data.stats.success}, Bỏ qua: ${data.stats.skipped}, Lỗi: ${data.stats.error}${therapeuticGroupText}`, { id: toastId });
+                const importMessage = `Nhập thành công: ${data.stats.success}, Bỏ qua: ${data.stats.skipped}, Lỗi: ${data.stats.error}${therapeuticGroupText}`;
+                const firstErrorText = data.errors?.[0] ? `. ${data.errors[0]}` : "";
+                if (data.stats.error > 0) {
+                    toast.warning(`${importMessage}${firstErrorText}`, { id: toastId });
+                } else {
+                    toast.success(importMessage, { id: toastId });
+                }
                 refetchCurrentPage();
             } else {
-                toast.error("Lỗi khi nhập dữ liệu", { id: toastId });
+                const error = await res.json().catch(() => null);
+                toast.error(error?.message || "Lỗi khi nhập dữ liệu", { id: toastId });
             }
         } catch (e) {
             console.error(e);
@@ -681,6 +572,7 @@ export default function MasterDrugsPage() {
                 "Địa chỉ đăng ký": "Hồ Chí Minh",
                 "Nhóm thuốc": "Hóa dược",
                 "Nhóm điều trị": "Giảm đau, hạ sốt",
+                "Thuốc hiếm": "Không",
                 "Thuốc kê đơn": "Không",
                 "Thuốc kiểm soát đặc biệt": "",
                 "Thuốc trong nước": "Có"
@@ -707,8 +599,9 @@ export default function MasterDrugsPage() {
                 "Địa chỉ đăng ký": "",
                 "Nhóm thuốc": "",
                 "Nhóm điều trị": "",
+                "Thuốc hiếm": "Không",
                 "Thuốc kê đơn": "",
-                "Thuốc kiểm soát đặc biệt": "",
+                "Thuốc kiểm soát đặc biệt": SPECIAL_CONTROL_OPTIONS[0],
                 "Thuốc trong nước": ""
             }
         ];
@@ -761,6 +654,7 @@ export default function MasterDrugsPage() {
         setEditingId(drug.id);
         setFormData({
             maChung: drug.maChung,
+            maAtc: drug.maAtc || "",
             maBhyt: drug.maBhyt || "",
             tenThuoc: drug.tenThuoc,
             hoatChat: drug.hoatChat || "",
@@ -786,7 +680,8 @@ export default function MasterDrugsPage() {
             nhomThuoc: normalizeDrugGroupValue(drug.nhomThuoc),
             therapeuticGroupId: drug.therapeuticGroupId || "",
             isKeDon: normalizePrescriptionValue(drug.isKeDon),
-            kiemSoatDacBiet: drug.kiemSoatDacBiet || "",
+            kiemSoatDacBiet: normalizeSpecialControlValue(drug.kiemSoatDacBiet) || "",
+            isThuocHiem: drug.isThuocHiem,
             isTrongNuoc: normalizeDomesticValue(drug.isTrongNuoc),
         });
         setSelectedTherapeuticGroup(drug.therapeuticGroup || null);
@@ -808,6 +703,11 @@ export default function MasterDrugsPage() {
 
             if (res.ok) {
                 toast.success("Đã xóa thuốc");
+                setSelectedDrugIds((previousIds) => {
+                    const nextIds = new Set(previousIds);
+                    nextIds.delete(id);
+                    return nextIds;
+                });
                 // fetchDrugs(page, searchTerm); // No need to fetch immediately if we trust optimistic
                 // But better to sync in background or just leave it
                 // If we don't fetch, pagination might be slightly off until next nav, but that's fine for "instant" feel
@@ -828,6 +728,77 @@ export default function MasterDrugsPage() {
         }
     };
 
+    const handleDeleteSelected = async () => {
+        const ids = Array.from(selectedDrugIds);
+        if (ids.length === 0) {
+            setIsDeleteSelectedOpen(false);
+            return;
+        }
+
+        setIsDeletingSelected(true);
+        try {
+            const res = await fetch("/api/admin/master-drugs/bulk-delete", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ ids }),
+            });
+
+            const data = await res.json().catch(() => ({}));
+
+            if (res.ok) {
+                toast.success(`Đã xóa ${data.deletedCount || ids.length} thuốc đã chọn`);
+                setSelectedDrugIds(new Set());
+                setIsDeleteSelectedOpen(false);
+                refetchCurrentPage();
+            } else {
+                toast.error(data.message || "Không thể xóa các thuốc đã chọn");
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error("Đã xảy ra lỗi khi xóa thuốc đã chọn");
+        } finally {
+            setIsDeletingSelected(false);
+        }
+    };
+
+    const handleDeleteDuplicates = async () => {
+        setIsDeletingDuplicates(true);
+        try {
+            const res = await fetch("/api/admin/master-drugs/delete-duplicates", {
+                method: "POST",
+            });
+
+            const data = await res.json().catch(() => ({}));
+
+            if (res.ok) {
+                const deletedCount = typeof data.deletedCount === "number" ? data.deletedCount : 0;
+                const skippedLinkedCount = typeof data.skippedLinkedCount === "number" ? data.skippedLinkedCount : 0;
+
+                if (deletedCount > 0) {
+                    toast.success(
+                        skippedLinkedCount > 0
+                            ? `Đã xóa ${deletedCount} dòng trùng. Bỏ qua ${skippedLinkedCount} dòng đang có liên kết.`
+                            : `Đã xóa ${deletedCount} dòng trùng`,
+                    );
+                } else if (skippedLinkedCount > 0) {
+                    toast.warning(`Không có dòng trùng có thể xóa. ${skippedLinkedCount} dòng đang có liên kết.`);
+                } else {
+                    toast.info("Không tìm thấy dòng trùng cần xóa");
+                }
+
+                setIsDeleteDuplicatesOpen(false);
+                refetchCurrentPage();
+            } else {
+                toast.error(data.message || "Không thể xóa dòng trùng");
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error("Đã xảy ra lỗi khi xóa dòng trùng");
+        } finally {
+            setIsDeletingDuplicates(false);
+        }
+    };
+
     const handleDeleteAll = async () => {
         setIsSubmitting(true);
         try {
@@ -839,6 +810,14 @@ export default function MasterDrugsPage() {
                 toast.success("Đã xóa tất cả thuốc");
                 setDrugs([]);
                 setTotalRecords(0);
+                setSelectedDrugIds(new Set());
+                setDuplicateRegistrations({
+                    summary: {
+                        duplicateRegistrationCount: 0,
+                        duplicateDrugCount: 0,
+                    },
+                    groups: [],
+                });
                 setIsDeleteAllOpen(false);
             } else {
                 toast.error("Không thể xóa dữ liệu");
@@ -860,46 +839,15 @@ export default function MasterDrugsPage() {
                 </div>
 
                 <div className="flex gap-2">
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="bg-white">
-                                <Settings2 className="w-4 h-4 mr-2" />
-                                Hiển thị
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-72">
-                            <DropdownMenuLabel>Cột hiển thị</DropdownMenuLabel>
-                            <DropdownMenuItem onSelect={() => setVisibleColumns({ ...DEFAULT_VISIBLE_COLUMNS })}>
-                                Hiện tất cả
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            {TABLE_COLUMNS.map((column) => (
-                                <DropdownMenuCheckboxItem
-                                    key={column.id}
-                                    checked={isColumnVisible(column.id)}
-                                    disabled={column.required}
-                                    onCheckedChange={(checked) => handleColumnVisibilityChange(column.id, Boolean(checked))}
-                                >
-                                    {column.label}
-                                    {column.required ? " (luôn hiển thị)" : ""}
-                                </DropdownMenuCheckboxItem>
-                            ))}
-                            <DropdownMenuSeparator />
-                            <DropdownMenuLabel>Xuống dòng</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            {WRAPPABLE_COLUMN_CONFIG.map((column) => (
-                                <DropdownMenuCheckboxItem
-                                    key={column.id}
-                                    checked={wrappedColumns[column.id]}
-                                    onCheckedChange={(checked) =>
-                                        setWrappedColumns((prev) => ({ ...prev, [column.id]: Boolean(checked) }))
-                                    }
-                                >
-                                    {column.label}
-                                </DropdownMenuCheckboxItem>
-                            ))}
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                    <MasterDrugsViewOptions
+                        visibleColumns={visibleColumns}
+                        wrappedColumns={wrappedColumns}
+                        onColumnVisibilityChange={handleColumnVisibilityChange}
+                        onWrappedColumnChange={(columnId, checked) =>
+                            setWrappedColumns((prev) => ({ ...prev, [columnId]: checked }))
+                        }
+                        onShowAllColumns={() => setVisibleColumns({ ...DEFAULT_VISIBLE_COLUMNS })}
+                    />
 
                     {isAdmin && (
                         <>
@@ -928,6 +876,25 @@ export default function MasterDrugsPage() {
                                     </svg>
                                 )}
                                 Xuất Excel
+                            </Button>
+
+                            <Button
+                                variant="destructive"
+                                onClick={() => setIsDeleteSelectedOpen(true)}
+                                disabled={selectedDrugCount === 0}
+                            >
+                                <Trash className="w-4 h-4 mr-2" />
+                                Xóa đã chọn ({selectedDrugCount})
+                            </Button>
+
+                            <Button
+                                variant="outline"
+                                className="border-orange-200 bg-white text-orange-700 hover:bg-orange-50"
+                                onClick={() => setIsDeleteDuplicatesOpen(true)}
+                                disabled={isDeletingDuplicates}
+                            >
+                                <Trash className="w-4 h-4 mr-2" />
+                                Xóa dòng trùng
                             </Button>
 
                             <Button
@@ -1021,12 +988,18 @@ export default function MasterDrugsPage() {
                                                             <h3 className="text-sm font-semibold text-gray-700">Thông tin cơ bản</h3>
                                                         </div>
 
-                                                        <div className="grid grid-cols-2 gap-3">
+                                                        <div className="grid grid-cols-3 gap-3">
                                                             <div className="space-y-1.5">
                                                                 <Label htmlFor="maChung" className="text-xs font-semibold text-gray-600">Mã chung <span className="text-red-500">*</span></Label>
                                                                 <Input id="maChung" value={formData.maChung}
                                                                     onChange={(e) => setFormData({ ...formData, maChung: e.target.value })}
                                                                     placeholder="MC001" required className="h-9" />
+                                                            </div>
+                                                            <div className="space-y-1.5">
+                                                                <Label htmlFor="maAtc" className="text-xs font-semibold text-gray-600">Mã ATC</Label>
+                                                                <Input id="maAtc" value={formData.maAtc}
+                                                                    onChange={(e) => setFormData({ ...formData, maAtc: e.target.value })}
+                                                                    placeholder="ATC001" className="h-9" />
                                                             </div>
                                                             <div className="space-y-1.5">
                                                                 <Label htmlFor="maBhyt" className="text-xs font-semibold text-gray-600">Mã BHYT</Label>
@@ -1224,7 +1197,22 @@ export default function MasterDrugsPage() {
                                                                         />
                                                                     </div>
                                                                 </div>
-                                                                <div className="grid grid-cols-3 gap-3">
+                                                                <div className="grid grid-cols-2 gap-3">
+                                                                    <div className="space-y-1.5">
+                                                                        <Label htmlFor="isThuocHiem" className="text-xs font-semibold text-gray-600">Thuốc hiếm</Label>
+                                                                        <Select
+                                                                            value={String(formData.isThuocHiem)}
+                                                                            onValueChange={(value) => setFormData({ ...formData, isThuocHiem: value === "true" })}
+                                                                        >
+                                                                            <SelectTrigger id="isThuocHiem" className="h-9 bg-white">
+                                                                                <SelectValue placeholder="Chọn trạng thái" />
+                                                                            </SelectTrigger>
+                                                                            <SelectContent>
+                                                                                <SelectItem value="false">Không</SelectItem>
+                                                                                <SelectItem value="true">Có</SelectItem>
+                                                                            </SelectContent>
+                                                                        </Select>
+                                                                    </div>
                                                                     <div className="space-y-1.5">
                                                                         <Label htmlFor="isKeDon" className="text-xs font-semibold text-gray-600">Kê đơn</Label>
                                                                         <Select
@@ -1245,9 +1233,27 @@ export default function MasterDrugsPage() {
                                                                     </div>
                                                                     <div className="space-y-1.5">
                                                                         <Label htmlFor="kiemSoatDacBiet" className="text-xs font-semibold text-gray-600">KS đặc biệt</Label>
-                                                                        <Input id="kiemSoatDacBiet" value={formData.kiemSoatDacBiet}
-                                                                            onChange={(e) => setFormData({ ...formData, kiemSoatDacBiet: e.target.value })}
-                                                                            placeholder="Có / Không" className="h-9" />
+                                                                        <Select
+                                                                            value={formData.kiemSoatDacBiet || SPECIAL_CONTROL_NONE_VALUE}
+                                                                            onValueChange={(value) => setFormData({
+                                                                                ...formData,
+                                                                                kiemSoatDacBiet: value === SPECIAL_CONTROL_NONE_VALUE ? "" : value,
+                                                                            })}
+                                                                        >
+                                                                            <SelectTrigger id="kiemSoatDacBiet" className="h-9 bg-white">
+                                                                                <SelectValue placeholder="Không phải thuốc kiểm soát đặc biệt" />
+                                                                            </SelectTrigger>
+                                                                            <SelectContent>
+                                                                                <SelectItem value={SPECIAL_CONTROL_NONE_VALUE}>
+                                                                                    Không phải thuốc kiểm soát đặc biệt
+                                                                                </SelectItem>
+                                                                                {SPECIAL_CONTROL_OPTIONS.map((option) => (
+                                                                                    <SelectItem key={option} value={option}>
+                                                                                        {option}
+                                                                                    </SelectItem>
+                                                                                ))}
+                                                                            </SelectContent>
+                                                                        </Select>
                                                                     </div>
                                                                     <div className="space-y-1.5">
                                                                         <Label htmlFor="isTrongNuoc" className="text-xs font-semibold text-gray-600">Trong nước</Label>
@@ -1299,6 +1305,18 @@ export default function MasterDrugsPage() {
 
             <Card className="border-0 shadow-lg">
                 <CardHeader>
+                    {isAdmin && duplicateRegistrations && duplicateRegistrations.summary.duplicateRegistrationCount > 0 && (
+                        <div className="mb-4 flex justify-end">
+                            <Button
+                                type="button"
+                                size="sm"
+                                className="bg-amber-600 text-white hover:bg-amber-700"
+                                onClick={() => setIsDuplicateReviewOpen(true)}
+                            >
+                                Rà soát thuốc trùng
+                            </Button>
+                        </div>
+                    )}
                     <div className="flex items-center justify-between">
                         <div>
                             <CardTitle>Danh sách thuốc</CardTitle>
@@ -1336,6 +1354,7 @@ export default function MasterDrugsPage() {
                                     <SelectItem value="soDangKy">Số GPLH</SelectItem>
                                     <SelectItem value="hoatChat">Hoạt chất</SelectItem>
                                     <SelectItem value="maChung">Mã chung</SelectItem>
+                                    <SelectItem value="maAtc">Mã ATC</SelectItem>
                                     <SelectItem value="maBhyt">Mã BHYT</SelectItem>
                                 </SelectContent>
                             </Select>
@@ -1413,477 +1432,48 @@ export default function MasterDrugsPage() {
                         </div>
                     ) : (
                         <div className="overflow-x-auto">
-                            <TooltipProvider delayDuration={500}>
-                                <Table>
-                                <TableHeader>
-                                    <TableRow className="bg-blue-600 hover:bg-blue-600">
-                                        {isColumnVisible("stt") && (
-                                            <TableHead className="w-[50px] text-center text-white font-bold">STT</TableHead>
-                                        )}
-                                        {isColumnVisible("maBhyt") && (
-                                            <TableHead className="text-white font-bold">Mã BHYT</TableHead>
-                                        )}
-                                        {isColumnVisible("tenThuoc") && (
-                                            <TableHead className="text-white font-bold">Tên thuốc</TableHead>
-                                        )}
-                                        {isColumnVisible("hoatChat") && (
-                                            <TableHead
-                                                className={cn(
-                                                    "sticky left-0 z-20 bg-blue-600 text-white font-bold shadow-[4px_0_6px_-4px_rgba(15,23,42,0.28)]",
-                                                    SHARED_WIDE_TEXT_COLUMN_CLASS,
-                                                )}
-                                            >
-                                                Hoạt chất
-                                            </TableHead>
-                                        )}
-                                        {isColumnVisible("hamLuong") && (
-                                            <TableHead className={cn("text-white font-bold", SHARED_WIDE_TEXT_COLUMN_CLASS)}>
-                                                Hàm lượng
-                                            </TableHead>
-                                        )}
-                                        {isColumnVisible("soDangKy") && (
-                                            <TableHead className="text-white font-bold">Số đăng ký</TableHead>
-                                        )}
-                                        {isColumnVisible("dangBaoChe") && (
-                                            <TableHead className="text-white font-bold">Dạng bào chế</TableHead>
-                                        )}
-                                        {isColumnVisible("quyCach") && (
-                                            <TableHead className="text-white font-bold">Quy cách</TableHead>
-                                        )}
-                                        {isColumnVisible("duongDung") && (
-                                            <TableHead className="text-white font-bold">Đường dùng</TableHead>
-                                        )}
-                                        {isColumnVisible("donViTinh") && (
-                                            <TableHead className="text-white font-bold">Đơn vị tính</TableHead>
-                                        )}
-                                        {isColumnVisible("nhomThuoc") && (
-                                            <TableHead className="text-white font-bold">Nhóm thuốc</TableHead>
-                                        )}
-                                        {isColumnVisible("therapeuticGroup") && (
-                                            <TableHead className="text-white font-bold">Nhóm điều trị</TableHead>
-                                        )}
-                                        {isColumnVisible("actions") && (
-                                            <TableHead className="text-right text-white font-bold">Thao tác</TableHead>
-                                        )}
-                                    </TableRow>
-                                    <TableRow className="bg-slate-50 hover:bg-slate-50">
-                                        {isColumnVisible("stt") && (
-                                            <TableHead className="w-[50px] bg-slate-50" />
-                                        )}
-                                        {isColumnVisible("maBhyt") && (
-                                            <TableHead className="bg-slate-50 py-2">
-                                                <Input
-                                                    value={columnFiltersDraft.maBhyt}
-                                                    onChange={(event) => handleColumnFilterChange("maBhyt", event.target.value)}
-                                                    placeholder="Lọc..."
-                                                    className="h-8 bg-white text-xs"
-                                                />
-                                            </TableHead>
-                                        )}
-                                        {isColumnVisible("tenThuoc") && (
-                                            <TableHead className="bg-slate-50 py-2">
-                                                <Input
-                                                    value={columnFiltersDraft.tenThuoc}
-                                                    onChange={(event) => handleColumnFilterChange("tenThuoc", event.target.value)}
-                                                    placeholder="Lọc..."
-                                                    className="h-8 bg-white text-xs"
-                                                />
-                                            </TableHead>
-                                        )}
-                                        {isColumnVisible("hoatChat") && (
-                                            <TableHead
-                                                className={cn(
-                                                    "sticky left-0 z-20 bg-slate-50 py-2 shadow-[4px_0_6px_-4px_rgba(15,23,42,0.16)]",
-                                                    SHARED_WIDE_TEXT_COLUMN_CLASS,
-                                                )}
-                                            >
-                                                <Input
-                                                    value={columnFiltersDraft.hoatChat}
-                                                    onChange={(event) => handleColumnFilterChange("hoatChat", event.target.value)}
-                                                    placeholder="Lọc..."
-                                                    className="h-8 bg-white text-xs"
-                                                />
-                                            </TableHead>
-                                        )}
-                                        {isColumnVisible("hamLuong") && (
-                                            <TableHead className={cn("bg-slate-50 py-2", SHARED_WIDE_TEXT_COLUMN_CLASS)}>
-                                                <Input
-                                                    value={columnFiltersDraft.hamLuong}
-                                                    onChange={(event) => handleColumnFilterChange("hamLuong", event.target.value)}
-                                                    placeholder="Lọc..."
-                                                    className="h-8 bg-white text-xs"
-                                                />
-                                            </TableHead>
-                                        )}
-                                        {isColumnVisible("soDangKy") && (
-                                            <TableHead className="bg-slate-50 py-2">
-                                                <Input
-                                                    value={columnFiltersDraft.soDangKy}
-                                                    onChange={(event) => handleColumnFilterChange("soDangKy", event.target.value)}
-                                                    placeholder="Lọc..."
-                                                    className="h-8 bg-white text-xs"
-                                                />
-                                            </TableHead>
-                                        )}
-                                        {isColumnVisible("dangBaoChe") && (
-                                            <TableHead className="bg-slate-50 py-2">
-                                                <Input
-                                                    value={columnFiltersDraft.dangBaoChe}
-                                                    onChange={(event) => handleColumnFilterChange("dangBaoChe", event.target.value)}
-                                                    placeholder="Lọc..."
-                                                    className="h-8 bg-white text-xs"
-                                                />
-                                            </TableHead>
-                                        )}
-                                        {isColumnVisible("quyCach") && (
-                                            <TableHead className="bg-slate-50 py-2">
-                                                <Input
-                                                    value={columnFiltersDraft.quyCach}
-                                                    onChange={(event) => handleColumnFilterChange("quyCach", event.target.value)}
-                                                    placeholder="Lọc..."
-                                                    className="h-8 bg-white text-xs"
-                                                />
-                                            </TableHead>
-                                        )}
-                                        {isColumnVisible("duongDung") && (
-                                            <TableHead className="bg-slate-50 py-2">
-                                                <Input
-                                                    value={columnFiltersDraft.duongDung}
-                                                    onChange={(event) => handleColumnFilterChange("duongDung", event.target.value)}
-                                                    placeholder="Lọc..."
-                                                    className="h-8 bg-white text-xs"
-                                                />
-                                            </TableHead>
-                                        )}
-                                        {isColumnVisible("donViTinh") && (
-                                            <TableHead className="bg-slate-50 py-2">
-                                                <Input
-                                                    value={columnFiltersDraft.donViTinh}
-                                                    onChange={(event) => handleColumnFilterChange("donViTinh", event.target.value)}
-                                                    placeholder="Lọc..."
-                                                    className="h-8 bg-white text-xs"
-                                                />
-                                            </TableHead>
-                                        )}
-                                        {isColumnVisible("nhomThuoc") && (
-                                            <TableHead className="bg-slate-50 py-2">
-                                                <Select
-                                                    value={columnFiltersDraft.nhomThuoc || "__all__"}
-                                                    onValueChange={(value) => handleColumnFilterChange("nhomThuoc", value === "__all__" ? "" : value)}
-                                                >
-                                                    <SelectTrigger className="h-8 bg-white text-xs">
-                                                        <SelectValue placeholder="Tất cả" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="__all__">Tất cả</SelectItem>
-                                                        {DRUG_GROUP_OPTIONS.map((option) => (
-                                                            <SelectItem key={option} value={option}>
-                                                                {option}
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                            </TableHead>
-                                        )}
-                                        {isColumnVisible("therapeuticGroup") && (
-                                            <TableHead className="bg-slate-50 py-2">
-                                                <TherapeuticGroupPicker
-                                                    key={`therapeutic-group-filter-${therapeuticGroupFilterResetKey}`}
-                                                    value={selectedTherapeuticGroupFilter}
-                                                    onChange={(value) => {
-                                                        setSelectedTherapeuticGroupFilter(value);
-                                                        handleColumnFilterChange("therapeuticGroupId", value?.id || "");
-                                                    }}
-                                                    allowCreate={false}
-                                                    placeholder="Tìm và chọn"
-                                                    inputClassName="h-8 bg-white pr-16 text-xs"
-                                                />
-                                            </TableHead>
-                                        )}
-                                        {isColumnVisible("actions") && (
-                                            <TableHead className="bg-slate-50 py-2 text-right">
-                                                <div className="flex justify-end gap-2">
-                                                    <Button
-                                                        size="sm"
-                                                        className="h-8 bg-cyan-500 px-3 text-white hover:bg-cyan-600"
-                                                        onClick={handleApplyColumnFilters}
-                                                    >
-                                                        Lọc
-                                                    </Button>
-                                                    <Button
-                                                        size="sm"
-                                                        variant="outline"
-                                                        className="h-8 px-3"
-                                                        onClick={handleClearColumnFilters}
-                                                    >
-                                                        Xóa lọc
-                                                    </Button>
-                                                </div>
-                                            </TableHead>
-                                        )}
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {drugs.map((drug, index) => (
-                                        <TableRow key={drug.id} className="group">
-                                            {isColumnVisible("stt") && (
-                                                <TableCell className="text-center">{(page - 1) * limit + index + 1}</TableCell>
-                                            )}
-                                            {isColumnVisible("maBhyt") && (
-                                                <DataTableTextCell
-                                                    value={drug.maBhyt}
-                                                    contentClassName="max-w-[180px]"
-                                                    codeStyle
-                                                />
-                                            )}
-                                            {isColumnVisible("tenThuoc") && (
-                                                <DataTableTextCell
-                                                    value={drug.tenThuoc}
-                                                    wrapped={wrappedColumns.tenThuoc}
-                                                    contentClassName="max-w-xs font-medium"
-                                                />
-                                            )}
-                                            {isColumnVisible("hoatChat") && (
-                                                <DataTableTextCell
-                                                    value={drug.hoatChat}
-                                                    wrapped={wrappedColumns.hoatChat}
-                                                    cellClassName={cn(
-                                                        "sticky left-0 z-10 bg-white text-gray-600 shadow-[4px_0_6px_-4px_rgba(15,23,42,0.16)] group-hover:bg-muted/50",
-                                                        SHARED_WIDE_TEXT_COLUMN_CLASS,
-                                                    )}
-                                                    contentClassName="w-full"
-                                                />
-                                            )}
-                                            {isColumnVisible("hamLuong") && (
-                                                <DataTableTextCell
-                                                    value={drug.hamLuong}
-                                                    wrapped={wrappedColumns.hamLuong}
-                                                    cellClassName={SHARED_WIDE_TEXT_COLUMN_CLASS}
-                                                    contentClassName="w-full"
-                                                />
-                                            )}
-                                            {isColumnVisible("soDangKy") && (
-                                                <DataTableTextCell
-                                                    value={drug.soDangKy}
-                                                    wrapped={wrappedColumns.soDangKy}
-                                                    contentClassName="max-w-xs"
-                                                    codeStyle
-                                                />
-                                            )}
-                                            {isColumnVisible("dangBaoChe") && (
-                                                <DataTableTextCell
-                                                    value={drug.dangBaoChe}
-                                                    wrapped={wrappedColumns.dangBaoChe}
-                                                    contentClassName="max-w-xs"
-                                                />
-                                            )}
-                                            {isColumnVisible("quyCach") && (
-                                                <DataTableTextCell
-                                                    value={drug.quyCach}
-                                                    wrapped={wrappedColumns.quyCach}
-                                                    contentClassName="max-w-xs"
-                                                />
-                                            )}
-                                            {isColumnVisible("duongDung") && (
-                                                <DataTableTextCell
-                                                    value={drug.duongDung}
-                                                    wrapped={wrappedColumns.duongDung}
-                                                    contentClassName="max-w-[180px]"
-                                                />
-                                            )}
-                                            {isColumnVisible("donViTinh") && (
-                                                <DataTableTextCell
-                                                    value={drug.donViTinh}
-                                                    wrapped={wrappedColumns.donViTinh}
-                                                    contentClassName="max-w-[180px]"
-                                                />
-                                            )}
-                                            {isColumnVisible("nhomThuoc") && (
-                                                <DataTableTextCell value={drug.nhomThuoc} contentClassName="max-w-xs" />
-                                            )}
-                                            {isColumnVisible("therapeuticGroup") && (
-                                                <DataTableTextCell
-                                                    value={drug.therapeuticGroup?.name}
-                                                    contentClassName="max-w-xs"
-                                                />
-                                            )}
-                                            {isColumnVisible("actions") && (
-                                                <TableCell className="text-right whitespace-nowrap">
-                                                    {isAdmin && (
-                                                        <>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="icon"
-                                                                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                                                                onClick={() => handleEdit(drug)}
-                                                                title="Sửa"
-                                                            >
-                                                                <Pencil className="w-4 h-4" />
-                                                            </Button>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="icon"
-                                                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                                                onClick={() => handleDelete(drug.id)}
-                                                                title="Xóa"
-                                                            >
-                                                                <Trash2 className="w-4 h-4" />
-                                                            </Button>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                onClick={() => toggleDrugStatus(drug.id, drug.isActive)}
-                                                            >
-                                                                {drug.isActive ? "Ẩn" : "Hiện"}
-                                                            </Button>
-                                                        </>
-                                                    )}
-                                                </TableCell>
-                                            )}
-                                        </TableRow>
-                                    ))}
-                                    {drugs.length === 0 && (
-                                        <TableRow>
-                                            <TableCell colSpan={visibleColumnCount} className="text-center text-gray-500 py-8">
-                                                {hasActiveDataFilters ? "Không tìm thấy thuốc phù hợp" : "Chưa có thuốc trong danh mục"}
-                                            </TableCell>
-                                        </TableRow>
-                                    )}
-                                </TableBody>
-                                </Table>
-                            </TooltipProvider>
-                            {/* Pagination Controls */}
-                            <div className="flex items-center justify-between mt-4">
-                                <div className="flex items-center gap-4">
-                                    <div className="flex items-center gap-2 text-sm text-gray-500">
-                                        <span>Hiển thị</span>
-                                        <Select value={limit.toString()} onValueChange={handlePageSizeChange}>
-                                            <SelectTrigger className="w-[120px] bg-white">
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {PAGE_SIZE_OPTIONS.map((pageSize) => (
-                                                    <SelectItem key={pageSize} value={pageSize.toString()}>
-                                                        {pageSize} dòng
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                    <div className="text-sm text-gray-500">
-                                        Trang {page} / {totalPages}
-                                    </div>
-                                </div>
-                                <div className="flex gap-2">
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => setPage(1)}
-                                        disabled={page === 1}
-                                        title="Trang đầu"
-                                    >
-                                        Trang đầu
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => setPage(p => Math.max(1, p - 1))}
-                                        disabled={page === 1}
-                                        title="Trang trước"
-                                    >
-                                        Trước
-                                    </Button>
-
-                                    {/* Numbered Pagination */}
-                                    {(() => {
-                                        const pages = [];
-                                        if (totalPages <= 7) {
-                                            for (let i = 1; i <= totalPages; i++) {
-                                                pages.push(i);
-                                            }
-                                        } else {
-                                            // Always include first page
-                                            pages.push(1);
-
-                                            // Logic for ellipsis and middle pages
-                                            if (page > 3) {
-                                                pages.push('...');
-                                            }
-
-                                            // Middle pages
-                                            let start = Math.max(2, page - 1);
-                                            let end = Math.min(totalPages - 1, page + 1);
-
-                                            // Adjust window if close to start or end
-                                            if (page < 3) {
-                                                start = 2;
-                                                end = 4;
-                                            } else if (page > totalPages - 2) {
-                                                start = totalPages - 3;
-                                                end = totalPages - 1;
-                                            }
-
-                                            for (let i = start; i <= end; i++) {
-                                                pages.push(i);
-                                            }
-
-                                            if (page < totalPages - 2) {
-                                                pages.push('...');
-                                            }
-
-                                            // Always include last page
-                                            pages.push(totalPages);
-                                        }
-
-                                        return pages.map((p, index) => (
-                                            p === '...' ? (
-                                                <Button
-                                                    key={`ellipsis-${index}`}
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    disabled
-                                                    className="w-9 px-0"
-                                                >
-                                                    ...
-                                                </Button>
-                                            ) : (
-                                                <Button
-                                                    key={p}
-                                                    variant={page === p ? "default" : "outline"}
-                                                    size="sm"
-                                                    onClick={() => setPage(Number(p))}
-                                                    className={`w-9 px-0 ${page === p ? "bg-emerald-600 hover:bg-emerald-700" : ""}`}
-                                                >
-                                                    {p}
-                                                </Button>
-                                            )
-                                        ));
-                                    })()}
-
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                                        disabled={page === totalPages}
-                                        title="Trang sau"
-                                    >
-                                        Sau
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => setPage(totalPages)}
-                                        disabled={page === totalPages}
-                                        title="Trang cuối"
-                                    >
-                                        Trang cuối
-                                    </Button>
-                                </div>
-                            </div>
+                            <MasterDrugsTable
+                                drugs={drugs}
+                                isAdmin={isAdmin}
+                                page={page}
+                                limit={limit}
+                                visibleColumns={visibleColumns}
+                                wrappedColumns={wrappedColumns}
+                                columnFiltersDraft={columnFiltersDraft}
+                                selectedTherapeuticGroupFilter={selectedTherapeuticGroupFilter}
+                                therapeuticGroupFilterResetKey={therapeuticGroupFilterResetKey}
+                                hasActiveDataFilters={hasActiveDataFilters}
+                                onColumnFilterChange={handleColumnFilterChange}
+                                onTherapeuticGroupFilterChange={handleTherapeuticGroupColumnFilterChange}
+                                onApplyColumnFilters={handleApplyColumnFilters}
+                                onClearColumnFilters={handleClearColumnFilters}
+                                onEdit={handleEdit}
+                                onDelete={handleDelete}
+                                onToggleDrugStatus={toggleDrugStatus}
+                                selectedIds={selectedDrugIds}
+                                onToggleSelected={handleToggleSelectedDrug}
+                                onTogglePageSelected={handleToggleCurrentPageSelected}
+                            />
+                            <MasterDrugsPagination
+                                page={page}
+                                totalPages={totalPages}
+                                limit={limit}
+                                onPageChange={setPage}
+                                onPageSizeChange={handlePageSizeChange}
+                            />
                         </div>
                     )}
                 </CardContent>
             </Card>
+
+            <DuplicateDrugsReviewDialog
+                open={isDuplicateReviewOpen}
+                onOpenChange={setIsDuplicateReviewOpen}
+                data={duplicateRegistrations}
+                isRefreshing={isDuplicateRegistrationsLoading}
+                onRefreshDuplicates={fetchDuplicateRegistrations}
+                onDeleted={refetchCurrentPage}
+            />
 
             <AlertDialog open={isDeleteAllOpen} onOpenChange={setIsDeleteAllOpen}>
                 <AlertDialogContent>
@@ -1898,6 +1488,56 @@ export default function MasterDrugsPage() {
                         <AlertDialogCancel>Hủy bỏ</AlertDialogCancel>
                         <AlertDialogAction onClick={handleDeleteAll} className="bg-red-600 hover:bg-red-700">
                             {isSubmitting ? "Đang xóa..." : "Xóa tất cả"}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            <AlertDialog open={isDeleteDuplicatesOpen} onOpenChange={setIsDeleteDuplicatesOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Xóa các dòng thuốc trùng?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Hệ thống sẽ nhóm trùng theo Số đăng ký, Tên thuốc và Hàm lượng.
+                            Mỗi nhóm chỉ giữ lại 1 dòng. Các dòng đang có ánh xạ, thuốc công ty hoặc đơn hàng liên quan sẽ được bỏ qua để bảo vệ dữ liệu.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={isDeletingDuplicates}>Hủy bỏ</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={(event) => {
+                                event.preventDefault();
+                                handleDeleteDuplicates();
+                            }}
+                            disabled={isDeletingDuplicates}
+                            className="bg-red-600 hover:bg-red-700"
+                        >
+                            {isDeletingDuplicates ? "Đang xóa..." : "Xóa dòng trùng"}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            <AlertDialog open={isDeleteSelectedOpen} onOpenChange={setIsDeleteSelectedOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Xóa các thuốc đã chọn?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Hành động này sẽ xóa {selectedDrugCount} thuốc đang được chọn trong danh mục dùng chung.
+                            Nếu có thuốc đang được ánh xạ, hệ thống sẽ chặn xóa để bảo vệ dữ liệu liên quan.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={isDeletingSelected}>Hủy bỏ</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={(event) => {
+                                event.preventDefault();
+                                handleDeleteSelected();
+                            }}
+                            disabled={isDeletingSelected || selectedDrugCount === 0}
+                            className="bg-red-600 hover:bg-red-700"
+                        >
+                            {isDeletingSelected ? "Đang xóa..." : `Xóa ${selectedDrugCount} thuốc`}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

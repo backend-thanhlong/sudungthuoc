@@ -124,6 +124,7 @@ export async function GET(request: Request) {
             nhomTckt: report.drugMap?.nhomTckt || "",
             tonDau: Number(report.tonDau),
             nhap: Number(report.nhap),
+            nhapHoanTra: Number(report.nhapHoanTra),
             xuat: Number(report.xuat),
             tonCuoi: Number(report.tonCuoi),
             giaVat: Number(report.giaVat),

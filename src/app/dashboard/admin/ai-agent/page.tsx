@@ -64,7 +64,7 @@ interface AISettings {
 
 interface ProviderRuntimeStatus {
     slot: ProviderSlot;
-    provider: "google" | "openai";
+    provider: "google" | "openai" | "deepseek";
     model: string;
     configured: boolean;
 }
@@ -72,6 +72,7 @@ interface ProviderRuntimeStatus {
 interface ProviderStatus {
     hasGoogleApiKey: boolean;
     hasOpenAIApiKey: boolean;
+    hasDeepSeekApiKey: boolean;
     primary: ProviderRuntimeStatus;
     fallback: ProviderRuntimeStatus;
 }

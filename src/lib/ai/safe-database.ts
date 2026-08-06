@@ -1,165 +1,26 @@
 import pg from "pg";
 import { getAIConfig } from "@/lib/ai/config";
+import {
+    SAFE_DATABASE_SEMANTIC_DESCRIPTION,
+    inferSafeDatabaseIntents,
+    type SafeDatabaseIntent,
+} from "@/lib/ai/safe-database-intelligence";
+import {
+    describeDomainRoutingForPrompt,
+    routeAIDomain,
+} from "@/lib/ai/domain-router";
+import {
+    buildSafeDatabaseSchemaDescription,
+    SAFE_VIEW_NAMES,
+} from "@/lib/ai/schema-registry";
+import { generateDeepSeekResponse } from "@/lib/ai/providers/deepseek";
 import { generateGoogleResponse } from "@/lib/ai/providers/google";
 import { generateOpenAIResponse } from "@/lib/ai/providers/openai";
-import type { AIAgentRequest, AIProviderName } from "@/lib/ai/types";
+import type { AIAgentRequest, AIModelRequest, AIProviderName } from "@/lib/ai/types";
 
-const SAFE_VIEW_NAMES = [
-    "ai_facilities",
-    "ai_companies",
-    "ai_therapeutic_groups",
-    "ai_master_drugs",
-    "ai_company_drugs",
-    "ai_mapping_status",
-    "ai_inventory_reports",
-    "ai_report_submissions",
-    "ai_report_review_logs",
-    "ai_report_periods",
-    "ai_drug_orders",
-    "ai_drug_order_shipments",
-    "ai_drug_order_receipts",
-    "ai_procurement_plans",
-    "ai_procurement_packages",
-    "ai_procurement_package_lots",
-    "ai_procurement_notices",
-    "ai_procurement_results",
-    "ai_procurement_lot_results",
-] as const;
+export { SAFE_VIEW_NAMES };
 
-const SAFE_SCHEMA_DESCRIPTION = `
-Available read-only AI views:
-
-ai_facilities(
-  facility_id, facility_name, facility_code, company_id, autonomy_group,
-  facility_type, is_active, created_at, updated_at
-)
-
-ai_companies(
-  company_id, company_code, company_name, contact_person, phone_number,
-  email, address, is_active, created_at, updated_at
-)
-
-ai_therapeutic_groups(
-  therapeutic_group_id, name, normalized_name, is_active, created_at, updated_at
-)
-
-ai_master_drugs(
-  master_drug_id, ma_chung, ma_bhyt, ten_thuoc, hoat_chat, ham_luong,
-  dang_bao_che, so_dang_ky, quy_cach, don_vi_tinh, tieu_chuan, tuoi_tho,
-  duong_dung, nguon_goc, cong_ty_san_xuat, nuoc_san_xuat, cong_ty_dang_ky,
-  nuoc_dang_ky, nhom_thuoc, therapeutic_group_name, is_ke_don,
-  kiem_soat_dac_biet, is_trong_nuoc, is_active, created_at, updated_at
-)
-
-ai_company_drugs(
-  company_drug_id, company_id, company_code, company_name, master_drug_id,
-  ma_chung, master_drug_name, company_drug_code, company_drug_name,
-  active_ingredient, quy_cach, unit, is_active, created_at, updated_at
-)
-
-ai_mapping_status(
-  mapping_id, facility_id, facility_name, facility_code, ma_noi_bo,
-  ten_thuoc_noi_bo, hoat_chat_noi_bo, so_dang_ky_noi_bo, don_vi_tinh_noi_bo,
-  master_drug_id, ma_chung, master_drug_name, master_active_ingredient,
-  master_strength, status, is_out_of_catalog, admin_note, created_at, updated_at
-)
-
-ai_inventory_reports(
-  inventory_report_id, facility_id, facility_name, facility_code, map_id,
-  ma_noi_bo, ten_thuoc_noi_bo, hoat_chat_noi_bo, master_drug_id, ma_chung,
-  master_drug_name, master_active_ingredient, master_strength, nhom_thuoc,
-  report_month, ton_dau, nhap, xuat, ton_cuoi, gia_vat,
-  thanh_tien_ton_cuoi, so_qd_trung_thau, ten_cong_ty, ngay_bat_dau_hd,
-  ngay_ket_thuc_hd, bhyt, dich_vu, status, admin_note, created_at, updated_at
-)
-
-ai_report_submissions(
-  submission_id, facility_id, facility_name, facility_code, report_month,
-  submitted_at, reported_row_count, skipped_row_count, created_at, updated_at
-)
-
-ai_report_review_logs(
-  review_log_id, facility_id, facility_name, facility_code, report_month,
-  status, admin_note, admin_id, created_at
-)
-
-ai_report_periods(
-  report_period_id, month, is_active, year, period_month, deadline,
-  reminder_sent, created_at, updated_at
-)
-
-ai_drug_orders(
-  order_id, order_no, facility_id, facility_name, facility_code, company_id,
-  company_code, company_name, order_status, base_report_month, submitted_at,
-  closed_at, order_created_at, order_updated_at, order_line_id, source_type,
-  master_drug_id, ma_chung, master_drug_name, company_drug_id,
-  company_drug_code, company_drug_name, display_name, unit, requested_qty,
-  accepted_qty, suggested_qty, line_status, company_response_reason,
-  suggestion_report_month, shipment_count, total_shipped_qty, receipt_count,
-  total_received_qty
-)
-
-ai_drug_order_shipments(
-  shipment_id, order_id, order_no, facility_id, facility_name, facility_code,
-  company_id, company_code, company_name, shipment_no, shipment_status,
-  shipped_at, shipped_from_date, shipped_to_date, company_note, created_at,
-  updated_at, shipment_line_count, total_shipped_qty, receipt_count
-)
-
-ai_drug_order_receipts(
-  receipt_id, order_id, order_no, shipment_id, shipment_no, facility_id,
-  facility_name, facility_code, company_id, company_code, company_name,
-  confirmed_at, note, created_at, updated_at, receipt_line_count,
-  total_received_qty
-)
-
-ai_procurement_plans(
-  plan_id, facility_id, facility_name, facility_code, quy_trinh, loai_mua_sam,
-  ma_khlcnt, ten_khlcnt, so_quyet_dinh, ngay_phe_duyet, so_luong_goi_thau,
-  trang_thai, loai_mua_sam_tu_quyet, thoi_gian_bat_dau_mua_sam,
-  thoi_gian_bat_dau_thuc_hien_hop_dong, thoi_gian_thuc_hien_hop_dong,
-  thoi_gian_ket_thuc_hop_dong, created_at, updated_at, package_count,
-  notice_count, result_count, total_package_value, total_awarded_value
-)
-
-ai_procurement_packages(
-  package_id, plan_id, facility_id, facility_name, facility_code, ma_khlcnt,
-  ten_khlcnt, ten_goi_thau, gia_goi_thau, linh_vuc, hinh_thuc_lcnt,
-  phuong_thuc_lcnt, loai_hop_dong, phan_loai_goi_thau, chi_tiet_nguon_von,
-  so_luong_phan_lo, thoi_gian_to_chuc, thoi_gian_bat_dau,
-  thoi_gian_thuc_hien, trang_thai, ma_thong_bao, created_at, updated_at,
-  lot_count, notice_count, result_count
-)
-
-ai_procurement_package_lots(
-  lot_id, package_id, plan_id, facility_id, facility_name, facility_code,
-  ma_khlcnt, ten_khlcnt, ten_goi_thau, stt, ten_phan_lo, don_vi_tinh,
-  so_luong, don_gia, thanh_tien, thoi_gian_thuc_hien,
-  don_vi_tinh_thoi_gian, created_at, updated_at
-)
-
-ai_procurement_notices(
-  notice_id, package_id, plan_id, facility_id, facility_name, facility_code,
-  ma_khlcnt, ten_khlcnt, ten_goi_thau, ma_tbmt, ngay_dang_tai,
-  so_qd_phe_duyet_hsmt, ngay_phe_duyet_hsmt, ngay_dong_thau, created_at,
-  updated_at, result_count
-)
-
-ai_procurement_results(
-  result_id, package_id, notice_id, plan_id, facility_id, facility_name,
-  facility_code, ma_khlcnt, ten_khlcnt, ten_goi_thau, ma_tbmt,
-  so_qd_phe_duyet_kqlcnt, ngay_phe_duyet_kqlcnt, so_mat_hang_moi_thau,
-  so_mat_hang_trung_thau, tong_gia_tri_trung_thau, created_at, updated_at,
-  lot_result_count
-)
-
-ai_procurement_lot_results(
-  lot_result_id, result_id, package_id, notice_id, plan_id, facility_id,
-  facility_name, facility_code, ma_khlcnt, ten_khlcnt, ten_goi_thau,
-  ten_phan_lo, lot_stt, ket_qua, don_gia_trung_thau, nha_thau_trung_thau,
-  created_at, updated_at
-)
-`.trim();
+const SAFE_SCHEMA_DESCRIPTION = buildSafeDatabaseSchemaDescription();
 
 const DEFAULT_LIMIT = 100;
 const MAX_LIMIT = 300;
@@ -221,7 +82,10 @@ const ENTITY_STOP_WORDS = new Set([
     "co",
     "cong",
     "cua",
+    "danh",
     "du",
+    "dung",
+    "chung",
     "duoc",
     "gia",
     "gi",
@@ -234,8 +98,11 @@ const ENTITY_STOP_WORDS = new Set([
     "ket",
     "la",
     "lcnt",
+    "le",
     "lieu",
+    "may",
     "mua",
+    "muc",
     "nao",
     "nhieu",
     "nha",
@@ -250,6 +117,7 @@ const ENTITY_STOP_WORDS = new Set([
     "thuoc",
     "tong",
     "trong",
+    "ty",
     "ve",
     "vien",
 ]);
@@ -259,7 +127,7 @@ const COMPANY_HINT_WORDS = ["cong", "ty", "nha", "thau", "cty", "duoc"];
 const DRUG_HINT_WORDS = ["thuoc", "hoat", "chat", "ma", "chung", "bhyt", "dang", "bao", "che", "ham", "luong"];
 const PROCUREMENT_HINT_WORDS = ["lcnt", "mua", "sam", "goi", "thau", "khlcnt", "tbmt", "ke", "hoach", "phan", "lo"];
 
-type SafeViewName = (typeof SAFE_VIEW_NAMES)[number];
+export type SafeViewName = (typeof SAFE_VIEW_NAMES)[number];
 
 const SAFE_VIEW_SET = new Set<string>(SAFE_VIEW_NAMES);
 
@@ -281,6 +149,8 @@ export interface GeneratedSafeSql {
     shouldQuery: boolean;
     sql?: string;
     reason?: string;
+    source?: "model";
+    intent?: SafeDatabaseIntent;
 }
 
 export interface ValidatedSafeSql {
@@ -326,10 +196,19 @@ export interface SafeDatabaseRetryContext {
     reason: string;
 }
 
+export interface SafeDatabaseVerifierRetryContext {
+    previousSql: string;
+    code: string;
+    reason: string;
+    expectedDomain?: string | null;
+    requiredViews?: string[];
+}
+
 export interface GenerateSafeDatabaseSqlOptions {
     signal?: AbortSignal;
     entityResolution?: SafeDatabaseEntityResolution;
     retry?: SafeDatabaseRetryContext;
+    verifierRetry?: SafeDatabaseVerifierRetryContext;
 }
 
 function getSafeDatabasePool() {
@@ -591,6 +470,7 @@ async function lookupDrugCandidates(question: string) {
             `hoat_chat ILIKE ${parameter}`,
             `ma_chung ILIKE ${parameter}`,
             `ma_bhyt ILIKE ${parameter}`,
+            `ma_atc ILIKE ${parameter}`,
         ].join(" OR ");
     }).map(condition => `(${condition})`).join(" OR ");
 
@@ -610,9 +490,10 @@ async function lookupDrugCandidates(question: string) {
             master_drug_id: string;
             ten_thuoc: string;
             ma_chung: string | null;
+            ma_atc: string | null;
             hoat_chat: string | null;
         }>(
-            `SELECT master_drug_id, ten_thuoc, ma_chung, hoat_chat FROM ai_master_drugs WHERE ${masterConditions} ORDER BY ten_thuoc LIMIT 40`,
+            `SELECT master_drug_id, ten_thuoc, ma_chung, ma_atc, hoat_chat FROM ai_master_drugs WHERE ${masterConditions} ORDER BY ten_thuoc LIMIT 40`,
             patterns
         ),
         runFixedReadQuery<{
@@ -635,6 +516,7 @@ async function lookupDrugCandidates(question: string) {
             code: row.ma_chung,
             question,
             metadata: {
+                ma_atc: row.ma_atc,
                 active_ingredient: row.hoat_chat,
             },
         })),
@@ -778,23 +660,121 @@ function stripMarkdownFence(text: string) {
         .trim();
 }
 
+function extractFirstJsonObject(text: string) {
+    const start = text.indexOf("{");
+    if (start < 0) {
+        return undefined;
+    }
+
+    let depth = 0;
+    let inString = false;
+    let escaped = false;
+    for (let index = start; index < text.length; index += 1) {
+        const char = text[index];
+        if (escaped) {
+            escaped = false;
+            continue;
+        }
+        if (char === "\\") {
+            escaped = inString;
+            continue;
+        }
+        if (char === "\"") {
+            inString = !inString;
+            continue;
+        }
+        if (inString) {
+            continue;
+        }
+        if (char === "{") {
+            depth += 1;
+        }
+        if (char === "}") {
+            depth -= 1;
+            if (depth === 0) {
+                return text.slice(start, index + 1);
+            }
+        }
+    }
+
+    return undefined;
+}
+
+function parseGeneratedSqlJson(text: string): GeneratedSafeSql {
+    const parsed = JSON.parse(text) as Record<string, unknown>;
+    return {
+        shouldQuery: parsed.shouldQuery === true,
+        sql: typeof parsed.sql === "string" ? parsed.sql : undefined,
+        reason: typeof parsed.reason === "string" ? parsed.reason : undefined,
+        source: "model",
+    };
+}
+
 function parseGeneratedSql(text: string): GeneratedSafeSql {
     const cleaned = stripMarkdownFence(text);
     try {
-        const parsed = JSON.parse(cleaned) as Record<string, unknown>;
-        return {
-            shouldQuery: parsed.shouldQuery === true,
-            sql: typeof parsed.sql === "string" ? parsed.sql : undefined,
-            reason: typeof parsed.reason === "string" ? parsed.reason : undefined,
-        };
+        return parseGeneratedSqlJson(cleaned);
     } catch {
+        const extracted = extractFirstJsonObject(cleaned);
+        if (extracted) {
+            try {
+                return parseGeneratedSqlJson(extracted);
+            } catch {
+                // Fall through to the standard safe database error below.
+            }
+        }
         throw new SafeDatabaseQueryError("AI_SQL_GENERATION_PARSE_ERROR", "Provider AI không trả về JSON SQL hợp lệ");
     }
 }
 
 function providerApiKey(provider: AIProviderName) {
     const config = getAIConfig();
-    return provider === "google" ? config.googleApiKey : config.openaiApiKey;
+    if (provider === "google") {
+        return config.googleApiKey;
+    }
+    if (provider === "deepseek") {
+        return config.deepseekApiKey;
+    }
+    return config.openaiApiKey;
+}
+
+function generateProviderResponse(provider: AIProviderName, modelRequest: AIModelRequest) {
+    if (provider === "google") {
+        return generateGoogleResponse(modelRequest, providerApiKey(provider));
+    }
+    if (provider === "deepseek") {
+        return generateDeepSeekResponse(modelRequest, providerApiKey(provider));
+    }
+    return generateOpenAIResponse(modelRequest, providerApiKey(provider));
+}
+
+async function repairGeneratedSqlJson(
+    provider: AIProviderName,
+    model: string,
+    invalidOutput: string,
+    signal?: AbortSignal
+) {
+    const response = await generateProviderResponse(provider, {
+        model,
+        systemPrompt: [
+            "Repair invalid model output into valid JSON for a safe SQL generator.",
+            "Return only one JSON object with keys: shouldQuery, sql, reason.",
+            "Do not add markdown, explanation, comments, or extra keys.",
+            "If no SQL is present or the output is unsafe/unclear, return {\"shouldQuery\":false,\"reason\":\"Không tạo được SQL hợp lệ\"}.",
+        ].join("\n"),
+        prompt: JSON.stringify({
+            invalidOutput,
+            expectedShape: {
+                shouldQuery: "boolean",
+                sql: "string | omitted",
+                reason: "string | omitted",
+            },
+        }),
+        maxOutputTokens: 300,
+        signal,
+    });
+
+    return parseGeneratedSql(response.text);
 }
 
 export async function generateSafeDatabaseSql(
@@ -804,12 +784,28 @@ export async function generateSafeDatabaseSql(
     const config = getAIConfig();
     const provider = config.primaryProvider;
     const model = config.primaryModel;
+    const inferredIntents = inferSafeDatabaseIntents(request.message);
+    const domainRouting = routeAIDomain(request.message);
     const retryInstructions = options.retry
         ? [
             "The previous safe query returned zero rows. Generate one broader safe SELECT for the same question.",
             "Use resolved entity IDs/codes when available. If names are needed, use ILIKE with partial matching.",
             "Do not repeat the previous SQL unless it is already the broadest safe query.",
         ]
+        : [];
+    const verifierRetryInstructions = options.verifierRetry
+        ? [
+            "The previous SQL was rejected by the deterministic query verifier.",
+            `Verifier code: ${options.verifierRetry.code}.`,
+            `Verifier reason: ${options.verifierRetry.reason}.`,
+            options.verifierRetry.expectedDomain
+                ? `Expected domain: ${options.verifierRetry.expectedDomain}.`
+                : "",
+            options.verifierRetry.requiredViews?.length
+                ? `Required views: ${options.verifierRetry.requiredViews.join(", ")}.`
+                : "",
+            "Generate one corrected safe SELECT, or return shouldQuery false if the question is ambiguous.",
+        ].filter(Boolean)
         : [];
     const modelRequest = {
         model,
@@ -823,16 +819,23 @@ export async function generateSafeDatabaseSql(
             "If entityCandidates are provided and relevant, prefer stable IDs/codes such as facility_id, facility_code, company_id, ma_chung, plan_id, or package_id.",
             "For facility-specific questions, resolve through ai_facilities candidates and filter business views by facility_id or facility_code when possible.",
             "For LCNT, mua sắm, gói thầu, kế hoạch đấu thầu, TBMT, or kết quả thầu questions, prefer ai_procurement_* views.",
+            "Use the business semantic layer to pick measures, dimensions, and filters before writing SQL.",
+            "Use the routed domain as the controlling context. If the routed domain is catalog/shared_drug_catalog, use ai_master_drugs rather than mapping views.",
+            "If domain ambiguity is high, return shouldQuery false and explain that a clarification is needed.",
             `Always include LIMIT ${DEFAULT_LIMIT} unless the question asks for fewer rows.`,
             `Never use LIMIT greater than ${MAX_LIMIT}.`,
             "If the question can be answered without database rows, return shouldQuery false.",
             "If the requested data is outside the ai_* views, return shouldQuery false with a short reason.",
             ...retryInstructions,
+            ...verifierRetryInstructions,
             SAFE_SCHEMA_DESCRIPTION,
+            SAFE_DATABASE_SEMANTIC_DESCRIPTION,
         ].join("\n"),
         prompt: JSON.stringify({
             question: request.message,
             context: request.context || {},
+            inferredIntents,
+            domainRouting: describeDomainRoutingForPrompt(domainRouting),
             entityCandidates: options.entityResolution?.candidates || [],
             entityResolutionWarnings: options.entityResolution?.warnings || [],
             retry: options.retry ? {
@@ -840,6 +843,13 @@ export async function generateSafeDatabaseSql(
                 previousReferencedViews: options.retry.previousReferencedViews,
                 previousRowCount: options.retry.previousRowCount,
                 reason: options.retry.reason,
+            } : undefined,
+            verifierRetry: options.verifierRetry ? {
+                previousSql: options.verifierRetry.previousSql,
+                code: options.verifierRetry.code,
+                reason: options.verifierRetry.reason,
+                expectedDomain: options.verifierRetry.expectedDomain,
+                requiredViews: options.verifierRetry.requiredViews,
             } : undefined,
             outputExamples: [
                 {
@@ -862,11 +872,22 @@ export async function generateSafeDatabaseSql(
         signal: options.signal,
     };
 
-    const response = provider === "google"
-        ? await generateGoogleResponse(modelRequest, providerApiKey(provider))
-        : await generateOpenAIResponse(modelRequest, providerApiKey(provider));
+    const response = await generateProviderResponse(provider, modelRequest);
 
-    return parseGeneratedSql(response.text);
+    let generated: GeneratedSafeSql;
+    try {
+        generated = parseGeneratedSql(response.text);
+    } catch (error) {
+        if (!(error instanceof SafeDatabaseQueryError) || error.code !== "AI_SQL_GENERATION_PARSE_ERROR") {
+            throw error;
+        }
+        generated = await repairGeneratedSqlJson(provider, model, response.text, options.signal);
+    }
+
+    return {
+        ...generated,
+        intent: inferredIntents[0],
+    };
 }
 
 function normalizeRelationName(rawName: string) {

@@ -19,9 +19,13 @@ interface KetQuaLCNTListItem {
     tenKHLCNT: string;
     goiThauId: string;
     tenGoiThau: string;
-    tbmtId: string;
-    maTBMT: string;
-    ngayDangTaiTBMT: string;
+    yeuCauTBMT: boolean;
+    reportTargetId: string;
+    resultMode: "TBMT" | "NO_TBMT";
+    tbmtId: string | null;
+    maTBMT: string | null;
+    ngayDangTaiTBMT: string | null;
+    ketQuaLCNTs?: Array<{ id: string }>;
 }
 
 export default function KetQuaLCNTPage() {
@@ -50,8 +54,11 @@ export default function KetQuaLCNTPage() {
         loadData();
     }, [loadData]);
 
-    const handleReport = (tbmtId: string) => {
-        router.push(`/dashboard/facility/mua-sam/ket-qua-lcnt/${tbmtId}`);
+    const handleReport = (item: KetQuaLCNTListItem) => {
+        const hasResult = (item.ketQuaLCNTs?.length || 0) > 0;
+        router.push(
+            `/dashboard/facility/mua-sam/ket-qua-lcnt/${item.reportTargetId}${hasResult ? "?mode=view" : ""}`
+        );
     };
 
     if (loading) {
@@ -85,7 +92,7 @@ export default function KetQuaLCNTPage() {
                                     <TableHead className="text-white font-bold">Mã KHLCNT</TableHead>
                                     <TableHead className="text-white font-bold">Tên KHLCNT</TableHead>
                                     <TableHead className="text-white font-bold">Tên gói thầu</TableHead>
-                                    <TableHead className="text-white font-bold">Mã TBMT</TableHead>
+                                    <TableHead className="text-white font-bold">Luồng TBMT</TableHead>
                                     <TableHead className="text-white font-bold">Ngày đăng tải TBMT</TableHead>
                                     <TableHead className="text-white font-bold">Thao tác</TableHead>
                                 </TableRow>
@@ -98,21 +105,21 @@ export default function KetQuaLCNTPage() {
                                                 <svg className="w-12 h-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                                 </svg>
-                                                <p>Chưa có kế hoạch LCNT nào có thông báo mời thầu.</p>
-                                                <p className="text-sm">Vui lòng tạo KHLCNT và TBMT trước khi báo cáo kết quả.</p>
+                                                <p>Chưa có kế hoạch LCNT nào sẵn sàng báo cáo kết quả.</p>
+                                                <p className="text-sm">Vui lòng tạo TBMT hoặc đánh dấu gói thầu không yêu cầu TBMT.</p>
                                             </div>
                                         </TableCell>
                                     </TableRow>
                                 ) : (
                                     data.map((item, idx) => (
-                                        <TableRow key={`${item.id}-${item.tbmtId}`} className="hover:bg-blue-50/50">
+                                        <TableRow key={`${item.id}-${item.reportTargetId}`} className="hover:bg-blue-50/50">
                                             <TableCell className="font-medium">{idx + 1}</TableCell>
                                             <TableCell>{item.maKHLCNT || "—"}</TableCell>
                                             <TableCell className="max-w-xs truncate">{item.tenKHLCNT || "—"}</TableCell>
                                             <TableCell className="max-w-xs truncate">{item.tenGoiThau || "—"}</TableCell>
                                             <TableCell>
-                                                <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
-                                                    {item.maTBMT}
+                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${item.resultMode === "TBMT" ? "bg-blue-100 text-blue-700" : "bg-slate-100 text-slate-700"}`}>
+                                                    {item.maTBMT || "Không yêu cầu TBMT"}
                                                 </span>
                                             </TableCell>
                                             <TableCell className="text-sm text-gray-500">
@@ -124,13 +131,13 @@ export default function KetQuaLCNTPage() {
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
-                                                    onClick={() => handleReport(item.tbmtId)}
+                                                    onClick={() => handleReport(item)}
                                                     className="text-blue-600 hover:text-blue-800 hover:bg-blue-100"
                                                 >
                                                     <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                                     </svg>
-                                                    Báo cáo
+                                                    {(item.ketQuaLCNTs?.length || 0) > 0 ? "Xem" : "Báo cáo"}
                                                 </Button>
                                             </TableCell>
                                         </TableRow>

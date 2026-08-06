@@ -1,4 +1,5 @@
 import type { AIAgentRequest, AIReviewEvidence } from "@/lib/ai/types";
+import { normalizeAIChatModelChoice } from "@/lib/ai/model-options";
 
 const MAX_EVIDENCE_ROWS = 30;
 const MAX_STRING_LENGTH = 500;
@@ -121,5 +122,6 @@ export function normalizeAgentRequest(body: unknown): AIAgentRequest | null {
         context,
         evidence: sanitizeEvidence(value.evidence as AIReviewEvidence | undefined),
         useFallback: value.useFallback === true,
+        modelChoice: value.mode === "chat" ? normalizeAIChatModelChoice(value.modelChoice) : undefined,
     };
 }

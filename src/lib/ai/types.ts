@@ -1,9 +1,10 @@
 import type { Role } from "@/../prisma/generated/client";
+import type { AIChatModelChoice } from "@/lib/ai/model-options";
 
 export type AIAgentMode = "chat" | "review";
 export type AIAgentSurface = "dashboard" | "facility_reports" | "facility_mappings";
 export type AITaskType = "simple_qa" | "record_review" | "summary" | "deep_analysis" | "executive_report";
-export type AIProviderName = "google" | "openai";
+export type AIProviderName = "google" | "openai" | "deepseek";
 export type AIToolStatus = "success" | "skipped" | "error";
 
 export interface AIReviewEvidence {
@@ -26,6 +27,7 @@ export interface AIAgentRequest {
     context?: AIAgentContext;
     evidence?: AIReviewEvidence;
     useFallback?: boolean;
+    modelChoice?: AIChatModelChoice;
 }
 
 export interface AIAgentToolCall {
@@ -100,4 +102,6 @@ export interface AILogDetails {
     warnings?: string[];
     status: "success" | "error" | "quota_exceeded";
     errorCode?: string;
+    providerStatus?: number;
+    providerMessage?: string;
 }

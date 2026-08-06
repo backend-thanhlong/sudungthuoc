@@ -11,6 +11,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 import { Building2, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Search } from "lucide-react";
 import type { DrugSearchResponse } from "./types";
 
@@ -77,6 +78,7 @@ export default function DrugResultsView({
                             <TableHead>Tên thuốc</TableHead>
                             <TableHead>Hoạt chất</TableHead>
                             <TableHead>Hàm lượng</TableHead>
+                            <TableHead>Nhóm TCKT</TableHead>
                             <TableHead>Số đăng ký</TableHead>
                             <TableHead>ĐVT</TableHead>
                             <TableHead className="text-center">Số cơ sở</TableHead>
@@ -88,7 +90,10 @@ export default function DrugResultsView({
                             <Fragment key={drug.masterDrugId || drug.drugCode}>
                                 <TableRow
                                     key={`${drug.masterDrugId || drug.drugCode}-row`}
-                                    className="cursor-pointer transition-colors hover:bg-blue-50"
+                                    className={cn(
+                                        "cursor-pointer transition-colors hover:bg-blue-50",
+                                        drug.isThuocHiem && "bg-red-50 hover:bg-red-100 [&>td]:text-red-700 [&_span]:text-red-700 [&_svg]:text-red-700"
+                                    )}
                                     onClick={() => toggleRow(drug.masterDrugId || drug.drugCode)}
                                 >
                                     <TableCell>
@@ -112,6 +117,9 @@ export default function DrugResultsView({
                                         {drug.dosage}
                                     </TableCell>
                                     <TableCell className="whitespace-normal break-words align-top text-slate-600">
+                                        {drug.nhomTckt || "-"}
+                                    </TableCell>
+                                    <TableCell className="whitespace-normal break-words align-top text-slate-600">
                                         {drug.soDangKy || "-"}
                                     </TableCell>
                                     <TableCell>{drug.unit}</TableCell>
@@ -128,45 +136,98 @@ export default function DrugResultsView({
 
                                 {expandedRows.has(drug.masterDrugId || drug.drugCode) && (
                                     <TableRow key={`${drug.masterDrugId || drug.drugCode}-facilities`}>
-                                        <TableCell colSpan={10} className="bg-slate-50 p-0">
-                                            <div className="px-6 py-3">
-                                                <p className="mb-3 text-sm font-medium text-slate-600">
-                                                    Danh sách cơ sở còn tồn kho
-                                                </p>
-                                                <Table className="table-auto">
-                                                    <TableHeader>
-                                                        <TableRow className="bg-slate-100">
-                                                            <TableHead className="w-12">STT</TableHead>
-                                                            <TableHead className="w-[120px]">Mã cơ sở</TableHead>
-                                                            <TableHead>Tên cơ sở</TableHead>
-                                                            <TableHead className="w-[120px] text-right">Tồn kho</TableHead>
-                                                            <TableHead className="w-[140px] text-right">Giá VAT</TableHead>
-                                                            <TableHead className="w-[120px]">Kỳ báo cáo</TableHead>
-                                                        </TableRow>
-                                                    </TableHeader>
-                                                    <TableBody>
-                                                        {drug.facilities.map((facility, facilityIndex) => (
-                                                            <TableRow key={`${drug.drugCode}-${facility.facilityId}`} className="bg-white">
-                                                                <TableCell className="align-top">{facilityIndex + 1}</TableCell>
-                                                                <TableCell className="font-mono text-sm align-top">
-                                                                    {facility.facilityCode}
-                                                                </TableCell>
-                                                                <TableCell className="whitespace-normal break-words align-top font-medium">
-                                                                    {facility.facilityName}
-                                                                </TableCell>
-                                                                <TableCell className="text-right font-semibold text-emerald-600 align-top">
-                                                                    {formatNumber(facility.currentStock)}
-                                                                </TableCell>
-                                                                <TableCell className="text-right align-top">
-                                                                    {formatNumber(facility.priceVAT)}
-                                                                </TableCell>
-                                                                <TableCell className="align-top text-slate-500">
-                                                                    {facility.reportMonth}
-                                                                </TableCell>
+                                        <TableCell colSpan={11} className={cn("p-0", drug.isThuocHiem ? "bg-red-50/60" : "bg-slate-50")}>
+                                            <div
+                                                className={cn(
+                                                    "m-4 overflow-hidden rounded-lg border bg-white shadow-sm",
+                                                    drug.isThuocHiem ? "border-red-200 ring-1 ring-red-100" : "border-slate-200"
+                                                )}
+                                            >
+                                                <div
+                                                    className={cn(
+                                                        "flex flex-col gap-3 border-b px-4 py-3 sm:flex-row sm:items-center sm:justify-between",
+                                                        drug.isThuocHiem ? "border-red-100 bg-red-50/80" : "border-slate-200 bg-slate-50"
+                                                    )}
+                                                >
+                                                    <div className="min-w-0">
+                                                        <p className={cn("text-sm font-semibold", drug.isThuocHiem ? "text-red-700" : "text-slate-700")}>
+                                                            Danh sách cơ sở còn tồn kho
+                                                        </p>
+                                                        <p className={cn("mt-1 text-xs", drug.isThuocHiem ? "text-red-600" : "text-slate-500")}>
+                                                            Tách riêng theo đơn vị, có thể cuộn ngang nếu bảng dài.
+                                                        </p>
+                                                    </div>
+                                                    <div className="flex flex-wrap items-center gap-2">
+                                                        <Badge
+                                                            variant="outline"
+                                                            className={cn(
+                                                                "border",
+                                                                drug.isThuocHiem
+                                                                    ? "border-red-200 bg-red-50 text-red-700"
+                                                                    : "border-slate-200 bg-slate-100 text-slate-700"
+                                                            )}
+                                                        >
+                                                            {drug.facilityCount} cơ sở
+                                                        </Badge>
+                                                        <Badge
+                                                            variant="outline"
+                                                            className={cn(
+                                                                "border",
+                                                                drug.isThuocHiem
+                                                                    ? "border-red-200 bg-red-50 text-red-700"
+                                                                    : "border-slate-200 bg-slate-100 text-slate-700"
+                                                            )}
+                                                        >
+                                                            Tổng tồn: {formatNumber(drug.totalStock)}
+                                                        </Badge>
+                                                    </div>
+                                                </div>
+                                                <div className="overflow-x-auto">
+                                                    <Table className="table-auto">
+                                                        <TableHeader>
+                                                            <TableRow className={cn(drug.isThuocHiem ? "bg-red-100" : "bg-slate-100")}>
+                                                                <TableHead className="w-12">STT</TableHead>
+                                                                <TableHead className="w-[120px]">Mã cơ sở</TableHead>
+                                                                <TableHead>Tên cơ sở</TableHead>
+                                                                <TableHead className="w-[160px]">Nhóm TCKT</TableHead>
+                                                                <TableHead className="w-[120px] text-right">Tồn kho</TableHead>
+                                                                <TableHead className="w-[140px] text-right">Giá VAT</TableHead>
+                                                                <TableHead className="w-[120px]">Kỳ báo cáo</TableHead>
                                                             </TableRow>
-                                                        ))}
-                                                    </TableBody>
-                                                </Table>
+                                                        </TableHeader>
+                                                        <TableBody>
+                                                            {drug.facilities.map((facility, facilityIndex) => (
+                                                                <TableRow
+                                                                    key={`${drug.drugCode}-${facility.facilityId}`}
+                                                                    className={cn(
+                                                                        "bg-white",
+                                                                        drug.isThuocHiem && "bg-red-50/70 [&>td]:text-red-700"
+                                                                    )}
+                                                                >
+                                                                    <TableCell className="align-top">{facilityIndex + 1}</TableCell>
+                                                                    <TableCell className="font-mono text-sm align-top">
+                                                                        {facility.facilityCode}
+                                                                    </TableCell>
+                                                                    <TableCell className="whitespace-normal break-words align-top font-medium">
+                                                                        {facility.facilityName}
+                                                                    </TableCell>
+                                                                    <TableCell className="whitespace-normal break-words align-top text-slate-600">
+                                                                        {facility.nhomTckt || "-"}
+                                                                    </TableCell>
+                                                                    <TableCell className="text-right font-semibold text-emerald-600 align-top">
+                                                                        {formatNumber(facility.currentStock)}
+                                                                    </TableCell>
+                                                                    <TableCell className="text-right align-top">
+                                                                        {formatNumber(facility.priceVAT)}
+                                                                    </TableCell>
+                                                                    <TableCell className="align-top text-slate-500">
+                                                                        {facility.reportMonth}
+                                                                    </TableCell>
+                                                                </TableRow>
+                                                            ))}
+                                                        </TableBody>
+                                                    </Table>
+                                                </div>
                                             </div>
                                         </TableCell>
                                     </TableRow>

@@ -43,9 +43,27 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Pencil, Trash2, Download, RotateCcw, AlertCircle, CheckCircle2, Lock, FileWarning } from "lucide-react";
-import { readExcel, exportMultiSheetExcelAdvanced } from "@/lib/excel";
-import { NHOM_TCKT_OPTIONS, normalizeNhomTckt } from "@/lib/report-validation";
+import { Pencil, Trash2, Download, RotateCcw, AlertCircle, CheckCircle2, Lock, FileWarning, Upload, PowerOff, RefreshCw, ArrowRight } from "lucide-react";
+import { readExcel, readExcelRequiredSheet, exportMultiSheetExcelAdvanced } from "@/lib/excel";
+import {
+    NHOM_TCKT_OPTIONS,
+    compareReportDates,
+    isCategoryMarked,
+    normalizeNhomTckt,
+    parseStrictNumber,
+    parseReportDateValue,
+} from "@/lib/report-validation";
+
+const APPROVED_MAPPING_SHEET_NAME = "Danh sách thuốc nội bộ đã duyệt";
+
+const APPROVED_MAPPING_IMPORT_COLUMNS = [
+    { label: "Mã nội bộ", aliases: ["Mã nội bộ", "Ma noi bo", "maNoiBo", "MaNoiBo"] },
+    { label: "Tên thuốc nội bộ", aliases: ["Tên thuốc nội bộ", "Ten thuoc noi bo", "tenThuocNoiBo", "TenThuocNoiBo"] },
+    { label: "Hoạt chất nội bộ", aliases: ["Hoạt chất nội bộ", "Hoat chat noi bo", "hoatChatNoiBo", "HoatChatNoiBo"] },
+    { label: "SĐK nội bộ", aliases: ["SĐK nội bộ", "SDK noi bo", "SĐK", "SDK", "soDangKyNoiBo", "SoDangKyNoiBo"] },
+    { label: "ĐVT nội bộ", aliases: ["ĐVT nội bộ", "DVT noi bo", "ĐVT", "DVT", "donViTinhNoiBo", "DonViTinhNoiBo"] },
+    { label: "Nhóm TCKT", aliases: ["Nhóm TCKT", "Nhom TCKT", "nhomTckt", "NhomTCKT"] },
+] as const;
 
 interface DrugMapping {
     id: string;
@@ -55,9 +73,30 @@ interface DrugMapping {
     soDangKyNoiBo: string | null;
     donViTinhNoiBo: string | null;
     nhomTckt: string | null;
+    giaVat: number | string;
+    bhyt: string | null;
+    dichVu: string | null;
+    soQdTrungThau: string | null;
+    tenCongTy: string | null;
+    ngayBatDauHd: string | null;
+    ngayKetThucHd: string | null;
+    demandRoundingEnabled: boolean;
+    demandPackageUnit: string | null;
+    demandPackageSize: number | string | null;
+    demandPlanningLocked: boolean;
+    demandPlanningLockedAt: string | null;
+    demandPlanningUnlockedAt: string | null;
+    demandPlanningLockReason: string | null;
     status: string;
     adminNote: string | null;
     isOutOfCatalog: boolean;
+    isActive: boolean;
+    inactiveFromMonth: string | null;
+    inactiveReason: string | null;
+    inactiveAt: string | null;
+    reactivatedFromMonth: string | null;
+    reactivatedAt: string | null;
+    reportCount?: number;
     masterDrug: {
         id: string;
         maChung: string;
@@ -83,6 +122,41 @@ interface MasterDrug {
     quyCach: string | null;
     donViTinh: string | null;
 }
+
+type ImportIssue = {
+    row: number;
+    maNoiBo: string;
+    message: string;
+    type: "error" | "warning" | "skip";
+};
+
+const getCurrentReportMonth = () => {
+    const now = new Date();
+    return `${String(now.getMonth() + 1).padStart(2, "0")}/${now.getFullYear()}`;
+};
+
+function getExcelCell(row: Record<string, unknown>, aliases: readonly string[]) {
+    for (const alias of aliases) {
+        if (Object.prototype.hasOwnProperty.call(row, alias)) {
+            return row[alias];
+        }
+    }
+
+    return "";
+}
+
+function hasAnyColumn(row: Record<string, unknown>, aliases: readonly string[]) {
+    return aliases.some((alias) => Object.prototype.hasOwnProperty.call(row, alias));
+}
+
+const normalizeMappingCategory = (value: unknown) => {
+    const text = String(value ?? "").trim();
+    if (!text) return { value: null, valid: true };
+    return { value: isCategoryMarked(text) ? "X" : text, valid: isCategoryMarked(text) };
+};
+
+const formatMappingGiaVat = (value: number | string | null | undefined) =>
+    Number(value || 0).toLocaleString("vi-VN");
 
 function CompactMappingText({
     value,
@@ -126,23 +200,50 @@ export default function FacilityMappingsPage() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
     const [isImporting, setIsImporting] = useState(false);
+    const [isNhomTcktImporting, setIsNhomTcktImporting] = useState(false);
     const [searchMaster, setSearchMaster] = useState("");
+    const [searchMasterField, setSearchMasterField] = useState<"soDangKy" | "tenThuoc">("soDangKy");
     const [isNhomTcktDialogOpen, setIsNhomTcktDialogOpen] = useState(false);
     const [nhomTcktDraft, setNhomTcktDraft] = useState("");
+    const [isLifecycleDialogOpen, setIsLifecycleDialogOpen] = useState(false);
+    const [lifecycleAction, setLifecycleAction] = useState<"deactivate" | "reactivate">("deactivate");
+    const [lifecycleEffectiveMonth, setLifecycleEffectiveMonth] = useState(getCurrentReportMonth());
+    const [lifecycleReason, setLifecycleReason] = useState("");
+    const [isDemandLockDialogOpen, setIsDemandLockDialogOpen] = useState(false);
+    const [nextDemandLockState, setNextDemandLockState] = useState(false);
+    const [demandLockReason, setDemandLockReason] = useState("");
 
     // Import error reporting
-    const [importErrors, setImportErrors] = useState<{ row: number; maNoiBo: string; message: string; type: 'error' | 'warning' | 'skip' }[]>([]);
+    const [importErrors, setImportErrors] = useState<ImportIssue[]>([]);
     const [isErrorDialogOpen, setIsErrorDialogOpen] = useState(false);
     const [importSummary, setImportSummary] = useState<{ total: number; success: number; errors: number; skipped: number }>({ total: 0, success: 0, errors: 0, skipped: 0 });
+    const [importDialogTitle, setImportDialogTitle] = useState("Báo cáo lỗi nhập liệu");
+    const [importDialogDescription, setImportDialogDescription] = useState("Kết quả xử lý file Excel — có một số dòng cần kiểm tra lại");
 
     // New state for editing internal info
     const [isEditInfoDialogOpen, setIsEditInfoDialogOpen] = useState(false);
+    const [isDemandRoundingDialogOpen, setIsDemandRoundingDialogOpen] = useState(false);
     const [editFormData, setEditFormData] = useState({
         maNoiBo: "",
         tenThuocNoiBo: "",
         hoatChatNoiBo: "",
         soDangKyNoiBo: "",
         donViTinhNoiBo: "",
+        giaVat: "",
+        bhyt: "",
+        dichVu: "",
+        soQdTrungThau: "",
+        tenCongTy: "",
+        ngayBatDauHd: "",
+        ngayKetThucHd: "",
+        demandRoundingEnabled: false,
+        demandPackageUnit: "",
+        demandPackageSize: "",
+    });
+    const [demandRoundingForm, setDemandRoundingForm] = useState({
+        enabled: false,
+        packageUnit: "",
+        packageSize: "",
     });
 
     const fetchMappings = useCallback(async () => {
@@ -161,10 +262,11 @@ export default function FacilityMappingsPage() {
     }, []);
 
     // Server-side search for master drugs
-    const fetchMasterDrugs = useCallback(async (search: string) => {
+    const fetchMasterDrugs = useCallback(async (search: string, searchField: "soDangKy" | "tenThuoc") => {
         try {
             const params = new URLSearchParams();
             params.set("limit", "50"); // Fetch top 50 matches
+            params.set("searchField", searchField);
             if (search) {
                 params.set("search", search);
             }
@@ -186,11 +288,11 @@ export default function FacilityMappingsPage() {
     // Debounce search effect
     useEffect(() => {
         const timer = setTimeout(() => {
-            fetchMasterDrugs(searchMaster);
+            fetchMasterDrugs(searchMaster, searchMasterField);
         }, 500); // 500ms debounce
 
         return () => clearTimeout(timer);
-    }, [searchMaster, fetchMasterDrugs]);
+    }, [searchMaster, searchMasterField, fetchMasterDrugs]);
 
     const handleSelectMapping = (mapping: DrugMapping) => {
         setSelectedMapping(mapping);
@@ -234,19 +336,148 @@ export default function FacilityMappingsPage() {
             hoatChatNoiBo: mapping.hoatChatNoiBo || "",
             soDangKyNoiBo: mapping.soDangKyNoiBo || "",
             donViTinhNoiBo: mapping.donViTinhNoiBo || "",
+            giaVat: String(mapping.giaVat ?? ""),
+            bhyt: mapping.bhyt || "",
+            dichVu: mapping.dichVu || "",
+            soQdTrungThau: mapping.soQdTrungThau || "",
+            tenCongTy: mapping.tenCongTy || "",
+            ngayBatDauHd: mapping.ngayBatDauHd || "",
+            ngayKetThucHd: mapping.ngayKetThucHd || "",
+            demandRoundingEnabled: Boolean(mapping.demandRoundingEnabled),
+            demandPackageUnit: mapping.demandPackageUnit || "",
+            demandPackageSize:
+                mapping.demandPackageSize === null || mapping.demandPackageSize === undefined
+                    ? ""
+                    : String(mapping.demandPackageSize),
         });
         setIsEditInfoDialogOpen(true);
     };
 
+    const handleOpenDemandRoundingDialog = (mapping: DrugMapping) => {
+        setSelectedMapping(mapping);
+        setDemandRoundingForm({
+            enabled: Boolean(mapping.demandRoundingEnabled),
+            packageUnit: mapping.demandPackageUnit || "",
+            packageSize:
+                mapping.demandPackageSize === null || mapping.demandPackageSize === undefined
+                    ? ""
+                    : String(mapping.demandPackageSize),
+        });
+        setIsDemandRoundingDialogOpen(true);
+    };
+
+    const handleSaveDemandRounding = async () => {
+        if (!selectedMapping) return;
+
+        const packageSize = parseStrictNumber(demandRoundingForm.packageSize);
+        const packageUnit = demandRoundingForm.packageUnit.trim();
+
+        if (demandRoundingForm.enabled && !packageUnit) {
+            toast.error("Vui lòng nhập đơn vị quy cách dự trù");
+            return;
+        }
+
+        if (
+            demandRoundingForm.enabled &&
+            (!packageSize.valid || packageSize.blank || packageSize.value <= 0)
+        ) {
+            toast.error("Số lượng trong 1 quy cách phải lớn hơn 0");
+            return;
+        }
+
+        setIsProcessing(true);
+        try {
+            const res = await fetch(`/api/facility/mappings/${selectedMapping.id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    demandRoundingEnabled: demandRoundingForm.enabled,
+                    demandPackageUnit: packageUnit || null,
+                    demandPackageSize:
+                        demandRoundingForm.enabled && packageSize.valid
+                            ? packageSize.value
+                            : null,
+                }),
+            });
+
+            if (res.ok) {
+                toast.success("Đã cập nhật quy cách dự trù");
+                setIsDemandRoundingDialogOpen(false);
+                fetchMappings();
+                return;
+            }
+
+            const errorData = await res.json().catch(() => null);
+            toast.error(errorData?.message || "Không thể cập nhật quy cách dự trù");
+        } catch {
+            toast.error("Đã xảy ra lỗi");
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
     const handleSaveInfo = async () => {
         if (!selectedMapping) return;
+        const ngayBatDauHd = parseReportDateValue(editFormData.ngayBatDauHd);
+        const ngayKetThucHd = parseReportDateValue(editFormData.ngayKetThucHd);
+        const giaVat = parseStrictNumber(editFormData.giaVat);
+        const bhyt = normalizeMappingCategory(editFormData.bhyt);
+        const dichVu = normalizeMappingCategory(editFormData.dichVu);
+
+        if (!ngayBatDauHd.valid) {
+            toast.error("Ngày bắt đầu HĐ phải theo định dạng YYYYMMDD và là ngày hợp lệ");
+            return;
+        }
+
+        if (!ngayKetThucHd.valid) {
+            toast.error("Ngày kết thúc HĐ phải theo định dạng YYYYMMDD và là ngày hợp lệ");
+            return;
+        }
+
+        if (
+            ngayBatDauHd.value
+            && ngayKetThucHd.value
+            && compareReportDates(ngayBatDauHd.value, ngayKetThucHd.value) > 0
+        ) {
+            toast.error("Ngày bắt đầu HĐ không được lớn hơn Ngày kết thúc HĐ");
+            return;
+        }
+
+        if (!giaVat.valid || giaVat.blank || giaVat.value < 0) {
+            toast.error(
+                giaVat.blank
+                    ? "Vui lòng nhập Giá VAT"
+                    : giaVat.value < 0
+                        ? "Giá VAT không được âm"
+                        : "Giá VAT phải là số hợp lệ"
+            );
+            return;
+        }
+
+        if (!bhyt.valid || !dichVu.valid) {
+            toast.error('BHYT và Dịch vụ chỉ được nhập "X" hoặc để trống');
+            return;
+        }
+
+        if (!bhyt.value && !dichVu.value) {
+            toast.error("Phải đánh dấu X ở ít nhất một trong hai cột BHYT hoặc Dịch vụ");
+            return;
+        }
+
         setIsProcessing(true);
 
         try {
             const res = await fetch(`/api/facility/mappings/${selectedMapping.id}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(editFormData),
+                body: JSON.stringify({
+                    ...editFormData,
+                    giaVat: giaVat.value,
+                    bhyt: bhyt.value,
+                    dichVu: dichVu.value,
+                    ngayBatDauHd: ngayBatDauHd.value,
+                    ngayKetThucHd: ngayKetThucHd.value,
+                }),
             });
 
             if (res.ok) {
@@ -254,7 +485,8 @@ export default function FacilityMappingsPage() {
                 setIsEditInfoDialogOpen(false);
                 fetchMappings();
             } else {
-                toast.error("Không thể cập nhật thông tin");
+                const errorData = await res.json().catch(() => null);
+                toast.error(errorData?.message || "Không thể cập nhật thông tin");
             }
         } catch {
             toast.error("Đã xảy ra lỗi");
@@ -301,23 +533,110 @@ export default function FacilityMappingsPage() {
         }
     };
 
-    const handleDelete = async (id: string) => {
-        if (!confirm("Bạn có chắc chắn muốn xóa thuốc này không?")) return;
+    const handleOpenLifecycleDialog = (mapping: DrugMapping, action: "deactivate" | "reactivate") => {
+        setSelectedMapping(mapping);
+        setLifecycleAction(action);
+        setLifecycleEffectiveMonth(getCurrentReportMonth());
+        setLifecycleReason("");
+        setIsLifecycleDialogOpen(true);
+    };
+
+    const handleSaveLifecycle = async () => {
+        if (!selectedMapping) return;
+
+        if (!/^(0[1-9]|1[0-2])\/\d{4}$/.test(lifecycleEffectiveMonth.trim())) {
+            toast.error("Tháng hiệu lực phải theo định dạng MM/YYYY");
+            return;
+        }
+
+        setIsProcessing(true);
+        try {
+            const res = await fetch(`/api/facility/mappings/${selectedMapping.id}/lifecycle`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    action: lifecycleAction,
+                    effectiveMonth: lifecycleEffectiveMonth.trim(),
+                    reason: lifecycleReason,
+                }),
+            });
+
+            const data = await res.json().catch(() => null);
+            if (!res.ok) {
+                toast.error(data?.message || "Không thể cập nhật trạng thái sử dụng thuốc");
+                return;
+            }
+
+            toast.success(lifecycleAction === "deactivate" ? "Đã ngừng sử dụng thuốc" : "Đã kích hoạt lại thuốc");
+            setIsLifecycleDialogOpen(false);
+            fetchMappings();
+        } catch {
+            toast.error("Đã xảy ra lỗi");
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    const handleOpenDemandLockDialog = (mapping: DrugMapping, locked: boolean) => {
+        setSelectedMapping(mapping);
+        setNextDemandLockState(locked);
+        setDemandLockReason("");
+        setIsDemandLockDialogOpen(true);
+    };
+
+    const handleSaveDemandLock = async () => {
+        if (!selectedMapping) return;
+
+        setIsProcessing(true);
+        try {
+            const res = await fetch(`/api/facility/mappings/${selectedMapping.id}/demand-lock`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    locked: nextDemandLockState,
+                    reason: demandLockReason,
+                }),
+            });
+
+            const data = await res.json().catch(() => null);
+            if (!res.ok) {
+                toast.error(data?.message || "Không thể cập nhật trạng thái dự trù");
+                return;
+            }
+
+            toast.success(nextDemandLockState ? "Đã khóa dự trù thuốc" : "Đã mở dự trù thuốc");
+            setIsDemandLockDialogOpen(false);
+            fetchMappings();
+        } catch {
+            toast.error("Đã xảy ra lỗi");
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    const handleDelete = async (mapping: DrugMapping) => {
+        const isApprovedMapping = mapping.status === "APPROVED" || mapping.status === "AUTO_MAPPED";
+        const confirmMessage = isApprovedMapping
+            ? "Thuốc đã duyệt này chưa có báo cáo XNT. Bạn có chắc muốn xóa khỏi danh mục?"
+            : "Bạn có chắc chắn muốn xóa thuốc này không?";
+
+        if (!confirm(confirmMessage)) return;
 
         // Optimistic Delete
         const previousMappings = [...mappings];
-        setMappings(prev => prev.filter(m => m.id !== id));
+        setMappings(prev => prev.filter(m => m.id !== mapping.id));
 
         try {
-            const res = await fetch(`/api/facility/mappings/${id}`, {
+            const res = await fetch(`/api/facility/mappings/${mapping.id}`, {
                 method: "DELETE",
             });
 
             if (res.ok) {
                 toast.success("Đã xóa thuốc khỏi danh sách");
             } else {
+                const errorData = await res.json().catch(() => null);
                 setMappings(previousMappings);
-                toast.error("Không thể xóa thuốc");
+                toast.error(errorData?.message || "Không thể xóa thuốc");
             }
         } catch {
             setMappings(previousMappings);
@@ -374,11 +693,60 @@ export default function FacilityMappingsPage() {
                 "Viên"
             ],
             [
-                "Nhóm TCKT (*)",
-                "Có",
+                "Nhóm TCKT",
+                "Không",
                 "Danh mục",
-                `Nhóm TCKT cố định theo mã nội bộ. Chỉ được nhập một trong: ${NHOM_TCKT_OPTIONS.join(", ")}.`,
+                `Nếu xác định được nhóm, chỉ nhập một trong: ${NHOM_TCKT_OPTIONS.join(", ")}. Nếu không xác định được thì để trống.`,
                 "Nhóm 1"
+            ],
+            [
+                "Giá VAT (*)",
+                "Có",
+                "Số",
+                "Đơn giá bao gồm VAT, cố định theo thuốc trong quá trình báo cáo XNT. Không được nhập âm.",
+                "25000"
+            ],
+            [
+                "BHYT",
+                "Có điều kiện",
+                "X hoặc trống",
+                "Nhập X nếu thuốc thuộc nhóm BHYT. Phải đánh dấu X ở ít nhất một trong hai cột BHYT hoặc Dịch vụ.",
+                "X"
+            ],
+            [
+                "Dịch vụ",
+                "Có điều kiện",
+                "X hoặc trống",
+                "Nhập X nếu thuốc thuộc nhóm Dịch vụ. Có thể đánh dấu cả BHYT và Dịch vụ nếu thuốc dùng cho cả hai.",
+                ""
+            ],
+            [
+                "Số QĐ trúng thầu",
+                "Không",
+                "Văn bản (Text)",
+                "Số quyết định trúng thầu/hợp đồng gắn với thuốc và mã nội bộ này. Hệ thống sẽ tự đưa sang báo cáo XNT.",
+                "123/QĐ-BV"
+            ],
+            [
+                "Tên Công ty",
+                "Không",
+                "Văn bản (Text)",
+                "Tên công ty cung cấp thuốc. Hệ thống sẽ tự đưa sang báo cáo XNT.",
+                "Công ty TNHH ABC"
+            ],
+            [
+                "Ngày bắt đầu HĐ",
+                "Không",
+                "Văn bản dạng YYYYMMDD",
+                "Ngày bắt đầu hiệu lực hợp đồng. Để trống nếu chưa có.",
+                "20260101"
+            ],
+            [
+                "Ngày kết thúc HĐ",
+                "Không",
+                "Văn bản dạng YYYYMMDD",
+                "Ngày kết thúc hợp đồng. Không được nhỏ hơn Ngày bắt đầu HĐ.",
+                "20261231"
             ],
             [""],
             ["Quy trình sau khi upload:"],
@@ -396,7 +764,14 @@ export default function FacilityMappingsPage() {
                 "Hoạt chất": "Paracetamol",
                 "Số đăng ký": "VD-12345-23",
                 "Đơn vị tính": "Viên",
-                "Nhóm TCKT": "Nhóm 1"
+                "Nhóm TCKT": "Nhóm 1",
+                "Giá VAT": 25000,
+                "BHYT": "X",
+                "Dịch vụ": "",
+                "Số QĐ trúng thầu": "123/QĐ-BV",
+                "Tên Công ty": "Công ty TNHH ABC",
+                "Ngày bắt đầu HĐ": "20260101",
+                "Ngày kết thúc HĐ": "20261231"
             },
             {
                 "Mã nội bộ": "T002",
@@ -404,7 +779,14 @@ export default function FacilityMappingsPage() {
                 "Hoạt chất": "Ascorbic acid",
                 "Số đăng ký": "",
                 "Đơn vị tính": "Viên",
-                "Nhóm TCKT": "Nhóm 2"
+                "Nhóm TCKT": "",
+                "Giá VAT": 12000,
+                "BHYT": "",
+                "Dịch vụ": "X",
+                "Số QĐ trúng thầu": "",
+                "Tên Công ty": "",
+                "Ngày bắt đầu HĐ": "",
+                "Ngày kết thúc HĐ": ""
             }
         ];
 
@@ -418,7 +800,7 @@ export default function FacilityMappingsPage() {
                 // Column widths for instruction sheet
                 [{ wch: 22 }, { wch: 10 }, { wch: 18 }, { wch: 70 }, { wch: 20 }],
                 // Column widths for data sheet
-                [{ wch: 15 }, { wch: 30 }, { wch: 20 }, { wch: 18 }, { wch: 14 }, { wch: 14 }],
+                [{ wch: 15 }, { wch: 30 }, { wch: 20 }, { wch: 18 }, { wch: 14 }, { wch: 14 }, { wch: 12 }, { wch: 8 }, { wch: 8 }, { wch: 20 }, { wch: 28 }, { wch: 16 }, { wch: 16 }],
             ]
         );
         toast.success("Đã tải xuống file mẫu");
@@ -429,6 +811,8 @@ export default function FacilityMappingsPage() {
 
         const file = files[0];
         setIsImporting(true);
+        setImportDialogTitle("Báo cáo lỗi nhập liệu");
+        setImportDialogDescription("Kết quả xử lý file Excel — có một số dòng cần kiểm tra lại");
         const toastId = toast.loading("Đang đọc file Excel...");
 
         try {
@@ -453,7 +837,20 @@ export default function FacilityMappingsPage() {
                 const soDangKyNoiBo = row['Số đăng ký'] || row['soDangKyNoiBo'] || row['SoDangKy'] || '';
                 const donViTinhNoiBo = row['Đơn vị tính'] || row['donViTinhNoiBo'] || row['DVT'] || '';
                 const nhomTcktRaw = row['Nhóm TCKT'] || row['nhomTckt'] || row['NhomTCKT'] || '';
+                const giaVatRaw = row['Giá VAT'] ?? row['Gia VAT'] ?? row['giaVat'] ?? row['GiaVat'] ?? '';
+                const bhytRaw = row['BHYT'] || row['bhyt'] || '';
+                const dichVuRaw = row['Dịch vụ'] || row['Dich vu'] || row['dichVu'] || row['DichVu'] || '';
+                const soQdTrungThau = row['Số QĐ trúng thầu'] || row['Số QĐ TT'] || row['soQdTrungThau'] || row['SoQdTrungThau'] || '';
+                const tenCongTy = row['Tên Công ty'] || row['Tên công ty'] || row['tenCongTy'] || row['TenCongTy'] || '';
+                const ngayBatDauHdRaw = row['Ngày bắt đầu HĐ'] || row['Ngày BĐ HĐ'] || row['ngayBatDauHd'] || row['NgayBatDauHd'] || '';
+                const ngayKetThucHdRaw = row['Ngày kết thúc HĐ'] || row['Ngày KT HĐ'] || row['ngayKetThucHd'] || row['NgayKetThucHd'] || '';
+                const nhomTcktText = String(nhomTcktRaw).trim();
                 const nhomTckt = normalizeNhomTckt(nhomTcktRaw);
+                const giaVat = parseStrictNumber(giaVatRaw);
+                const bhyt = normalizeMappingCategory(bhytRaw);
+                const dichVu = normalizeMappingCategory(dichVuRaw);
+                const ngayBatDauHd = parseReportDateValue(ngayBatDauHdRaw);
+                const ngayKetThucHd = parseReportDateValue(ngayKetThucHdRaw);
 
                 const maNoiBoStr = String(maNoiBo).trim();
                 const tenThuocStr = String(tenThuocNoiBo).trim();
@@ -465,11 +862,77 @@ export default function FacilityMappingsPage() {
                 if (!tenThuocStr) {
                     clientErrors.push({ row: rowNum, maNoiBo: maNoiBoStr, message: 'Thiếu tên thuốc (bắt buộc)', type: 'error' });
                 }
-                if (!nhomTckt) {
+                if (nhomTcktText && !nhomTckt) {
                     clientErrors.push({
                         row: rowNum,
                         maNoiBo: maNoiBoStr,
-                        message: `Thiếu hoặc sai Nhóm TCKT. Chỉ được nhập: ${NHOM_TCKT_OPTIONS.join(", ")}`,
+                        message: `Nhóm TCKT không hợp lệ. Nếu có nhập, chỉ được nhập: ${NHOM_TCKT_OPTIONS.join(", ")}`,
+                        type: 'error',
+                    });
+                }
+                if (!giaVat.valid || giaVat.blank || giaVat.value < 0) {
+                    clientErrors.push({
+                        row: rowNum,
+                        maNoiBo: maNoiBoStr,
+                        message: giaVat.blank
+                            ? 'Thiếu Giá VAT (bắt buộc)'
+                            : giaVat.value < 0
+                                ? 'Giá VAT không được âm'
+                                : 'Giá VAT phải là số hợp lệ',
+                        type: 'error',
+                    });
+                }
+                if (!bhyt.valid) {
+                    clientErrors.push({
+                        row: rowNum,
+                        maNoiBo: maNoiBoStr,
+                        message: 'BHYT chỉ được nhập "X" hoặc để trống',
+                        type: 'error',
+                    });
+                }
+                if (!dichVu.valid) {
+                    clientErrors.push({
+                        row: rowNum,
+                        maNoiBo: maNoiBoStr,
+                        message: 'Dịch vụ chỉ được nhập "X" hoặc để trống',
+                        type: 'error',
+                    });
+                }
+                if (bhyt.valid && dichVu.valid && !bhyt.value && !dichVu.value) {
+                    clientErrors.push({
+                        row: rowNum,
+                        maNoiBo: maNoiBoStr,
+                        message: 'Phải đánh dấu X ở ít nhất một trong hai cột BHYT hoặc Dịch vụ',
+                        type: 'error',
+                    });
+                }
+                if (!ngayBatDauHd.valid) {
+                    clientErrors.push({
+                        row: rowNum,
+                        maNoiBo: maNoiBoStr,
+                        message: 'Ngày bắt đầu HĐ phải theo định dạng YYYYMMDD và là ngày hợp lệ',
+                        type: 'error',
+                    });
+                }
+                if (!ngayKetThucHd.valid) {
+                    clientErrors.push({
+                        row: rowNum,
+                        maNoiBo: maNoiBoStr,
+                        message: 'Ngày kết thúc HĐ phải theo định dạng YYYYMMDD và là ngày hợp lệ',
+                        type: 'error',
+                    });
+                }
+                if (
+                    ngayBatDauHd.valid
+                    && ngayKetThucHd.valid
+                    && ngayBatDauHd.value
+                    && ngayKetThucHd.value
+                    && compareReportDates(ngayBatDauHd.value, ngayKetThucHd.value) > 0
+                ) {
+                    clientErrors.push({
+                        row: rowNum,
+                        maNoiBo: maNoiBoStr,
+                        message: 'Ngày bắt đầu HĐ không được lớn hơn Ngày kết thúc HĐ',
                         type: 'error',
                     });
                 }
@@ -495,7 +958,14 @@ export default function FacilityMappingsPage() {
                     hoatChatNoiBo: String(hoatChatNoiBo).trim() || null,
                     soDangKyNoiBo: String(soDangKyNoiBo).trim() || null,
                     donViTinhNoiBo: String(donViTinhNoiBo).trim() || null,
-                    nhomTckt,
+                    nhomTckt: nhomTcktText || null,
+                    giaVat: giaVat.value,
+                    bhyt: bhyt.value,
+                    dichVu: dichVu.value,
+                    soQdTrungThau: String(soQdTrungThau).trim() || null,
+                    tenCongTy: String(tenCongTy).trim() || null,
+                    ngayBatDauHd: ngayBatDauHd.value,
+                    ngayKetThucHd: ngayKetThucHd.value,
                 };
             });
 
@@ -630,6 +1100,13 @@ export default function FacilityMappingsPage() {
             "SĐK nội bộ": m.soDangKyNoiBo,
             "ĐVT nội bộ": m.donViTinhNoiBo,
             "Nhóm TCKT": m.nhomTckt || "",
+            "Giá VAT": Number(m.giaVat || 0),
+            "BHYT": m.bhyt || "",
+            "Dịch vụ": m.dichVu || "",
+            "Số QĐ trúng thầu": m.soQdTrungThau || "",
+            "Tên Công ty": m.tenCongTy || "",
+            "Ngày bắt đầu HĐ": m.ngayBatDauHd || "",
+            "Ngày kết thúc HĐ": m.ngayKetThucHd || "",
         }));
 
         const sheet2Data = approvedMappings.map((m, index) => ({
@@ -652,6 +1129,96 @@ export default function FacilityMappingsPage() {
         toast.success("Đã xuất file Excel thành công");
     };
 
+    const handleImportApprovedNhomTckt = async (files: FileList | null) => {
+        if (!files || files.length === 0) return;
+
+        const file = files[0];
+        setIsNhomTcktImporting(true);
+        setImportDialogTitle("Báo cáo cập nhật Nhóm TCKT");
+        setImportDialogDescription("Kết quả xử lý file Excel đã duyệt — có một số dòng cần kiểm tra lại");
+        const toastId = toast.loading("Đang đọc file Excel đã duyệt...");
+
+        try {
+            const rawData = await readExcelRequiredSheet(file, APPROVED_MAPPING_SHEET_NAME) as Record<string, unknown>[];
+
+            if (rawData.length === 0) {
+                toast.error("File Excel trống hoặc sheet đã duyệt không có dữ liệu", { id: toastId });
+                return;
+            }
+
+            const firstRow = rawData[0];
+            const missingColumns = APPROVED_MAPPING_IMPORT_COLUMNS
+                .filter((column) => !hasAnyColumn(firstRow, column.aliases))
+                .map((column) => column.label);
+
+            if (missingColumns.length > 0) {
+                toast.error(`File thiếu cột bắt buộc: ${missingColumns.join(", ")}`, { id: toastId });
+                return;
+            }
+
+            const rows = rawData.map((row, idx) => ({
+                _rowIndex: idx + 2,
+                maNoiBo: String(getExcelCell(row, APPROVED_MAPPING_IMPORT_COLUMNS[0].aliases)).trim(),
+                tenThuocNoiBo: String(getExcelCell(row, APPROVED_MAPPING_IMPORT_COLUMNS[1].aliases)).trim(),
+                hoatChatNoiBo: String(getExcelCell(row, APPROVED_MAPPING_IMPORT_COLUMNS[2].aliases)).trim(),
+                soDangKyNoiBo: String(getExcelCell(row, APPROVED_MAPPING_IMPORT_COLUMNS[3].aliases)).trim(),
+                donViTinhNoiBo: String(getExcelCell(row, APPROVED_MAPPING_IMPORT_COLUMNS[4].aliases)).trim(),
+                nhomTckt: String(getExcelCell(row, APPROVED_MAPPING_IMPORT_COLUMNS[5].aliases)).trim(),
+            }));
+
+            toast.loading(`Đang cập nhật Nhóm TCKT cho ${rows.length} dòng...`, { id: toastId });
+
+            const res = await fetch("/api/facility/mappings/nhom-tckt/import", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ rows }),
+            });
+            const data = await res.json().catch(() => null) as {
+                total?: number;
+                updated?: number;
+                unchanged?: number;
+                errors?: { row: number; maNoiBo: string; message: string }[];
+                message?: string;
+            } | null;
+
+            if (!res.ok) {
+                toast.error(data?.message || "Không thể cập nhật Nhóm TCKT từ Excel", { id: toastId });
+                return;
+            }
+
+            const issues: ImportIssue[] = (data?.errors || []).map((error) => ({
+                ...error,
+                type: "error" as const,
+            }));
+            const updated = data?.updated || 0;
+            const unchanged = data?.unchanged || 0;
+            const total = data?.total ?? rows.length;
+
+            if (issues.length > 0) {
+                setImportErrors(issues);
+                setImportSummary({
+                    total,
+                    success: updated,
+                    errors: issues.length,
+                    skipped: unchanged,
+                });
+                setIsErrorDialogOpen(true);
+                toast.success(`Đã cập nhật ${updated} dòng, ${unchanged} dòng không đổi, có ${issues.length} dòng cần xem lại`, { id: toastId });
+            } else {
+                toast.success(`Đã cập nhật ${updated} dòng Nhóm TCKT, ${unchanged} dòng không đổi`, { id: toastId });
+            }
+
+            fetchMappings();
+        } catch (error) {
+            const message = error instanceof Error ? error.message : "Lỗi đọc file Excel";
+            toast.error(message, { id: toastId });
+        } finally {
+            setIsNhomTcktImporting(false);
+            const input = document.getElementById("nhom-tckt-excel-upload") as HTMLInputElement;
+            if (input) input.value = "";
+        }
+    };
+
     const getStatusBadge = (status: string) => {
         switch (status) {
             case "PENDING_MAPPING":
@@ -669,10 +1236,12 @@ export default function FacilityMappingsPage() {
         }
     };
 
-    const pendingMappings = mappings.filter((m) => m.status === "PENDING_MAPPING");
-    const waitingMappings = mappings.filter((m) => m.status === "WAITING_APPROVAL");
-    const approvedMappings = mappings.filter((m) => m.status === "APPROVED" || m.status === "AUTO_MAPPED");
-    const rejectedMappings = mappings.filter((m) => m.status === "REJECTED");
+    const activeMappings = mappings.filter((m) => m.isActive !== false);
+    const inactiveMappings = mappings.filter((m) => m.isActive === false);
+    const pendingMappings = activeMappings.filter((m) => m.status === "PENDING_MAPPING");
+    const waitingMappings = activeMappings.filter((m) => m.status === "WAITING_APPROVAL");
+    const approvedMappings = activeMappings.filter((m) => m.status === "APPROVED" || m.status === "AUTO_MAPPED");
+    const rejectedMappings = activeMappings.filter((m) => m.status === "REJECTED");
     const mappingsAIReviewEvidence = {
         summary: {
             total: mappings.length,
@@ -680,13 +1249,14 @@ export default function FacilityMappingsPage() {
             waitingApproval: waitingMappings.length,
             approved: approvedMappings.length,
             rejected: rejectedMappings.length,
+            inactive: inactiveMappings.length,
             missingInfo: mappings.filter((mapping) =>
-                !mapping.hoatChatNoiBo || !mapping.soDangKyNoiBo || !mapping.donViTinhNoiBo || !mapping.nhomTckt
+                !mapping.hoatChatNoiBo || !mapping.soDangKyNoiBo || !mapping.donViTinhNoiBo || (!mapping.bhyt && !mapping.dichVu)
             ).length,
         },
         rows: [
             ...mappings
-                .filter((mapping) => !mapping.hoatChatNoiBo || !mapping.soDangKyNoiBo || !mapping.donViTinhNoiBo || !mapping.nhomTckt)
+                .filter((mapping) => !mapping.hoatChatNoiBo || !mapping.soDangKyNoiBo || !mapping.donViTinhNoiBo || (!mapping.bhyt && !mapping.dichVu))
                 .slice(0, 30)
                 .map((mapping) => ({
                     maNoiBo: mapping.maNoiBo,
@@ -695,6 +1265,9 @@ export default function FacilityMappingsPage() {
                     soDangKyNoiBo: mapping.soDangKyNoiBo,
                     donViTinhNoiBo: mapping.donViTinhNoiBo,
                     nhomTckt: mapping.nhomTckt,
+                    giaVat: mapping.giaVat,
+                    bhyt: mapping.bhyt,
+                    dichVu: mapping.dichVu,
                     status: mapping.status,
                     type: "MISSING_INFO",
                 })),
@@ -710,146 +1283,292 @@ export default function FacilityMappingsPage() {
 
     // Ids for disabled/locked statuses
     const LOCKED_STATUSES = ["WAITING_APPROVAL", "APPROVED"];
-    const readyPendingMappings = pendingMappings.filter((m) => (m.masterDrug || m.isOutOfCatalog) && m.nhomTckt);
+    const readyPendingMappings = pendingMappings.filter((m) => (m.masterDrug || m.isOutOfCatalog) && (m.bhyt || m.dichVu));
+    const submitApprovalDisabled = isProcessing || readyPendingMappings.length === 0;
+    const submitApprovalTitle = isProcessing
+        ? "Đang gửi duyệt lên Sở"
+        : readyPendingMappings.length === 0
+            ? "Không có thuốc chờ xử lý đủ điều kiện gửi duyệt. Cần có ánh xạ hoặc đánh dấu ngoài danh mục, đồng thời có BHYT hoặc Dịch vụ."
+            : `Sẵn sàng gửi ${readyPendingMappings.length} thuốc lên Sở duyệt`;
 
     // Use server-side results directly
     const filteredMasterDrugs = masterDrugs;
 
-    const MappingTable = ({ items, showAction = false }: { items: DrugMapping[]; showAction?: boolean }) => (
-        <TooltipProvider delayDuration={300}>
-            <Table className={`${showAction ? "w-[1480px]" : "w-[1310px]"} table-fixed`}>
-            <TableHeader>
-                <TableRow className="bg-blue-600 hover:bg-blue-600">
-                    <TableHead className="w-[115px] text-white font-bold">Mã nội bộ</TableHead>
-                    <TableHead className="w-[180px] text-white font-bold">Tên thuốc nội bộ</TableHead>
-                    <TableHead className="w-[110px] text-white font-bold">SĐK nội bộ</TableHead>
-                    <TableHead className="w-[110px] text-white font-bold">Nhóm TCKT</TableHead>
-                    <TableHead className="w-[110px] bg-emerald-50/50 text-white font-bold">Mã chung</TableHead>
-                    <TableHead className="w-[180px] bg-emerald-50/50 text-white font-bold">Tên thuốc mapping</TableHead>
-                    <TableHead className="w-[110px] bg-emerald-50/50 text-white font-bold">Hàm lượng</TableHead>
-                    <TableHead className="w-[120px] bg-emerald-50/50 text-white font-bold">Dạng bào chế</TableHead>
-                    <TableHead className="w-[120px] bg-emerald-50/50 text-white font-bold">SĐK mapping</TableHead>
-                    <TableHead className="w-[150px] text-white font-bold">Trạng thái</TableHead>
-                    {showAction && <TableHead className="w-[170px] text-right text-white font-bold">Thao tác</TableHead>}
-                </TableRow>
-            </TableHeader>
-            <TableBody>
-                {items.map((mapping) => (
-                    <TableRow key={mapping.id}>
-                        <TableCell>
-                            <code className="px-2 py-1 bg-gray-100 rounded text-sm">{mapping.maNoiBo}</code>
-                        </TableCell>
-                        <TableCell className="w-[180px] max-w-[180px] whitespace-normal font-medium">
-                            <CompactMappingText value={mapping.tenThuocNoiBo} lines={2} />
-                        </TableCell>
-                        <TableCell>{mapping.soDangKyNoiBo || "-"}</TableCell>
-                        <TableCell>
-                            {mapping.nhomTckt ? (
-                                <Badge className="bg-indigo-100 text-indigo-700 border-0">{mapping.nhomTckt}</Badge>
-                            ) : (
-                                <div className="flex flex-col items-start gap-1.5">
-                                    <Badge className="bg-amber-100 text-amber-700 border-0">Chưa thiết lập</Badge>
-                                    <Button
-                                        type="button"
-                                        size="xs"
-                                        variant="outline"
-                                        className="border-amber-300 text-amber-700 hover:bg-amber-50"
-                                        onClick={() => handleOpenNhomTcktDialog(mapping)}
-                                    >
-                                        Thiết lập
-                                    </Button>
-                                </div>
-                            )}
-                        </TableCell>
-                        <TableCell className="bg-emerald-50/50">
-                            {mapping.masterDrug ? (
-                                <code className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-sm">
-                                    {mapping.masterDrug.maChung}
-                                </code>
-                            ) : "-"}
-                        </TableCell>
-                        <TableCell className="w-[180px] max-w-[180px] whitespace-normal bg-emerald-50/50">
-                            {mapping.isOutOfCatalog ? (
-                                <CompactMappingText value="Ngoài danh mục" lines={1} className="text-amber-600 italic" />
-                            ) : mapping.masterDrug ? (
-                                <CompactMappingText value={mapping.masterDrug.tenThuoc} lines={2} className="text-emerald-600 font-medium" />
-                            ) : (
-                                <CompactMappingText value="Chưa mapping" lines={1} className="text-gray-400" />
-                            )}
-                        </TableCell>
-                        <TableCell className="w-[110px] max-w-[110px] bg-emerald-50/50">
-                            <CompactMappingText value={mapping.masterDrug?.hamLuong} />
-                        </TableCell>
-                        <TableCell className="w-[120px] max-w-[120px] bg-emerald-50/50">
-                            <CompactMappingText value={mapping.masterDrug?.dangBaoChe} />
-                        </TableCell>
-                        <TableCell className="bg-emerald-50/50">
-                            {mapping.masterDrug?.soDangKy || "-"}
-                        </TableCell>
-                        <TableCell>
-                            {getStatusBadge(mapping.status)}
-                            {mapping.adminNote && (
-                                <p className="text-xs text-red-500 mt-1">Lý do: {mapping.adminNote}</p>
-                            )}
-                        </TableCell>
-                        {showAction && (
-                            <TableCell className="text-right">
-                                {LOCKED_STATUSES.includes(mapping.status) ? (
-                                    <div className="flex items-center justify-end gap-1 text-gray-400">
-                                        <Lock className="w-3.5 h-3.5" />
-                                        <span className="text-xs">
-                                            {mapping.status === "WAITING_APPROVAL" ? "Đang chờ duyệt" : "Đã duyệt"}
-                                        </span>
-                                    </div>
-                                ) : (
-                                    <div className="flex justify-end gap-2">
-                                        <Button size="sm" variant="outline" onClick={() => handleSelectMapping(mapping)}>
-                                            Chọn mapping
-                                        </Button>
-                                        <Button
-                                            size="icon"
-                                            variant="ghost"
-                                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                                            onClick={() => handleEditInfo(mapping)}
-                                            title="Chỉnh sửa thông tin"
-                                        >
-                                            <Pencil className="w-4 h-4" />
-                                        </Button>
-                                        <Button
-                                            size="icon"
-                                            variant="ghost"
-                                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                            onClick={() => handleDelete(mapping.id)}
-                                            title="Xóa"
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </Button>
-                                    </div>
+    const mappingTableColumnClasses = {
+        withAction: ["w-[110px]", "w-[220px]", "w-[110px]", "w-[115px]", "w-[110px]", "w-[80px]", "w-[80px]", "w-[110px]", "w-[220px]", "w-[110px]", "w-[120px]", "w-[115px]", "w-[130px]", "w-[250px]"],
+        withoutAction: ["w-[110px]", "w-[240px]", "w-[110px]", "w-[115px]", "w-[110px]", "w-[80px]", "w-[80px]", "w-[110px]", "w-[240px]", "w-[110px]", "w-[120px]", "w-[115px]", "w-[130px]"],
+    };
+    const actionColumnClass = "sticky right-0 z-10 bg-white text-right shadow-[-8px_0_8px_-8px_rgba(15,23,42,0.18)]";
+
+    const MappingTable = ({
+        items,
+        showAction = false,
+        showLifecycleActions = false,
+        allowDeleteApprovedWithoutReports = false,
+    }: {
+        items: DrugMapping[];
+        showAction?: boolean;
+        showLifecycleActions?: boolean;
+        allowDeleteApprovedWithoutReports?: boolean;
+    }) => {
+        const hasActionColumn = showAction || showLifecycleActions;
+        const columnClasses = hasActionColumn ? mappingTableColumnClasses.withAction : mappingTableColumnClasses.withoutAction;
+
+        return (
+            <TooltipProvider delayDuration={300}>
+                <Table className={`${hasActionColumn ? "min-w-[1870px]" : "min-w-[1680px]"} w-full table-fixed`}>
+                    <colgroup>
+                        {columnClasses.map((className, index) => (
+                            <col key={index} className={className} />
+                        ))}
+                    </colgroup>
+                    <TableHeader>
+                        <TableRow className="bg-blue-600 hover:bg-blue-600">
+                            <TableHead className="text-white font-bold">Mã nội bộ</TableHead>
+                            <TableHead className="text-white font-bold">Tên thuốc nội bộ</TableHead>
+                            <TableHead className="text-white font-bold">SĐK nội bộ</TableHead>
+                            <TableHead className="text-white font-bold">Nhóm TCKT</TableHead>
+                            <TableHead className="text-white font-bold text-right">Giá VAT</TableHead>
+                            <TableHead className="text-white font-bold text-center">BHYT</TableHead>
+                            <TableHead className="text-white font-bold text-center">Dịch vụ</TableHead>
+                            <TableHead className="bg-emerald-50/50 text-white font-bold">Mã chung</TableHead>
+                            <TableHead className="bg-emerald-50/50 text-white font-bold">Tên thuốc mapping</TableHead>
+                            <TableHead className="bg-emerald-50/50 text-white font-bold">Hàm lượng</TableHead>
+                            <TableHead className="bg-emerald-50/50 text-white font-bold">Dạng bào chế</TableHead>
+                            <TableHead className="bg-emerald-50/50 text-white font-bold">SĐK mapping</TableHead>
+                            <TableHead className="text-white font-bold">Trạng thái</TableHead>
+                            {hasActionColumn && <TableHead className="sticky right-0 z-20 bg-blue-600 text-right text-white font-bold shadow-[-8px_0_8px_-8px_rgba(15,23,42,0.35)]">Thao tác</TableHead>}
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {items.map((mapping) => (
+                            <TableRow key={mapping.id}>
+                                <TableCell>
+                                    <code className="px-2 py-1 bg-gray-100 rounded text-sm">{mapping.maNoiBo}</code>
+                                </TableCell>
+                                <TableCell className="whitespace-normal font-medium">
+                                    <CompactMappingText value={mapping.tenThuocNoiBo} lines={2} />
+                                </TableCell>
+                                <TableCell>{mapping.soDangKyNoiBo || "-"}</TableCell>
+                                <TableCell>
+                                    {mapping.nhomTckt ? (
+                                        <Badge className="bg-indigo-100 text-indigo-700 border-0">{mapping.nhomTckt}</Badge>
+                                    ) : (
+                                        <div className="flex flex-col items-start gap-1.5">
+                                            <Badge className="bg-slate-100 text-slate-600 border-0">Chưa xác định</Badge>
+                                            <Button
+                                                type="button"
+                                                size="xs"
+                                                variant="outline"
+                                                className="border-slate-300 text-slate-700 hover:bg-slate-50"
+                                                onClick={() => handleOpenNhomTcktDialog(mapping)}
+                                            >
+                                                Thiết lập
+                                            </Button>
+                                        </div>
+                                    )}
+                                </TableCell>
+                                <TableCell className="text-right tabular-nums">{formatMappingGiaVat(mapping.giaVat)}</TableCell>
+                                <TableCell className="text-center">
+                                    {mapping.bhyt ? <Badge className="bg-emerald-100 text-emerald-700 border-0">X</Badge> : <span className="text-gray-400">-</span>}
+                                </TableCell>
+                                <TableCell className="text-center">
+                                    {mapping.dichVu ? <Badge className="bg-blue-100 text-blue-700 border-0">X</Badge> : <span className="text-gray-400">-</span>}
+                                </TableCell>
+                                <TableCell className="bg-emerald-50/50">
+                                    {mapping.masterDrug ? (
+                                        <code className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-sm">
+                                            {mapping.masterDrug.maChung}
+                                        </code>
+                                    ) : "-"}
+                                </TableCell>
+                                <TableCell className="whitespace-normal bg-emerald-50/50">
+                                    {mapping.isOutOfCatalog ? (
+                                        <CompactMappingText value="Ngoài danh mục" lines={1} className="text-amber-600 italic" />
+                                    ) : mapping.masterDrug ? (
+                                        <CompactMappingText value={mapping.masterDrug.tenThuoc} lines={2} className="text-emerald-600 font-medium" />
+                                    ) : (
+                                        <CompactMappingText value="Chưa mapping" lines={1} className="text-gray-400" />
+                                    )}
+                                </TableCell>
+                                <TableCell className="bg-emerald-50/50">
+                                    <CompactMappingText value={mapping.masterDrug?.hamLuong} />
+                                </TableCell>
+                                <TableCell className="bg-emerald-50/50">
+                                    <CompactMappingText value={mapping.masterDrug?.dangBaoChe} />
+                                </TableCell>
+                                <TableCell className="bg-emerald-50/50">
+                                    {mapping.masterDrug?.soDangKy || "-"}
+                                </TableCell>
+                                <TableCell>
+                                    {getStatusBadge(mapping.status)}
+                                    {mapping.isActive === false && (
+                                        <div className="mt-1">
+                                            <Badge className="bg-slate-100 text-slate-700">Ngừng từ {mapping.inactiveFromMonth || "-"}</Badge>
+                                        </div>
+                                    )}
+                                    {mapping.demandPlanningLocked && (
+                                        <div className="mt-1">
+                                            <Badge className="bg-amber-100 text-amber-800">Khóa dự trù</Badge>
+                                            {mapping.demandPlanningLockReason ? (
+                                                <p className="mt-1 text-xs text-amber-700">
+                                                    {mapping.demandPlanningLockReason}
+                                                </p>
+                                            ) : null}
+                                        </div>
+                                    )}
+                                    {mapping.adminNote && (
+                                        <p className="text-xs text-red-500 mt-1">Lý do: {mapping.adminNote}</p>
+                                    )}
+                                </TableCell>
+                                {hasActionColumn && (
+                                    <TableCell className={actionColumnClass}>
+                                        {showLifecycleActions && mapping.isActive === false ? (
+                                            <div className="flex justify-end">
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    className="text-green-700 border-green-300 hover:bg-green-50"
+                                                    onClick={() => handleOpenLifecycleDialog(mapping, "reactivate")}
+                                                >
+                                                    <RefreshCw className="w-4 h-4 mr-1.5" />
+                                                    Kích hoạt lại
+                                                </Button>
+                                            </div>
+                                        ) : showLifecycleActions
+                                            && allowDeleteApprovedWithoutReports
+                                            && (mapping.status === "APPROVED" || mapping.status === "AUTO_MAPPED")
+                                            && mapping.reportCount === 0 ? (
+                                            <div className="flex justify-end gap-2">
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    className="text-blue-700 border-blue-300 hover:bg-blue-50"
+                                                    onClick={() => handleOpenDemandRoundingDialog(mapping)}
+                                                >
+                                                    Quy cách
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    className={
+                                                        mapping.demandPlanningLocked
+                                                            ? "text-green-700 border-green-300 hover:bg-green-50"
+                                                            : "text-amber-700 border-amber-300 hover:bg-amber-50"
+                                                    }
+                                                    onClick={() => handleOpenDemandLockDialog(mapping, !mapping.demandPlanningLocked)}
+                                                >
+                                                    {mapping.demandPlanningLocked ? (
+                                                        <RefreshCw className="w-4 h-4 mr-1.5" />
+                                                    ) : (
+                                                        <Lock className="w-4 h-4 mr-1.5" />
+                                                    )}
+                                                    {mapping.demandPlanningLocked ? "Mở dự trù" : "Khóa dự trù"}
+                                                </Button>
+                                                <Button
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                    onClick={() => handleDelete(mapping)}
+                                                    title="Xóa thuốc đã duyệt chưa có báo cáo XNT"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </Button>
+                                            </div>
+                                        ) : showLifecycleActions && (mapping.status === "APPROVED" || mapping.status === "AUTO_MAPPED") ? (
+                                            <div className="flex justify-end gap-2">
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    className="text-blue-700 border-blue-300 hover:bg-blue-50"
+                                                    onClick={() => handleOpenDemandRoundingDialog(mapping)}
+                                                >
+                                                    Quy cách
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    className={
+                                                        mapping.demandPlanningLocked
+                                                            ? "text-green-700 border-green-300 hover:bg-green-50"
+                                                            : "text-amber-700 border-amber-300 hover:bg-amber-50"
+                                                    }
+                                                    onClick={() => handleOpenDemandLockDialog(mapping, !mapping.demandPlanningLocked)}
+                                                >
+                                                    {mapping.demandPlanningLocked ? (
+                                                        <RefreshCw className="w-4 h-4 mr-1.5" />
+                                                    ) : (
+                                                        <Lock className="w-4 h-4 mr-1.5" />
+                                                    )}
+                                                    {mapping.demandPlanningLocked ? "Mở dự trù" : "Khóa dự trù"}
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    className="text-slate-700 border-slate-300 hover:bg-slate-50"
+                                                    onClick={() => handleOpenLifecycleDialog(mapping, "deactivate")}
+                                                >
+                                                    <PowerOff className="w-4 h-4 mr-1.5" />
+                                                    Ngừng sử dụng
+                                                </Button>
+                                            </div>
+                                        ) : LOCKED_STATUSES.includes(mapping.status) ? (
+                                            <div className="flex items-center justify-end gap-1 text-gray-400">
+                                                <Lock className="w-3.5 h-3.5" />
+                                                <span className="text-xs">
+                                                    {mapping.status === "WAITING_APPROVAL" ? "Đang chờ duyệt" : "Đã duyệt"}
+                                                </span>
+                                            </div>
+                                        ) : (
+                                            <div className="flex justify-end gap-2">
+                                                <Button size="sm" variant="outline" onClick={() => handleSelectMapping(mapping)}>
+                                                    Chọn mapping
+                                                </Button>
+                                                <Button
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                                    onClick={() => handleEditInfo(mapping)}
+                                                    title="Chỉnh sửa thông tin"
+                                                >
+                                                    <Pencil className="w-4 h-4" />
+                                                </Button>
+                                                <Button
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                    onClick={() => handleDelete(mapping)}
+                                                    title="Xóa"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </Button>
+                                            </div>
+                                        )}
+                                    </TableCell>
                                 )}
-                            </TableCell>
+                            </TableRow>
+                        ))}
+                        {items.length === 0 && (
+                            <TableRow>
+                                <TableCell colSpan={hasActionColumn ? 14 : 13} className="text-center text-gray-500 py-8">
+                                    Không có dữ liệu
+                                </TableCell>
+                            </TableRow>
                         )}
-                    </TableRow>
-                ))}
-                {items.length === 0 && (
-                    <TableRow>
-                        <TableCell colSpan={showAction ? 11 : 10} className="text-center text-gray-500 py-8">
-                            Không có dữ liệu
-                        </TableCell>
-                    </TableRow>
-                )}
-            </TableBody>
-            </Table>
-        </TooltipProvider>
-    );
+                    </TableBody>
+                </Table>
+            </TooltipProvider>
+        );
+    };
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
+            <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                <div className="min-w-0">
                     <h2 className="text-3xl font-bold text-gray-800">Quản lý danh mục thuốc</h2>
                     <p className="text-gray-500 mt-1">Ánh xạ thuốc nội bộ với danh mục dùng chung</p>
                 </div>
-                <div className="flex flex-wrap justify-end gap-2">
+                <div className="flex w-full flex-wrap gap-2 xl:w-auto xl:justify-end">
                     <AIReviewButton
                         surface="facility_mappings"
                         message="Kiểm tra danh mục thuốc nội bộ và ánh xạ hiện tại, nêu lỗi cần xử lý, cảnh báo nên kiểm tra và bước tiếp theo."
@@ -859,7 +1578,7 @@ export default function FacilityMappingsPage() {
                     />
                     <Button
                         variant="outline"
-                        className="bg-white text-blue-600 border-blue-200 hover:bg-blue-50"
+                        className="w-full bg-white text-blue-600 border-blue-200 hover:bg-blue-50 sm:w-auto"
                         onClick={handleDownloadTemplate}
                     >
                         <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -867,7 +1586,7 @@ export default function FacilityMappingsPage() {
                         </svg>
                         Tải mẫu Excel
                     </Button>
-                    <div className="relative">
+                    <div className="relative w-full sm:w-auto">
                         <input
                             id="excel-upload"
                             type="file"
@@ -877,7 +1596,7 @@ export default function FacilityMappingsPage() {
                             disabled={isImporting}
                             title="Chọn file Excel"
                         />
-                        <Button variant="outline" disabled={isImporting}>
+                        <Button variant="outline" disabled={isImporting} className="w-full sm:w-auto">
                             {isImporting ? (
                                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 mr-2"></div>
                             ) : (
@@ -888,16 +1607,18 @@ export default function FacilityMappingsPage() {
                             Upload Excel
                         </Button>
                     </div>
-                    <Button
-                        className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
-                        onClick={handleSubmitForApproval}
-                        disabled={isProcessing || readyPendingMappings.length === 0}
-                    >
-                        <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        Gửi duyệt lên Sở
-                    </Button>
+                    <div className="w-full sm:w-auto" title={submitApprovalTitle}>
+                        <Button
+                            className="w-full border border-transparent bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-sm hover:from-blue-600 hover:to-purple-600 disabled:border-slate-200 disabled:bg-none disabled:bg-slate-100 disabled:text-slate-500 disabled:opacity-100 sm:w-auto"
+                            onClick={handleSubmitForApproval}
+                            disabled={submitApprovalDisabled}
+                        >
+                            <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Gửi duyệt lên Sở
+                        </Button>
+                    </div>
                 </div>
             </div>
 
@@ -930,7 +1651,9 @@ export default function FacilityMappingsPage() {
             <Card className="border-0 shadow-lg">
                 <CardHeader>
                     <CardTitle>Danh sách thuốc</CardTitle>
-                    <CardDescription>Tổng cộng {mappings.length} thuốc trong danh mục nội bộ</CardDescription>
+                    <CardDescription>
+                        Tổng cộng {mappings.length} thuốc trong danh mục nội bộ, {activeMappings.length} đang sử dụng
+                    </CardDescription>
                 </CardHeader>
                 <CardContent>
                     {isLoading ? (
@@ -948,6 +1671,7 @@ export default function FacilityMappingsPage() {
                                     )}
                                 </TabsTrigger>
                                 <TabsTrigger value="approved">Đã duyệt ({approvedMappings.length})</TabsTrigger>
+                                <TabsTrigger value="inactive">Ngừng sử dụng ({inactiveMappings.length})</TabsTrigger>
                                 <TabsTrigger value="rejected" data-value="rejected">
                                     Từ chối ({rejectedMappings.length})
                                     {rejectedMappings.length > 0 && (
@@ -982,11 +1706,35 @@ export default function FacilityMappingsPage() {
                                 <MappingTable items={waitingMappings} />
                             </TabsContent>
                             <TabsContent value="approved" className="mt-4">
-                                <div className="flex justify-end mb-4">
+                                <div className="flex flex-wrap justify-end gap-2 mb-4">
+                                    <div className="relative">
+                                        <input
+                                            id="nhom-tckt-excel-upload"
+                                            type="file"
+                                            accept=".xlsx, .xls"
+                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 disabled:cursor-not-allowed"
+                                            onChange={(e) => handleImportApprovedNhomTckt(e.target.files)}
+                                            disabled={isNhomTcktImporting || approvedMappings.length === 0}
+                                            title="Chọn file Excel đã duyệt"
+                                        />
+                                        <Button
+                                            variant="outline"
+                                            className="text-indigo-600 border-indigo-200 hover:bg-indigo-50"
+                                            disabled={isNhomTcktImporting || approvedMappings.length === 0}
+                                        >
+                                            {isNhomTcktImporting ? (
+                                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-indigo-600 mr-2"></div>
+                                            ) : (
+                                                <Upload className="w-4 h-4 mr-2" />
+                                            )}
+                                            Cập nhật Nhóm TCKT
+                                        </Button>
+                                    </div>
                                     <Button
                                         variant="outline"
                                         className="text-green-600 border-green-200 hover:bg-green-50"
                                         onClick={handleExportApproved}
+                                        disabled={approvedMappings.length === 0}
                                     >
                                         <Download className="w-4 h-4 mr-2" />
                                         Xuất Excel Đã Duyệt
@@ -1000,7 +1748,22 @@ export default function FacilityMappingsPage() {
                                         </span>
                                     </div>
                                 )}
-                                <MappingTable items={approvedMappings} />
+                                <MappingTable
+                                    items={approvedMappings}
+                                    showLifecycleActions={true}
+                                    allowDeleteApprovedWithoutReports={true}
+                                />
+                            </TabsContent>
+                            <TabsContent value="inactive" className="mt-4">
+                                {inactiveMappings.length > 0 && (
+                                    <div className="flex items-center gap-2 mb-3 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg">
+                                        <PowerOff className="w-4 h-4 text-slate-600" />
+                                        <span className="text-sm text-slate-700">
+                                            Thuốc ngừng sử dụng sẽ không xuất hiện trong mẫu báo cáo từ tháng hiệu lực.
+                                        </span>
+                                    </div>
+                                )}
+                                <MappingTable items={inactiveMappings} showLifecycleActions={true} />
                             </TabsContent>
                             <TabsContent value="rejected" className="mt-4">
                                 {rejectedMappings.length > 0 && (
@@ -1045,7 +1808,28 @@ export default function FacilityMappingsPage() {
                                 <div className="space-y-3">
                                     <div>
                                         <span className="text-xs text-gray-500 uppercase font-semibold">Tên thuốc</span>
-                                        <div className="font-medium text-gray-900 mt-0.5">{selectedMapping?.tenThuocNoiBo}</div>
+                                        <div className="mt-0.5 flex items-center gap-2">
+                                            <span className="font-medium text-gray-900">{selectedMapping?.tenThuocNoiBo}</span>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Button
+                                                        type="button"
+                                                        size="icon"
+                                                        variant="outline"
+                                                        className="h-7 w-7 shrink-0"
+                                                        disabled={!selectedMapping?.tenThuocNoiBo}
+                                                        onClick={() => {
+                                                            setSearchMasterField("tenThuoc");
+                                                            setSearchMaster(selectedMapping?.tenThuocNoiBo || "");
+                                                        }}
+                                                        aria-label="Dùng tên thuốc để tìm kiếm"
+                                                    >
+                                                        <ArrowRight className="h-4 w-4" />
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent>Dùng tên thuốc để tìm kiếm</TooltipContent>
+                                            </Tooltip>
+                                        </div>
                                     </div>
                                     <div className="grid grid-cols-2 gap-3">
                                         <div>
@@ -1063,7 +1847,28 @@ export default function FacilityMappingsPage() {
                                     </div>
                                     <div>
                                         <span className="text-xs text-gray-500 uppercase font-semibold">Số đăng ký</span>
-                                        <div className="mt-0.5 text-sm">{selectedMapping?.soDangKyNoiBo || "-"}</div>
+                                        <div className="mt-0.5 flex items-center gap-2 text-sm">
+                                            <span>{selectedMapping?.soDangKyNoiBo || "-"}</span>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Button
+                                                        type="button"
+                                                        size="icon"
+                                                        variant="outline"
+                                                        className="h-7 w-7"
+                                                        disabled={!selectedMapping?.soDangKyNoiBo}
+                                                        onClick={() => {
+                                                            setSearchMasterField("soDangKy");
+                                                            setSearchMaster(selectedMapping?.soDangKyNoiBo || "");
+                                                        }}
+                                                        aria-label="Dùng Số đăng ký để tìm kiếm"
+                                                    >
+                                                        <ArrowRight className="h-4 w-4" />
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent>Dùng Số đăng ký để tìm kiếm</TooltipContent>
+                                            </Tooltip>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1097,16 +1902,30 @@ export default function FacilityMappingsPage() {
                         <div className="col-span-8 flex flex-col gap-4 overflow-hidden h-full">
                             {!isOutOfCatalog ? (
                                 <>
-                                    <div className="relative">
-                                        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                        </svg>
-                                        <Input
-                                            className="pl-9 bg-white"
-                                            placeholder="Tìm kiếm trong danh mục dùng chung (Tên thuốc, Mã chung, SĐK, Hoạt chất)..."
-                                            value={searchMaster}
-                                            onChange={(e) => setSearchMaster(e.target.value)}
-                                        />
+                                    <div className="flex gap-2">
+                                        <Select
+                                            value={searchMasterField}
+                                            onValueChange={(value) => setSearchMasterField(value as "soDangKy" | "tenThuoc")}
+                                        >
+                                            <SelectTrigger className="w-[150px] bg-white">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="soDangKy">Số đăng ký</SelectItem>
+                                                <SelectItem value="tenThuoc">Tên thuốc</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        <div className="relative flex-1">
+                                            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                            </svg>
+                                            <Input
+                                                className="pl-9 bg-white"
+                                                placeholder={searchMasterField === "soDangKy" ? "Tìm theo Số đăng ký trong danh mục dùng chung..." : "Tìm theo Tên thuốc trong danh mục dùng chung..."}
+                                                value={searchMaster}
+                                                onChange={(e) => setSearchMaster(e.target.value)}
+                                            />
+                                        </div>
                                     </div>
 
                                     <div className="flex-1 overflow-auto border rounded-lg bg-white shadow-sm">
@@ -1266,11 +2085,188 @@ export default function FacilityMappingsPage() {
                                 onChange={(e) => setEditFormData({ ...editFormData, soDangKyNoiBo: e.target.value })}
                             />
                         </div>
+                        <div className="grid grid-cols-3 gap-4">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Giá VAT</label>
+                                <Input
+                                    inputMode="decimal"
+                                    value={editFormData.giaVat}
+                                    onChange={(e) => setEditFormData({ ...editFormData, giaVat: e.target.value })}
+                                />
+                            </div>
+                            <label className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium">
+                                <input
+                                    type="checkbox"
+                                    className="h-4 w-4"
+                                    checked={editFormData.bhyt === "X"}
+                                    onChange={(e) => setEditFormData({ ...editFormData, bhyt: e.target.checked ? "X" : "" })}
+                                />
+                                BHYT
+                            </label>
+                            <label className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium">
+                                <input
+                                    type="checkbox"
+                                    className="h-4 w-4"
+                                    checked={editFormData.dichVu === "X"}
+                                    onChange={(e) => setEditFormData({ ...editFormData, dichVu: e.target.checked ? "X" : "" })}
+                                />
+                                Dịch vụ
+                            </label>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Số QĐ trúng thầu</label>
+                                <Input
+                                    value={editFormData.soQdTrungThau}
+                                    onChange={(e) => setEditFormData({ ...editFormData, soQdTrungThau: e.target.value })}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Tên Công ty</label>
+                                <Input
+                                    value={editFormData.tenCongTy}
+                                    onChange={(e) => setEditFormData({ ...editFormData, tenCongTy: e.target.value })}
+                                />
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Ngày bắt đầu HĐ</label>
+                                <Input
+                                    placeholder="YYYYMMDD"
+                                    value={editFormData.ngayBatDauHd}
+                                    onChange={(e) => setEditFormData({ ...editFormData, ngayBatDauHd: e.target.value })}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Ngày kết thúc HĐ</label>
+                                <Input
+                                    placeholder="YYYYMMDD"
+                                    value={editFormData.ngayKetThucHd}
+                                    onChange={(e) => setEditFormData({ ...editFormData, ngayKetThucHd: e.target.value })}
+                                />
+                            </div>
+                        </div>
+                        <div className="rounded-md border p-3 space-y-3">
+                            <label className="flex items-center gap-2 text-sm font-medium">
+                                <input
+                                    type="checkbox"
+                                    className="h-4 w-4"
+                                    checked={editFormData.demandRoundingEnabled}
+                                    onChange={(e) =>
+                                        setEditFormData({
+                                            ...editFormData,
+                                            demandRoundingEnabled: e.target.checked,
+                                        })
+                                    }
+                                />
+                                Làm tròn số lượng khi lập dự trù
+                            </label>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">Đơn vị quy cách</label>
+                                    <Input
+                                        placeholder="vỉ, hộp, chai..."
+                                        value={editFormData.demandPackageUnit}
+                                        onChange={(e) =>
+                                            setEditFormData({
+                                                ...editFormData,
+                                                demandPackageUnit: e.target.value,
+                                            })
+                                        }
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">Số lượng / 1 quy cách</label>
+                                    <Input
+                                        inputMode="decimal"
+                                        placeholder="10"
+                                        value={editFormData.demandPackageSize}
+                                        onChange={(e) =>
+                                            setEditFormData({
+                                                ...editFormData,
+                                                demandPackageSize: e.target.value,
+                                            })
+                                        }
+                                    />
+                                </div>
+                            </div>
+                            <p className="text-xs text-gray-500">
+                                Ví dụ: 1 vỉ = 10 viên. Khi gợi ý 7 viên, hệ thống đề xuất 10 viên.
+                            </p>
+                        </div>
                     </div>
                     <DialogFooter>
                         <Button variant="ghost" onClick={() => setIsEditInfoDialogOpen(false)}>Hủy</Button>
                         <Button onClick={handleSaveInfo} disabled={isProcessing}>
                             {isProcessing ? "Đang lưu..." : "Lưu thay đổi"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={isDemandRoundingDialogOpen} onOpenChange={setIsDemandRoundingDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Cấu hình quy cách dự trù</DialogTitle>
+                        <DialogDescription>
+                            Thiết lập cách làm tròn số lượng dự trù cho {selectedMapping?.tenThuocNoiBo || "thuốc này"}.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-2">
+                        <label className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium">
+                            <input
+                                type="checkbox"
+                                className="h-4 w-4"
+                                checked={demandRoundingForm.enabled}
+                                onChange={(e) =>
+                                    setDemandRoundingForm({
+                                        ...demandRoundingForm,
+                                        enabled: e.target.checked,
+                                    })
+                                }
+                            />
+                            Làm tròn số lượng khi lập dự trù
+                        </label>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Đơn vị quy cách</label>
+                                <Input
+                                    placeholder="vỉ, hộp, chai..."
+                                    value={demandRoundingForm.packageUnit}
+                                    onChange={(e) =>
+                                        setDemandRoundingForm({
+                                            ...demandRoundingForm,
+                                            packageUnit: e.target.value,
+                                        })
+                                    }
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Số lượng / 1 quy cách</label>
+                                <Input
+                                    inputMode="decimal"
+                                    placeholder="10"
+                                    value={demandRoundingForm.packageSize}
+                                    onChange={(e) =>
+                                        setDemandRoundingForm({
+                                            ...demandRoundingForm,
+                                            packageSize: e.target.value,
+                                        })
+                                    }
+                                />
+                            </div>
+                        </div>
+                        <div className="rounded-md bg-blue-50 px-3 py-2 text-sm text-blue-800">
+                            Ví dụ: đơn vị nhỏ nhất là viên, 1 vỉ = 10 viên. Nếu gợi ý 7 viên, hệ thống đề xuất 10 viên.
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="ghost" onClick={() => setIsDemandRoundingDialogOpen(false)}>
+                            Hủy
+                        </Button>
+                        <Button onClick={handleSaveDemandRounding} disabled={isProcessing}>
+                            {isProcessing ? "Đang lưu..." : "Lưu quy cách"}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -1282,7 +2278,7 @@ export default function FacilityMappingsPage() {
                     <DialogHeader>
                         <DialogTitle>Thiết lập Nhóm TCKT</DialogTitle>
                         <DialogDescription>
-                            Nhóm TCKT cố định theo mã nội bộ. Sau khi lưu, cơ sở không thể tự thay đổi lại.
+                            Chỉ thiết lập khi đã xác định được nhóm. Sau khi lưu, cơ sở không thể tự thay đổi lại.
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 py-2">
@@ -1315,16 +2311,120 @@ export default function FacilityMappingsPage() {
                 </DialogContent>
             </Dialog>
 
+            <Dialog open={isLifecycleDialogOpen} onOpenChange={setIsLifecycleDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>
+                            {lifecycleAction === "deactivate" ? "Ngừng sử dụng thuốc" : "Kích hoạt lại thuốc"}
+                        </DialogTitle>
+                        <DialogDescription>
+                            {selectedMapping?.tenThuocNoiBo}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-2">
+                        <div className="rounded-lg border bg-slate-50 p-3 text-sm">
+                            <p className="text-slate-500">Mã nội bộ</p>
+                            <p className="font-semibold text-slate-900">{selectedMapping?.maNoiBo}</p>
+                            {lifecycleAction === "deactivate" ? (
+                                <p className="mt-2 text-slate-600">
+                                    Từ tháng hiệu lực, thuốc sẽ không còn xuất hiện trong mẫu báo cáo. Hệ thống sẽ chặn nếu tồn cuối tháng trước còn lớn hơn 0.
+                                </p>
+                            ) : (
+                                <p className="mt-2 text-slate-600">
+                                    Từ tháng hiệu lực, thuốc sẽ xuất hiện lại trong mẫu báo cáo nếu tháng đó chưa được nộp.
+                                </p>
+                            )}
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Tháng hiệu lực</label>
+                            <Input
+                                placeholder="MM/YYYY"
+                                value={lifecycleEffectiveMonth}
+                                onChange={(e) => setLifecycleEffectiveMonth(e.target.value)}
+                            />
+                        </div>
+                        {lifecycleAction === "deactivate" && (
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Lý do</label>
+                                <Input
+                                    placeholder="Ví dụ: Không còn sử dụng tại cơ sở"
+                                    value={lifecycleReason}
+                                    onChange={(e) => setLifecycleReason(e.target.value)}
+                                />
+                            </div>
+                        )}
+                    </div>
+                    <DialogFooter>
+                        <Button variant="ghost" onClick={() => setIsLifecycleDialogOpen(false)}>Hủy</Button>
+                        <Button onClick={handleSaveLifecycle} disabled={isProcessing}>
+                            {isProcessing
+                                ? "Đang lưu..."
+                                : lifecycleAction === "deactivate"
+                                    ? "Ngừng sử dụng"
+                                    : "Kích hoạt lại"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={isDemandLockDialogOpen} onOpenChange={setIsDemandLockDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>
+                            {nextDemandLockState ? "Khóa dự trù thuốc" : "Mở dự trù thuốc"}
+                        </DialogTitle>
+                        <DialogDescription>
+                            {selectedMapping?.tenThuocNoiBo}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-2">
+                        <div className="rounded-lg border bg-slate-50 p-3 text-sm">
+                            <p className="text-slate-500">Mã nội bộ</p>
+                            <p className="font-semibold text-slate-900">{selectedMapping?.maNoiBo}</p>
+                            {nextDemandLockState ? (
+                                <p className="mt-2 text-slate-600">
+                                    Thuốc sẽ không còn hiển thị trong modal Lập dự trù. Báo cáo XNT và trạng thái ánh xạ không bị ảnh hưởng.
+                                </p>
+                            ) : (
+                                <p className="mt-2 text-slate-600">
+                                    Thuốc sẽ hiển thị lại trong modal Lập dự trù nếu vẫn đang sử dụng và đã đủ điều kiện ánh xạ.
+                                </p>
+                            )}
+                        </div>
+                        {nextDemandLockState ? (
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Lý do</label>
+                                <Input
+                                    placeholder="Ví dụ: Không lập dự trù trong đợt này"
+                                    value={demandLockReason}
+                                    onChange={(event) => setDemandLockReason(event.target.value)}
+                                />
+                            </div>
+                        ) : null}
+                    </div>
+                    <DialogFooter>
+                        <Button variant="ghost" onClick={() => setIsDemandLockDialogOpen(false)}>Hủy</Button>
+                        <Button onClick={handleSaveDemandLock} disabled={isProcessing}>
+                            {isProcessing
+                                ? "Đang lưu..."
+                                : nextDemandLockState
+                                    ? "Khóa dự trù"
+                                    : "Mở dự trù"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
             {/* Import Error Report Dialog */}
             <Dialog open={isErrorDialogOpen} onOpenChange={setIsErrorDialogOpen}>
                 <DialogContent className="!max-w-[700px] w-full max-h-[85vh] flex flex-col">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2 text-red-700">
                             <FileWarning className="w-5 h-5" />
-                            Báo cáo lỗi nhập liệu
+                            {importDialogTitle}
                         </DialogTitle>
                         <DialogDescription>
-                            Kết quả xử lý file Excel — có một số dòng cần kiểm tra lại
+                            {importDialogDescription}
                         </DialogDescription>
                     </DialogHeader>
 

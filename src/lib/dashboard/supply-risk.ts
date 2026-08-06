@@ -23,10 +23,15 @@ export interface RawSupplyReport {
     drugMap?: {
         tenThuocNoiBo?: string | null;
         hoatChatNoiBo?: string | null;
+        soDangKyNoiBo?: string | null;
+        donViTinhNoiBo?: string | null;
+        nhomTckt?: string | null;
         masterDrug?: {
             tenThuoc?: string | null;
             hoatChat?: string | null;
             hamLuong?: string | null;
+            soDangKy?: string | null;
+            donViTinh?: string | null;
             isTrongNuoc?: string | null;
         } | null;
     } | null;
@@ -45,6 +50,9 @@ export interface SupplyReportRow {
     drugName: string;
     hoatChat: string;
     hamLuong: string;
+    soDangKy: string;
+    nhomTckt: string;
+    donViTinh: string;
     giaVat: number;
     thanhTienTonCuoi: number;
     soQdTrungThau: string;
@@ -62,6 +70,9 @@ export interface StockoutActualRow {
     drugName: string;
     hoatChat: string;
     hamLuong: string;
+    soDangKy: string;
+    nhomTckt: string;
+    donViTinh: string;
     tonCuoi: number;
     xuat: number;
     currentXuat: number;
@@ -134,6 +145,9 @@ export interface SnapshotMetric {
     drugName: string;
     hoatChat: string;
     hamLuong: string;
+    soDangKy: string;
+    nhomTckt: string;
+    donViTinh: string;
     currentTonCuoi: number;
     currentXuat: number;
     demandAvg: number;
@@ -274,6 +288,9 @@ export function buildSnapshotMetrics(
             drugName: report.drugName,
             hoatChat: report.hoatChat,
             hamLuong: report.hamLuong,
+            soDangKy: report.soDangKy,
+            nhomTckt: report.nhomTckt,
+            donViTinh: report.donViTinh,
             currentTonCuoi: report.tonCuoi,
             currentXuat: report.xuat,
             demandAvg,
@@ -389,6 +406,9 @@ export function normalizeSupplyReportRow(report: RawSupplyReport): SupplyReportR
         drugName: report.drugMap?.masterDrug?.tenThuoc || report.drugMap?.tenThuocNoiBo || "N/A",
         hoatChat: report.drugMap?.masterDrug?.hoatChat || report.drugMap?.hoatChatNoiBo || "N/A",
         hamLuong: report.drugMap?.masterDrug?.hamLuong || "",
+        soDangKy: report.drugMap?.masterDrug?.soDangKy || report.drugMap?.soDangKyNoiBo || "",
+        nhomTckt: report.drugMap?.nhomTckt || "",
+        donViTinh: report.drugMap?.masterDrug?.donViTinh || report.drugMap?.donViTinhNoiBo || "",
         giaVat: toNumber(report.giaVat),
         thanhTienTonCuoi: toNumber(report.thanhTienTonCuoi),
         soQdTrungThau: report.soQdTrungThau?.trim() || "",
@@ -420,6 +440,9 @@ export function buildSupplyDashboardDataFromMetrics({
             drugName: metric.drugName,
             hoatChat: metric.hoatChat,
             hamLuong: metric.hamLuong,
+            soDangKy: metric.soDangKy,
+            nhomTckt: metric.nhomTckt,
+            donViTinh: metric.donViTinh,
             tonCuoi: 0,
             xuat: metric.currentXuat,
             currentXuat: metric.currentXuat,

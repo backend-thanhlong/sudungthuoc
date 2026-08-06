@@ -19,6 +19,9 @@ export interface InventorySnapshotRow {
     drugName: string;
     activeIngredient: string;
     dosage: string;
+    nhomTckt: string;
+    kiemSoatDacBiet: string;
+    isThuocHiem: boolean;
     soDangKy: string;
     unit: string;
     currentStock: number;
@@ -31,6 +34,7 @@ export interface DrugFacilityStock {
     facilityCode: string;
     facilityName: string;
     facilityType: string;
+    nhomTckt: string;
     currentStock: number;
     priceVAT: number;
     reportMonth: string;
@@ -42,6 +46,9 @@ export interface DrugSearchItem {
     drugName: string;
     activeIngredient: string;
     dosage: string;
+    nhomTckt: string;
+    kiemSoatDacBiet: string;
+    isThuocHiem: boolean;
     soDangKy: string;
     unit: string;
     facilities: DrugFacilityStock[];
@@ -62,6 +69,8 @@ export interface FacilityInventoryItem {
     drugName: string;
     activeIngredient: string;
     dosage: string;
+    nhomTckt: string;
+    isThuocHiem: boolean;
     soDangKy: string;
     unit: string;
     currentStock: number;

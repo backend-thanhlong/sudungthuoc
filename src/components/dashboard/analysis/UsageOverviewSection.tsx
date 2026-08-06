@@ -22,6 +22,9 @@ import type {
     UsageSlice,
 } from "@/lib/dashboard/abc-analysis";
 import { useDashboardChartTheme } from "../chart-theme";
+import ChartColorShortcut from "../ChartColorShortcut";
+import { useChartColors } from "../ChartColorProvider";
+import { normalizeDynamicChartKey } from "@/lib/chart-colors";
 
 interface UsageOverviewSectionProps {
     overview: UsageOverview;
@@ -41,6 +44,7 @@ interface UsageSliceTooltipProps {
         payload?: UsageChartDatum;
     }>;
     metric: UsageMetricKey;
+    hiddenPercentLabels?: string[];
 }
 
 interface FacilityStackDatum {
@@ -62,19 +66,6 @@ interface FacilityTooltipProps {
     metric: UsageMetricKey;
 }
 
-const CHART_COLORS = [
-    "#2563eb",
-    "#16a34a",
-    "#dc2626",
-    "#d97706",
-    "#7c3aed",
-    "#0891b2",
-    "#be123c",
-    "#4f46e5",
-    "#65a30d",
-    "#c2410c",
-];
-
 const DIMENSION_OPTIONS: Array<{ key: UsageDimensionKey; label: string }> = [
     { key: "drugGroup", label: "Nhóm thuốc" },
     { key: "therapeuticGroup", label: "Nhóm điều trị" },
@@ -82,6 +73,7 @@ const DIMENSION_OPTIONS: Array<{ key: UsageDimensionKey; label: string }> = [
     { key: "prescription", label: "Kê đơn" },
     { key: "domestic", label: "Trong nước" },
 ];
+const NON_SPECIAL_CONTROL_LABEL = "Không phải thuốc kiểm soát đặc biệt";
 
 const formatCurrency = (value: number) =>
     new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND", maximumFractionDigits: 0 }).format(value);
@@ -117,7 +109,16 @@ function formatMetricCompact(value: number) {
     return formatCompact(value);
 }
 
-function normalizeChartSlices(slices: UsageSlice[], metric: UsageMetricKey, limit = 10): UsageChartDatum[] {
+function shouldHidePercent(label: string, hiddenPercentLabels?: string[]) {
+    return hiddenPercentLabels?.includes(label) ?? false;
+}
+
+function normalizeChartSlices(
+    slices: UsageSlice[],
+    metric: UsageMetricKey,
+    limit = 10,
+    getFill?: (item: UsageSlice, index: number) => string
+): UsageChartDatum[] {
     const positiveSlices = slices
         .filter((item) => getMetricValue(item, metric) > 0)
         .sort((left, right) => getMetricValue(right, metric) - getMetricValue(left, metric));
@@ -133,7 +134,7 @@ function normalizeChartSlices(slices: UsageSlice[], metric: UsageMetricKey, limi
         ...item,
         metricValue: getMetricValue(item, metric),
         metricPercent: getMetricPercent(item, metric),
-        fill: CHART_COLORS[index % CHART_COLORS.length],
+        fill: getFill?.(item, index) ?? "#1974D3",
     }));
 
     if (overflowSlices.length > 0) {
@@ -142,7 +143,7 @@ function normalizeChartSlices(slices: UsageSlice[], metric: UsageMetricKey, limi
         const otherDrugCount = overflowSlices.reduce((sum, item) => sum + item.drugCount, 0);
         const otherPercentValue = overflowSlices.reduce((sum, item) => sum + item.percentValue, 0);
         const otherPercentQuantity = overflowSlices.reduce((sum, item) => sum + item.percentQuantity, 0);
-        rows.push({
+        const otherSlice = {
             key: "other",
             label: "Khác",
             value: otherValue,
@@ -152,14 +153,18 @@ function normalizeChartSlices(slices: UsageSlice[], metric: UsageMetricKey, limi
             percentQuantity: otherPercentQuantity,
             metricValue: metric === "value" ? otherValue : otherQuantity,
             metricPercent: metric === "value" ? otherPercentValue : otherPercentQuantity,
-            fill: "#64748b",
+            fill: "#00001B",
+        };
+        rows.push({
+            ...otherSlice,
+            fill: getFill?.(otherSlice, rows.length) ?? otherSlice.fill,
         });
     }
 
     return rows;
 }
 
-function UsageSliceTooltip({ active, payload, metric }: UsageSliceTooltipProps) {
+function UsageSliceTooltip({ active, payload, metric, hiddenPercentLabels }: UsageSliceTooltipProps) {
     const item = payload?.[0]?.payload;
     const chartTheme = useDashboardChartTheme();
 
@@ -183,7 +188,9 @@ function UsageSliceTooltip({ active, payload, metric }: UsageSliceTooltipProps) 
             <p style={{ color: chartTheme.mutedText }}>Giá trị: {formatCurrency(item.value)}</p>
             <p style={{ color: chartTheme.mutedText }}>Số lượng: {formatNumber(item.quantity)}</p>
             <p style={{ color: chartTheme.mutedText }}>Số mặt hàng: {formatNumber(item.drugCount, 0)}</p>
-            <p style={{ color: chartTheme.mutedText }}>Tỷ trọng: {formatPercent(item.metricPercent)}</p>
+            {!shouldHidePercent(item.label, hiddenPercentLabels) && (
+                <p style={{ color: chartTheme.mutedText }}>Tỷ trọng: {formatPercent(item.metricPercent)}</p>
+            )}
         </div>
     );
 }
@@ -201,22 +208,37 @@ function UsageBreakdownBarChart({
     subtitle,
     slices,
     metric,
+    chartId,
 }: {
     title: string;
     subtitle: string;
     slices: UsageSlice[];
     metric: UsageMetricKey;
+    chartId: string;
 }) {
-    const chartData = useMemo(() => normalizeChartSlices(slices, metric), [metric, slices]);
+    const chartColors = useChartColors();
+    const chartData = useMemo(() => normalizeChartSlices(
+        slices,
+        metric,
+        10,
+        (item, index) => chartColors.resolveColor({
+            chartId,
+            key: normalizeDynamicChartKey(item.label),
+            index,
+        })
+    ), [chartColors, chartId, metric, slices]);
     const chartTheme = useDashboardChartTheme();
 
     return (
-        <div className="rounded-xl border border-border bg-card p-5 text-card-foreground shadow-sm">
-            <div className="mb-4">
-                <h3 className="font-semibold text-foreground">{title}</h3>
-                <p className="text-xs text-muted-foreground">{subtitle}</p>
+        <div className="rounded-xl border border-border bg-card p-4 text-card-foreground shadow-sm sm:p-5">
+            <div className="mb-4 flex items-start justify-between gap-3">
+                <div>
+                    <h3 className="font-semibold text-foreground">{title}</h3>
+                    <p className="text-xs text-muted-foreground">{subtitle}</p>
+                </div>
+                <ChartColorShortcut chartId={chartId} />
             </div>
-            <div className="h-[340px]">
+            <div className="h-[300px] sm:h-[340px]">
                 {chartData.length > 0 ? (
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={chartData} layout="vertical" margin={{ top: 8, right: 18, left: 8, bottom: 8 }}>
@@ -253,21 +275,38 @@ function UsageDonutChart({
     title,
     slices,
     metric,
+    chartId,
+    hiddenPercentLabels,
 }: {
     title: string;
     slices: UsageSlice[];
     metric: UsageMetricKey;
+    chartId: string;
+    hiddenPercentLabels?: string[];
 }) {
-    const chartData = useMemo(() => normalizeChartSlices(slices, metric, 4), [metric, slices]);
+    const chartColors = useChartColors();
+    const chartData = useMemo(() => normalizeChartSlices(
+        slices,
+        metric,
+        4,
+        (item, index) => chartColors.resolveColor({
+            chartId,
+            key: normalizeDynamicChartKey(item.label),
+            index,
+        })
+    ), [chartColors, chartId, metric, slices]);
     const chartTheme = useDashboardChartTheme();
 
     return (
-        <div className="rounded-xl border border-border bg-card p-5 text-card-foreground shadow-sm">
-            <div className="mb-3">
-                <h3 className="font-semibold text-foreground">{title}</h3>
-                <p className="text-xs text-muted-foreground">Theo {getMetricLabel(metric).toLowerCase()}</p>
+        <div className="rounded-xl border border-border bg-card p-4 text-card-foreground shadow-sm sm:p-5">
+            <div className="mb-3 flex items-start justify-between gap-3">
+                <div>
+                    <h3 className="font-semibold text-foreground">{title}</h3>
+                    <p className="text-xs text-muted-foreground">Theo {getMetricLabel(metric).toLowerCase()}</p>
+                </div>
+                <ChartColorShortcut chartId={chartId} />
             </div>
-            <div className="h-[260px]">
+            <div className="h-[240px] sm:h-[260px]">
                 {chartData.length > 0 ? (
                     <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
@@ -277,18 +316,20 @@ function UsageDonutChart({
                                 nameKey="label"
                                 cx="50%"
                                 cy="47%"
-                                innerRadius={54}
-                                outerRadius={82}
+                                innerRadius="42%"
+                                outerRadius="68%"
                                 paddingAngle={2}
-                                label={({ percent }: { percent?: number }) =>
-                                    percent && percent > 0.05 ? `${(percent * 100).toFixed(0)}%` : ""
+                                label={({ percent, payload }: { percent?: number; payload?: UsageChartDatum }) =>
+                                    percent && percent > 0.05 && payload && !shouldHidePercent(payload.label, hiddenPercentLabels)
+                                        ? `${(percent * 100).toFixed(0)}%`
+                                        : ""
                                 }
                             >
                                 {chartData.map((item) => (
                                     <Cell key={item.key} fill={item.fill} />
                                 ))}
                             </Pie>
-                            <Tooltip content={<UsageSliceTooltip metric={metric} />} />
+                            <Tooltip content={<UsageSliceTooltip metric={metric} hiddenPercentLabels={hiddenPercentLabels} />} />
                             <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8, color: chartTheme.axis }} />
                         </PieChart>
                     </ResponsiveContainer>
@@ -341,7 +382,8 @@ function FacilityUsageTooltip({ active, payload, metric }: FacilityTooltipProps)
 function buildFacilityStackData(
     facilities: FacilityUsageComparison[],
     dimension: UsageDimensionKey,
-    metric: UsageMetricKey
+    metric: UsageMetricKey,
+    getSeriesColor: (label: string, index: number) => string
 ) {
     const topFacilities = [...facilities]
         .filter((facility) => (metric === "value" ? facility.totalValue : facility.totalQuantity) > 0)
@@ -374,14 +416,14 @@ function buildFacilityStackData(
             sourceKey: key,
             dataKey: `s${index}`,
             label: item.label,
-            color: CHART_COLORS[index % CHART_COLORS.length],
+            color: getSeriesColor(item.label, index),
         })),
         ...(hasOther
             ? [{
                 sourceKey: "other",
                 dataKey: `s${topSlices.length}`,
                 label: "Khác",
-                color: "#64748b",
+                color: getSeriesColor("Khác", topSlices.length),
             }]
             : []),
     ];
@@ -427,22 +469,37 @@ function AdminFacilityUsageChart({
     onDimensionChange: (value: UsageDimensionKey) => void;
 }) {
     const comparison = useMemo(() => overview.facilityComparison ?? [], [overview.facilityComparison]);
+    const chartColors = useChartColors();
     const { data, series } = useMemo(
-        () => buildFacilityStackData(comparison, dimension, metric),
-        [comparison, dimension, metric]
+        () => buildFacilityStackData(
+            comparison,
+            dimension,
+            metric,
+            (label, index) => chartColors.resolveColor({
+                chartId: "dashboard.analysis.facilityComparison",
+                key: normalizeDynamicChartKey(label),
+                index,
+            })
+        ),
+        [chartColors, comparison, dimension, metric]
     );
     const chartTheme = useDashboardChartTheme();
 
     return (
-        <div className="rounded-xl border border-border bg-card p-5 text-card-foreground shadow-sm">
+        <div className="rounded-xl border border-border bg-card p-4 text-card-foreground shadow-sm sm:p-5">
             <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                 <div>
-                    <h3 className="font-semibold text-foreground">Top CSYT theo sử dụng</h3>
-                    <p className="text-xs text-muted-foreground">
-                        {isSingleFacility ? "Cơ sở đang chọn" : "Top 10 cơ sở, chia theo chiều phân tích"}
-                    </p>
+                    <div className="flex items-start gap-2">
+                        <div>
+                            <h3 className="font-semibold text-foreground">Top CSYT theo sử dụng</h3>
+                            <p className="text-xs text-muted-foreground">
+                                {isSingleFacility ? "Cơ sở đang chọn" : "Top 10 cơ sở, chia theo chiều phân tích"}
+                            </p>
+                        </div>
+                        <ChartColorShortcut chartId="dashboard.analysis.facilityComparison" />
+                    </div>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
                     {DIMENSION_OPTIONS.map((option) => (
                         <button
                             key={option.key}
@@ -458,7 +515,7 @@ function AdminFacilityUsageChart({
                     ))}
                 </div>
             </div>
-            <div className="h-[420px]">
+            <div className="h-[340px] sm:h-[420px]">
                 {data.length > 0 && series.length > 0 ? (
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={data} layout="vertical" margin={{ top: 8, right: 20, left: 12, bottom: 8 }}>
@@ -511,13 +568,13 @@ export default function UsageOverviewSection({ overview, isAdmin, isSingleFacili
                         Cơ cấu sử dụng thuốc đã ánh xạ theo nhóm thuốc, nhóm điều trị và các thuộc tính quản lý
                     </p>
                 </div>
-                <div className="inline-flex w-fit rounded-lg border border-border bg-card p-1 shadow-sm">
+                <div className="inline-flex w-full rounded-lg border border-border bg-card p-1 shadow-sm sm:w-fit">
                     {(["value", "quantity"] as UsageMetricKey[]).map((metric) => (
                         <button
                             key={metric}
                             type="button"
                             onClick={() => setUsageMetric(metric)}
-                            className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${usageMetric === metric
+                            className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors sm:flex-none ${usageMetric === metric
                                 ? "bg-indigo-600 text-white"
                                 : "text-muted-foreground hover:bg-muted hover:text-foreground"
                                 }`}
@@ -547,12 +604,14 @@ export default function UsageOverviewSection({ overview, isAdmin, isSingleFacili
                             subtitle="Top nhóm thuốc theo phạm vi đang chọn"
                             slices={overview.byDrugGroup}
                             metric={usageMetric}
+                            chartId="dashboard.analysis.usageDrugGroup"
                         />
                         <UsageBreakdownBarChart
                             title="Cơ cấu theo nhóm điều trị"
                             subtitle="Top nhóm điều trị theo phạm vi đang chọn"
                             slices={overview.byTherapeuticGroup}
                             metric={usageMetric}
+                            chartId="dashboard.analysis.usageTherapeuticGroup"
                         />
                     </div>
 
@@ -561,12 +620,19 @@ export default function UsageOverviewSection({ overview, isAdmin, isSingleFacili
                         subtitle="Gộp góc nhìn nhóm thuốc và nhóm điều trị"
                         slices={overview.topGroups}
                         metric={usageMetric}
+                        chartId="dashboard.analysis.usageTopGroups"
                     />
 
                     <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-                        <UsageDonutChart title="Thuốc kiểm soát đặc biệt" slices={overview.bySpecialControl} metric={usageMetric} />
-                        <UsageDonutChart title="Kê đơn" slices={overview.byPrescription} metric={usageMetric} />
-                        <UsageDonutChart title="Trong nước" slices={overview.byDomestic} metric={usageMetric} />
+                        <UsageDonutChart
+                            title="Thuốc kiểm soát đặc biệt"
+                            slices={overview.bySpecialControl}
+                            metric={usageMetric}
+                            chartId="dashboard.analysis.attributes"
+                            hiddenPercentLabels={[NON_SPECIAL_CONTROL_LABEL]}
+                        />
+                        <UsageDonutChart title="Kê đơn" slices={overview.byPrescription} metric={usageMetric} chartId="dashboard.analysis.attributes" />
+                        <UsageDonutChart title="Trong nước" slices={overview.byDomestic} metric={usageMetric} chartId="dashboard.analysis.attributes" />
                     </div>
 
                     {isAdmin && (

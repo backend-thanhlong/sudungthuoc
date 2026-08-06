@@ -25,6 +25,7 @@ export async function GET() {
                         tenGoiThau: true,
                         giaGoiThau: true,
                         soLuongPhanLo: true,
+                        yeuCauTBMT: true,
                         thongBaoMoiThaus: true,
                     }
                 }

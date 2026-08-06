@@ -6,6 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import {
     Dialog,
     DialogContent,
     DialogDescription,
@@ -13,6 +20,11 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import type { AIClientResponse } from "@/components/ai/types";
+import {
+    AI_CHAT_MODEL_OPTIONS,
+    DEFAULT_AI_MODEL_CHOICE,
+    type AIChatModelChoice,
+} from "@/lib/ai/model-options";
 
 interface ChatMessage {
     id: string;
@@ -46,6 +58,7 @@ export default function AIAssistantPanel({
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
     const [useFallback, setUseFallback] = useState(false);
+    const [modelChoice, setModelChoice] = useState<AIChatModelChoice>(DEFAULT_AI_MODEL_CHOICE);
 
     const sendMessage = async () => {
         const trimmedInput = input.trim();
@@ -71,7 +84,8 @@ export default function AIAssistantPanel({
                     mode: "chat",
                     surface: "dashboard",
                     message: trimmedInput,
-                    useFallback,
+                    useFallback: modelChoice === DEFAULT_AI_MODEL_CHOICE ? useFallback : false,
+                    modelChoice,
                     context: { pathname },
                 }),
             });
@@ -156,6 +170,32 @@ export default function AIAssistantPanel({
                 </div>
 
                 <div className="border-t border-slate-200 bg-white p-4">
+                    <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+                        <div className="flex items-center gap-2">
+                            <span className="text-xs font-medium text-slate-600">Mô hình</span>
+                            <Select
+                                value={modelChoice}
+                                onValueChange={(value) => {
+                                    const nextChoice = value as AIChatModelChoice;
+                                    setModelChoice(nextChoice);
+                                    if (nextChoice !== DEFAULT_AI_MODEL_CHOICE) {
+                                        setUseFallback(false);
+                                    }
+                                }}
+                            >
+                                <SelectTrigger size="sm" className="w-[220px] max-w-full">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {AI_CHAT_MODEL_OPTIONS.map(option => (
+                                        <SelectItem key={option.value} value={option.value}>
+                                            {option.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
                     <div className="flex gap-2">
                         <Textarea
                             value={input}
@@ -180,7 +220,7 @@ export default function AIAssistantPanel({
                             {isLoading ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
                         </Button>
                     </div>
-                    {canUseFallback && (
+                    {canUseFallback && modelChoice === DEFAULT_AI_MODEL_CHOICE && (
                         <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
                             <button
                                 type="button"

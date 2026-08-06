@@ -5,6 +5,27 @@ import {
     findOrCreateTherapeuticGroup,
     normalizeTherapeuticGroupName,
 } from "@/lib/therapeutic-groups";
+import {
+    isValidSpecialControlValue,
+    normalizeSpecialControlValue,
+} from "@/lib/master-drugs/special-control";
+
+function parseImportedBooleanFlag(value: unknown) {
+    if (typeof value === "boolean") {
+        return value;
+    }
+
+    if (typeof value === "number") {
+        return value === 1;
+    }
+
+    if (typeof value !== "string") {
+        return false;
+    }
+
+    const normalizedValue = value.trim().toLowerCase();
+    return ["1", "true", "yes", "y", "có", "co", "x"].includes(normalizedValue);
+}
 
 export async function POST(request: Request) {
     try {
@@ -24,15 +45,26 @@ export async function POST(request: Request) {
         let errorCount = 0;
         let skippedCount = 0;
         let createdTherapeuticGroupCount = 0;
+        const errors: string[] = [];
         const therapeuticGroupCache = new Map<string, string | null>();
 
-        for (const drug of drugs) {
+        for (const [index, drug] of drugs.entries()) {
+            const rowNumber = index + 2;
             if (!drug.maChung || !drug.tenThuoc) {
                 errorCount++;
+                errors.push(`Dòng ${rowNumber}: thiếu Mã chung hoặc Tên thuốc`);
                 continue;
             }
 
             try {
+                if (!isValidSpecialControlValue(drug.kiemSoatDacBiet)) {
+                    errorCount++;
+                    errors.push(`Dòng ${rowNumber}: Thuốc kiểm soát đặc biệt không thuộc danh mục hợp lệ`);
+                    continue;
+                }
+
+                const normalizedSpecialControl = normalizeSpecialControlValue(drug.kiemSoatDacBiet);
+
                 // Check if drug already exists
                 const existingDrug = await prisma.masterDrug.findFirst({
                     where: { maChung: String(drug.maChung) },
@@ -68,6 +100,7 @@ export async function POST(request: Request) {
                     data: {
                         maChung: String(drug.maChung),
                         maBhyt: drug.maBhyt ? String(drug.maBhyt) : null,
+                        maAtc: drug.maAtc ? String(drug.maAtc) : null,
                         tenThuoc: String(drug.tenThuoc),
                         hoatChat: drug.hoatChat ? String(drug.hoatChat) : null,
                         hamLuong: drug.hamLuong ? String(drug.hamLuong) : null,
@@ -94,7 +127,8 @@ export async function POST(request: Request) {
                             ? { connect: { id: therapeuticGroupId } }
                             : undefined,
                         isKeDon: drug.isKeDon ? String(drug.isKeDon) : null,
-                        kiemSoatDacBiet: drug.kiemSoatDacBiet ? String(drug.kiemSoatDacBiet) : null,
+                        kiemSoatDacBiet: normalizedSpecialControl,
+                        isThuocHiem: parseImportedBooleanFlag(drug.isThuocHiem ?? drug.thuocHiem),
                         isTrongNuoc: drug.isTrongNuoc ? String(drug.isTrongNuoc) : null,
                         isActive: true,
                     },
@@ -102,6 +136,7 @@ export async function POST(request: Request) {
                 successCount++;
             } catch (error) {
                 console.error(`Error importing drug ${drug.maChung}:`, error);
+                errors.push(`Dòng ${rowNumber}: lỗi khi nhập thuốc ${drug.maChung}`);
                 errorCount++;
             }
         }
@@ -115,6 +150,7 @@ export async function POST(request: Request) {
                 error: errorCount,
                 createdTherapeuticGroups: createdTherapeuticGroupCount,
             },
+            errors,
         });
     } catch (error) {
         console.error("Import error:", error);

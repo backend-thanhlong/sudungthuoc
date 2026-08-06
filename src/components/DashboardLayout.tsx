@@ -21,6 +21,7 @@ import {
     LogOut,
     Megaphone,
     Menu,
+    Palette,
     PackageCheck,
     PanelLeftClose,
     PanelLeftOpen,
@@ -31,12 +32,15 @@ import {
     ShoppingCart,
     Sparkles,
     Users,
+    Wrench,
     X,
     type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AIAssistantPanel from "@/components/ai/AIAssistantPanel";
 import ChangePasswordDialog from "@/components/ChangePasswordDialog";
+import FacilityProfileDialog, { type FacilityProfile } from "@/components/FacilityProfileDialog";
+import { ChartColorProvider } from "@/components/dashboard/ChartColorProvider";
 import NotificationBell from "@/components/NotificationBell";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 import {
@@ -115,12 +119,22 @@ const adminNavItems: NavItem[] = [
         icon: FileBarChart,
     },
     {
+        label: "Phân tích giá thuốc",
+        href: "/dashboard/price-analysis",
+        icon: BarChart3,
+    },
+    {
+        label: "Lập dự trù",
+        href: "/dashboard/admin/lap-du-tru",
+        icon: ClipboardList,
+    },
+    {
         label: "Báo cáo nâng cao",
         href: "/dashboard/admin/reports-advanced",
         icon: BarChart3,
     },
     {
-        label: "Dự trù đặt hàng",
+        label: "Thiết lập đơn hàng",
         href: "#dutru-dat-hang-admin",
         icon: PackageCheck,
         children: [
@@ -162,9 +176,19 @@ const adminNavItems: NavItem[] = [
                 icon: CalendarDays,
             },
             {
+                label: "Cài đặt hệ thống",
+                href: "/dashboard/admin/system-maintenance",
+                icon: Wrench,
+            },
+            {
                 label: "Danh mục nhóm điều trị",
                 href: "/dashboard/admin/therapeutic-groups",
                 icon: ListTree,
+            },
+            {
+                label: "Bảng màu biểu đồ",
+                href: "/dashboard/admin/chart-colors",
+                icon: Palette,
             },
             {
                 label: "Nhật ký hoạt động",
@@ -239,7 +263,17 @@ const facilityNavItems: NavItem[] = [
         icon: FileBarChart,
     },
     {
-        label: "Dự trù đặt hàng",
+        label: "Phân tích giá thuốc",
+        href: "/dashboard/price-analysis",
+        icon: BarChart3,
+    },
+    {
+        label: "Lập dự trù",
+        href: "/dashboard/facility/lap-du-tru",
+        icon: ClipboardList,
+    },
+    {
+        label: "Thiết lập đơn hàng",
         href: "#dutru-dat-hang-facility",
         icon: PackageCheck,
         children: [
@@ -264,7 +298,7 @@ const facilityNavItems: NavItem[] = [
 
 const companyNavItems: NavItem[] = [
     {
-        label: "Dự trù đặt hàng",
+        label: "Thiết lập đơn hàng",
         href: "#dutru-dat-hang-company",
         icon: PackageCheck,
         children: [
@@ -326,6 +360,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [mobileNavOpen, setMobileNavOpen] = useState(false);
     const [changePasswordOpen, setChangePasswordOpen] = useState(false);
+    const [facilityProfileOpen, setFacilityProfileOpen] = useState(false);
+    const [facilityNameOverride, setFacilityNameOverride] = useState<string | null>(null);
     const [aiAssistantOpen, setAiAssistantOpen] = useState(false);
     const [openDropdowns, setOpenDropdowns] = useState<string[]>([]);
 
@@ -342,14 +378,14 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             ? companyNavItems
             : facilityNavItems;
     const roleLabel = role === "ADMIN" ? "Admin" : role === "COMPANY" ? "Công ty" : "Cơ sở";
-    const userName = session?.user?.name || "Người dùng";
+    const userName = facilityNameOverride || session?.user?.name || "Người dùng";
     const userInitial = userName[0]?.toUpperCase() || "U";
     const canUseAI = role === "ADMIN" || role === "FACILITY";
     const headerTitle = role === "ADMIN"
         ? "Sở Y Tế - Quản trị hệ thống"
         : role === "COMPANY"
             ? `Công ty - ${session?.user?.name || "Tài khoản công ty"}`
-            : session?.user?.name || "Dashboard";
+            : userName || "Dashboard";
 
     const isNavItemActive = (item: NavItem) => {
         if (item.children) {
@@ -360,7 +396,11 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     };
 
     const handleLogout = async () => {
-        await signOut({ callbackUrl: "/login" });
+        await signOut({ callbackUrl: "/" });
+    };
+
+    const handleFacilityProfileSaved = (profile: FacilityProfile) => {
+        setFacilityNameOverride(profile.facilityName || profile.username || "Người dùng");
     };
 
     const renderNavItems = ({
@@ -384,7 +424,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                         aria-expanded={isDropdownOpen}
                         onClick={() => toggleDropdown(item.label)}
                         className={cn(
-                            "group relative flex h-11 w-full items-center rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40",
+                            "group relative flex h-11 w-full items-center rounded-lg text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40",
                             expanded ? "gap-3 px-3" : "justify-center px-0",
                             isActive
                                 ? "bg-blue-50 text-blue-700 dark:bg-blue-950/45 dark:text-blue-200"
@@ -432,9 +472,9 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                                             href={child.href}
                                             onClick={onNavigate}
                                             className={cn(
-                                                "group flex h-9 items-center gap-2 rounded-md px-3 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40",
+                                                "group flex h-9 items-center gap-2 rounded-md px-3 text-sm font-normal transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40",
                                                 isChildActive
-                                                    ? "bg-blue-50 text-blue-700 font-semibold dark:bg-blue-950/45 dark:text-blue-200"
+                                                    ? "bg-blue-50 text-blue-700 dark:bg-blue-950/45 dark:text-blue-200"
                                                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                                             )}
                                         >
@@ -462,7 +502,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                     href={item.href}
                     onClick={onNavigate}
                     className={cn(
-                        "group relative flex h-11 w-full items-center rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40",
+                        "group relative flex h-11 w-full items-center rounded-lg text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40",
                         expanded ? "gap-3 px-3" : "justify-center px-0",
                         isActive
                             ? "bg-blue-50 text-blue-700 dark:bg-blue-950/45 dark:text-blue-200"
@@ -495,6 +535,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
     return (
         <TooltipProvider delayDuration={150}>
+            <ChartColorProvider>
             <div className="min-h-screen bg-background">
                 {mobileNavOpen && (
                     <button
@@ -650,6 +691,15 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                                         <p className="truncate text-xs text-muted-foreground">{session?.user?.email}</p>
                                     </div>
                                     <DropdownMenuSeparator />
+                                    {role === "FACILITY" && (
+                                        <DropdownMenuItem
+                                            onClick={() => setFacilityProfileOpen(true)}
+                                            className="cursor-pointer"
+                                        >
+                                            <Building2 className="mr-2 size-4" />
+                                            Cập nhật thông tin cơ sở
+                                        </DropdownMenuItem>
+                                    )}
                                     <DropdownMenuItem
                                         onClick={() => setChangePasswordOpen(true)}
                                         className="cursor-pointer"
@@ -674,6 +724,13 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                     open={changePasswordOpen}
                     onOpenChange={setChangePasswordOpen}
                 />
+                {role === "FACILITY" && (
+                    <FacilityProfileDialog
+                        open={facilityProfileOpen}
+                        onOpenChange={setFacilityProfileOpen}
+                        onSaved={handleFacilityProfileSaved}
+                    />
+                )}
                 {canUseAI && (
                     <AIAssistantPanel
                         open={aiAssistantOpen}
@@ -683,6 +740,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                     />
                 )}
             </div>
+            </ChartColorProvider>
         </TooltipProvider>
     );
 }

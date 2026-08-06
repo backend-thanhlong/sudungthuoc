@@ -1,0 +1,31 @@
+CREATE OR REPLACE VIEW "ai_master_drugs" AS
+SELECT
+    md."id" AS "master_drug_id",
+    md."ma_chung",
+    md."ma_bhyt",
+    md."ten_thuoc",
+    md."hoat_chat",
+    md."ham_luong",
+    md."dang_bao_che",
+    md."so_dang_ky",
+    md."quy_cach",
+    md."don_vi_tinh",
+    md."tieu_chuan",
+    md."tuoi_tho",
+    md."duong_dung",
+    md."nguon_goc",
+    md."cong_ty_san_xuat",
+    md."nuoc_san_xuat",
+    md."cong_ty_dang_ky",
+    md."nuoc_dang_ky",
+    md."nhom_thuoc",
+    tg."name" AS "therapeutic_group_name",
+    md."is_ke_don",
+    md."kiem_soat_dac_biet",
+    md."is_trong_nuoc",
+    md."is_active",
+    md."created_at",
+    md."updated_at",
+    md."ma_atc"
+FROM "master_drugs" md
+LEFT JOIN "therapeutic_groups" tg ON tg."id" = md."therapeutic_group_id";

@@ -120,6 +120,7 @@ export async function POST(
                 thoiGianToChuc: body.thoiGianToChuc || null,
                 thoiGianBatDau: normalizeOptionalString(body.thoiGianBatDau),
                 thoiGianThucHien: body.thoiGianThucHien || null,
+                yeuCauTBMT: body.yeuCauTBMT !== false,
                 phanLos: phanLos.length > 0
                     ? {
                         create: phanLos.map((pl: any, index: number) => ({

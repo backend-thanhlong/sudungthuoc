@@ -29,6 +29,35 @@ export const readExcel = (file: File, targetSheet?: string): Promise<any[]> => {
     });
 };
 
+export const readExcelRequiredSheet = (file: File, targetSheet: string): Promise<any[]> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+            try {
+                const data = e.target?.result;
+                if (!data) return resolve([]);
+
+                const workbook = XLSX.read(data, { type: "array" });
+
+                if (!workbook.SheetNames.includes(targetSheet)) {
+                    reject(new Error(`Không tìm thấy sheet "${targetSheet}"`));
+                    return;
+                }
+
+                const sheet = workbook.Sheets[targetSheet];
+                const jsonData = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+                resolve(jsonData);
+            } catch (error) {
+                reject(error);
+            }
+        };
+
+        reader.onerror = (error) => reject(error);
+        reader.readAsArrayBuffer(file);
+    });
+};
+
 export const exportExcel = (data: any[], fileName: string) => {
     const worksheet = XLSX.utils.json_to_sheet(data);
     const workbook = XLSX.utils.book_new();

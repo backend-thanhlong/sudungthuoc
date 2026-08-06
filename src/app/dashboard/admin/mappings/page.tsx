@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
     Card,
     CardContent,
@@ -35,25 +36,59 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
-import { Trash2, XCircle, Download } from "lucide-react";
+import { Trash2, XCircle, Download, Pencil, Search, X } from "lucide-react";
 import { exportExcel } from "@/lib/excel";
+import {
+    compareReportDates,
+    isCategoryMarked,
+    normalizeReportText,
+    parseReportDateValue,
+    parseStrictNumber,
+} from "@/lib/report-validation";
 
 type ListTab = "pending" | "summary";
 type DetailViewMode = "pending" | "all";
 
 const FACILITY_PAGE_SIZE = 10;
 const DETAIL_PAGE_SIZE = 50;
+const DETAIL_SEARCH_FIELDS = [
+    { value: "all", label: "Tất cả trường" },
+    { value: "maNoiBo", label: "Mã nội bộ" },
+    { value: "tenThuocNoiBo", label: "Tên thuốc nội bộ" },
+    { value: "hoatChatNoiBo", label: "Hoạt chất nội bộ" },
+    { value: "soDangKyNoiBo", label: "SĐK nội bộ" },
+    { value: "nhomTckt", label: "Nhóm TCKT" },
+    { value: "maChung", label: "Mã DQG" },
+    { value: "tenThuoc", label: "Tên thuốc DQG" },
+    { value: "hoatChat", label: "Hoạt chất DQG" },
+    { value: "soDangKy", label: "SĐK DQG" },
+    { value: "status", label: "Trạng thái" },
+] as const;
+type DetailSearchField = (typeof DETAIL_SEARCH_FIELDS)[number]["value"];
+const DETAIL_SEARCH_FIELD_LABELS = Object.fromEntries(
+    DETAIL_SEARCH_FIELDS.map((field) => [field.value, field.label])
+) as Record<DetailSearchField, string>;
 
 interface MasterDrugSummary {
     id: string;
     maChung: string;
     tenThuoc: string;
     hoatChat: string | null;
+    hamLuong: string | null;
+    dangBaoChe: string | null;
     soDangKy: string | null;
+    donViTinh: string | null;
 }
 
 interface MappingDetailItem {
@@ -63,7 +98,16 @@ interface MappingDetailItem {
     hoatChatNoiBo: string | null;
     soDangKyNoiBo: string | null;
     donViTinhNoiBo: string | null;
+    nhomTckt: string | null;
+    giaVat: number | string;
+    bhyt: string | null;
+    dichVu: string | null;
+    soQdTrungThau: string | null;
+    tenCongTy: string | null;
+    ngayBatDauHd: string | null;
+    ngayKetThucHd: string | null;
     status: string;
+    adminNote: string | null;
     isOutOfCatalog: boolean;
     createdAt: string;
     updatedAt: string;
@@ -131,6 +175,14 @@ const createFacilityListState = (): FacilityListState => ({
 const INITIAL_LIST_STATES: Record<ListTab, FacilityListState> = {
     pending: createFacilityListState(),
     summary: createFacilityListState(),
+};
+
+const ADMIN_EDITABLE_MAPPING_STATUSES = new Set(["APPROVED", "AUTO_MAPPED"]);
+
+const normalizeMappingCategory = (value: unknown) => {
+    const normalized = normalizeReportText(value);
+    if (!normalized) return { value: "", valid: true };
+    return { value: isCategoryMarked(normalized) ? "X" : normalized, valid: isCategoryMarked(normalized) };
 };
 
 const formatDate = (dateString: string | null) => {
@@ -378,6 +430,21 @@ export default function MappingsApprovalPage() {
     const [selectedMapping, setSelectedMapping] = useState<MappingDetailItem | null>(null);
     const [rejectNote, setRejectNote] = useState("");
     const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
+    const [isEditInfoDialogOpen, setIsEditInfoDialogOpen] = useState(false);
+    const [editFormData, setEditFormData] = useState({
+        maNoiBo: "",
+        tenThuocNoiBo: "",
+        hoatChatNoiBo: "",
+        soDangKyNoiBo: "",
+        donViTinhNoiBo: "",
+        giaVat: "",
+        bhyt: "",
+        dichVu: "",
+        soQdTrungThau: "",
+        tenCongTy: "",
+        ngayBatDauHd: "",
+        ngayKetThucHd: "",
+    });
     const [isProcessing, setIsProcessing] = useState(false);
 
     const [selectedFacilityCode, setSelectedFacilityCode] = useState<string | null>(null);
@@ -387,6 +454,12 @@ export default function MappingsApprovalPage() {
     const [detailItems, setDetailItems] = useState<MappingDetailItem[]>([]);
     const [detailPagination, setDetailPagination] = useState<PaginationMeta>(createPagination(DETAIL_PAGE_SIZE));
     const [isDetailLoading, setIsDetailLoading] = useState(false);
+    const [detailSearchField, setDetailSearchField] = useState<DetailSearchField>("all");
+    const [detailAppliedSearchField, setDetailAppliedSearchField] = useState<DetailSearchField>("all");
+    const [detailSearchInput, setDetailSearchInput] = useState("");
+    const [detailSearchTerm, setDetailSearchTerm] = useState("");
+    const [selectedDetailIds, setSelectedDetailIds] = useState<string[]>([]);
+    const selectAllDetailCheckboxRef = useRef<HTMLInputElement>(null);
 
     const [facilityToDelete, setFacilityToDelete] = useState<{ code: string; name: string } | null>(null);
     const [facilityToApprove, setFacilityToApprove] = useState<{ code: string; name: string } | null>(null);
@@ -470,17 +543,30 @@ export default function MappingsApprovalPage() {
         }
     }, []);
 
-    const loadDetailPage = useCallback(async (facilityCode: string, viewMode: DetailViewMode, pageToLoad: number) => {
+    const loadDetailPage = useCallback(async (
+        facilityCode: string,
+        viewMode: DetailViewMode,
+        pageToLoad: number,
+        search = {
+            field: detailAppliedSearchField,
+            term: detailSearchTerm,
+        }
+    ) => {
         const requestId = latestRequestIds.current.detail + 1;
         latestRequestIds.current.detail = requestId;
         setIsDetailLoading(true);
+        setSelectedDetailIds([]);
 
         try {
             const params = new URLSearchParams({
                 viewMode,
                 page: pageToLoad.toString(),
                 limit: DETAIL_PAGE_SIZE.toString(),
+                searchField: search.field,
             });
+            if (search.term) {
+                params.set("searchTerm", search.term);
+            }
 
             const res = await fetch(`/api/admin/mappings/facilities/${facilityCode}/details?${params.toString()}`);
             if (!res.ok) {
@@ -510,7 +596,7 @@ export default function MappingsApprovalPage() {
             toast.error("Không thể tải chi tiết cơ sở");
             setIsDetailLoading(false);
         }
-    }, []);
+    }, [detailAppliedSearchField, detailSearchTerm]);
 
     useEffect(() => {
         void Promise.all([
@@ -545,8 +631,13 @@ export default function MappingsApprovalPage() {
         setDetailFacility(null);
         setDetailItems([]);
         setDetailPagination(createPagination(DETAIL_PAGE_SIZE));
+        setDetailSearchField("all");
+        setDetailAppliedSearchField("all");
+        setDetailSearchInput("");
+        setDetailSearchTerm("");
+        setSelectedDetailIds([]);
         setIsDetailDialogOpen(true);
-        void loadDetailPage(facilityCode, viewMode, 1);
+        void loadDetailPage(facilityCode, viewMode, 1, { field: "all", term: "" });
     };
 
     const handleDetailDialogChange = (open: boolean) => {
@@ -557,6 +648,11 @@ export default function MappingsApprovalPage() {
             setDetailFacility(null);
             setDetailItems([]);
             setDetailPagination(createPagination(DETAIL_PAGE_SIZE));
+            setDetailSearchField("all");
+            setDetailAppliedSearchField("all");
+            setDetailSearchInput("");
+            setDetailSearchTerm("");
+            setSelectedDetailIds([]);
             setIsDetailLoading(false);
         }
     };
@@ -595,7 +691,69 @@ export default function MappingsApprovalPage() {
             return;
         }
 
-        void loadDetailPage(selectedFacilityCode, detailViewMode, safePage);
+        void loadDetailPage(selectedFacilityCode, detailViewMode, safePage, {
+            field: detailAppliedSearchField,
+            term: detailSearchTerm,
+        });
+    };
+
+    const handleDetailSearch = () => {
+        if (!selectedFacilityCode) {
+            return;
+        }
+
+        const nextSearchTerm = detailSearchInput.trim();
+        setDetailSearchInput(nextSearchTerm);
+        setDetailAppliedSearchField(detailSearchField);
+        setDetailSearchTerm(nextSearchTerm);
+        setDetailPagination((prev) => ({ ...prev, page: 1 }));
+        void loadDetailPage(selectedFacilityCode, detailViewMode, 1, {
+            field: detailSearchField,
+            term: nextSearchTerm,
+        });
+    };
+
+    const handleResetDetailSearch = () => {
+        if (!selectedFacilityCode) {
+            return;
+        }
+
+        setDetailSearchField("all");
+        setDetailAppliedSearchField("all");
+        setDetailSearchInput("");
+        setDetailSearchTerm("");
+        setDetailPagination((prev) => ({ ...prev, page: 1 }));
+        void loadDetailPage(selectedFacilityCode, detailViewMode, 1, {
+            field: "all",
+            term: "",
+        });
+    };
+
+    const toggleDetailSelection = (mappingId: string) => {
+        setSelectedDetailIds((current) => (
+            current.includes(mappingId)
+                ? current.filter((id) => id !== mappingId)
+                : [...current, mappingId]
+        ));
+    };
+
+    const handleToggleVisiblePendingSelection = () => {
+        const visiblePendingIds = detailItems
+            .filter((mapping) => mapping.status === "WAITING_APPROVAL")
+            .map((mapping) => mapping.id);
+
+        if (visiblePendingIds.length === 0) {
+            return;
+        }
+
+        const allVisibleSelected = visiblePendingIds.every((id) => selectedDetailIds.includes(id));
+        setSelectedDetailIds((current) => {
+            if (allVisibleSelected) {
+                return current.filter((id) => !visiblePendingIds.includes(id));
+            }
+
+            return Array.from(new Set([...current, ...visiblePendingIds]));
+        });
     };
 
     const handleApprove = async (mappingId: string) => {
@@ -644,6 +802,106 @@ export default function MappingsApprovalPage() {
         } catch (error) {
             console.error("Reject error:", error);
             toast.error("Đã xảy ra lỗi");
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    const handleOpenEditInfo = (mapping: MappingDetailItem) => {
+        setSelectedMapping(mapping);
+        setEditFormData({
+            maNoiBo: mapping.maNoiBo,
+            tenThuocNoiBo: mapping.tenThuocNoiBo,
+            hoatChatNoiBo: mapping.hoatChatNoiBo || "",
+            soDangKyNoiBo: mapping.soDangKyNoiBo || "",
+            donViTinhNoiBo: mapping.donViTinhNoiBo || "",
+            giaVat: String(mapping.giaVat ?? ""),
+            bhyt: mapping.bhyt || "",
+            dichVu: mapping.dichVu || "",
+            soQdTrungThau: mapping.soQdTrungThau || "",
+            tenCongTy: mapping.tenCongTy || "",
+            ngayBatDauHd: mapping.ngayBatDauHd || "",
+            ngayKetThucHd: mapping.ngayKetThucHd || "",
+        });
+        setIsEditInfoDialogOpen(true);
+    };
+
+    const handleSaveInfo = async () => {
+        if (!selectedMapping) return;
+
+        const ngayBatDauHd = parseReportDateValue(editFormData.ngayBatDauHd);
+        const ngayKetThucHd = parseReportDateValue(editFormData.ngayKetThucHd);
+        const giaVat = parseStrictNumber(editFormData.giaVat);
+        const bhyt = normalizeMappingCategory(editFormData.bhyt);
+        const dichVu = normalizeMappingCategory(editFormData.dichVu);
+
+        if (!ngayBatDauHd.valid) {
+            toast.error("Ngày bắt đầu HĐ phải theo định dạng YYYYMMDD và là ngày hợp lệ");
+            return;
+        }
+
+        if (!ngayKetThucHd.valid) {
+            toast.error("Ngày kết thúc HĐ phải theo định dạng YYYYMMDD và là ngày hợp lệ");
+            return;
+        }
+
+        if (
+            ngayBatDauHd.value
+            && ngayKetThucHd.value
+            && compareReportDates(ngayBatDauHd.value, ngayKetThucHd.value) > 0
+        ) {
+            toast.error("Ngày bắt đầu HĐ không được lớn hơn Ngày kết thúc HĐ");
+            return;
+        }
+
+        if (!giaVat.valid || giaVat.blank || giaVat.value < 0) {
+            toast.error(
+                giaVat.blank
+                    ? "Vui lòng nhập Giá VAT"
+                    : giaVat.value < 0
+                        ? "Giá VAT không được âm"
+                        : "Giá VAT phải là số hợp lệ"
+            );
+            return;
+        }
+
+        if (!bhyt.valid || !dichVu.valid) {
+            toast.error('BHYT và Dịch vụ chỉ được nhập "X" hoặc để trống');
+            return;
+        }
+
+        if (!bhyt.value && !dichVu.value) {
+            toast.error("Phải đánh dấu X ở ít nhất một trong hai cột BHYT hoặc Dịch vụ");
+            return;
+        }
+
+        setIsProcessing(true);
+
+        try {
+            const res = await fetch(`/api/admin/mappings/${selectedMapping.id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    ...editFormData,
+                    giaVat: giaVat.value,
+                    bhyt: bhyt.value,
+                    dichVu: dichVu.value,
+                    ngayBatDauHd: ngayBatDauHd.value,
+                    ngayKetThucHd: ngayKetThucHd.value,
+                }),
+            });
+
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => null);
+                throw new Error(errorData?.message || "Không thể cập nhật thông tin");
+            }
+
+            toast.success("Đã cập nhật thông tin thuốc");
+            setIsEditInfoDialogOpen(false);
+            await refreshAfterMutation({ refetchDetail: true });
+        } catch (error) {
+            console.error("Edit mapping info error:", error);
+            toast.error(error instanceof Error ? error.message : "Đã xảy ra lỗi");
         } finally {
             setIsProcessing(false);
         }
@@ -703,6 +961,49 @@ export default function MappingsApprovalPage() {
         } finally {
             setIsProcessing(false);
             setFacilityToApprove(null);
+        }
+    };
+
+    const handleApproveSelected = async () => {
+        if (!selectedFacilityCode || !detailFacility) return;
+
+        const visiblePendingIds = new Set(
+            detailItems
+                .filter((mapping) => mapping.status === "WAITING_APPROVAL")
+                .map((mapping) => mapping.id)
+        );
+        const mappingIds = selectedDetailIds.filter((id) => visiblePendingIds.has(id));
+
+        if (mappingIds.length === 0) {
+            toast.info("Vui lòng chọn thuốc chờ duyệt");
+            return;
+        }
+
+        setIsProcessing(true);
+        try {
+            const res = await fetch("/api/admin/mappings", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    facilityCode: selectedFacilityCode,
+                    status: "APPROVED",
+                    mappingIds,
+                }),
+            });
+
+            if (!res.ok) {
+                throw new Error("Failed to approve selected mappings");
+            }
+
+            const data = await res.json();
+            toast.success(`Đã duyệt ${data.count} thuốc được chọn`);
+            setSelectedDetailIds([]);
+            await refreshAfterMutation({ refetchDetail: true });
+        } catch (error) {
+            console.error("Selected approve error:", error);
+            toast.error("Đã xảy ra lỗi khi duyệt thuốc đã chọn");
+        } finally {
+            setIsProcessing(false);
         }
     };
 
@@ -799,6 +1100,24 @@ export default function MappingsApprovalPage() {
     const pendingState = listStates.pending;
     const summaryState = listStates.summary;
     const isInitialLoading = !pendingState.isLoaded && pendingState.isLoading;
+    const hasActiveDetailSearch = detailSearchTerm.length > 0;
+    const canResetDetailSearch = detailSearchField !== "all"
+        || detailAppliedSearchField !== "all"
+        || detailSearchInput.length > 0
+        || detailSearchTerm.length > 0;
+    const visiblePendingDetailIds = detailItems
+        .filter((mapping) => mapping.status === "WAITING_APPROVAL")
+        .map((mapping) => mapping.id);
+    const selectedVisiblePendingCount = selectedDetailIds.filter((id) => visiblePendingDetailIds.includes(id)).length;
+    const allVisiblePendingSelected = visiblePendingDetailIds.length > 0
+        && selectedVisiblePendingCount === visiblePendingDetailIds.length;
+    const someVisiblePendingSelected = selectedVisiblePendingCount > 0 && !allVisiblePendingSelected;
+
+    useEffect(() => {
+        if (selectAllDetailCheckboxRef.current) {
+            selectAllDetailCheckboxRef.current.indeterminate = someVisiblePendingSelected;
+        }
+    }, [someVisiblePendingSelected]);
 
     return (
         <div className="space-y-6">
@@ -882,7 +1201,13 @@ export default function MappingsApprovalPage() {
             </Card>
 
             <Dialog open={isDetailDialogOpen} onOpenChange={handleDetailDialogChange}>
-                <DialogContent className="flex h-[85vh] w-[95vw] max-w-[1200px] flex-col p-6 sm:max-w-none">
+                <DialogContent
+                    className={
+                        detailViewMode === "all"
+                            ? "left-0 top-0 flex h-[100dvh] w-screen max-w-none translate-x-0 translate-y-0 flex-col rounded-none border-0 p-4 shadow-none sm:max-w-none sm:p-6"
+                            : "flex h-[85vh] w-[95vw] max-w-[1200px] flex-col p-6 sm:max-w-none"
+                    }
+                >
                     <DialogHeader>
                         <div className="flex items-center justify-between">
                             <div>
@@ -917,6 +1242,14 @@ export default function MappingsApprovalPage() {
                                         Từ chối tất cả ({detailFacility.pendingCount})
                                     </Button>
                                     <Button
+                                        variant="outline"
+                                        className="border-green-300 text-green-700 hover:bg-green-50"
+                                        onClick={handleApproveSelected}
+                                        disabled={isProcessing || selectedVisiblePendingCount === 0}
+                                    >
+                                        Duyệt đã chọn ({selectedVisiblePendingCount})
+                                    </Button>
+                                    <Button
                                         className="bg-green-600 hover:bg-green-700"
                                         onClick={() => setFacilityToApprove({
                                             code: detailFacility.facilityCode,
@@ -930,17 +1263,91 @@ export default function MappingsApprovalPage() {
                         </div>
                     </DialogHeader>
 
-                    <div className="mt-4 flex-1 overflow-auto rounded-md border">
+                    {detailViewMode === "all" && (
+                        <div className="mt-4 rounded-md border bg-slate-50 p-3">
+                            <form
+                                className="flex flex-col gap-2 lg:flex-row lg:items-center"
+                                onSubmit={(event) => {
+                                    event.preventDefault();
+                                    handleDetailSearch();
+                                }}
+                            >
+                                <Select
+                                    value={detailSearchField}
+                                    onValueChange={(value) => setDetailSearchField(value as DetailSearchField)}
+                                >
+                                    <SelectTrigger className="bg-white lg:w-[220px]">
+                                        <SelectValue placeholder="Chọn trường tìm kiếm" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {DETAIL_SEARCH_FIELDS.map((field) => (
+                                            <SelectItem key={field.value} value={field.value}>
+                                                {field.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+
+                                <div className="relative min-w-0 flex-1">
+                                    <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                                    <Input
+                                        value={detailSearchInput}
+                                        onChange={(event) => setDetailSearchInput(event.target.value)}
+                                        placeholder="Tìm mã, tên thuốc, hoạt chất, SĐK, trạng thái..."
+                                        className="bg-white pl-9"
+                                    />
+                                </div>
+
+                                <div className="flex gap-2">
+                                    <Button type="submit" disabled={isDetailLoading}>
+                                        <Search className="mr-1.5 h-4 w-4" />
+                                        Tìm kiếm
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={handleResetDetailSearch}
+                                        disabled={isDetailLoading || !canResetDetailSearch}
+                                    >
+                                        <X className="mr-1.5 h-4 w-4" />
+                                        Xóa
+                                    </Button>
+                                </div>
+                            </form>
+                            {hasActiveDetailSearch && (
+                                <p className="mt-2 text-sm text-slate-600">
+                                    Kết quả tìm kiếm cho <span className="font-medium">&quot;{detailSearchTerm}&quot;</span>
+                                    {" "}trong <span className="font-medium">{DETAIL_SEARCH_FIELD_LABELS[detailAppliedSearchField]}</span>
+                                </p>
+                            )}
+                        </div>
+                    )}
+
+                    <div className="mt-4 min-h-0 flex-1 overflow-auto rounded-md border">
                         {isDetailLoading ? (
                             <TableLoadingState />
                         ) : (
                             <Table>
                                 <TableHeader className="sticky top-0 z-10 bg-gray-50">
                                     <TableRow>
+                                        <TableHead className="w-[44px] bg-gray-100 text-center">
+                                            {detailViewMode === "pending" && (
+                                                <input
+                                                    ref={selectAllDetailCheckboxRef}
+                                                    type="checkbox"
+                                                    aria-label="Chọn tất cả thuốc chờ duyệt đang hiển thị"
+                                                    checked={allVisiblePendingSelected}
+                                                    onChange={handleToggleVisiblePendingSelection}
+                                                    disabled={isProcessing || visiblePendingDetailIds.length === 0}
+                                                    className="h-4 w-4 rounded border-slate-300 text-green-600 focus:ring-green-500"
+                                                />
+                                            )}
+                                        </TableHead>
                                         <TableHead className="w-[40px] bg-gray-100 font-bold text-gray-700">STT</TableHead>
                                         <TableHead className="min-w-[150px] bg-gray-100 font-bold text-gray-700">Thuốc nội bộ</TableHead>
                                         <TableHead className="min-w-[150px] bg-gray-100 font-bold text-gray-700">Hoạt chất / Hàm lượng (NB)</TableHead>
                                         <TableHead className="min-w-[120px] bg-gray-100 font-bold text-gray-700">SĐK / ĐVT (NB)</TableHead>
+                                        <TableHead className="min-w-[110px] bg-gray-100 font-bold text-gray-700">Nhóm TCKT</TableHead>
                                         <TableHead className="min-w-[200px] bg-gray-100 font-bold text-gray-700">Thuốc Dược Quốc Gia</TableHead>
                                         <TableHead className="min-w-[100px] bg-gray-100 font-bold text-gray-700">Trạng thái</TableHead>
                                         <TableHead className="sticky right-0 min-w-[120px] bg-gray-100 text-right font-bold text-gray-700">Thao tác</TableHead>
@@ -949,6 +1356,18 @@ export default function MappingsApprovalPage() {
                                 <TableBody>
                                     {detailItems.map((mapping, index) => (
                                         <TableRow key={mapping.id} className="hover:bg-slate-50">
+                                            <TableCell className="text-center">
+                                                {detailViewMode === "pending" && (
+                                                    <input
+                                                        type="checkbox"
+                                                        aria-label={`Chọn thuốc ${mapping.tenThuocNoiBo}`}
+                                                        checked={selectedDetailIds.includes(mapping.id)}
+                                                        onChange={() => toggleDetailSelection(mapping.id)}
+                                                        disabled={isProcessing || mapping.status !== "WAITING_APPROVAL"}
+                                                        className="h-4 w-4 rounded border-slate-300 text-green-600 focus:ring-green-500 disabled:cursor-not-allowed disabled:opacity-40"
+                                                    />
+                                                )}
+                                            </TableCell>
                                             <TableCell className="whitespace-nowrap">
                                                 {(detailPagination.page - 1) * detailPagination.limit + index + 1}
                                             </TableCell>
@@ -981,6 +1400,15 @@ export default function MappingsApprovalPage() {
                                                         <p className="text-slate-700">{mapping.donViTinhNoiBo || "-"}</p>
                                                     </div>
                                                 </div>
+                                            </TableCell>
+                                            <TableCell className="min-w-[110px] whitespace-nowrap">
+                                                {mapping.nhomTckt ? (
+                                                    <Badge className="border-0 bg-indigo-100 text-indigo-700">
+                                                        {mapping.nhomTckt}
+                                                    </Badge>
+                                                ) : (
+                                                    <span className="text-gray-300">-</span>
+                                                )}
                                             </TableCell>
                                             <TableCell className="min-w-[240px] max-w-[320px] whitespace-normal break-words">
                                                 {mapping.isOutOfCatalog ? (
@@ -1046,16 +1474,28 @@ export default function MappingsApprovalPage() {
                                                             </Button>
                                                         </>
                                                     )}
+                                                    {ADMIN_EDITABLE_MAPPING_STATUSES.has(mapping.status) && (
+                                                        <Button
+                                                            size="sm"
+                                                            variant="outline"
+                                                            className="h-8 px-3"
+                                                            onClick={() => handleOpenEditInfo(mapping)}
+                                                            disabled={isProcessing}
+                                                        >
+                                                            <Pencil className="mr-1.5 h-3.5 w-3.5" />
+                                                            Chỉnh sửa
+                                                        </Button>
+                                                    )}
                                                 </div>
                                             </TableCell>
                                         </TableRow>
                                     ))}
                                     {detailItems.length === 0 && (
                                         <TableRow>
-                                            <TableCell colSpan={7} className="py-12 text-center text-gray-500">
+                                            <TableCell colSpan={9} className="py-12 text-center text-gray-500">
                                                 <div className="flex flex-col items-center gap-2">
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="text-gray-300"><circle cx="12" cy="12" r="10" /><path d="m9 12 2 2 4-4" /></svg>
-                                                    <p>Không có dữ liệu</p>
+                                                    <p>{hasActiveDetailSearch ? "Không có kết quả phù hợp" : "Không có dữ liệu"}</p>
                                                 </div>
                                             </TableCell>
                                         </TableRow>
@@ -1114,6 +1554,128 @@ export default function MappingsApprovalPage() {
                         </Button>
                         <Button variant="destructive" onClick={handleReject} disabled={isProcessing}>
                             {isProcessing ? "Đang xử lý..." : "Xác nhận từ chối"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={isEditInfoDialogOpen} onOpenChange={setIsEditInfoDialogOpen}>
+                <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                        <DialogTitle>Chỉnh sửa thông tin thuốc</DialogTitle>
+                        <DialogDescription>
+                            Cập nhật thông tin thuốc đã được ánh xạ của cơ sở.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-2">
+                        <div className="grid gap-4 sm:grid-cols-2">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Mã nội bộ</label>
+                                <Input
+                                    value={editFormData.maNoiBo}
+                                    onChange={(e) => setEditFormData({ ...editFormData, maNoiBo: e.target.value })}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Đơn vị tính</label>
+                                <Input
+                                    value={editFormData.donViTinhNoiBo}
+                                    onChange={(e) => setEditFormData({ ...editFormData, donViTinhNoiBo: e.target.value })}
+                                />
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Tên thuốc</label>
+                            <Input
+                                value={editFormData.tenThuocNoiBo}
+                                onChange={(e) => setEditFormData({ ...editFormData, tenThuocNoiBo: e.target.value })}
+                            />
+                        </div>
+                        <div className="grid gap-4 sm:grid-cols-2">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Hoạt chất</label>
+                                <Input
+                                    value={editFormData.hoatChatNoiBo}
+                                    onChange={(e) => setEditFormData({ ...editFormData, hoatChatNoiBo: e.target.value })}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Số đăng ký</label>
+                                <Input
+                                    value={editFormData.soDangKyNoiBo}
+                                    onChange={(e) => setEditFormData({ ...editFormData, soDangKyNoiBo: e.target.value })}
+                                />
+                            </div>
+                        </div>
+                        <div className="grid gap-4 sm:grid-cols-3">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Giá VAT</label>
+                                <Input
+                                    inputMode="decimal"
+                                    value={editFormData.giaVat}
+                                    onChange={(e) => setEditFormData({ ...editFormData, giaVat: e.target.value })}
+                                />
+                            </div>
+                            <label className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium sm:mt-7">
+                                <input
+                                    type="checkbox"
+                                    className="h-4 w-4"
+                                    checked={editFormData.bhyt === "X"}
+                                    onChange={(e) => setEditFormData({ ...editFormData, bhyt: e.target.checked ? "X" : "" })}
+                                />
+                                BHYT
+                            </label>
+                            <label className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium sm:mt-7">
+                                <input
+                                    type="checkbox"
+                                    className="h-4 w-4"
+                                    checked={editFormData.dichVu === "X"}
+                                    onChange={(e) => setEditFormData({ ...editFormData, dichVu: e.target.checked ? "X" : "" })}
+                                />
+                                Dịch vụ
+                            </label>
+                        </div>
+                        <div className="grid gap-4 sm:grid-cols-2">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Số QĐ trúng thầu</label>
+                                <Input
+                                    value={editFormData.soQdTrungThau}
+                                    onChange={(e) => setEditFormData({ ...editFormData, soQdTrungThau: e.target.value })}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Tên Công ty</label>
+                                <Input
+                                    value={editFormData.tenCongTy}
+                                    onChange={(e) => setEditFormData({ ...editFormData, tenCongTy: e.target.value })}
+                                />
+                            </div>
+                        </div>
+                        <div className="grid gap-4 sm:grid-cols-2">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Ngày bắt đầu HĐ</label>
+                                <Input
+                                    placeholder="YYYYMMDD"
+                                    value={editFormData.ngayBatDauHd}
+                                    onChange={(e) => setEditFormData({ ...editFormData, ngayBatDauHd: e.target.value })}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Ngày kết thúc HĐ</label>
+                                <Input
+                                    placeholder="YYYYMMDD"
+                                    value={editFormData.ngayKetThucHd}
+                                    onChange={(e) => setEditFormData({ ...editFormData, ngayKetThucHd: e.target.value })}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsEditInfoDialogOpen(false)} disabled={isProcessing}>
+                            Hủy
+                        </Button>
+                        <Button onClick={handleSaveInfo} disabled={isProcessing}>
+                            {isProcessing ? "Đang lưu..." : "Lưu thay đổi"}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

@@ -18,7 +18,13 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { Search, SlidersHorizontal, GitCompareArrows, Building2, X } from "lucide-react";
-import type { DrugSortOption, FacilitySortOption, InventoryFacilityOption, DrugOption } from "./types";
+import type {
+    DrugSortOption,
+    FacilitySortOption,
+    InventoryDrugTypeFilters,
+    InventoryFacilityOption,
+    DrugOption,
+} from "./types";
 import {
     DRUG_SORT_OPTIONS,
     FACILITY_SORT_OPTIONS,
@@ -34,6 +40,8 @@ interface InventorySearchToolbarProps {
     onQueryChange: (value: string) => void;
     drugSort: DrugSortOption;
     onDrugSortChange: (value: DrugSortOption) => void;
+    drugTypeFilters: InventoryDrugTypeFilters;
+    onDrugTypeFiltersChange: (value: InventoryDrugTypeFilters) => void;
     facilitySort: FacilitySortOption;
     onFacilitySortChange: (value: FacilitySortOption) => void;
     facilities: InventoryFacilityOption[];
@@ -59,6 +67,8 @@ export default function InventorySearchToolbar({
     onQueryChange,
     drugSort,
     onDrugSortChange,
+    drugTypeFilters,
+    onDrugTypeFiltersChange,
     facilitySort,
     onFacilitySortChange,
     facilities,
@@ -109,33 +119,66 @@ export default function InventorySearchToolbar({
                 </div>
 
                 {viewMode === "drug" && (
-                    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px]">
-                        <div className="relative">
-                            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                            <Input
-                                value={query}
-                                onChange={(event) => onQueryChange(event.target.value)}
-                                placeholder="Nhập tên thuốc, hoạt chất, hàm lượng hoặc mã thuốc"
-                                className="pl-10"
-                            />
+                    <div className="space-y-4">
+                        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px]">
+                            <div className="relative">
+                                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                                <Input
+                                    value={query}
+                                    onChange={(event) => onQueryChange(event.target.value)}
+                                    placeholder="Nhập tên thuốc, hoạt chất, hàm lượng hoặc mã thuốc"
+                                    className="pl-10"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <p className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+                                    <SlidersHorizontal className="h-3.5 w-3.5" />
+                                    Sắp xếp
+                                </p>
+                                <Select value={drugSort} onValueChange={(value) => onDrugSortChange(value as DrugSortOption)}>
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder="Chọn cách sắp xếp" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {DRUG_SORT_OPTIONS.map((option) => (
+                                            <SelectItem key={option.value} value={option.value}>
+                                                {option.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         </div>
-                        <div className="space-y-2">
-                            <p className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-slate-500">
-                                <SlidersHorizontal className="h-3.5 w-3.5" />
-                                Sắp xếp
-                            </p>
-                            <Select value={drugSort} onValueChange={(value) => onDrugSortChange(value as DrugSortOption)}>
-                                <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="Chọn cách sắp xếp" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {DRUG_SORT_OPTIONS.map((option) => (
-                                        <SelectItem key={option.value} value={option.value}>
-                                            {option.label}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                        <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:flex-row sm:flex-wrap sm:items-center">
+                            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Lọc nhóm thuốc</span>
+                            <label className="inline-flex items-center gap-2 text-sm text-slate-700">
+                                <input
+                                    type="checkbox"
+                                    checked={drugTypeFilters.controlledSpecial}
+                                    onChange={(event) =>
+                                        onDrugTypeFiltersChange({
+                                            ...drugTypeFilters,
+                                            controlledSpecial: event.target.checked,
+                                        })
+                                    }
+                                    className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                />
+                                Thuốc kiểm soát đặc biệt
+                            </label>
+                            <label className="inline-flex items-center gap-2 text-sm text-slate-700">
+                                <input
+                                    type="checkbox"
+                                    checked={drugTypeFilters.rareDrug}
+                                    onChange={(event) =>
+                                        onDrugTypeFiltersChange({
+                                            ...drugTypeFilters,
+                                            rareDrug: event.target.checked,
+                                        })
+                                    }
+                                    className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                />
+                                Thuốc hiếm
+                            </label>
                         </div>
                     </div>
                 )}

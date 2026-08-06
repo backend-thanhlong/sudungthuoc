@@ -35,10 +35,43 @@ function ValueRiskTable({
     emptyText: string;
 }) {
     return (
-        <div className="rounded-xl border border-border bg-card p-5 text-card-foreground shadow-sm">
+        <div className="rounded-xl border border-border bg-card p-4 text-card-foreground shadow-sm sm:p-5">
             <h3 className="font-semibold text-foreground mb-1">{title}</h3>
             <p className="text-xs text-muted-foreground mb-4">{subtitle}</p>
-            <div className="overflow-x-auto max-h-[340px] overflow-y-auto">
+            <div>
+                <div className="max-h-[340px] space-y-3 overflow-y-auto md:hidden">
+                    {rows.map((row, index) => (
+                        <div key={`${row.facility}-${row.drugName}-${index}`} className="rounded-lg border border-border bg-muted/30 p-3">
+                            <div className="flex items-start justify-between gap-3">
+                                <div className="min-w-0">
+                                    <p className="text-xs text-muted-foreground">
+                                        #{index + 1}{scope === "admin" ? ` • ${row.facility}` : ""}
+                                    </p>
+                                    <p className="mt-1 font-medium text-foreground">{row.drugName}</p>
+                                    <p className="text-xs text-muted-foreground">{row.hoatChat}{row.hamLuong ? ` • ${row.hamLuong}` : ""}</p>
+                                    <p className="text-xs text-muted-foreground/70">{row.supplierName}</p>
+                                </div>
+                                <p className="shrink-0 text-right font-mono text-sm font-semibold text-foreground">
+                                    {formatCurrencyCompact(row[valueKey])}
+                                </p>
+                            </div>
+                            <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                                <div className="rounded-md bg-card p-2">
+                                    <p className="text-muted-foreground">Nhu cầu BQ</p>
+                                    <p className="mt-1 font-mono font-semibold text-foreground">{formatNumber(row.demandAvg)}</p>
+                                </div>
+                                <div className="rounded-md bg-card p-2">
+                                    <p className="text-muted-foreground">Độ phủ</p>
+                                    <p className="mt-1 font-mono font-semibold text-foreground">{formatNumber(row.monthsOfCover)} tháng</p>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                    {rows.length === 0 && (
+                        <p className="text-center text-muted-foreground/70 py-8">{emptyText}</p>
+                    )}
+                </div>
+                <div className="hidden overflow-x-auto max-h-[340px] overflow-y-auto md:block">
                 <table className="w-full text-sm">
                     <thead className="sticky top-0">
                         <tr className={tone}>
@@ -72,6 +105,7 @@ function ValueRiskTable({
                 {rows.length === 0 && (
                     <p className="text-center text-muted-foreground/70 py-8">{emptyText}</p>
                 )}
+                </div>
             </div>
         </div>
     );
@@ -83,7 +117,7 @@ export default function SupplyValueSections({
     topShortageByRiskValue,
 }: SupplyValueSectionsProps) {
     return (
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-2 xl:gap-6">
             <ValueRiskTable
                 rows={topOverstockByValue}
                 scope={scope}

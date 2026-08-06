@@ -4,12 +4,31 @@ import { auth } from "@/auth";
 
 type FacilityGroupMetricMap = Map<string, Map<string, number>>;
 
+const INVENTORY_DRUG_GROUPS = ["Hóa dược", "Dược liệu", "Sinh phẩm", "Thuốc cổ truyền", "Vắc xin", "Khác"] as const;
+
 interface TreemapDatum {
     name: string;
     value: number;
     facility?: string;
     drugGroup?: string;
     children?: TreemapDatum[];
+}
+
+interface FacilityInventoryMapDatum {
+    facilityId: string;
+    facilityName: string;
+    address: string;
+    latitude: number;
+    longitude: number;
+    value: number;
+}
+
+interface FacilityImportExportInventoryDatum {
+    facility: string;
+    importValue: number;
+    exportValue: number;
+    inventoryValue: number;
+    total: number;
 }
 
 const normalizeDomesticFlag = (value: string | null | undefined) =>
@@ -22,6 +41,28 @@ const normalizeDomesticFlag = (value: string | null | undefined) =>
 const isDomesticDrug = (value: string | null | undefined) => {
     const normalized = normalizeDomesticFlag(value);
     return normalized === "trong nuoc" || normalized === "co" || normalized === "true" || normalized === "1";
+};
+
+const isForeignDrug = (value: string | null | undefined) =>
+    normalizeDomesticFlag(value) === "nuoc ngoai";
+
+const normalizeDrugGroupKey = (value: string | null | undefined) =>
+    value
+        ?.trim()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "") || "";
+
+const normalizeInventoryDrugGroup = (value: string | null | undefined) => {
+    const normalized = normalizeDrugGroupKey(value);
+
+    if (normalized.includes("hoa duoc")) return "Hóa dược";
+    if (normalized.includes("duoc lieu")) return "Dược liệu";
+    if (normalized.includes("sinh pham")) return "Sinh phẩm";
+    if (normalized.includes("thuoc co truyen")) return "Thuốc cổ truyền";
+    if (normalized.includes("vac xin") || normalized.includes("vaccine")) return "Vắc xin";
+
+    return "Khác";
 };
 
 const addMetricToFacilityGroupMap = (
@@ -80,6 +121,56 @@ const buildTreemapData = (metricMap: FacilityGroupMetricMap): TreemapDatum[] =>
             })),
     }));
 
+const buildAllFacilityInventoryByDrugGroup = (metricMap: FacilityGroupMetricMap) =>
+    Array.from(metricMap.keys())
+        .map((facility) => {
+            const groups = metricMap.get(facility);
+            const row: Record<string, string | number> = { facility };
+            let total = 0;
+
+            INVENTORY_DRUG_GROUPS.forEach((group) => {
+                const value = Math.round(groups?.get(group) || 0);
+                row[group] = value;
+                total += value;
+            });
+
+            row.total = total;
+            return row;
+        })
+        .sort((a, b) => Number(b.total) - Number(a.total) || String(a.facility).localeCompare(String(b.facility), "vi"));
+
+const buildFacilityImportExportInventory = (
+    inventoryMetricMap: FacilityGroupMetricMap,
+    exportMetricMap: FacilityGroupMetricMap,
+    importMetricMap: FacilityGroupMetricMap
+): FacilityImportExportInventoryDatum[] => {
+    const facilities = new Set([
+        ...inventoryMetricMap.keys(),
+        ...exportMetricMap.keys(),
+        ...importMetricMap.keys(),
+    ]);
+
+    return Array.from(facilities)
+        .map((facility) => {
+            const inventoryValue = Array.from(inventoryMetricMap.get(facility)?.values() || [])
+                .reduce((sum, value) => sum + value, 0);
+            const exportValue = Array.from(exportMetricMap.get(facility)?.values() || [])
+                .reduce((sum, value) => sum + value, 0);
+            const importValue = Array.from(importMetricMap.get(facility)?.values() || [])
+                .reduce((sum, value) => sum + value, 0);
+
+            return {
+                facility,
+                importValue: Math.round(importValue),
+                exportValue: Math.round(exportValue),
+                inventoryValue: Math.round(inventoryValue),
+                total: Math.round(inventoryValue),
+            };
+        })
+        .filter((item) => item.importValue > 0 || item.exportValue > 0 || item.inventoryValue > 0)
+        .sort((a, b) => b.inventoryValue - a.inventoryValue || a.facility.localeCompare(b.facility, "vi"));
+};
+
 export async function GET(request: Request) {
     const session = await auth();
     if (!session || (session.user as any).role !== "ADMIN") {
@@ -89,6 +180,10 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const reportMonth = searchParams.get("reportMonth") || undefined;
     const facilityId = searchParams.get("facilityId") || undefined;
+    const mapMasterDrugIdParam = searchParams.get("mapMasterDrugId")?.trim();
+    const mapMasterDrugId = mapMasterDrugIdParam && mapMasterDrugIdParam !== "all"
+        ? mapMasterDrugIdParam
+        : undefined;
 
     try {
         // Build where clause for inventory reports
@@ -101,7 +196,16 @@ export async function GET(request: Request) {
         }
 
         // 1. KPIs
-        const [totalInventoryValue, distinctDrugCount, allReports] = await Promise.all([
+        const mapReportWhere = mapMasterDrugId
+            ? {
+                ...reportWhere,
+                drugMap: {
+                    masterDrugId: mapMasterDrugId,
+                },
+            }
+            : reportWhere;
+
+        const [totalInventoryValue, distinctDrugCount, allReports, mapReports] = await Promise.all([
             // Total inventory value
             prisma.inventoryReport.aggregate({
                 _sum: { thanhTienTonCuoi: true },
@@ -138,6 +242,24 @@ export async function GET(request: Request) {
                         select: {
                             facilityName: true,
                             address: true,
+                            latitude: true,
+                            longitude: true,
+                        },
+                    },
+                },
+            }),
+            // Reports used only by the inventory map. This can be filtered by selected drug.
+            prisma.inventoryReport.findMany({
+                where: mapReportWhere,
+                select: {
+                    facilityId: true,
+                    thanhTienTonCuoi: true,
+                    facility: {
+                        select: {
+                            facilityName: true,
+                            address: true,
+                            latitude: true,
+                            longitude: true,
                         },
                     },
                 },
@@ -147,16 +269,20 @@ export async function GET(request: Request) {
         // 2. Domestic drug usage ratio
         let domesticValue = 0;
         let totalExportValue = 0;
+        let domesticUsageLineCount = 0;
+        let classifiedUsageLineCount = 0;
         let bhytValue = 0;
         let dichvuValue = 0;
         const inventoryMetricMap: FacilityGroupMetricMap = new Map();
         const exportMetricMap: FacilityGroupMetricMap = new Map();
         const importMetricMap: FacilityGroupMetricMap = new Map();
         const addressMap = new Map<string, number>();
+        const facilityMap = new Map<string, FacilityInventoryMapDatum>();
+        const mapMissingCoordinateFacilityIds = new Set<string>();
 
         allReports.forEach((r) => {
             const facilityName = r.facility?.facilityName || "Unknown";
-            const drugGroup = r.drugMap?.masterDrug?.nhomThuoc || "Khác";
+            const drugGroup = normalizeInventoryDrugGroup(r.drugMap?.masterDrug?.nhomThuoc);
             const inventoryValue = Number(r.thanhTienTonCuoi);
             const exportVal = Number(r.xuat) * Number(r.giaVat);
             const importVal = Number(r.nhap) * Number(r.giaVat);
@@ -171,6 +297,15 @@ export async function GET(request: Request) {
             if (isDomesticDrug(r.drugMap?.masterDrug?.isTrongNuoc)) {
                 domesticValue += exportVal;
             }
+            if (Number(r.xuat) > 0) {
+                const domesticFlag = r.drugMap?.masterDrug?.isTrongNuoc;
+                if (isDomesticDrug(domesticFlag)) {
+                    domesticUsageLineCount += 1;
+                    classifiedUsageLineCount += 1;
+                } else if (isForeignDrug(domesticFlag)) {
+                    classifiedUsageLineCount += 1;
+                }
+            }
 
             if (r.bhyt === "Có" || r.bhyt === "có" || r.bhyt === "TRUE" || r.bhyt === "true" || r.bhyt === "1" || r.bhyt === "x" || r.bhyt === "X") {
                 bhytValue += exportVal;
@@ -179,7 +314,33 @@ export async function GET(request: Request) {
                 dichvuValue += exportVal;
             }
         });
+
+        mapReports.forEach((r) => {
+            const facilityName = r.facility?.facilityName || "Unknown";
+            const inventoryValue = Number(r.thanhTienTonCuoi);
+            const addr = r.facility?.address || "Không rõ";
+            const latitude = Number(r.facility?.latitude);
+            const longitude = Number(r.facility?.longitude);
+
+            if (Number.isFinite(latitude) && Number.isFinite(longitude)) {
+                const current = facilityMap.get(r.facilityId);
+                facilityMap.set(r.facilityId, {
+                    facilityId: r.facilityId,
+                    facilityName,
+                    address: addr,
+                    latitude,
+                    longitude,
+                    value: (current?.value || 0) + inventoryValue,
+                });
+            } else if (inventoryValue > 0) {
+                mapMissingCoordinateFacilityIds.add(r.facilityId);
+            }
+        });
+
         const domesticRatio = totalExportValue > 0 ? (domesticValue / totalExportValue) * 100 : 0;
+        const domesticUsageLineRatio = classifiedUsageLineCount > 0
+            ? (domesticUsageLineCount / classifiedUsageLineCount) * 100
+            : 0;
 
         // 3. Top 10 CSYT by inventory value (grouped by nhomThuoc for stacked bar)
         const inventoryTopFacilities = getTopFacilityMetrics(inventoryMetricMap);
@@ -192,6 +353,12 @@ export async function GET(request: Request) {
             facility: item.facility,
             ...Object.fromEntries(item.groups.entries()),
         }));
+        const inventoryByFacilityDrugGroup = buildAllFacilityInventoryByDrugGroup(inventoryMetricMap);
+        const facilityImportExportInventory = buildFacilityImportExportInventory(
+            inventoryMetricMap,
+            exportMetricMap,
+            importMetricMap
+        );
 
         const topExportByFacility = buildTopStackedBarData(exportMetricMap);
         const topImportTreemap = buildTreemapData(importMetricMap);
@@ -205,19 +372,31 @@ export async function GET(request: Request) {
         const heatmapData = Array.from(addressMap.entries())
             .map(([address, value]) => ({ address, value: Math.round(value) }))
             .sort((a, b) => b.value - a.value);
+        const inventoryMapData = Array.from(facilityMap.values())
+            .map((item) => ({ ...item, value: Math.round(item.value) }))
+            .filter((item) => item.value > 0)
+            .sort((a, b) => b.value - a.value);
 
         return NextResponse.json({
             kpis: {
                 totalInventoryValue: Number(totalInventoryValue._sum.thanhTienTonCuoi) || 0,
                 domesticRatio: Math.round(domesticRatio * 100) / 100,
+                domesticUsageLineRatio: Math.round(domesticUsageLineRatio * 100) / 100,
+                domesticUsageLineCount,
+                classifiedUsageLineCount,
                 distinctDrugCount: distinctDrugCount.length,
             },
             stackedBarData,
+            facilityImportExportInventory,
+            inventoryByFacilityDrugGroup,
+            inventoryDrugGroups: INVENTORY_DRUG_GROUPS,
             drugGroups: Array.from(allDrugGroups),
             donutData,
             topExportByFacility,
             topImportTreemap,
             heatmapData,
+            inventoryMapData,
+            mapMissingCoordinateCount: mapMissingCoordinateFacilityIds.size,
         });
     } catch (error) {
         console.error("Dashboard overview error:", error);

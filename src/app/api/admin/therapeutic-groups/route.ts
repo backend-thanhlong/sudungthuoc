@@ -9,16 +9,21 @@ import {
 } from "@/lib/therapeutic-groups";
 import {
     isRouteError,
+    RouteError,
     requireActiveSessionUser,
 } from "@/lib/server-authz";
 
 export async function GET(request: Request) {
     try {
-        await requireActiveSessionUser("ADMIN");
+        const { user } = await requireActiveSessionUser();
+        if (user.role !== "ADMIN" && user.role !== "FACILITY") {
+            throw new RouteError(403, "Forbidden");
+        }
 
         const { searchParams } = new URL(request.url);
         const search = searchParams.get("search") || "";
-        const status = (searchParams.get("status") || "active") as TherapeuticGroupStatus;
+        const requestedStatus = (searchParams.get("status") || "active") as TherapeuticGroupStatus;
+        const status = user.role === "ADMIN" ? requestedStatus : "active";
         const limitParam = searchParams.get("limit");
         const limit = limitParam ? Number(limitParam) : null;
 

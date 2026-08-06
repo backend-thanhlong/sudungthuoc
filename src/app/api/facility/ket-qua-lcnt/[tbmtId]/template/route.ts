@@ -2,9 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import * as XLSX from "xlsx";
 import {
+    getFacilityOwnedGoiThau,
     getFacilityOwnedThongBaoMoiThauById,
     isRouteError,
     requireActiveSessionUser,
+    RouteError,
 } from "@/lib/server-authz";
 
 const buildAttachmentDisposition = (fileName: string) => {
@@ -39,6 +41,22 @@ const serializeExcelNumber = (value: { toString(): string } | number | null | un
     return Number(value);
 };
 
+const GOI_THAU_TARGET_PREFIX = "goi-thau-";
+
+const parseResultTarget = (targetId: string) => {
+    if (targetId.startsWith(GOI_THAU_TARGET_PREFIX)) {
+        return {
+            mode: "NO_TBMT" as const,
+            goiThauId: targetId.slice(GOI_THAU_TARGET_PREFIX.length),
+        };
+    }
+
+    return {
+        mode: "TBMT" as const,
+        tbmtId: targetId,
+    };
+};
+
 // GET /api/facility/ket-qua-lcnt/[tbmtId]/template
 // Generate Excel template with existing PhanLo data
 export async function GET(
@@ -50,25 +68,64 @@ export async function GET(
         const { user } = await requireActiveSessionUser("FACILITY");
 
         const { tbmtId } = await params;
-        const ownedTbmt = await getFacilityOwnedThongBaoMoiThauById(tbmtId, user.id);
+        const target = parseResultTarget(tbmtId);
+        const ownedGoiThau = target.mode === "NO_TBMT"
+            ? await getFacilityOwnedGoiThau(target.goiThauId, user.id)
+            : null;
+        const ownedTbmt = target.mode === "TBMT"
+            ? await getFacilityOwnedThongBaoMoiThauById(tbmtId, user.id)
+            : null;
 
-        // Get TBMT and related package and lots
-        const tbmt = await prisma.thongBaoMoiThau.findUnique({
-            where: { id: ownedTbmt.id },
-            include: {
-                goiThau: {
-                    include: {
-                        phanLos: {
-                            orderBy: {
-                                stt: "asc",
+        const goiThau = target.mode === "NO_TBMT"
+            ? await prisma.goiThau.findUnique({
+                where: { id: ownedGoiThau!.id },
+                include: {
+                    phanLos: {
+                        orderBy: {
+                            stt: "asc",
+                        },
+                    },
+                },
+            })
+            : (await prisma.thongBaoMoiThau.findUnique({
+                where: { id: ownedTbmt!.id },
+                include: {
+                    goiThau: {
+                        include: {
+                            phanLos: {
+                                orderBy: {
+                                    stt: "asc",
+                                },
                             },
                         },
                     },
                 },
-            },
-        });
+            }))?.goiThau;
 
-        if (!tbmt) {
+        if (!goiThau) {
+            return NextResponse.json(
+                { message: "Gói thầu not found" },
+                { status: 404 }
+            );
+        }
+
+        if (!goiThau.yeuCauTBMT && target.mode !== "NO_TBMT") {
+            throw new RouteError(400, "Gói thầu này thuộc trường hợp không có Thông báo mời thầu");
+        }
+
+        if (goiThau.yeuCauTBMT && target.mode === "NO_TBMT") {
+            throw new RouteError(400, "Gói thầu này yêu cầu Thông báo mời thầu trước khi nhập KQLCNT");
+        }
+
+        // Get target code for the file name.
+        const tbmt = target.mode === "TBMT" ? await prisma.thongBaoMoiThau.findUnique({
+            where: { id: ownedTbmt!.id },
+            include: {
+                goiThau: true,
+            },
+        }) : null;
+
+        if (target.mode === "TBMT" && !tbmt) {
             return NextResponse.json(
                 { message: "Thông báo mời thầu not found" },
                 { status: 404 }
@@ -76,7 +133,7 @@ export async function GET(
         }
 
         // Prepare Excel data with lot information + new fields for results
-        const excelData = tbmt.goiThau.phanLos.map((phanLo) => ({
+        const excelData = goiThau.phanLos.map((phanLo) => ({
             STT: phanLo.stt,
             "Tên phần lô": phanLo.tenPhanLo,
             "Đơn vị tính": phanLo.donViTinh || "",
@@ -99,7 +156,7 @@ export async function GET(
 
         // Write to buffer
         const buffer = XLSX.write(wb, { type: "buffer", bookType: "xlsx" });
-        const fileName = `Ket_Qua_LCNT_${tbmt.maTBMT}.xlsx`;
+        const fileName = `Ket_Qua_LCNT_${tbmt?.maTBMT || goiThau.tenGoiThau}.xlsx`;
 
         // Return as file download
         return new NextResponse(buffer, {

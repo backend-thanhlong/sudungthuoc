@@ -51,13 +51,15 @@ ALLOW_PRODUCTION_SEED=false
 
 # AI Agent MVP
 AI_PRIMARY_PROVIDER=google
-AI_PRIMARY_MODEL=gemma-4-26b-a4b-it
+AI_PRIMARY_MODEL=gemini-3.1-flash-lite-preview
 GOOGLE_GENERATIVE_AI_API_KEY="your-google-ai-key"
+DEEPSEEK_API_KEY="your-deepseek-key"
+AI_DEEPSEEK_MODEL=deepseek-v4-flash
 AI_ENABLE_FALLBACK=false
 AI_MAX_OUTPUT_TOKENS=1200
 ```
 
-AI Agent dùng `Gemma 4 26B A4B IT` mặc định qua Gemini API. Khi chưa cấu hình `GOOGLE_GENERATIVE_AI_API_KEY`, chat AI sẽ báo lỗi provider có kiểm soát; riêng nút `AI kiểm tra` vẫn trả được kết quả rule nội bộ cho báo cáo/ánh xạ để không chặn workflow.
+AI Agent dùng `Gemini 3.1 Flash Lite` mặc định qua Gemini API. Khi chưa cấu hình `GOOGLE_GENERATIVE_AI_API_KEY`, chat AI sẽ báo lỗi provider có kiểm soát; riêng nút `AI kiểm tra` vẫn trả được kết quả rule nội bộ cho báo cáo/ánh xạ để không chặn workflow.
 
 Chỉ bật fallback sau giai đoạn pilot:
 
@@ -67,6 +69,8 @@ AI_FALLBACK_PROVIDER=openai
 AI_FALLBACK_MODEL=gpt-5.4-mini
 OPENAI_API_KEY="your-openai-key"
 ```
+
+Dropdown trong chatbot cũng có tùy chọn `gemini-3.1-flash-lite-preview` và `deepseek-v4-flash`. Tùy chọn DeepSeek dùng `DEEPSEEK_API_KEY` và `AI_DEEPSEEK_MODEL`, không yêu cầu đổi primary/fallback provider.
 
 ### Bước 3: Build và chạy Docker
 

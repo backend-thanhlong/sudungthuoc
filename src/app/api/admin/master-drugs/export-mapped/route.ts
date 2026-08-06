@@ -39,6 +39,7 @@ export async function GET() {
         // Map to Vietnamese format for Excel
         const exportData = mappedMasterDrugs.map(drug => ({
             "Mã chung": drug.maChung,
+            "Mã ATC": drug.maAtc || "",
             "Mã BHYT": drug.maBhyt || "",
             "Tên thuốc": drug.tenThuoc,
             "Hoạt chất": drug.hoatChat || "",
@@ -59,6 +60,7 @@ export async function GET() {
             "Địa chỉ đăng ký": drug.diaChiDangKy || "",
             "Nhóm thuốc": drug.nhomThuoc || "",
             "Nhóm điều trị": drug.therapeuticGroup?.name || "",
+            "Thuốc hiếm": drug.isThuocHiem ? "Có" : "Không",
             "Thuốc kê đơn": drug.isKeDon || "",
             "Thuốc kiểm soát đặc biệt": drug.kiemSoatDacBiet || "",
             "Thuốc trong nước": drug.isTrongNuoc || "",

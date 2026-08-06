@@ -134,6 +134,8 @@ exports.Prisma.UserScalarFieldEnum = {
   contactPerson: 'contactPerson',
   phoneNumber: 'phoneNumber',
   address: 'address',
+  latitude: 'latitude',
+  longitude: 'longitude',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -164,6 +166,7 @@ exports.Prisma.MasterDrugScalarFieldEnum = {
   id: 'id',
   maChung: 'maChung',
   maBhyt: 'maBhyt',
+  maAtc: 'maAtc',
   tenThuoc: 'tenThuoc',
   hoatChat: 'hoatChat',
   hamLuong: 'hamLuong',
@@ -185,6 +188,7 @@ exports.Prisma.MasterDrugScalarFieldEnum = {
   therapeuticGroupId: 'therapeuticGroupId',
   isKeDon: 'isKeDon',
   kiemSoatDacBiet: 'kiemSoatDacBiet',
+  isThuocHiem: 'isThuocHiem',
   isTrongNuoc: 'isTrongNuoc',
   isActive: 'isActive',
   createdAt: 'createdAt',
@@ -214,10 +218,68 @@ exports.Prisma.FacilityDrugMapScalarFieldEnum = {
   soDangKyNoiBo: 'soDangKyNoiBo',
   donViTinhNoiBo: 'donViTinhNoiBo',
   nhomTckt: 'nhomTckt',
+  giaVat: 'giaVat',
+  bhyt: 'bhyt',
+  dichVu: 'dichVu',
+  soQdTrungThau: 'soQdTrungThau',
+  tenCongTy: 'tenCongTy',
+  ngayBatDauHd: 'ngayBatDauHd',
+  ngayKetThucHd: 'ngayKetThucHd',
+  demandRoundingEnabled: 'demandRoundingEnabled',
+  demandPackageUnit: 'demandPackageUnit',
+  demandPackageSize: 'demandPackageSize',
+  demandPlanningLocked: 'demandPlanningLocked',
+  demandPlanningLockedAt: 'demandPlanningLockedAt',
+  demandPlanningUnlockedAt: 'demandPlanningUnlockedAt',
+  demandPlanningLockReason: 'demandPlanningLockReason',
   masterDrugId: 'masterDrugId',
   status: 'status',
   adminNote: 'adminNote',
   isOutOfCatalog: 'isOutOfCatalog',
+  isActive: 'isActive',
+  inactiveFromMonth: 'inactiveFromMonth',
+  inactiveReason: 'inactiveReason',
+  inactiveAt: 'inactiveAt',
+  reactivatedFromMonth: 'reactivatedFromMonth',
+  reactivatedAt: 'reactivatedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.FacilityDemandPlanScalarFieldEnum = {
+  id: 'id',
+  planNo: 'planNo',
+  facilityId: 'facilityId',
+  status: 'status',
+  baseReportMonth: 'baseReportMonth',
+  note: 'note',
+  finalizedAt: 'finalizedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.FacilityDemandPlanLineScalarFieldEnum = {
+  id: 'id',
+  planId: 'planId',
+  mapId: 'mapId',
+  masterDrugId: 'masterDrugId',
+  maNoiBoSnapshot: 'maNoiBoSnapshot',
+  tenThuocSnapshot: 'tenThuocSnapshot',
+  hoatChatSnapshot: 'hoatChatSnapshot',
+  donViTinhSnapshot: 'donViTinhSnapshot',
+  nhomTcktSnapshot: 'nhomTcktSnapshot',
+  maChungSnapshot: 'maChungSnapshot',
+  suggestedQty: 'suggestedQty',
+  rawSuggestedQty: 'rawSuggestedQty',
+  roundedSuggestedQty: 'roundedSuggestedQty',
+  packageUnitSnapshot: 'packageUnitSnapshot',
+  packageSizeSnapshot: 'packageSizeSnapshot',
+  roundingNote: 'roundingNote',
+  finalQty: 'finalQty',
+  suggestionBasis: 'suggestionBasis',
+  suggestionReportMonth: 'suggestionReportMonth',
+  suggestionRuleVersion: 'suggestionRuleVersion',
+  note: 'note',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -229,6 +291,7 @@ exports.Prisma.InventoryReportScalarFieldEnum = {
   reportMonth: 'reportMonth',
   tonDau: 'tonDau',
   nhap: 'nhap',
+  nhapHoanTra: 'nhapHoanTra',
   xuat: 'xuat',
   tonCuoi: 'tonCuoi',
   giaVat: 'giaVat',
@@ -394,6 +457,7 @@ exports.Prisma.GoiThauScalarFieldEnum = {
   thoiGianThucHien: 'thoiGianThucHien',
   trangThai: 'trangThai',
   maThongBao: 'maThongBao',
+  yeuCauTBMT: 'yeuCauTBMT',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -481,6 +545,15 @@ exports.Prisma.AISettingScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.SystemSettingScalarFieldEnum = {
+  id: 'id',
+  key: 'key',
+  value: 'value',
+  updatedById: 'updatedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.AIUserPolicyScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -542,6 +615,11 @@ exports.MappingStatus = exports.$Enums.MappingStatus = {
   REJECTED: 'REJECTED'
 };
 
+exports.FacilityDemandPlanStatus = exports.$Enums.FacilityDemandPlanStatus = {
+  DRAFT: 'DRAFT',
+  FINALIZED: 'FINALIZED'
+};
+
 exports.ReportStatus = exports.$Enums.ReportStatus = {
   PENDING: 'PENDING',
   APPROVED: 'APPROVED',
@@ -584,6 +662,8 @@ exports.Prisma.ModelName = {
   MasterDrug: 'MasterDrug',
   CompanyDrug: 'CompanyDrug',
   FacilityDrugMap: 'FacilityDrugMap',
+  FacilityDemandPlan: 'FacilityDemandPlan',
+  FacilityDemandPlanLine: 'FacilityDemandPlanLine',
   InventoryReport: 'InventoryReport',
   FacilityReportSubmission: 'FacilityReportSubmission',
   DrugOrder: 'DrugOrder',
@@ -603,6 +683,7 @@ exports.Prisma.ModelName = {
   Notification: 'Notification',
   ActivityLog: 'ActivityLog',
   AISetting: 'AISetting',
+  SystemSetting: 'SystemSetting',
   AIUserPolicy: 'AIUserPolicy',
   AIToolPolicy: 'AIToolPolicy'
 };

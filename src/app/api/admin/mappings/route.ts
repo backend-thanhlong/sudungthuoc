@@ -86,7 +86,7 @@ export async function PATCH(req: Request) {
         }
 
         const body = await req.json();
-        const { facilityCode, status, adminNote } = body;
+        const { facilityCode, status, adminNote, mappingIds } = body;
 
         if (!facilityCode || !status) {
             return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
@@ -96,12 +96,21 @@ export async function PATCH(req: Request) {
             return NextResponse.json({ message: "Status must be APPROVED or REJECTED" }, { status: 400 });
         }
 
+        const selectedMappingIds = Array.isArray(mappingIds)
+            ? mappingIds.filter((id): id is string => typeof id === "string" && id.trim().length > 0)
+            : [];
+
+        if (mappingIds !== undefined && selectedMappingIds.length === 0) {
+            return NextResponse.json({ message: "mappingIds must contain at least one id" }, { status: 400 });
+        }
+
         const result = await prisma.facilityDrugMap.updateMany({
             where: {
                 facility: {
                     facilityCode: facilityCode
                 },
-                status: "WAITING_APPROVAL"
+                status: "WAITING_APPROVAL",
+                ...(selectedMappingIds.length > 0 ? { id: { in: selectedMappingIds } } : {}),
             },
             data: {
                 status,

@@ -1,3 +1,5 @@
+import { normalizeSpecialControlValue } from "@/lib/master-drugs/special-control";
+
 export type AbcGroup = "A" | "B" | "C";
 export type UsageMetricKey = "value" | "quantity";
 export type UsageDimensionKey = "drugGroup" | "therapeuticGroup" | "specialControl" | "prescription" | "domestic";
@@ -193,6 +195,11 @@ const DEFAULT_LIMIT = 500;
 const MAX_LIMIT = 2000;
 const PARETO_LIMIT = 50;
 const REPORT_MONTH_PATTERN = /^(\d{2})\/(\d{4})$/;
+const NON_SPECIAL_CONTROL_LABEL = "Không phải thuốc kiểm soát đặc biệt";
+const LEGACY_SPECIAL_CONTROL_LABEL = "Có KSĐB";
+const PRESCRIPTION_LABEL = "Thuốc kê đơn";
+const NON_PRESCRIPTION_LABEL = "Thuốc không kê đơn";
+const UNKNOWN_PRESCRIPTION_LABEL = "Chưa phân loại kê đơn";
 const USAGE_DIMENSION_KEYS: UsageDimensionKey[] = [
     "drugGroup",
     "therapeuticGroup",
@@ -236,6 +243,59 @@ function normalizeFlag(value: string | null | undefined) {
 export function isTruthyReportFlag(value: string | null | undefined) {
     const normalized = normalizeFlag(value);
     return normalized === "co" || normalized === "true" || normalized === "1" || normalized === "x";
+}
+
+export function isSpecialControlDrug(value: string | null | undefined) {
+    return normalizeSpecialControlValue(value) !== null || isTruthyReportFlag(value);
+}
+
+export function isPrescriptionDrug(value: string | null | undefined) {
+    const normalized = normalizeFlag(value);
+
+    if (isFalseyPrescriptionFlag(normalized)) {
+        return false;
+    }
+
+    return (
+        normalized === "thuoc ke don" ||
+        normalized === "ke don" ||
+        isTruthyReportFlag(value)
+    );
+}
+
+function isFalseyPrescriptionFlag(normalized: string) {
+    return (
+        normalized === "thuoc khong ke don" ||
+        normalized === "khong ke don" ||
+        normalized === "khong" ||
+        normalized === "no" ||
+        normalized === "false" ||
+        normalized === "0"
+    );
+}
+
+function getSpecialControlUsageLabel(value: string | null | undefined) {
+    const specialControlValue = normalizeSpecialControlValue(value);
+    if (specialControlValue) {
+        return specialControlValue;
+    }
+
+    return isTruthyReportFlag(value) ? LEGACY_SPECIAL_CONTROL_LABEL : NON_SPECIAL_CONTROL_LABEL;
+}
+
+function getPrescriptionUsageLabel(value: string | null | undefined) {
+    const normalized = normalizeFlag(value);
+    if (!normalized) {
+        return UNKNOWN_PRESCRIPTION_LABEL;
+    }
+    if (normalized === "thuoc ke don" || normalized === "ke don" || isTruthyReportFlag(value)) {
+        return PRESCRIPTION_LABEL;
+    }
+    if (isFalseyPrescriptionFlag(normalized)) {
+        return NON_PRESCRIPTION_LABEL;
+    }
+
+    return UNKNOWN_PRESCRIPTION_LABEL;
 }
 
 function isDomesticDrugFlag(value: string | null | undefined) {
@@ -459,12 +519,19 @@ function getUsageDimensionKey(dimension: UsageDimensionKey, label: string) {
     return `${dimension}:${normalized}`;
 }
 
+function getPrescriptionUsageDimensions(): UsageDimensionEntry[] {
+    return [PRESCRIPTION_LABEL, NON_PRESCRIPTION_LABEL, UNKNOWN_PRESCRIPTION_LABEL].map((label) => ({
+        key: getUsageDimensionKey("prescription", label),
+        label,
+    }));
+}
+
 function getUsageDimensions(report: RawAbcReport): Record<UsageDimensionKey, UsageDimensionEntry> {
     const masterDrug = report.drugMap?.masterDrug;
     const drugGroupLabel = normalizeText(masterDrug?.nhomThuoc, "Chưa phân nhóm");
     const therapeuticGroupLabel = normalizeText(masterDrug?.therapeuticGroup?.name, "Chưa phân nhóm điều trị");
-    const specialControlLabel = isTruthyReportFlag(masterDrug?.kiemSoatDacBiet) ? "Có KSĐB" : "Không KSĐB";
-    const prescriptionLabel = isTruthyReportFlag(masterDrug?.isKeDon) ? "Kê đơn" : "Không kê đơn";
+    const specialControlLabel = getSpecialControlUsageLabel(masterDrug?.kiemSoatDacBiet);
+    const prescriptionLabel = getPrescriptionUsageLabel(masterDrug?.isKeDon);
     const domesticLabel = isDomesticDrugFlag(masterDrug?.isTrongNuoc) ? "Trong nước" : "Nước ngoài hoặc chưa rõ";
 
     return {
@@ -477,11 +544,11 @@ function getUsageDimensions(report: RawAbcReport): Record<UsageDimensionKey, Usa
             label: therapeuticGroupLabel,
         },
         specialControl: {
-            key: isTruthyReportFlag(masterDrug?.kiemSoatDacBiet) ? "specialControl:yes" : "specialControl:no",
+            key: getUsageDimensionKey("specialControl", specialControlLabel),
             label: specialControlLabel,
         },
         prescription: {
-            key: isTruthyReportFlag(masterDrug?.isKeDon) ? "prescription:yes" : "prescription:no",
+            key: getUsageDimensionKey("prescription", prescriptionLabel),
             label: prescriptionLabel,
         },
         domestic: {
@@ -515,9 +582,23 @@ function addUsageToMap(
 function toUsageSlices(
     map: Map<string, UsageSliceAccumulator>,
     totalValue: number,
-    totalQuantity: number
+    totalQuantity: number,
+    fixedDimensions?: UsageDimensionEntry[]
 ): UsageSlice[] {
-    return Array.from(map.values())
+    const values = new Map(map);
+    fixedDimensions?.forEach((dimension) => {
+        if (!values.has(dimension.key)) {
+            values.set(dimension.key, {
+                key: dimension.key,
+                label: dimension.label,
+                value: 0,
+                quantity: 0,
+                drugIds: new Set<string>(),
+            });
+        }
+    });
+
+    const slices = Array.from(values.values())
         .map((item) => ({
             key: item.key,
             label: item.label,
@@ -526,8 +607,17 @@ function toUsageSlices(
             drugCount: item.drugIds.size,
             percentValue: totalValue > 0 ? roundTo(item.value / totalValue * 100) : 0,
             percentQuantity: totalQuantity > 0 ? roundTo(item.quantity / totalQuantity * 100) : 0,
-        }))
-        .sort((left, right) => right.value - left.value || right.quantity - left.quantity || left.label.localeCompare(right.label, "vi"));
+        }));
+
+    if (fixedDimensions) {
+        const fixedOrder = new Map(fixedDimensions.map((dimension, index) => [dimension.key, index]));
+        return slices.sort((left, right) =>
+            (fixedOrder.get(left.key) ?? Number.MAX_SAFE_INTEGER) -
+            (fixedOrder.get(right.key) ?? Number.MAX_SAFE_INTEGER)
+        );
+    }
+
+    return slices.sort((left, right) => right.value - left.value || right.quantity - left.quantity || left.label.localeCompare(right.label, "vi"));
 }
 
 function createFacilityAccumulator(report: RawAbcReport): UsageFacilityAccumulator {
@@ -619,7 +709,8 @@ function buildUsageOverview(
     const byDrugGroup = toUsageSlices(dimensionMaps.drugGroup, totalValue, totalQuantity);
     const byTherapeuticGroup = toUsageSlices(dimensionMaps.therapeuticGroup, totalValue, totalQuantity);
     const bySpecialControl = toUsageSlices(dimensionMaps.specialControl, totalValue, totalQuantity);
-    const byPrescription = toUsageSlices(dimensionMaps.prescription, totalValue, totalQuantity);
+    const prescriptionDimensions = getPrescriptionUsageDimensions();
+    const byPrescription = toUsageSlices(dimensionMaps.prescription, totalValue, totalQuantity, prescriptionDimensions);
     const byDomestic = toUsageSlices(dimensionMaps.domestic, totalValue, totalQuantity);
     const facilityComparison = scope === "admin"
         ? Array.from(facilityMap.values())
@@ -632,7 +723,7 @@ function buildUsageOverview(
                     drugGroup: toUsageSlices(facility.dimensions.drugGroup, facility.totalValue, facility.totalQuantity),
                     therapeuticGroup: toUsageSlices(facility.dimensions.therapeuticGroup, facility.totalValue, facility.totalQuantity),
                     specialControl: toUsageSlices(facility.dimensions.specialControl, facility.totalValue, facility.totalQuantity),
-                    prescription: toUsageSlices(facility.dimensions.prescription, facility.totalValue, facility.totalQuantity),
+                    prescription: toUsageSlices(facility.dimensions.prescription, facility.totalValue, facility.totalQuantity, prescriptionDimensions),
                     domestic: toUsageSlices(facility.dimensions.domestic, facility.totalValue, facility.totalQuantity),
                 },
             }))
@@ -731,7 +822,7 @@ export function buildAbcAnalysis(
             group: item.group,
         })),
         specialDrugItems: allItems
-            .filter((item) => isTruthyReportFlag(item.kiemSoatDacBiet))
+            .filter((item) => isSpecialControlDrug(item.kiemSoatDacBiet))
             .slice(0, 50),
         dataQuality: {
             zeroPriceWithConsumption,

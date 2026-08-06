@@ -151,8 +151,11 @@ function buildSuggestionBasisLines(params: {
     latestEndingStock?: number | null;
     suggestionReportMonth?: string | null;
     incomingAcceptedQty?: number;
+    showIncomingAcceptedQty?: boolean;
     status: DrugOrderSuggestionStatus;
 }) {
+    const showIncomingAcceptedQty = params.showIncomingAcceptedQty ?? true;
+
     if (params.status === "UNLINKED") {
         return [
             "Thuốc chưa liên kết thuốc chuẩn nên không thể tính gợi ý.",
@@ -161,7 +164,7 @@ function buildSuggestionBasisLines(params: {
 
     if (params.status === "INSUFFICIENT_DATA") {
         const lines = ["Chưa đủ dữ liệu XNT để tính gợi ý."];
-        if ((params.incomingAcceptedQty || 0) > 0) {
+        if (showIncomingAcceptedQty && (params.incomingAcceptedQty || 0) > 0) {
             lines.push(
                 `Đang về: ${formatQuantityLabel(params.incomingAcceptedQty || 0)}`
             );
@@ -169,30 +172,42 @@ function buildSuggestionBasisLines(params: {
         return lines;
     }
 
-    return [
+    const lines = [
         `Xuất BQ ${params.monthCount}T: ${formatQuantityLabel(params.avgMonthlyExport || 0)}`,
         `Tồn cuối ${params.suggestionReportMonth}: ${formatQuantityLabel(
             params.latestEndingStock || 0
         )}`,
-        `Đang về: ${formatQuantityLabel(params.incomingAcceptedQty || 0)}`,
         `Mức phủ mục tiêu: ${DRUG_ORDER_TARGET_COVERAGE_MONTHS} tháng`,
         params.status === "PROVISIONAL"
             ? "Gợi ý tạm do có dùng dữ liệu chưa duyệt"
             : "Dữ liệu gợi ý đã duyệt",
     ];
+
+    if (showIncomingAcceptedQty) {
+        lines.splice(
+            2,
+            0,
+            `Đang về: ${formatQuantityLabel(params.incomingAcceptedQty || 0)}`
+        );
+    }
+
+    return lines;
 }
 
 function buildSuggestionResult(params: {
     status: DrugOrderSuggestionStatus;
     incomingAcceptedQty?: number;
+    showIncomingAcceptedQty?: boolean;
     baseMetrics?: SuggestionBaseMetrics | null;
 }) {
     const incomingAcceptedQty = Math.max(0, params.incomingAcceptedQty || 0);
+    const showIncomingAcceptedQty = params.showIncomingAcceptedQty ?? true;
 
     if (params.status === "UNLINKED") {
         const basisLines = buildSuggestionBasisLines({
             status: "UNLINKED",
             incomingAcceptedQty,
+            showIncomingAcceptedQty,
         });
 
         return {
@@ -216,6 +231,7 @@ function buildSuggestionResult(params: {
         const basisLines = buildSuggestionBasisLines({
             status: "INSUFFICIENT_DATA",
             incomingAcceptedQty,
+            showIncomingAcceptedQty,
         });
 
         return {
@@ -247,6 +263,7 @@ function buildSuggestionResult(params: {
         suggestionReportMonth: params.baseMetrics.suggestionReportMonth,
         incomingAcceptedQty,
         status: params.baseMetrics.status,
+        showIncomingAcceptedQty,
     });
 
     if (basisLines[0].startsWith("Xuất BQ undefinedT")) {
@@ -514,19 +531,23 @@ function buildMasterDrugSuggestionMap(params: {
     masterDrugIds: string[];
     baseMetricsByMasterDrug: Map<string, SuggestionBaseMetrics>;
     incomingAcceptedQtyByMasterDrug: Map<string, number>;
+    includeIncomingAcceptedQty?: boolean;
 }) {
     const suggestions = new Map<string, DrugOrderSuggestionResult>();
+    const includeIncomingAcceptedQty = params.includeIncomingAcceptedQty ?? true;
 
     for (const masterDrugId of [...new Set(params.masterDrugIds.filter(Boolean))]) {
         const baseMetrics = params.baseMetricsByMasterDrug.get(masterDrugId) || null;
-        const incomingAcceptedQty =
-            params.incomingAcceptedQtyByMasterDrug.get(masterDrugId) || 0;
+        const incomingAcceptedQty = includeIncomingAcceptedQty
+            ? params.incomingAcceptedQtyByMasterDrug.get(masterDrugId) || 0
+            : 0;
 
         suggestions.set(
             masterDrugId,
             buildSuggestionResult({
                 status: baseMetrics?.status || "INSUFFICIENT_DATA",
                 incomingAcceptedQty,
+                showIncomingAcceptedQty: includeIncomingAcceptedQty,
                 baseMetrics,
             })
         );
@@ -578,6 +599,7 @@ export async function buildDrugOrderSuggestionSnapshotMap(params: {
     masterDrugIds: string[];
     baseReportMonth: string | null;
     excludeOrderId?: string | null;
+    includeIncomingAcceptedQty?: boolean;
 }) {
     const uniqueMasterDrugIds = [...new Set(params.masterDrugIds.filter(Boolean))];
     if (uniqueMasterDrugIds.length === 0) {
@@ -594,6 +616,7 @@ export async function buildDrugOrderSuggestionSnapshotMap(params: {
         facilityId: params.facilityId,
         baseReportMonth: params.baseReportMonth,
     });
+    const includeIncomingAcceptedQty = params.includeIncomingAcceptedQty ?? true;
 
     const [baseMetricsByMasterDrug, incomingAcceptedQtyByMasterDrug] = await Promise.all([
         loadBaseMetricsByMasterDrug({
@@ -601,11 +624,13 @@ export async function buildDrugOrderSuggestionSnapshotMap(params: {
             masterDrugIds: uniqueMasterDrugIds,
             effectiveReportMonth,
         }),
-        loadIncomingAcceptedQtyByMasterDrug({
-            facilityId: params.facilityId,
-            masterDrugIds: uniqueMasterDrugIds,
-            excludeOrderId: params.excludeOrderId,
-        }),
+        includeIncomingAcceptedQty
+            ? loadIncomingAcceptedQtyByMasterDrug({
+                  facilityId: params.facilityId,
+                  masterDrugIds: uniqueMasterDrugIds,
+                  excludeOrderId: params.excludeOrderId,
+              })
+            : Promise.resolve(new Map<string, number>()),
     ]);
 
     return {
@@ -614,6 +639,7 @@ export async function buildDrugOrderSuggestionSnapshotMap(params: {
             masterDrugIds: uniqueMasterDrugIds,
             baseMetricsByMasterDrug,
             incomingAcceptedQtyByMasterDrug,
+            includeIncomingAcceptedQty,
         }),
     };
 }

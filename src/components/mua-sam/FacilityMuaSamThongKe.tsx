@@ -11,12 +11,9 @@ import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     PieChart, Pie, Cell, Legend,
 } from "recharts";
-
-const COLORS = [
-    "#6366f1", "#ec4899", "#14b8a6", "#f59e0b", "#3b82f6",
-    "#8b5cf6", "#ef4444", "#10b981", "#f97316", "#06b6d4",
-    "#a855f7", "#84cc16", "#e11d48", "#0ea5e9",
-];
+import ChartColorShortcut from "@/components/dashboard/ChartColorShortcut";
+import { useChartColors } from "@/components/dashboard/ChartColorProvider";
+import { normalizeDynamicChartKey } from "@/lib/chart-colors";
 
 const formatCurrency = (value: number) =>
     new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(value);
@@ -67,6 +64,7 @@ interface FacilityThongKeResponse {
 export default function FacilityMuaSamThongKe() {
     const [data, setData] = useState<FacilityThongKeResponse | null>(null);
     const [loading, setLoading] = useState(true);
+    const chartColors = useChartColors();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -112,6 +110,20 @@ export default function FacilityMuaSamThongKe() {
         pieQuyTrinh,
         timeline,
     } = data;
+    const neutralColor = chartColors.resolveColor({ semanticKey: "neutral" });
+    const bidColor = chartColors.resolveColor({ chartId: "muaSam.procurementType", key: "bid", semanticKey: "bid" });
+    const serviceColor = chartColors.resolveColor({ chartId: "muaSam.procurementType", key: "service", semanticKey: "service" });
+    const successColor = chartColors.resolveColor({ chartId: "muaSam.procurementType", key: "success", semanticKey: "success" });
+    const dynamicProcurementColor = (label: string, index: number) => chartColors.resolveColor({
+        chartId: "muaSam.procurementType",
+        key: normalizeDynamicChartKey(label),
+        index,
+    });
+    const dynamicFacilityColor = (label: string, index: number) => chartColors.resolveColor({
+        chartId: "muaSam.topFacilities",
+        key: normalizeDynamicChartKey(label),
+        index,
+    });
 
     return (
         <div className="space-y-6">
@@ -184,7 +196,10 @@ export default function FacilityMuaSamThongKe() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Pie: Hình thức LCNT */}
                 <div className="bg-white rounded-xl shadow-lg p-5 border border-gray-100">
-                    <h3 className="font-semibold text-gray-800 mb-1">Phân bổ hình thức LCNT</h3>
+                    <div className="mb-1 flex items-center justify-between gap-3">
+                        <h3 className="font-semibold text-gray-800">Phân bổ hình thức LCNT</h3>
+                        <ChartColorShortcut chartId="muaSam.procurementType" />
+                    </div>
                     <p className="text-xs text-gray-500 mb-4">Theo số lượng gói thầu</p>
                     <div className="h-[320px]">
                         {pieHinhThuc && pieHinhThuc.length > 0 ? (
@@ -201,8 +216,8 @@ export default function FacilityMuaSamThongKe() {
                                         label={({ name, percent }: any) => `${name}: ${((percent || 0) * 100).toFixed(0)}%`}
                                         labelLine={{ strokeWidth: 2 }}
                                     >
-                                        {pieHinhThuc.map((_: any, i: number) => (
-                                            <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                                        {pieHinhThuc.map((item: any, i: number) => (
+                                            <Cell key={i} fill={dynamicProcurementColor(item.name, i)} />
                                         ))}
                                     </Pie>
                                     <Tooltip />
@@ -217,7 +232,10 @@ export default function FacilityMuaSamThongKe() {
 
                 {/* Pie: Quy trình */}
                 <div className="bg-white rounded-xl shadow-lg p-5 border border-gray-100">
-                    <h3 className="font-semibold text-gray-800 mb-1">Phân bổ quy trình mua sắm</h3>
+                    <div className="mb-1 flex items-center justify-between gap-3">
+                        <h3 className="font-semibold text-gray-800">Phân bổ quy trình mua sắm</h3>
+                        <ChartColorShortcut chartId="muaSam.procurementType" />
+                    </div>
                     <p className="text-xs text-gray-500 mb-4">Luật Đấu thầu vs Tự quyết định</p>
                     <div className="h-[320px]">
                         {pieQuyTrinh && pieQuyTrinh.length > 0 ? (
@@ -234,8 +252,8 @@ export default function FacilityMuaSamThongKe() {
                                         label={({ name, percent }: any) => `${name}: ${((percent || 0) * 100).toFixed(0)}%`}
                                         labelLine={{ strokeWidth: 2 }}
                                     >
-                                        <Cell fill="#14b8a6" />
-                                        <Cell fill="#f59e0b" />
+                                        <Cell fill={bidColor} />
+                                        <Cell fill={serviceColor} />
                                     </Pie>
                                     <Tooltip />
                                     <Legend wrapperStyle={{ fontSize: 12 }} />
@@ -252,7 +270,10 @@ export default function FacilityMuaSamThongKe() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Bar: Giá trị theo kế hoạch */}
                 <div className="bg-white rounded-xl shadow-lg p-5 border border-gray-100">
-                    <h3 className="font-semibold text-gray-800 mb-1">Giá trị gói thầu theo kế hoạch</h3>
+                    <div className="mb-1 flex items-center justify-between gap-3">
+                        <h3 className="font-semibold text-gray-800">Giá trị gói thầu theo kế hoạch</h3>
+                        <ChartColorShortcut chartId="muaSam.topFacilities" />
+                    </div>
                     <p className="text-xs text-gray-500 mb-4">Tổng giá trị gói thầu từng kế hoạch LCNT</p>
                     <div className="h-[380px]">
                         {valueByKeHoach && valueByKeHoach.length > 0 ? (
@@ -264,17 +285,17 @@ export default function FacilityMuaSamThongKe() {
                                         angle={-35}
                                         textAnchor="end"
                                         height={100}
-                                        tick={{ fontSize: 10, fill: "#64748b" }}
+                                        tick={{ fontSize: 10, fill: neutralColor }}
                                         interval={0}
                                     />
-                                    <YAxis tick={{ fontSize: 11, fill: "#64748b" }} tickFormatter={formatCompact} width={70} />
+                                    <YAxis tick={{ fontSize: 11, fill: neutralColor }} tickFormatter={formatCompact} width={70} />
                                     <Tooltip
                                         contentStyle={{ backgroundColor: "white", borderRadius: "10px", border: "1px solid #e2e8f0", boxShadow: "0 10px 25px -5px rgb(0 0 0 / 0.1)" }}
                                         formatter={((value: any) => [formatCurrency(Number(value)), "Giá trị"]) as any}
                                     />
                                     <Bar dataKey="value" radius={[6, 6, 0, 0]}>
-                                        {valueByKeHoach.map((_: any, i: number) => (
-                                            <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                                        {valueByKeHoach.map((item: any, i: number) => (
+                                            <Cell key={i} fill={dynamicFacilityColor(item.name, i)} />
                                         ))}
                                     </Bar>
                                 </BarChart>
@@ -294,7 +315,10 @@ export default function FacilityMuaSamThongKe() {
 
             {/* Tỷ lệ trúng thầu */}
             <div className="bg-white rounded-xl shadow-lg p-5 border border-gray-100">
-                <h3 className="font-semibold text-gray-800 mb-1">Tỷ lệ trúng thầu</h3>
+                <div className="mb-1 flex items-center justify-between gap-3">
+                    <h3 className="font-semibold text-gray-800">Tỷ lệ trúng thầu</h3>
+                    <ChartColorShortcut chartId="muaSam.procurementType" />
+                </div>
                 <p className="text-xs text-gray-500 mb-4">So sánh mời thầu vs trúng thầu theo từng gói</p>
                 <div className="h-[300px]">
                     {bidData && bidData.length > 0 ? (
@@ -306,16 +330,16 @@ export default function FacilityMuaSamThongKe() {
                                     angle={-25}
                                     textAnchor="end"
                                     height={80}
-                                    tick={{ fontSize: 10, fill: "#64748b" }}
+                                    tick={{ fontSize: 10, fill: neutralColor }}
                                     interval={0}
                                 />
-                                <YAxis tick={{ fontSize: 11, fill: "#64748b" }} allowDecimals={false} />
+                                <YAxis tick={{ fontSize: 11, fill: neutralColor }} allowDecimals={false} />
                                 <Tooltip
                                     contentStyle={{ backgroundColor: "white", borderRadius: "10px", border: "1px solid #e2e8f0", boxShadow: "0 10px 25px -5px rgb(0 0 0 / 0.1)" }}
                                 />
                                 <Legend wrapperStyle={{ fontSize: 12 }} />
-                                <Bar dataKey="moiThau" name="Mời thầu" fill="#6366f1" radius={[4, 4, 0, 0]} />
-                                <Bar dataKey="trungThau" name="Trúng thầu" fill="#10b981" radius={[4, 4, 0, 0]} />
+                                <Bar dataKey="moiThau" name="Mời thầu" fill={bidColor} radius={[4, 4, 0, 0]} />
+                                <Bar dataKey="trungThau" name="Trúng thầu" fill={successColor} radius={[4, 4, 0, 0]} />
                             </BarChart>
                         </ResponsiveContainer>
                     ) : (

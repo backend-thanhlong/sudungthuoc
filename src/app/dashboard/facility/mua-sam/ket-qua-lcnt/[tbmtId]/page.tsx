@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, use } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -87,7 +87,10 @@ const getImportedPhanLoId = (row: Record<string, unknown>) =>
 
 export default function KetQuaLCNTDetailPage({ params }: { params: Promise<{ tbmtId: string }> }) {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const { tbmtId } = use(params);
+    const isNoTbmtTarget = tbmtId.startsWith("goi-thau-");
+    const isViewOnly = searchParams.get("mode") === "view";
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [excelModalOpen, setExcelModalOpen] = useState(false);
@@ -237,6 +240,10 @@ export default function KetQuaLCNTDetailPage({ params }: { params: Promise<{ tbm
     };
 
     const handleSave = async () => {
+        if (isViewOnly) {
+            return;
+        }
+
         // Validation
         if (!form.soQdPheDuyetKQLCNT || !form.ngayPheDuyetKQLCNT) {
             alert("Vui lòng nhập đầy đủ thông tin bắt buộc!");
@@ -264,7 +271,7 @@ export default function KetQuaLCNTDetailPage({ params }: { params: Promise<{ tbm
             console.log("Saving with goiThauId:", goiThauId);
             const payload = {
                 goiThauId: goiThauId,
-                thongBaoMoiThauId: tbmtId,
+                thongBaoMoiThauId: isNoTbmtTarget ? undefined : tbmtId,
                 ...form,
                 ketQuaPhanLos: phanLoResults,
             };
@@ -325,10 +332,12 @@ export default function KetQuaLCNTDetailPage({ params }: { params: Promise<{ tbm
                 </Button>
                 <div>
                     <h2 className="text-2xl font-bold text-gray-800">
-                        {existingData ? "Chỉnh sửa Kết quả LCNT" : "Báo cáo Kết quả LCNT"}
+                        {isViewOnly ? "Xem Kết quả LCNT" : existingData ? "Chỉnh sửa Kết quả LCNT" : "Báo cáo Kết quả LCNT"}
                     </h2>
                     <p className="text-gray-500 mt-0.5 text-sm">
-                        Nhập thông tin kết quả lựa chọn nhà thầu
+                        {isNoTbmtTarget
+                            ? "Nhập kết quả trực tiếp cho gói thầu không có Thông báo mời thầu"
+                            : "Nhập thông tin kết quả lựa chọn nhà thầu"}
                     </p>
                 </div>
             </div>
@@ -351,6 +360,7 @@ export default function KetQuaLCNTDetailPage({ params }: { params: Promise<{ tbm
                                 value={form.soQdPheDuyetKQLCNT}
                                 onChange={(e) => setForm({ ...form, soQdPheDuyetKQLCNT: e.target.value })}
                                 placeholder="Ví dụ: 123/QĐ-SYT"
+                                disabled={isViewOnly}
                             />
                         </div>
                         <div className="space-y-2">
@@ -362,6 +372,7 @@ export default function KetQuaLCNTDetailPage({ params }: { params: Promise<{ tbm
                                 type="date"
                                 value={form.ngayPheDuyetKQLCNT}
                                 onChange={(e) => setForm({ ...form, ngayPheDuyetKQLCNT: e.target.value })}
+                                disabled={isViewOnly}
                             />
                         </div>
                     </div>
@@ -373,6 +384,7 @@ export default function KetQuaLCNTDetailPage({ params }: { params: Promise<{ tbm
                                 type="number"
                                 value={form.soMatHangMoiThau || ""}
                                 onChange={(e) => setForm({ ...form, soMatHangMoiThau: e.target.value ? parseInt(e.target.value) : null })}
+                                disabled={isViewOnly}
                             />
                         </div>
                         <div className="space-y-2">
@@ -382,6 +394,7 @@ export default function KetQuaLCNTDetailPage({ params }: { params: Promise<{ tbm
                                 type="number"
                                 value={form.soMatHangTrungThau || ""}
                                 onChange={(e) => setForm({ ...form, soMatHangTrungThau: e.target.value ? parseInt(e.target.value) : null })}
+                                disabled={isViewOnly}
                             />
                         </div>
                         <div className="space-y-2">
@@ -391,6 +404,7 @@ export default function KetQuaLCNTDetailPage({ params }: { params: Promise<{ tbm
                                 type="number"
                                 value={form.tongGiaTriTrungThau || ""}
                                 onChange={(e) => setForm({ ...form, tongGiaTriTrungThau: e.target.value ? parseFloat(e.target.value) : null })}
+                                disabled={isViewOnly}
                             />
                         </div>
                     </div>
@@ -403,15 +417,17 @@ export default function KetQuaLCNTDetailPage({ params }: { params: Promise<{ tbm
                     <CardTitle className="text-lg text-blue-800">
                         Kết quả từng phần lô
                     </CardTitle>
-                    <Button
-                        onClick={() => setExcelModalOpen(true)}
-                        className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
-                    >
-                        <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                        </svg>
-                        Nhận dữ liệu phần lô từ file Excel
-                    </Button>
+                    {!isViewOnly && (
+                        <Button
+                            onClick={() => setExcelModalOpen(true)}
+                            className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+                        >
+                            <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                            </svg>
+                            Nhận dữ liệu phần lô từ file Excel
+                        </Button>
+                    )}
                 </CardHeader>
                 <CardContent>
                     {phanLoResults.length === 0 ? (
@@ -468,19 +484,21 @@ export default function KetQuaLCNTDetailPage({ params }: { params: Promise<{ tbm
 
             {/* Save Button */}
             <div className="flex justify-end gap-3">
-                <Button
-                    variant="outline"
-                    onClick={() => router.push("/dashboard/facility/mua-sam/ket-qua-lcnt")}
-                >
-                    Hủy
+                    <Button
+                        variant="outline"
+                        onClick={() => router.push("/dashboard/facility/mua-sam/ket-qua-lcnt")}
+                    >
+                    {isViewOnly ? "Quay lại" : "Hủy"}
                 </Button>
-                <Button
-                    onClick={handleSave}
-                    disabled={saving}
-                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-                >
-                    {saving ? "Đang lưu..." : "Lưu lại"}
-                </Button>
+                {!isViewOnly && (
+                    <Button
+                        onClick={handleSave}
+                        disabled={saving}
+                        className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                    >
+                        {saving ? "Đang lưu..." : "Lưu lại"}
+                    </Button>
+                )}
             </div>
 
             {/* Excel Import Modal */}

@@ -1,0 +1,3 @@
+ALTER TABLE "facility_drug_maps"
+ALTER COLUMN "gia_vat" TYPE DECIMAL(65,30) USING "gia_vat"::DECIMAL(65,30),
+ALTER COLUMN "gia_vat" SET DEFAULT 0;

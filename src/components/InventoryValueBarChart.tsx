@@ -1,6 +1,9 @@
 "use client";
 
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
+import ChartColorShortcut from "@/components/dashboard/ChartColorShortcut";
+import { useChartColors } from "@/components/dashboard/ChartColorProvider";
+import { normalizeDynamicChartKey } from "@/lib/chart-colors";
 
 interface InventoryValueData {
     facilityName: string;
@@ -12,6 +15,8 @@ interface InventoryValueBarChartProps {
 }
 
 export default function InventoryValueBarChart({ data }: InventoryValueBarChartProps) {
+    const chartColors = useChartColors();
+
     // Format currency to VND
     const formatCurrency = (value: number) => {
         return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
@@ -23,7 +28,10 @@ export default function InventoryValueBarChart({ data }: InventoryValueBarChartP
     };
 
     return (
-        <div className="h-[400px] w-full">
+        <div className="relative h-[400px] w-full">
+            <div className="absolute right-0 top-0 z-10">
+                <ChartColorShortcut chartId="inventory.inventoryValue" />
+            </div>
             <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
@@ -55,31 +63,25 @@ export default function InventoryValueBarChart({ data }: InventoryValueBarChartP
                         {data.map((entry, index) => (
                             <Cell
                                 key={`cell-${index}`}
-                                fill={`url(#valueGradient${index % 5})`}
+                                fill={`url(#valueGradient${index})`}
                             />
                         ))}
                     </Bar>
                     <defs>
-                        <linearGradient id="valueGradient0" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.9} />
-                            <stop offset="100%" stopColor="#7c3aed" stopOpacity={0.9} />
-                        </linearGradient>
-                        <linearGradient id="valueGradient1" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#ec4899" stopOpacity={0.9} />
-                            <stop offset="100%" stopColor="#db2777" stopOpacity={0.9} />
-                        </linearGradient>
-                        <linearGradient id="valueGradient2" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#14b8a6" stopOpacity={0.9} />
-                            <stop offset="100%" stopColor="#0d9488" stopOpacity={0.9} />
-                        </linearGradient>
-                        <linearGradient id="valueGradient3" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#f59e0b" stopOpacity={0.9} />
-                            <stop offset="100%" stopColor="#d97706" stopOpacity={0.9} />
-                        </linearGradient>
-                        <linearGradient id="valueGradient4" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.9} />
-                            <stop offset="100%" stopColor="#2563eb" stopOpacity={0.9} />
-                        </linearGradient>
+                        {data.map((entry, index) => {
+                            const baseColor = chartColors.resolveColor({
+                                chartId: "inventory.inventoryValue",
+                                key: normalizeDynamicChartKey(entry.facilityName),
+                                index,
+                            });
+                            const gradient = chartColors.getGradientStops(index);
+                            return (
+                            <linearGradient key={`${entry.facilityName}-${index}`} id={`valueGradient${index}`} x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor={baseColor} stopOpacity={0.86} />
+                                <stop offset="100%" stopColor={gradient.to} stopOpacity={0.92} />
+                            </linearGradient>
+                            );
+                        })}
                     </defs>
                 </BarChart>
             </ResponsiveContainer>

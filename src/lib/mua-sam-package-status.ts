@@ -1,6 +1,7 @@
 export const PACKAGE_STATUS_ORDER = [
     "chuaCoTbmt",
     "daCoTbmtChuaCoKqlcnt",
+    "khongYeuCauTbmt",
     "daCoKqlcnt",
 ] as const;
 
@@ -9,6 +10,7 @@ export type PackageStatusKey = (typeof PACKAGE_STATUS_ORDER)[number];
 export const PACKAGE_STATUS_LABELS: Record<PackageStatusKey, string> = {
     chuaCoTbmt: "Chưa có TBMT",
     daCoTbmtChuaCoKqlcnt: "Đã có TBMT chưa có KQLCNT",
+    khongYeuCauTbmt: "Không yêu cầu TBMT",
     daCoKqlcnt: "Đã có KQLCNT",
 };
 
@@ -19,6 +21,7 @@ export type PackageStatusSourceItem = {
     tenKHLCNT: string | null;
     maKHLCNT: string | null;
     quyTrinh: number;
+    yeuCauTBMT: boolean;
     tbmtCount: number;
     kqlcntCount: number;
     facilityId?: string;
@@ -49,12 +52,13 @@ export function createEmptyPackageStatusBreakdown(): PackageStatusBreakdown {
     return {
         chuaCoTbmt: [],
         daCoTbmtChuaCoKqlcnt: [],
+        khongYeuCauTbmt: [],
         daCoKqlcnt: [],
     };
 }
 
 export function classifyPackageStatus(
-    item: Pick<PackageStatusSourceItem, "quyTrinh" | "tbmtCount" | "kqlcntCount">
+    item: Pick<PackageStatusSourceItem, "quyTrinh" | "yeuCauTBMT" | "tbmtCount" | "kqlcntCount">
 ): PackageStatusKey | null {
     if (item.quyTrinh !== 1) {
         return null;
@@ -66,6 +70,10 @@ export function classifyPackageStatus(
 
     if (item.tbmtCount > 0) {
         return "daCoTbmtChuaCoKqlcnt";
+    }
+
+    if (!item.yeuCauTBMT) {
+        return "khongYeuCauTbmt";
     }
 
     return "chuaCoTbmt";
@@ -108,6 +116,7 @@ export function buildPackageStatusData(items: PackageStatusSourceItem[]) {
             keHoachId: item.keHoachId,
             tenKHLCNT: item.tenKHLCNT,
             maKHLCNT: item.maKHLCNT,
+            yeuCauTBMT: item.yeuCauTBMT,
             tbmtCount: item.tbmtCount,
             kqlcntCount: item.kqlcntCount,
             facilityId: item.facilityId,

@@ -48,11 +48,11 @@ export default function SupplySummaryCards({ metrics }: SupplySummaryCardsProps)
     ];
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 xl:gap-4">
             {cards.map(card => (
-                <div key={card.label} className={`rounded-xl border p-4 shadow-sm ${card.tone}`}>
+                <div key={card.label} className={`rounded-xl border p-3 shadow-sm sm:p-4 ${card.tone}`}>
                     <p className="text-xs font-medium uppercase tracking-[0.14em] opacity-70">{card.label}</p>
-                    <p className="mt-2 text-2xl font-bold leading-none">{card.value}</p>
+                    <p className="mt-2 text-xl font-bold leading-none sm:text-2xl">{card.value}</p>
                 </div>
             ))}
         </div>

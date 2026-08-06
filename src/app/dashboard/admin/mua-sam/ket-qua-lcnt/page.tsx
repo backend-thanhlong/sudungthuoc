@@ -49,8 +49,8 @@ interface KetQuaItem {
     tenKHLCNT: string | null;
     tenGoiThau: string;
     giaGoiThau: number | null;
-    maTBMT: string;
-    ngayDangTaiTBMT: string;
+    maTBMT: string | null;
+    ngayDangTaiTBMT: string | null;
     soQdPheDuyetKQLCNT: string;
     ngayPheDuyetKQLCNT: string;
     soMatHangMoiThau: number;
@@ -538,7 +538,7 @@ export default function AdminKetQuaLCNTPage() {
                                                                                 <TableHead>STT</TableHead>
                                                                                 <TableHead>Mã KHLCNT</TableHead>
                                                                                 <TableHead>Tên gói thầu</TableHead>
-                                                                                <TableHead>Mã TBMT</TableHead>
+                                                                                <TableHead>Luồng TBMT</TableHead>
                                                                                 <TableHead>Số QĐ phê duyệt</TableHead>
                                                                                 <TableHead>Ngày phê duyệt</TableHead>
                                                                                 <TableHead className="text-right">MH mời thầu</TableHead>
@@ -554,8 +554,8 @@ export default function AdminKetQuaLCNTPage() {
                                                                                     <TableCell className="font-mono text-sm">{item.maKHLCNT || "—"}</TableCell>
                                                                                     <TableCell className="max-w-[320px] whitespace-normal break-words align-top text-sm">{item.tenGoiThau || "—"}</TableCell>
                                                                                     <TableCell>
-                                                                                        <Badge className="border-0 bg-blue-100 text-blue-700 hover:bg-blue-200">
-                                                                                            {item.maTBMT}
+                                                                                        <Badge className={`border-0 ${item.maTBMT ? "bg-blue-100 text-blue-700 hover:bg-blue-200" : "bg-slate-100 text-slate-700 hover:bg-slate-200"}`}>
+                                                                                            {item.maTBMT || "Không yêu cầu TBMT"}
                                                                                         </Badge>
                                                                                     </TableCell>
                                                                                     <TableCell>{item.soQdPheDuyetKQLCNT}</TableCell>
@@ -764,7 +764,7 @@ export default function AdminKetQuaLCNTPage() {
                                 <span className="mt-2 block text-gray-700">
                                     <strong>Gói thầu:</strong> {deleteItem.tenGoiThau}
                                     <br />
-                                    <strong>Mã TBMT:</strong> {deleteItem.maTBMT}
+                                    <strong>Luồng TBMT:</strong> {deleteItem.maTBMT || "Không yêu cầu TBMT"}
                                     <br />
                                     <strong>Cơ sở:</strong> {deleteItem.facilityName}
                                 </span>

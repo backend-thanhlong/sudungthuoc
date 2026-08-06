@@ -19,22 +19,30 @@ import {
     type PackageStatusKey,
     type PackageStatusSummary,
 } from "@/lib/mua-sam-package-status";
+import ChartColorShortcut from "@/components/dashboard/ChartColorShortcut";
+import { useChartColors } from "@/components/dashboard/ChartColorProvider";
 
-const STATUS_COLORS: Record<PackageStatusKey, string> = {
-    chuaCoTbmt: "#94a3b8",
-    daCoTbmtChuaCoKqlcnt: "#f59e0b",
-    daCoKqlcnt: "#10b981",
-};
-
-function StatusTick({ x = 0, y = 0, payload }: { x?: number; y?: number; payload?: { value?: string } }) {
+function StatusTick({
+    x = 0,
+    y = 0,
+    payload,
+    color,
+}: {
+    x?: number;
+    y?: number;
+    payload?: { value?: string };
+    color: string;
+}) {
     const label = payload?.value || "";
     const lines = label === PACKAGE_STATUS_LABELS.daCoTbmtChuaCoKqlcnt
         ? ["Đã có TBMT", "chưa có KQLCNT"]
+        : label === PACKAGE_STATUS_LABELS.khongYeuCauTbmt
+            ? ["Không yêu cầu", "TBMT"]
         : [label];
 
     return (
         <g transform={`translate(${x},${y})`}>
-            <text textAnchor="middle" fill="#64748b" fontSize={11}>
+            <text textAnchor="middle" fill={color} fontSize={11}>
                 {lines.map((line, index) => (
                     <tspan key={`${line}-${index}`} x={0} dy={index === 0 ? 16 : 14}>
                         {line}
@@ -78,6 +86,15 @@ export default function PackageStatusChartCard({
     showFacilityColumn = false,
 }: PackageStatusChartCardProps) {
     const [selectedStatusKey, setSelectedStatusKey] = useState<PackageStatusKey | null>(null);
+    const chartColors = useChartColors();
+    const statusColors: Record<PackageStatusKey, string> = {
+        chuaCoTbmt: chartColors.resolveColor({ chartId: "muaSam.packageStatus", key: "chuaCoTbmt", semanticKey: "neutral" }),
+        daCoTbmtChuaCoKqlcnt: chartColors.resolveColor({ chartId: "muaSam.packageStatus", key: "daCoTbmtChuaCoKqlcnt", semanticKey: "warning" }),
+        khongYeuCauTbmt: chartColors.resolveColor({ chartId: "muaSam.packageStatus", key: "khongYeuCauTbmt", semanticKey: "service" }),
+        daCoKqlcnt: chartColors.resolveColor({ chartId: "muaSam.packageStatus", key: "daCoKqlcnt", semanticKey: "success" }),
+    };
+    const neutralColor = chartColors.resolveColor({ semanticKey: "neutral" });
+    const mutedColor = chartColors.resolveColor({ semanticKey: "muted" });
 
     useEffect(() => {
         setSelectedStatusKey(null);
@@ -101,15 +118,18 @@ export default function PackageStatusChartCard({
                         Phân loại theo tiến độ nghiệp vụ thực tế của gói thầu quy trình 1
                     </p>
                 </div>
-                {selectedStatusKey && (
-                    <button
-                        type="button"
-                        onClick={() => setSelectedStatusKey(null)}
-                        className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50"
-                    >
-                        Bỏ chọn
-                    </button>
-                )}
+                <div className="flex items-center gap-2">
+                    <ChartColorShortcut chartId="muaSam.packageStatus" />
+                    {selectedStatusKey && (
+                        <button
+                            type="button"
+                            onClick={() => setSelectedStatusKey(null)}
+                            className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50"
+                        >
+                            Bỏ chọn
+                        </button>
+                    )}
+                </div>
             </div>
 
             <div className="h-[380px] mt-4">
@@ -117,8 +137,8 @@ export default function PackageStatusChartCard({
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={statusData} margin={{ top: 10, right: 20, left: 10, bottom: 45 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                            <XAxis dataKey="name" tick={<StatusTick />} interval={0} height={58} />
-                            <YAxis tick={{ fontSize: 11, fill: "#64748b" }} allowDecimals={false} />
+                            <XAxis dataKey="name" tick={<StatusTick color={neutralColor} />} interval={0} height={58} />
+                            <YAxis tick={{ fontSize: 11, fill: neutralColor }} allowDecimals={false} />
                             <Tooltip
                                 cursor={{ fill: "#f8fafc" }}
                                 contentStyle={{ backgroundColor: "white", borderRadius: "10px", border: "1px solid #e2e8f0" }}
@@ -138,7 +158,7 @@ export default function PackageStatusChartCard({
                                     <Cell
                                         key={item.key}
                                         cursor="pointer"
-                                        fill={selectedStatusKey && selectedStatusKey !== item.key ? "#cbd5e1" : STATUS_COLORS[item.key]}
+                                        fill={selectedStatusKey && selectedStatusKey !== item.key ? mutedColor : statusColors[item.key]}
                                     />
                                 ))}
                             </Bar>
@@ -170,7 +190,7 @@ export default function PackageStatusChartCard({
                         >
                             <span
                                 className="h-2.5 w-2.5 rounded-full"
-                                style={{ backgroundColor: isSelected ? "#ffffff" : STATUS_COLORS[item.key] }}
+                                style={{ backgroundColor: isSelected ? "#ffffff" : statusColors[item.key] }}
                             />
                             <span>{item.name}</span>
                             <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${isSelected ? "bg-white/15 text-white" : "bg-slate-100 text-slate-600"}`}>
@@ -188,7 +208,7 @@ export default function PackageStatusChartCard({
                             Đang theo dõi {statusSummary.totalTrackedPackages} gói thầu thuộc quy trình 1
                         </p>
                         <p className="text-xs text-slate-500">
-                            Dữ liệu dưới đây chỉ xét gói thầu có thể đi qua các mốc TBMT và KQLCNT.
+                            Dữ liệu dưới đây tách riêng gói chưa có TBMT và gói thuộc trường hợp không yêu cầu TBMT.
                         </p>
                     </div>
                 ) : (

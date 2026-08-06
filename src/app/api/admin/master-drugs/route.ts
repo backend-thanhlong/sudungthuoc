@@ -3,9 +3,14 @@ import { MappingStatus, type Prisma } from "@/../prisma/generated/client";
 import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
 import { RouteError } from "@/lib/server-authz";
+import {
+    isValidSpecialControlValue,
+    normalizeSpecialControlValue,
+} from "@/lib/master-drugs/special-control";
 
 const MASTER_DRUG_OPTIONAL_STRING_FIELDS = [
     "maBhyt",
+    "maAtc",
     "hoatChat",
     "hamLuong",
     "dangBaoChe",
@@ -24,7 +29,6 @@ const MASTER_DRUG_OPTIONAL_STRING_FIELDS = [
     "diaChiDangKy",
     "nhomThuoc",
     "isKeDon",
-    "kiemSoatDacBiet",
     "isTrongNuoc",
 ] as const;
 
@@ -34,10 +38,12 @@ const MASTER_DRUG_SEARCHABLE_FIELDS = [
     "hoatChat",
     "maChung",
     "maBhyt",
+    "maAtc",
 ] as const;
 
 const MASTER_DRUG_TEXT_FILTER_FIELDS = [
     "maBhyt",
+    "maAtc",
     "tenThuoc",
     "hoatChat",
     "hamLuong",
@@ -50,6 +56,18 @@ const MASTER_DRUG_TEXT_FILTER_FIELDS = [
 
 function getTrimmedParam(searchParams: URLSearchParams, key: string) {
     return searchParams.get(key)?.trim() ?? "";
+}
+
+function parseOptionalBoolean(value: unknown, fieldLabel: string) {
+    if (value === undefined || value === null || value === "") {
+        return false;
+    }
+
+    if (typeof value !== "boolean") {
+        throw new RouteError(400, `${fieldLabel} không hợp lệ`);
+    }
+
+    return value;
 }
 
 async function resolveTherapeuticGroupId(value: unknown) {
@@ -80,6 +98,7 @@ async function buildMasterDrugCreateData(body: Record<string, unknown>): Promise
     const data: Prisma.MasterDrugCreateInput = {
         maChung,
         tenThuoc,
+        isThuocHiem: parseOptionalBoolean(body.isThuocHiem, "Thuốc hiếm"),
         isActive: true,
     };
 
@@ -87,6 +106,11 @@ async function buildMasterDrugCreateData(body: Record<string, unknown>): Promise
         const rawValue = body[field];
         data[field] = typeof rawValue === "string" && rawValue.trim() ? rawValue.trim() : null;
     }
+
+    if (!isValidSpecialControlValue(body.kiemSoatDacBiet)) {
+        throw new RouteError(400, "KS đặc biệt không hợp lệ");
+    }
+    data.kiemSoatDacBiet = normalizeSpecialControlValue(body.kiemSoatDacBiet);
 
     const therapeuticGroupId = await resolveTherapeuticGroupId(body.therapeuticGroupId);
     if (therapeuticGroupId) {
@@ -127,6 +151,7 @@ export async function GET(request: Request) {
                     { hoatChat: { contains: search, mode: "insensitive" } },
                     { soDangKy: { contains: search, mode: "insensitive" } },
                     { maBhyt: { contains: search, mode: "insensitive" } },
+                    { maAtc: { contains: search, mode: "insensitive" } },
                     ],
                 });
             } else if (MASTER_DRUG_SEARCHABLE_FIELDS.includes(searchField as (typeof MASTER_DRUG_SEARCHABLE_FIELDS)[number])) {
@@ -180,10 +205,31 @@ export async function GET(request: Request) {
             });
         }
 
+        const isTrongNuoc = getTrimmedParam(searchParams, "isTrongNuoc");
+        if (isTrongNuoc) {
+            whereClauses.push({
+                isTrongNuoc,
+            });
+        }
+
+        const isKeDon = getTrimmedParam(searchParams, "isKeDon");
+        if (isKeDon) {
+            whereClauses.push({
+                isKeDon,
+            });
+        }
+
         const therapeuticGroupId = getTrimmedParam(searchParams, "therapeuticGroupId");
         if (therapeuticGroupId) {
             whereClauses.push({
                 therapeuticGroupId,
+            });
+        }
+
+        const isThuocHiem = getTrimmedParam(searchParams, "isThuocHiem");
+        if (isThuocHiem === "true" || isThuocHiem === "false") {
+            whereClauses.push({
+                isThuocHiem: isThuocHiem === "true",
             });
         }
 

@@ -30,6 +30,8 @@ import SupplyValueSections from "@/components/dashboard/supply/SupplyValueSectio
 import SupplyContractSections from "@/components/dashboard/supply/SupplyContractSections";
 import SupplyCoverageSection from "@/components/dashboard/supply/SupplyCoverageSection";
 import { useDashboardChartTheme } from "./chart-theme";
+import ChartColorShortcut from "./ChartColorShortcut";
+import { useChartColors } from "./ChartColorProvider";
 
 interface Tab2Props {
     reportMonth: string;
@@ -63,11 +65,11 @@ const SEVERITY_META: Record<SupplySeverity, { label: string; className: string }
     },
 };
 
-const SCATTER_SEVERITY_META: Record<ScatterSeverity, { label: string; color: string }> = {
-    danger: { label: "Dưới 1 tháng", color: "#dc2626" },
-    warning: { label: "1 đến < 2 tháng", color: "#f59e0b" },
-    watch: { label: "2 đến < 3 tháng", color: "#eab308" },
-    safe: { label: "Từ 3 tháng", color: "#10b981" },
+const SCATTER_SEVERITY_LABELS: Record<ScatterSeverity, string> = {
+    danger: "Dưới 1 tháng",
+    warning: "1 đến < 2 tháng",
+    watch: "2 đến < 3 tháng",
+    safe: "Từ 3 tháng",
 };
 
 const formatCompact = (value: number) =>
@@ -115,7 +117,40 @@ function buildSupplyQueryString({
 
 function StockoutActualTable({ rows }: { rows: StockoutActualRow[] }) {
     return (
-        <div className="overflow-x-auto max-h-[350px] overflow-y-auto">
+        <div>
+            <div className="max-h-[350px] space-y-3 overflow-y-auto md:hidden">
+                {rows.map((item, index) => (
+                    <div key={`${item.facility}-${item.drugName}-${index}`} className="rounded-lg border border-red-100 bg-red-50/40 p-3 dark:border-red-900/60 dark:bg-red-950/15">
+                        <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                                <p className="text-xs text-muted-foreground">#{index + 1} • {item.facility}</p>
+                                <p className="mt-1 font-medium text-foreground">{item.drugName}</p>
+                                {item.hamLuong && <p className="text-xs text-muted-foreground">{item.hamLuong}</p>}
+                                <p className="mt-1 text-xs text-muted-foreground">{item.hoatChat}</p>
+                                <div className="mt-2 grid grid-cols-1 gap-1 text-xs text-muted-foreground">
+                                    <p>Số đăng ký: <span className="text-foreground">{item.soDangKy || "-"}</span></p>
+                                    <p>Nhóm TCKT: <span className="text-foreground">{item.nhomTckt || "-"}</span></p>
+                                    <p>Đơn vị tính: <span className="text-foreground">{item.donViTinh || "-"}</span></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                            <div className="rounded-md bg-card/70 p-2">
+                                <p className="text-muted-foreground">Xuất kỳ này</p>
+                                <p className="mt-1 font-mono font-semibold text-red-600">{formatNumber(item.currentXuat)}</p>
+                            </div>
+                            <div className="rounded-md bg-card/70 p-2">
+                                <p className="text-muted-foreground">Nhu cầu BQ</p>
+                                <p className="mt-1 font-mono font-semibold text-foreground">{formatNumber(item.demandAvg)}</p>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+                {rows.length === 0 && (
+                    <p className="text-center text-muted-foreground/70 py-8">Không có thuốc hết hàng cuối kỳ trong bộ lọc hiện tại</p>
+                )}
+            </div>
+            <div className="hidden overflow-x-auto max-h-[350px] overflow-y-auto md:block">
             <table className="w-full text-sm">
                 <thead className="sticky top-0">
                     <tr className="bg-gradient-to-r from-red-600 to-rose-600 text-white">
@@ -123,6 +158,9 @@ function StockoutActualTable({ rows }: { rows: StockoutActualRow[] }) {
                         <th className="text-left p-3 font-semibold">Cơ sở</th>
                         <th className="text-left p-3 font-semibold">Tên thuốc</th>
                         <th className="text-left p-3 font-semibold">Hoạt chất</th>
+                        <th className="text-left p-3 font-semibold">Số đăng ký</th>
+                        <th className="text-left p-3 font-semibold">Nhóm TCKT</th>
+                        <th className="text-left p-3 font-semibold">Đơn vị tính</th>
                         <th className="text-right p-3 font-semibold">Xuất kỳ này</th>
                         <th className="text-right p-3 font-semibold rounded-tr-lg">Nhu cầu BQ</th>
                     </tr>
@@ -140,6 +178,9 @@ function StockoutActualTable({ rows }: { rows: StockoutActualRow[] }) {
                                 {item.hamLuong && <p className="text-xs text-muted-foreground">{item.hamLuong}</p>}
                             </td>
                             <td className="p-3 text-muted-foreground">{item.hoatChat}</td>
+                            <td className="p-3 text-muted-foreground">{item.soDangKy || "-"}</td>
+                            <td className="p-3 text-muted-foreground">{item.nhomTckt || "-"}</td>
+                            <td className="p-3 text-muted-foreground">{item.donViTinh || "-"}</td>
                             <td className="p-3 text-right font-mono text-red-600 font-semibold">{formatNumber(item.currentXuat)}</td>
                             <td className="p-3 text-right font-mono text-foreground">{formatNumber(item.demandAvg)}</td>
                         </tr>
@@ -149,13 +190,49 @@ function StockoutActualTable({ rows }: { rows: StockoutActualRow[] }) {
             {rows.length === 0 && (
                 <p className="text-center text-muted-foreground/70 py-8">Không có thuốc hết hàng cuối kỳ trong bộ lọc hiện tại</p>
             )}
+            </div>
         </div>
     );
 }
 
 function StockoutForecastTable({ rows }: { rows: StockoutForecastRow[] }) {
     return (
-        <div className="overflow-x-auto max-h-[350px] overflow-y-auto">
+        <div>
+            <div className="max-h-[350px] space-y-3 overflow-y-auto md:hidden">
+                {rows.map((item, index) => (
+                    <div key={`${item.facility}-${item.drugName}-${index}`} className="rounded-lg border border-amber-100 bg-amber-50/40 p-3 dark:border-amber-900/60 dark:bg-amber-950/15">
+                        <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                                <p className="text-xs text-muted-foreground">#{index + 1} • {item.facility}</p>
+                                <p className="mt-1 font-medium text-foreground">{item.drugName}</p>
+                                {item.hamLuong && <p className="text-xs text-muted-foreground">{item.hamLuong}</p>}
+                                <p className="mt-1 text-xs text-muted-foreground">{item.hoatChat}</p>
+                            </div>
+                            <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${SEVERITY_META[item.severity].className}`}>
+                                {SEVERITY_META[item.severity].label}
+                            </span>
+                        </div>
+                        <div className="mt-3 grid grid-cols-3 gap-2 text-xs">
+                            <div className="rounded-md bg-card/70 p-2">
+                                <p className="text-muted-foreground">Tồn cuối</p>
+                                <p className="mt-1 font-mono font-semibold text-foreground">{formatNumber(item.currentTonCuoi)}</p>
+                            </div>
+                            <div className="rounded-md bg-card/70 p-2">
+                                <p className="text-muted-foreground">Nhu cầu</p>
+                                <p className="mt-1 font-mono font-semibold text-foreground">{formatNumber(item.demandAvg)}</p>
+                            </div>
+                            <div className="rounded-md bg-card/70 p-2">
+                                <p className="text-muted-foreground">Độ phủ</p>
+                                <p className="mt-1 font-mono font-semibold text-amber-700">{formatNumber(item.monthsOfCover)}</p>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+                {rows.length === 0 && (
+                    <p className="text-center text-muted-foreground/70 py-8">Không có thuốc nào có độ phủ tồn kho dưới 3 tháng</p>
+                )}
+            </div>
+            <div className="hidden overflow-x-auto max-h-[350px] overflow-y-auto md:block">
             <table className="w-full text-sm">
                 <thead className="sticky top-0">
                     <tr className="bg-gradient-to-r from-amber-500 to-orange-500 text-white">
@@ -197,13 +274,31 @@ function StockoutForecastTable({ rows }: { rows: StockoutForecastRow[] }) {
             {rows.length === 0 && (
                 <p className="text-center text-muted-foreground/70 py-8">Không có thuốc nào có độ phủ tồn kho dưới 3 tháng</p>
             )}
+            </div>
         </div>
     );
 }
 
 function DeadStockTable({ rows }: { rows: DeadStockRow[] }) {
     return (
-        <div className="overflow-x-auto max-h-60 overflow-y-auto">
+        <div>
+            <div className="max-h-60 space-y-2 overflow-y-auto md:hidden">
+                {rows.map((item, index) => (
+                    <div key={`${item.facility}-${item.drugName}-${index}`} className="rounded-lg border border-border bg-card p-3">
+                        <p className="text-xs text-muted-foreground">#{index + 1} • {item.facility}</p>
+                        <p className="mt-1 text-sm font-medium text-foreground">{item.drugName}</p>
+                        {item.hamLuong && <p className="text-[11px] text-muted-foreground">{item.hamLuong}</p>}
+                        <div className="mt-2 flex items-center justify-between gap-3 text-xs">
+                            <span className="text-muted-foreground">{item.hoatChat}</span>
+                            <span className="font-mono font-semibold text-foreground">{formatNumber(item.tonCuoi)}</span>
+                        </div>
+                    </div>
+                ))}
+                {rows.length === 0 && (
+                    <p className="text-center text-muted-foreground/70 py-6">Không có thuốc tồn kho không phát sinh nhu cầu trong cửa sổ đang chọn</p>
+                )}
+            </div>
+            <div className="hidden overflow-x-auto max-h-60 overflow-y-auto md:block">
             <table className="w-full text-xs">
                 <thead className="sticky top-0">
                     <tr className="bg-slate-700 text-white dark:bg-muted dark:text-foreground">
@@ -232,6 +327,7 @@ function DeadStockTable({ rows }: { rows: DeadStockRow[] }) {
             {rows.length === 0 && (
                 <p className="text-center text-muted-foreground/70 py-6">Không có thuốc tồn kho không phát sinh nhu cầu trong cửa sổ đang chọn</p>
             )}
+            </div>
         </div>
     );
 }
@@ -250,6 +346,13 @@ export default function Tab2Supply({
     const [searchTerm, setSearchTerm] = useState("");
     const [demandWindow, setDemandWindow] = useState<DemandWindow>(3);
     const chartTheme = useDashboardChartTheme();
+    const chartColors = useChartColors();
+    const scatterSeverityColors: Record<ScatterSeverity, string> = {
+        danger: chartColors.resolveColor({ chartId: "dashboard.supply.coverageRisk", key: "danger", semanticKey: "danger" }),
+        warning: chartColors.resolveColor({ chartId: "dashboard.supply.coverageRisk", key: "warning", semanticKey: "warning" }),
+        watch: chartColors.resolveColor({ chartId: "dashboard.supply.coverageRisk", key: "watch", semanticKey: "service" }),
+        safe: chartColors.resolveColor({ chartId: "dashboard.supply.coverageRisk", key: "safe", semanticKey: "success" }),
+    };
 
     useEffect(() => {
         let isCancelled = false;
@@ -354,8 +457,8 @@ export default function Tab2Supply({
     const demandWindowLabel = getDemandWindowLabel(data.demandWindow);
 
     return (
-        <div className="space-y-6">
-            <div className="rounded-xl border border-border bg-card p-5 text-card-foreground shadow-sm">
+        <div className="space-y-4 sm:space-y-6">
+            <div className="rounded-xl border border-border bg-card p-4 text-card-foreground shadow-sm sm:p-5">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div>
                         <h3 className="font-semibold text-foreground">Thiết lập cảnh báo cung ứng</h3>
@@ -365,7 +468,7 @@ export default function Tab2Supply({
                                 : "Không có dữ liệu kỳ báo cáo trong bộ lọc hiện tại"}
                         </p>
                     </div>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 lg:flex lg:flex-wrap">
                         {DEMAND_WINDOW_OPTIONS.map(option => (
                             <button
                                 key={option.value}
@@ -386,45 +489,48 @@ export default function Tab2Supply({
 
             <SupplySummaryCards metrics={data.summaryMetrics} />
 
-            <div className="rounded-xl border border-border bg-card p-5 text-card-foreground shadow-sm">
+            <div className="rounded-xl border border-border bg-card p-4 text-card-foreground shadow-sm sm:p-5">
                 <div className="flex items-center gap-2 mb-1">
                     <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-red-100 text-red-600 dark:bg-red-950/40 dark:text-red-200 text-lg">!</span>
                     <h3 className="font-semibold text-foreground">Đã hết hàng cuối kỳ</h3>
                 </div>
-                <p className="text-xs text-muted-foreground mb-4 ml-9">
+                <p className="mb-4 text-xs text-muted-foreground sm:ml-9">
                     Thuốc đã tồn cuối = 0 ở kỳ đang xem và vẫn còn nhu cầu sử dụng theo chuẩn nhu cầu đã chọn
                 </p>
                 <StockoutActualTable rows={data.stockoutActual} />
             </div>
 
-            <div className="rounded-xl border border-border bg-card p-5 text-card-foreground shadow-sm">
+            <div className="rounded-xl border border-border bg-card p-4 text-card-foreground shadow-sm sm:p-5">
                 <div className="flex items-center gap-2 mb-1">
                     <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-amber-100 text-amber-600 dark:bg-amber-950/40 dark:text-amber-200 text-lg">!</span>
                     <h3 className="font-semibold text-foreground">Nguy cơ đứt gãy</h3>
                 </div>
-                <p className="text-xs text-muted-foreground mb-4 ml-9">
+                <p className="mb-4 text-xs text-muted-foreground sm:ml-9">
                     Thuốc vẫn còn tồn kho nhưng độ phủ dưới 3 tháng. Mức độ báo động: đỏ &lt; 1 tháng, cam 1 đến &lt; 2 tháng, vàng 2 đến &lt; 3 tháng
                 </p>
                 <StockoutForecastTable rows={data.stockoutForecast} />
             </div>
 
-            <div className="rounded-xl border border-border bg-card p-5 text-card-foreground shadow-sm">
-                <h3 className="font-semibold text-foreground mb-1">Ma trận Nhu cầu/Độ phủ tồn kho</h3>
+            <div className="rounded-xl border border-border bg-card p-4 text-card-foreground shadow-sm sm:p-5">
+                <div className="mb-1 flex items-start justify-between gap-3">
+                    <h3 className="font-semibold text-foreground">Ma trận Nhu cầu/Độ phủ tồn kho</h3>
+                    <ChartColorShortcut chartId="dashboard.supply.coverageRisk" />
+                </div>
                 <p className="text-xs text-muted-foreground mb-4">
                     Snapshot kỳ {effectiveReportMonth || "N/A"}. Trục X là nhu cầu bình quân theo cửa sổ đã chọn, trục Y là số tháng đủ dùng.
                 </p>
                 <div className="flex flex-wrap gap-2 text-xs mb-4">
-                    {Object.entries(SCATTER_SEVERITY_META).map(([severity, meta]) => (
+                    {Object.entries(SCATTER_SEVERITY_LABELS).map(([severity, label]) => (
                         <span
                             key={severity}
                             className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-muted-foreground"
                         >
-                            <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: meta.color }} />
-                            {meta.label}
+                            <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: scatterSeverityColors[severity as ScatterSeverity] }} />
+                            {label}
                         </span>
                     ))}
                 </div>
-                <div className="h-[400px]">
+                <div className="h-[320px] sm:h-[400px]">
                     <ResponsiveContainer width="100%" height="100%">
                         <ScatterChart margin={{ top: 20, right: 30, left: 10, bottom: 20 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} />
@@ -445,8 +551,8 @@ export default function Tab2Supply({
                                 label={{ value: "Số tháng đủ dùng", angle: -90, position: "insideLeft", style: { fontSize: 12, fill: chartTheme.mutedText } }}
                             />
                             <ZAxis range={[30, 60]} />
-                            <ReferenceLine y={1} stroke="#dc2626" strokeDasharray="4 4" label={{ value: "1 tháng", fill: "#dc2626", fontSize: 11 }} />
-                            <ReferenceLine y={3} stroke="#10b981" strokeDasharray="4 4" label={{ value: "3 tháng", fill: "#10b981", fontSize: 11 }} />
+                            <ReferenceLine y={1} stroke={scatterSeverityColors.danger} strokeDasharray="4 4" label={{ value: "1 tháng", fill: scatterSeverityColors.danger, fontSize: 11 }} />
+                            <ReferenceLine y={3} stroke={scatterSeverityColors.safe} strokeDasharray="4 4" label={{ value: "3 tháng", fill: scatterSeverityColors.safe, fontSize: 11 }} />
                             <Tooltip
                                 cursor={{ strokeDasharray: "3 3" }}
                                 contentStyle={{
@@ -478,7 +584,7 @@ export default function Tab2Supply({
                             />
                             <Scatter data={data.scatterData} fillOpacity={0.85}>
                                 {data.scatterData.map((point, index) => (
-                                    <Cell key={`${point.facility}-${point.drugName}-${index}`} fill={SCATTER_SEVERITY_META[point.severity].color} />
+                                    <Cell key={`${point.facility}-${point.drugName}-${index}`} fill={scatterSeverityColors[point.severity]} />
                                 ))}
                             </Scatter>
                         </ScatterChart>
@@ -488,8 +594,8 @@ export default function Tab2Supply({
                     <p className="text-center text-muted-foreground/70 py-6">Không có thuốc nào phát sinh nhu cầu để hiển thị trên ma trận</p>
                 )}
 
-                <div className="mt-5 rounded-xl border border-border bg-muted/40 p-4">
-                    <div className="flex items-center justify-between gap-3 mb-3">
+                <div className="mt-5 rounded-xl border border-border bg-muted/40 p-3 sm:p-4">
+                    <div className="flex flex-col gap-3 mb-3 sm:flex-row sm:items-start sm:justify-between">
                         <div>
                             <h4 className="font-semibold text-foreground">Tồn kho không có nhu cầu</h4>
                             <p className="text-xs text-muted-foreground">
@@ -504,13 +610,13 @@ export default function Tab2Supply({
                 </div>
             </div>
 
-            <div className="rounded-xl border border-border bg-card p-5 text-card-foreground shadow-sm">
+            <div className="rounded-xl border border-border bg-card p-4 text-card-foreground shadow-sm sm:p-5">
                 <h3 className="font-semibold text-foreground mb-1">Gợi ý điều chuyển thuốc</h3>
                 <p className="text-xs text-muted-foreground mb-4">
                     Chọn hoạt chất để xem CSYT thừa hoặc thiếu theo kỳ {effectiveReportMonth || "N/A"} và chuẩn nhu cầu {demandWindowLabel.toLowerCase()}
                 </p>
                 <div className="flex flex-col gap-3 md:flex-row md:items-start mb-4">
-                    <div className="flex-1 max-w-md relative">
+                    <div className="relative flex-1 md:max-w-md">
                         <input
                             type="text"
                             placeholder="Tìm hoạt chất..."
@@ -551,7 +657,7 @@ export default function Tab2Supply({
                             }
                         }}
                         disabled={!searchTerm.trim() || transferLoading}
-                        className="px-5 py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className="w-full rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50 md:w-auto"
                     >
                         {transferLoading ? "Đang tải..." : "Phân tích"}
                     </button>
@@ -577,7 +683,28 @@ export default function Tab2Supply({
                                 </h4>
                             </div>
                             <div className="max-h-60 overflow-y-auto">
-                                <table className="w-full text-xs">
+                                <div className="space-y-2 p-3 md:hidden">
+                                    {transferData.surplus.map((item, index) => (
+                                        <div key={`${item.facility}-${index}`} className="rounded-md border border-emerald-100 bg-card p-3 text-xs dark:border-emerald-900/60">
+                                            <p className="font-medium text-foreground">{item.facility}</p>
+                                            <div className="mt-2 grid grid-cols-3 gap-2">
+                                                <div>
+                                                    <p className="text-muted-foreground">Tồn cuối</p>
+                                                    <p className="font-mono font-semibold">{formatNumber(item.tonCuoi)}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-muted-foreground">Nhu cầu</p>
+                                                    <p className="font-mono font-semibold">{formatNumber(item.demandAvg)}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-muted-foreground">Đủ dùng</p>
+                                                    <p className="font-mono font-semibold text-emerald-600 dark:text-emerald-300">{formatNumber(item.monthsOfCover)}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <table className="hidden w-full text-xs md:table">
                                     <thead>
                                         <tr className="bg-emerald-50/50 dark:bg-emerald-950/20">
                                             <th className="text-left p-2">Cơ sở</th>
@@ -611,7 +738,24 @@ export default function Tab2Supply({
                                 </h4>
                             </div>
                             <div className="max-h-60 overflow-y-auto">
-                                <table className="w-full text-xs">
+                                <div className="space-y-2 p-3 md:hidden">
+                                    {transferData.shortage.map((item, index) => (
+                                        <div key={`${item.facility}-${index}`} className="rounded-md border border-red-100 bg-card p-3 text-xs dark:border-red-900/60">
+                                            <p className="font-medium text-foreground">{item.facility}</p>
+                                            <div className="mt-2 grid grid-cols-2 gap-2">
+                                                <div>
+                                                    <p className="text-muted-foreground">Tồn cuối</p>
+                                                    <p className="font-mono font-semibold text-red-600 dark:text-red-300">0</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-muted-foreground">Nhu cầu BQ</p>
+                                                    <p className="font-mono font-semibold">{formatNumber(item.demandAvg)}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <table className="hidden w-full text-xs md:table">
                                     <thead>
                                         <tr className="bg-red-50/50 dark:bg-red-950/20">
                                             <th className="text-left p-2">Cơ sở</th>

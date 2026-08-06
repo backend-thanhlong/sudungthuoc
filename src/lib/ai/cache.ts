@@ -84,6 +84,7 @@ export function buildAIResponseCacheKey(
         surface: request.surface || "dashboard",
         message: request.message,
         useFallback: request.useFallback === true,
+        modelChoice: request.modelChoice || "system-default",
         context: {
             entityId: context.entityId,
             filters: context.filters || {},

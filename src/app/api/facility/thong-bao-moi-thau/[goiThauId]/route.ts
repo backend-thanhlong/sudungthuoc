@@ -47,7 +47,14 @@ export async function POST(
 
         const { goiThauId } = await params;
         const body = await request.json();
-        await getFacilityOwnedGoiThau(goiThauId, user.id);
+        const goiThau = await getFacilityOwnedGoiThau(goiThauId, user.id);
+
+        if (!goiThau.yeuCauTBMT) {
+            return NextResponse.json(
+                { message: "Gói thầu này thuộc trường hợp không có Thông báo mời thầu" },
+                { status: 409 }
+            );
+        }
 
         const tbmt = await prisma.thongBaoMoiThau.create({
             data: {
@@ -76,7 +83,14 @@ export async function PATCH(
 
         const { goiThauId } = await params;
         const body = await request.json();
-        await getFacilityOwnedGoiThau(goiThauId, user.id);
+        const goiThau = await getFacilityOwnedGoiThau(goiThauId, user.id);
+
+        if (!goiThau.yeuCauTBMT) {
+            return NextResponse.json(
+                { message: "Gói thầu này thuộc trường hợp không có Thông báo mời thầu" },
+                { status: 409 }
+            );
+        }
 
         // Find the existing TBMT
         const existing = await prisma.thongBaoMoiThau.findFirst({

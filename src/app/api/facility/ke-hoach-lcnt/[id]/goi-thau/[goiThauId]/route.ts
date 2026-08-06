@@ -127,6 +127,7 @@ export async function PATCH(
                     thoiGianToChuc: body.thoiGianToChuc || null,
                     thoiGianBatDau: normalizeOptionalString(body.thoiGianBatDau),
                     thoiGianThucHien: body.thoiGianThucHien || null,
+                    yeuCauTBMT: body.yeuCauTBMT !== false,
                 },
             });
 

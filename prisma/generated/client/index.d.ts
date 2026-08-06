@@ -44,6 +44,16 @@ export type CompanyDrug = $Result.DefaultSelection<Prisma.$CompanyDrugPayload>
  */
 export type FacilityDrugMap = $Result.DefaultSelection<Prisma.$FacilityDrugMapPayload>
 /**
+ * Model FacilityDemandPlan
+ * 
+ */
+export type FacilityDemandPlan = $Result.DefaultSelection<Prisma.$FacilityDemandPlanPayload>
+/**
+ * Model FacilityDemandPlanLine
+ * 
+ */
+export type FacilityDemandPlanLine = $Result.DefaultSelection<Prisma.$FacilityDemandPlanLinePayload>
+/**
  * Model InventoryReport
  * 
  */
@@ -139,6 +149,11 @@ export type ActivityLog = $Result.DefaultSelection<Prisma.$ActivityLogPayload>
  */
 export type AISetting = $Result.DefaultSelection<Prisma.$AISettingPayload>
 /**
+ * Model SystemSetting
+ * 
+ */
+export type SystemSetting = $Result.DefaultSelection<Prisma.$SystemSettingPayload>
+/**
  * Model AIUserPolicy
  * 
  */
@@ -171,6 +186,14 @@ export const MappingStatus: {
 };
 
 export type MappingStatus = (typeof MappingStatus)[keyof typeof MappingStatus]
+
+
+export const FacilityDemandPlanStatus: {
+  DRAFT: 'DRAFT',
+  FINALIZED: 'FINALIZED'
+};
+
+export type FacilityDemandPlanStatus = (typeof FacilityDemandPlanStatus)[keyof typeof FacilityDemandPlanStatus]
 
 
 export const ReportStatus: {
@@ -231,6 +254,10 @@ export const Role: typeof $Enums.Role
 export type MappingStatus = $Enums.MappingStatus
 
 export const MappingStatus: typeof $Enums.MappingStatus
+
+export type FacilityDemandPlanStatus = $Enums.FacilityDemandPlanStatus
+
+export const FacilityDemandPlanStatus: typeof $Enums.FacilityDemandPlanStatus
 
 export type ReportStatus = $Enums.ReportStatus
 
@@ -430,6 +457,26 @@ export class PrismaClient<
   get facilityDrugMap(): Prisma.FacilityDrugMapDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.facilityDemandPlan`: Exposes CRUD operations for the **FacilityDemandPlan** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more FacilityDemandPlans
+    * const facilityDemandPlans = await prisma.facilityDemandPlan.findMany()
+    * ```
+    */
+  get facilityDemandPlan(): Prisma.FacilityDemandPlanDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.facilityDemandPlanLine`: Exposes CRUD operations for the **FacilityDemandPlanLine** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more FacilityDemandPlanLines
+    * const facilityDemandPlanLines = await prisma.facilityDemandPlanLine.findMany()
+    * ```
+    */
+  get facilityDemandPlanLine(): Prisma.FacilityDemandPlanLineDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.inventoryReport`: Exposes CRUD operations for the **InventoryReport** model.
     * Example usage:
     * ```ts
@@ -618,6 +665,16 @@ export class PrismaClient<
     * ```
     */
   get aISetting(): Prisma.AISettingDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.systemSetting`: Exposes CRUD operations for the **SystemSetting** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more SystemSettings
+    * const systemSettings = await prisma.systemSetting.findMany()
+    * ```
+    */
+  get systemSetting(): Prisma.SystemSettingDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.aIUserPolicy`: Exposes CRUD operations for the **AIUserPolicy** model.
@@ -1078,6 +1135,8 @@ export namespace Prisma {
     MasterDrug: 'MasterDrug',
     CompanyDrug: 'CompanyDrug',
     FacilityDrugMap: 'FacilityDrugMap',
+    FacilityDemandPlan: 'FacilityDemandPlan',
+    FacilityDemandPlanLine: 'FacilityDemandPlanLine',
     InventoryReport: 'InventoryReport',
     FacilityReportSubmission: 'FacilityReportSubmission',
     DrugOrder: 'DrugOrder',
@@ -1097,6 +1156,7 @@ export namespace Prisma {
     Notification: 'Notification',
     ActivityLog: 'ActivityLog',
     AISetting: 'AISetting',
+    SystemSetting: 'SystemSetting',
     AIUserPolicy: 'AIUserPolicy',
     AIToolPolicy: 'AIToolPolicy'
   };
@@ -1114,7 +1174,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "company" | "therapeuticGroup" | "masterDrug" | "companyDrug" | "facilityDrugMap" | "inventoryReport" | "facilityReportSubmission" | "drugOrder" | "drugOrderLine" | "drugOrderShipment" | "drugOrderShipmentLine" | "drugOrderReceipt" | "drugOrderReceiptLine" | "reportReviewLog" | "reportPeriod" | "keHoachLCNT" | "goiThau" | "thongBaoMoiThau" | "phanLoGoiThau" | "ketQuaLCNT" | "ketQuaPhanLo" | "notification" | "activityLog" | "aISetting" | "aIUserPolicy" | "aIToolPolicy"
+      modelProps: "user" | "company" | "therapeuticGroup" | "masterDrug" | "companyDrug" | "facilityDrugMap" | "facilityDemandPlan" | "facilityDemandPlanLine" | "inventoryReport" | "facilityReportSubmission" | "drugOrder" | "drugOrderLine" | "drugOrderShipment" | "drugOrderShipmentLine" | "drugOrderReceipt" | "drugOrderReceiptLine" | "reportReviewLog" | "reportPeriod" | "keHoachLCNT" | "goiThau" | "thongBaoMoiThau" | "phanLoGoiThau" | "ketQuaLCNT" | "ketQuaPhanLo" | "notification" | "activityLog" | "aISetting" | "systemSetting" | "aIUserPolicy" | "aIToolPolicy"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1559,6 +1619,154 @@ export namespace Prisma {
           count: {
             args: Prisma.FacilityDrugMapCountArgs<ExtArgs>
             result: $Utils.Optional<FacilityDrugMapCountAggregateOutputType> | number
+          }
+        }
+      }
+      FacilityDemandPlan: {
+        payload: Prisma.$FacilityDemandPlanPayload<ExtArgs>
+        fields: Prisma.FacilityDemandPlanFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.FacilityDemandPlanFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FacilityDemandPlanPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.FacilityDemandPlanFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FacilityDemandPlanPayload>
+          }
+          findFirst: {
+            args: Prisma.FacilityDemandPlanFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FacilityDemandPlanPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.FacilityDemandPlanFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FacilityDemandPlanPayload>
+          }
+          findMany: {
+            args: Prisma.FacilityDemandPlanFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FacilityDemandPlanPayload>[]
+          }
+          create: {
+            args: Prisma.FacilityDemandPlanCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FacilityDemandPlanPayload>
+          }
+          createMany: {
+            args: Prisma.FacilityDemandPlanCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.FacilityDemandPlanCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FacilityDemandPlanPayload>[]
+          }
+          delete: {
+            args: Prisma.FacilityDemandPlanDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FacilityDemandPlanPayload>
+          }
+          update: {
+            args: Prisma.FacilityDemandPlanUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FacilityDemandPlanPayload>
+          }
+          deleteMany: {
+            args: Prisma.FacilityDemandPlanDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.FacilityDemandPlanUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.FacilityDemandPlanUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FacilityDemandPlanPayload>[]
+          }
+          upsert: {
+            args: Prisma.FacilityDemandPlanUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FacilityDemandPlanPayload>
+          }
+          aggregate: {
+            args: Prisma.FacilityDemandPlanAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateFacilityDemandPlan>
+          }
+          groupBy: {
+            args: Prisma.FacilityDemandPlanGroupByArgs<ExtArgs>
+            result: $Utils.Optional<FacilityDemandPlanGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.FacilityDemandPlanCountArgs<ExtArgs>
+            result: $Utils.Optional<FacilityDemandPlanCountAggregateOutputType> | number
+          }
+        }
+      }
+      FacilityDemandPlanLine: {
+        payload: Prisma.$FacilityDemandPlanLinePayload<ExtArgs>
+        fields: Prisma.FacilityDemandPlanLineFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.FacilityDemandPlanLineFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FacilityDemandPlanLinePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.FacilityDemandPlanLineFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FacilityDemandPlanLinePayload>
+          }
+          findFirst: {
+            args: Prisma.FacilityDemandPlanLineFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FacilityDemandPlanLinePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.FacilityDemandPlanLineFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FacilityDemandPlanLinePayload>
+          }
+          findMany: {
+            args: Prisma.FacilityDemandPlanLineFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FacilityDemandPlanLinePayload>[]
+          }
+          create: {
+            args: Prisma.FacilityDemandPlanLineCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FacilityDemandPlanLinePayload>
+          }
+          createMany: {
+            args: Prisma.FacilityDemandPlanLineCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.FacilityDemandPlanLineCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FacilityDemandPlanLinePayload>[]
+          }
+          delete: {
+            args: Prisma.FacilityDemandPlanLineDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FacilityDemandPlanLinePayload>
+          }
+          update: {
+            args: Prisma.FacilityDemandPlanLineUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FacilityDemandPlanLinePayload>
+          }
+          deleteMany: {
+            args: Prisma.FacilityDemandPlanLineDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.FacilityDemandPlanLineUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.FacilityDemandPlanLineUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FacilityDemandPlanLinePayload>[]
+          }
+          upsert: {
+            args: Prisma.FacilityDemandPlanLineUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FacilityDemandPlanLinePayload>
+          }
+          aggregate: {
+            args: Prisma.FacilityDemandPlanLineAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateFacilityDemandPlanLine>
+          }
+          groupBy: {
+            args: Prisma.FacilityDemandPlanLineGroupByArgs<ExtArgs>
+            result: $Utils.Optional<FacilityDemandPlanLineGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.FacilityDemandPlanLineCountArgs<ExtArgs>
+            result: $Utils.Optional<FacilityDemandPlanLineCountAggregateOutputType> | number
           }
         }
       }
@@ -2968,6 +3176,80 @@ export namespace Prisma {
           }
         }
       }
+      SystemSetting: {
+        payload: Prisma.$SystemSettingPayload<ExtArgs>
+        fields: Prisma.SystemSettingFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.SystemSettingFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SystemSettingPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.SystemSettingFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SystemSettingPayload>
+          }
+          findFirst: {
+            args: Prisma.SystemSettingFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SystemSettingPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.SystemSettingFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SystemSettingPayload>
+          }
+          findMany: {
+            args: Prisma.SystemSettingFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SystemSettingPayload>[]
+          }
+          create: {
+            args: Prisma.SystemSettingCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SystemSettingPayload>
+          }
+          createMany: {
+            args: Prisma.SystemSettingCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.SystemSettingCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SystemSettingPayload>[]
+          }
+          delete: {
+            args: Prisma.SystemSettingDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SystemSettingPayload>
+          }
+          update: {
+            args: Prisma.SystemSettingUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SystemSettingPayload>
+          }
+          deleteMany: {
+            args: Prisma.SystemSettingDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.SystemSettingUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.SystemSettingUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SystemSettingPayload>[]
+          }
+          upsert: {
+            args: Prisma.SystemSettingUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SystemSettingPayload>
+          }
+          aggregate: {
+            args: Prisma.SystemSettingAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateSystemSetting>
+          }
+          groupBy: {
+            args: Prisma.SystemSettingGroupByArgs<ExtArgs>
+            result: $Utils.Optional<SystemSettingGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.SystemSettingCountArgs<ExtArgs>
+            result: $Utils.Optional<SystemSettingCountAggregateOutputType> | number
+          }
+        }
+      }
       AIUserPolicy: {
         payload: Prisma.$AIUserPolicyPayload<ExtArgs>
         fields: Prisma.AIUserPolicyFieldRefs
@@ -3230,6 +3512,8 @@ export namespace Prisma {
     masterDrug?: MasterDrugOmit
     companyDrug?: CompanyDrugOmit
     facilityDrugMap?: FacilityDrugMapOmit
+    facilityDemandPlan?: FacilityDemandPlanOmit
+    facilityDemandPlanLine?: FacilityDemandPlanLineOmit
     inventoryReport?: InventoryReportOmit
     facilityReportSubmission?: FacilityReportSubmissionOmit
     drugOrder?: DrugOrderOmit
@@ -3249,6 +3533,7 @@ export namespace Prisma {
     notification?: NotificationOmit
     activityLog?: ActivityLogOmit
     aISetting?: AISettingOmit
+    systemSetting?: SystemSettingOmit
     aIUserPolicy?: AIUserPolicyOmit
     aIToolPolicy?: AIToolPolicyOmit
   }
@@ -3334,6 +3619,7 @@ export namespace Prisma {
     drugMaps: number
     reports: number
     reportSubmissions: number
+    facilityDemandPlans: number
     keHoachLCNTs: number
     drugOrders: number
     drugOrderReceipts: number
@@ -3345,6 +3631,7 @@ export namespace Prisma {
     drugMaps?: boolean | UserCountOutputTypeCountDrugMapsArgs
     reports?: boolean | UserCountOutputTypeCountReportsArgs
     reportSubmissions?: boolean | UserCountOutputTypeCountReportSubmissionsArgs
+    facilityDemandPlans?: boolean | UserCountOutputTypeCountFacilityDemandPlansArgs
     keHoachLCNTs?: boolean | UserCountOutputTypeCountKeHoachLCNTsArgs
     drugOrders?: boolean | UserCountOutputTypeCountDrugOrdersArgs
     drugOrderReceipts?: boolean | UserCountOutputTypeCountDrugOrderReceiptsArgs
@@ -3382,6 +3669,13 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountReportSubmissionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: FacilityReportSubmissionWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountFacilityDemandPlansArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FacilityDemandPlanWhereInput
   }
 
   /**
@@ -3508,12 +3802,14 @@ export namespace Prisma {
     drugMaps: number
     companyDrugs: number
     drugOrderLines: number
+    facilityDemandPlanLines: number
   }
 
   export type MasterDrugCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     drugMaps?: boolean | MasterDrugCountOutputTypeCountDrugMapsArgs
     companyDrugs?: boolean | MasterDrugCountOutputTypeCountCompanyDrugsArgs
     drugOrderLines?: boolean | MasterDrugCountOutputTypeCountDrugOrderLinesArgs
+    facilityDemandPlanLines?: boolean | MasterDrugCountOutputTypeCountFacilityDemandPlanLinesArgs
   }
 
   // Custom InputTypes
@@ -3546,6 +3842,13 @@ export namespace Prisma {
    */
   export type MasterDrugCountOutputTypeCountDrugOrderLinesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: DrugOrderLineWhereInput
+  }
+
+  /**
+   * MasterDrugCountOutputType without action
+   */
+  export type MasterDrugCountOutputTypeCountFacilityDemandPlanLinesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FacilityDemandPlanLineWhereInput
   }
 
 
@@ -3586,10 +3889,12 @@ export namespace Prisma {
 
   export type FacilityDrugMapCountOutputType = {
     reports: number
+    demandPlanLines: number
   }
 
   export type FacilityDrugMapCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     reports?: boolean | FacilityDrugMapCountOutputTypeCountReportsArgs
+    demandPlanLines?: boolean | FacilityDrugMapCountOutputTypeCountDemandPlanLinesArgs
   }
 
   // Custom InputTypes
@@ -3608,6 +3913,44 @@ export namespace Prisma {
    */
   export type FacilityDrugMapCountOutputTypeCountReportsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: InventoryReportWhereInput
+  }
+
+  /**
+   * FacilityDrugMapCountOutputType without action
+   */
+  export type FacilityDrugMapCountOutputTypeCountDemandPlanLinesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FacilityDemandPlanLineWhereInput
+  }
+
+
+  /**
+   * Count Type FacilityDemandPlanCountOutputType
+   */
+
+  export type FacilityDemandPlanCountOutputType = {
+    lines: number
+  }
+
+  export type FacilityDemandPlanCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    lines?: boolean | FacilityDemandPlanCountOutputTypeCountLinesArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * FacilityDemandPlanCountOutputType without action
+   */
+  export type FacilityDemandPlanCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FacilityDemandPlanCountOutputType
+     */
+    select?: FacilityDemandPlanCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * FacilityDemandPlanCountOutputType without action
+   */
+  export type FacilityDemandPlanCountOutputTypeCountLinesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FacilityDemandPlanLineWhereInput
   }
 
 
@@ -3985,8 +4328,20 @@ export namespace Prisma {
 
   export type AggregateUser = {
     _count: UserCountAggregateOutputType | null
+    _avg: UserAvgAggregateOutputType | null
+    _sum: UserSumAggregateOutputType | null
     _min: UserMinAggregateOutputType | null
     _max: UserMaxAggregateOutputType | null
+  }
+
+  export type UserAvgAggregateOutputType = {
+    latitude: number | null
+    longitude: number | null
+  }
+
+  export type UserSumAggregateOutputType = {
+    latitude: number | null
+    longitude: number | null
   }
 
   export type UserMinAggregateOutputType = {
@@ -4003,6 +4358,8 @@ export namespace Prisma {
     contactPerson: string | null
     phoneNumber: string | null
     address: string | null
+    latitude: number | null
+    longitude: number | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -4021,6 +4378,8 @@ export namespace Prisma {
     contactPerson: string | null
     phoneNumber: string | null
     address: string | null
+    latitude: number | null
+    longitude: number | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -4039,11 +4398,23 @@ export namespace Prisma {
     contactPerson: number
     phoneNumber: number
     address: number
+    latitude: number
+    longitude: number
     createdAt: number
     updatedAt: number
     _all: number
   }
 
+
+  export type UserAvgAggregateInputType = {
+    latitude?: true
+    longitude?: true
+  }
+
+  export type UserSumAggregateInputType = {
+    latitude?: true
+    longitude?: true
+  }
 
   export type UserMinAggregateInputType = {
     id?: true
@@ -4059,6 +4430,8 @@ export namespace Prisma {
     contactPerson?: true
     phoneNumber?: true
     address?: true
+    latitude?: true
+    longitude?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -4077,6 +4450,8 @@ export namespace Prisma {
     contactPerson?: true
     phoneNumber?: true
     address?: true
+    latitude?: true
+    longitude?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -4095,6 +4470,8 @@ export namespace Prisma {
     contactPerson?: true
     phoneNumber?: true
     address?: true
+    latitude?: true
+    longitude?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -4138,6 +4515,18 @@ export namespace Prisma {
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
+     * Select which fields to average
+    **/
+    _avg?: UserAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: UserSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
      * Select which fields to find the minimum value
     **/
     _min?: UserMinAggregateInputType
@@ -4168,6 +4557,8 @@ export namespace Prisma {
     take?: number
     skip?: number
     _count?: UserCountAggregateInputType | true
+    _avg?: UserAvgAggregateInputType
+    _sum?: UserSumAggregateInputType
     _min?: UserMinAggregateInputType
     _max?: UserMaxAggregateInputType
   }
@@ -4186,9 +4577,13 @@ export namespace Prisma {
     contactPerson: string | null
     phoneNumber: string | null
     address: string | null
+    latitude: number | null
+    longitude: number | null
     createdAt: Date
     updatedAt: Date
     _count: UserCountAggregateOutputType | null
+    _avg: UserAvgAggregateOutputType | null
+    _sum: UserSumAggregateOutputType | null
     _min: UserMinAggregateOutputType | null
     _max: UserMaxAggregateOutputType | null
   }
@@ -4221,12 +4616,15 @@ export namespace Prisma {
     contactPerson?: boolean
     phoneNumber?: boolean
     address?: boolean
+    latitude?: boolean
+    longitude?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     company?: boolean | User$companyArgs<ExtArgs>
     drugMaps?: boolean | User$drugMapsArgs<ExtArgs>
     reports?: boolean | User$reportsArgs<ExtArgs>
     reportSubmissions?: boolean | User$reportSubmissionsArgs<ExtArgs>
+    facilityDemandPlans?: boolean | User$facilityDemandPlansArgs<ExtArgs>
     keHoachLCNTs?: boolean | User$keHoachLCNTsArgs<ExtArgs>
     drugOrders?: boolean | User$drugOrdersArgs<ExtArgs>
     drugOrderReceipts?: boolean | User$drugOrderReceiptsArgs<ExtArgs>
@@ -4250,6 +4648,8 @@ export namespace Prisma {
     contactPerson?: boolean
     phoneNumber?: boolean
     address?: boolean
+    latitude?: boolean
+    longitude?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     company?: boolean | User$companyArgs<ExtArgs>
@@ -4269,6 +4669,8 @@ export namespace Prisma {
     contactPerson?: boolean
     phoneNumber?: boolean
     address?: boolean
+    latitude?: boolean
+    longitude?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     company?: boolean | User$companyArgs<ExtArgs>
@@ -4288,16 +4690,19 @@ export namespace Prisma {
     contactPerson?: boolean
     phoneNumber?: boolean
     address?: boolean
+    latitude?: boolean
+    longitude?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "username" | "passwordHash" | "role" | "facilityName" | "facilityCode" | "companyId" | "isActive" | "autonomyGroup" | "facilityType" | "contactPerson" | "phoneNumber" | "address" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "username" | "passwordHash" | "role" | "facilityName" | "facilityCode" | "companyId" | "isActive" | "autonomyGroup" | "facilityType" | "contactPerson" | "phoneNumber" | "address" | "latitude" | "longitude" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     company?: boolean | User$companyArgs<ExtArgs>
     drugMaps?: boolean | User$drugMapsArgs<ExtArgs>
     reports?: boolean | User$reportsArgs<ExtArgs>
     reportSubmissions?: boolean | User$reportSubmissionsArgs<ExtArgs>
+    facilityDemandPlans?: boolean | User$facilityDemandPlansArgs<ExtArgs>
     keHoachLCNTs?: boolean | User$keHoachLCNTsArgs<ExtArgs>
     drugOrders?: boolean | User$drugOrdersArgs<ExtArgs>
     drugOrderReceipts?: boolean | User$drugOrderReceiptsArgs<ExtArgs>
@@ -4320,6 +4725,7 @@ export namespace Prisma {
       drugMaps: Prisma.$FacilityDrugMapPayload<ExtArgs>[]
       reports: Prisma.$InventoryReportPayload<ExtArgs>[]
       reportSubmissions: Prisma.$FacilityReportSubmissionPayload<ExtArgs>[]
+      facilityDemandPlans: Prisma.$FacilityDemandPlanPayload<ExtArgs>[]
       keHoachLCNTs: Prisma.$KeHoachLCNTPayload<ExtArgs>[]
       drugOrders: Prisma.$DrugOrderPayload<ExtArgs>[]
       drugOrderReceipts: Prisma.$DrugOrderReceiptPayload<ExtArgs>[]
@@ -4341,6 +4747,8 @@ export namespace Prisma {
       contactPerson: string | null
       phoneNumber: string | null
       address: string | null
+      latitude: number | null
+      longitude: number | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["user"]>
@@ -4741,6 +5149,7 @@ export namespace Prisma {
     drugMaps<T extends User$drugMapsArgs<ExtArgs> = {}>(args?: Subset<T, User$drugMapsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FacilityDrugMapPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     reports<T extends User$reportsArgs<ExtArgs> = {}>(args?: Subset<T, User$reportsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     reportSubmissions<T extends User$reportSubmissionsArgs<ExtArgs> = {}>(args?: Subset<T, User$reportSubmissionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FacilityReportSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    facilityDemandPlans<T extends User$facilityDemandPlansArgs<ExtArgs> = {}>(args?: Subset<T, User$facilityDemandPlansArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FacilityDemandPlanPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     keHoachLCNTs<T extends User$keHoachLCNTsArgs<ExtArgs> = {}>(args?: Subset<T, User$keHoachLCNTsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KeHoachLCNTPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     drugOrders<T extends User$drugOrdersArgs<ExtArgs> = {}>(args?: Subset<T, User$drugOrdersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DrugOrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     drugOrderReceipts<T extends User$drugOrderReceiptsArgs<ExtArgs> = {}>(args?: Subset<T, User$drugOrderReceiptsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DrugOrderReceiptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -4789,6 +5198,8 @@ export namespace Prisma {
     readonly contactPerson: FieldRef<"User", 'String'>
     readonly phoneNumber: FieldRef<"User", 'String'>
     readonly address: FieldRef<"User", 'String'>
+    readonly latitude: FieldRef<"User", 'Float'>
+    readonly longitude: FieldRef<"User", 'Float'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
   }
@@ -5275,6 +5686,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: FacilityReportSubmissionScalarFieldEnum | FacilityReportSubmissionScalarFieldEnum[]
+  }
+
+  /**
+   * User.facilityDemandPlans
+   */
+  export type User$facilityDemandPlansArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FacilityDemandPlan
+     */
+    select?: FacilityDemandPlanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FacilityDemandPlan
+     */
+    omit?: FacilityDemandPlanOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacilityDemandPlanInclude<ExtArgs> | null
+    where?: FacilityDemandPlanWhereInput
+    orderBy?: FacilityDemandPlanOrderByWithRelationInput | FacilityDemandPlanOrderByWithRelationInput[]
+    cursor?: FacilityDemandPlanWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: FacilityDemandPlanScalarFieldEnum | FacilityDemandPlanScalarFieldEnum[]
   }
 
   /**
@@ -7723,6 +8158,7 @@ export namespace Prisma {
     id: string | null
     maChung: string | null
     maBhyt: string | null
+    maAtc: string | null
     tenThuoc: string | null
     hoatChat: string | null
     hamLuong: string | null
@@ -7744,6 +8180,7 @@ export namespace Prisma {
     therapeuticGroupId: string | null
     isKeDon: string | null
     kiemSoatDacBiet: string | null
+    isThuocHiem: boolean | null
     isTrongNuoc: string | null
     isActive: boolean | null
     createdAt: Date | null
@@ -7754,6 +8191,7 @@ export namespace Prisma {
     id: string | null
     maChung: string | null
     maBhyt: string | null
+    maAtc: string | null
     tenThuoc: string | null
     hoatChat: string | null
     hamLuong: string | null
@@ -7775,6 +8213,7 @@ export namespace Prisma {
     therapeuticGroupId: string | null
     isKeDon: string | null
     kiemSoatDacBiet: string | null
+    isThuocHiem: boolean | null
     isTrongNuoc: string | null
     isActive: boolean | null
     createdAt: Date | null
@@ -7785,6 +8224,7 @@ export namespace Prisma {
     id: number
     maChung: number
     maBhyt: number
+    maAtc: number
     tenThuoc: number
     hoatChat: number
     hamLuong: number
@@ -7806,6 +8246,7 @@ export namespace Prisma {
     therapeuticGroupId: number
     isKeDon: number
     kiemSoatDacBiet: number
+    isThuocHiem: number
     isTrongNuoc: number
     isActive: number
     createdAt: number
@@ -7818,6 +8259,7 @@ export namespace Prisma {
     id?: true
     maChung?: true
     maBhyt?: true
+    maAtc?: true
     tenThuoc?: true
     hoatChat?: true
     hamLuong?: true
@@ -7839,6 +8281,7 @@ export namespace Prisma {
     therapeuticGroupId?: true
     isKeDon?: true
     kiemSoatDacBiet?: true
+    isThuocHiem?: true
     isTrongNuoc?: true
     isActive?: true
     createdAt?: true
@@ -7849,6 +8292,7 @@ export namespace Prisma {
     id?: true
     maChung?: true
     maBhyt?: true
+    maAtc?: true
     tenThuoc?: true
     hoatChat?: true
     hamLuong?: true
@@ -7870,6 +8314,7 @@ export namespace Prisma {
     therapeuticGroupId?: true
     isKeDon?: true
     kiemSoatDacBiet?: true
+    isThuocHiem?: true
     isTrongNuoc?: true
     isActive?: true
     createdAt?: true
@@ -7880,6 +8325,7 @@ export namespace Prisma {
     id?: true
     maChung?: true
     maBhyt?: true
+    maAtc?: true
     tenThuoc?: true
     hoatChat?: true
     hamLuong?: true
@@ -7901,6 +8347,7 @@ export namespace Prisma {
     therapeuticGroupId?: true
     isKeDon?: true
     kiemSoatDacBiet?: true
+    isThuocHiem?: true
     isTrongNuoc?: true
     isActive?: true
     createdAt?: true
@@ -7984,6 +8431,7 @@ export namespace Prisma {
     id: string
     maChung: string
     maBhyt: string | null
+    maAtc: string | null
     tenThuoc: string
     hoatChat: string | null
     hamLuong: string | null
@@ -8005,6 +8453,7 @@ export namespace Prisma {
     therapeuticGroupId: string | null
     isKeDon: string | null
     kiemSoatDacBiet: string | null
+    isThuocHiem: boolean
     isTrongNuoc: string | null
     isActive: boolean
     createdAt: Date
@@ -8032,6 +8481,7 @@ export namespace Prisma {
     id?: boolean
     maChung?: boolean
     maBhyt?: boolean
+    maAtc?: boolean
     tenThuoc?: boolean
     hoatChat?: boolean
     hamLuong?: boolean
@@ -8053,6 +8503,7 @@ export namespace Prisma {
     therapeuticGroupId?: boolean
     isKeDon?: boolean
     kiemSoatDacBiet?: boolean
+    isThuocHiem?: boolean
     isTrongNuoc?: boolean
     isActive?: boolean
     createdAt?: boolean
@@ -8061,6 +8512,7 @@ export namespace Prisma {
     drugMaps?: boolean | MasterDrug$drugMapsArgs<ExtArgs>
     companyDrugs?: boolean | MasterDrug$companyDrugsArgs<ExtArgs>
     drugOrderLines?: boolean | MasterDrug$drugOrderLinesArgs<ExtArgs>
+    facilityDemandPlanLines?: boolean | MasterDrug$facilityDemandPlanLinesArgs<ExtArgs>
     _count?: boolean | MasterDrugCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["masterDrug"]>
 
@@ -8068,6 +8520,7 @@ export namespace Prisma {
     id?: boolean
     maChung?: boolean
     maBhyt?: boolean
+    maAtc?: boolean
     tenThuoc?: boolean
     hoatChat?: boolean
     hamLuong?: boolean
@@ -8089,6 +8542,7 @@ export namespace Prisma {
     therapeuticGroupId?: boolean
     isKeDon?: boolean
     kiemSoatDacBiet?: boolean
+    isThuocHiem?: boolean
     isTrongNuoc?: boolean
     isActive?: boolean
     createdAt?: boolean
@@ -8100,6 +8554,7 @@ export namespace Prisma {
     id?: boolean
     maChung?: boolean
     maBhyt?: boolean
+    maAtc?: boolean
     tenThuoc?: boolean
     hoatChat?: boolean
     hamLuong?: boolean
@@ -8121,6 +8576,7 @@ export namespace Prisma {
     therapeuticGroupId?: boolean
     isKeDon?: boolean
     kiemSoatDacBiet?: boolean
+    isThuocHiem?: boolean
     isTrongNuoc?: boolean
     isActive?: boolean
     createdAt?: boolean
@@ -8132,6 +8588,7 @@ export namespace Prisma {
     id?: boolean
     maChung?: boolean
     maBhyt?: boolean
+    maAtc?: boolean
     tenThuoc?: boolean
     hoatChat?: boolean
     hamLuong?: boolean
@@ -8153,18 +8610,20 @@ export namespace Prisma {
     therapeuticGroupId?: boolean
     isKeDon?: boolean
     kiemSoatDacBiet?: boolean
+    isThuocHiem?: boolean
     isTrongNuoc?: boolean
     isActive?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type MasterDrugOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "maChung" | "maBhyt" | "tenThuoc" | "hoatChat" | "hamLuong" | "dangBaoChe" | "soDangKy" | "quyCach" | "donViTinh" | "tieuChuan" | "tuoiTho" | "duongDung" | "nguonGoc" | "congTySanXuat" | "nuocSanXuat" | "diaChiSanXuat" | "congTyDangKy" | "nuocDangKy" | "diaChiDangKy" | "nhomThuoc" | "therapeuticGroupId" | "isKeDon" | "kiemSoatDacBiet" | "isTrongNuoc" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["masterDrug"]>
+  export type MasterDrugOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "maChung" | "maBhyt" | "maAtc" | "tenThuoc" | "hoatChat" | "hamLuong" | "dangBaoChe" | "soDangKy" | "quyCach" | "donViTinh" | "tieuChuan" | "tuoiTho" | "duongDung" | "nguonGoc" | "congTySanXuat" | "nuocSanXuat" | "diaChiSanXuat" | "congTyDangKy" | "nuocDangKy" | "diaChiDangKy" | "nhomThuoc" | "therapeuticGroupId" | "isKeDon" | "kiemSoatDacBiet" | "isThuocHiem" | "isTrongNuoc" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["masterDrug"]>
   export type MasterDrugInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     therapeuticGroup?: boolean | MasterDrug$therapeuticGroupArgs<ExtArgs>
     drugMaps?: boolean | MasterDrug$drugMapsArgs<ExtArgs>
     companyDrugs?: boolean | MasterDrug$companyDrugsArgs<ExtArgs>
     drugOrderLines?: boolean | MasterDrug$drugOrderLinesArgs<ExtArgs>
+    facilityDemandPlanLines?: boolean | MasterDrug$facilityDemandPlanLinesArgs<ExtArgs>
     _count?: boolean | MasterDrugCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type MasterDrugIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -8181,11 +8640,13 @@ export namespace Prisma {
       drugMaps: Prisma.$FacilityDrugMapPayload<ExtArgs>[]
       companyDrugs: Prisma.$CompanyDrugPayload<ExtArgs>[]
       drugOrderLines: Prisma.$DrugOrderLinePayload<ExtArgs>[]
+      facilityDemandPlanLines: Prisma.$FacilityDemandPlanLinePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       maChung: string
       maBhyt: string | null
+      maAtc: string | null
       tenThuoc: string
       hoatChat: string | null
       hamLuong: string | null
@@ -8207,6 +8668,7 @@ export namespace Prisma {
       therapeuticGroupId: string | null
       isKeDon: string | null
       kiemSoatDacBiet: string | null
+      isThuocHiem: boolean
       isTrongNuoc: string | null
       isActive: boolean
       createdAt: Date
@@ -8609,6 +9071,7 @@ export namespace Prisma {
     drugMaps<T extends MasterDrug$drugMapsArgs<ExtArgs> = {}>(args?: Subset<T, MasterDrug$drugMapsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FacilityDrugMapPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     companyDrugs<T extends MasterDrug$companyDrugsArgs<ExtArgs> = {}>(args?: Subset<T, MasterDrug$companyDrugsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CompanyDrugPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     drugOrderLines<T extends MasterDrug$drugOrderLinesArgs<ExtArgs> = {}>(args?: Subset<T, MasterDrug$drugOrderLinesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DrugOrderLinePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    facilityDemandPlanLines<T extends MasterDrug$facilityDemandPlanLinesArgs<ExtArgs> = {}>(args?: Subset<T, MasterDrug$facilityDemandPlanLinesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FacilityDemandPlanLinePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -8641,6 +9104,7 @@ export namespace Prisma {
     readonly id: FieldRef<"MasterDrug", 'String'>
     readonly maChung: FieldRef<"MasterDrug", 'String'>
     readonly maBhyt: FieldRef<"MasterDrug", 'String'>
+    readonly maAtc: FieldRef<"MasterDrug", 'String'>
     readonly tenThuoc: FieldRef<"MasterDrug", 'String'>
     readonly hoatChat: FieldRef<"MasterDrug", 'String'>
     readonly hamLuong: FieldRef<"MasterDrug", 'String'>
@@ -8662,6 +9126,7 @@ export namespace Prisma {
     readonly therapeuticGroupId: FieldRef<"MasterDrug", 'String'>
     readonly isKeDon: FieldRef<"MasterDrug", 'String'>
     readonly kiemSoatDacBiet: FieldRef<"MasterDrug", 'String'>
+    readonly isThuocHiem: FieldRef<"MasterDrug", 'Boolean'>
     readonly isTrongNuoc: FieldRef<"MasterDrug", 'String'>
     readonly isActive: FieldRef<"MasterDrug", 'Boolean'>
     readonly createdAt: FieldRef<"MasterDrug", 'DateTime'>
@@ -9150,6 +9615,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: DrugOrderLineScalarFieldEnum | DrugOrderLineScalarFieldEnum[]
+  }
+
+  /**
+   * MasterDrug.facilityDemandPlanLines
+   */
+  export type MasterDrug$facilityDemandPlanLinesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FacilityDemandPlanLine
+     */
+    select?: FacilityDemandPlanLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FacilityDemandPlanLine
+     */
+    omit?: FacilityDemandPlanLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacilityDemandPlanLineInclude<ExtArgs> | null
+    where?: FacilityDemandPlanLineWhereInput
+    orderBy?: FacilityDemandPlanLineOrderByWithRelationInput | FacilityDemandPlanLineOrderByWithRelationInput[]
+    cursor?: FacilityDemandPlanLineWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: FacilityDemandPlanLineScalarFieldEnum | FacilityDemandPlanLineScalarFieldEnum[]
   }
 
   /**
@@ -10370,8 +10859,20 @@ export namespace Prisma {
 
   export type AggregateFacilityDrugMap = {
     _count: FacilityDrugMapCountAggregateOutputType | null
+    _avg: FacilityDrugMapAvgAggregateOutputType | null
+    _sum: FacilityDrugMapSumAggregateOutputType | null
     _min: FacilityDrugMapMinAggregateOutputType | null
     _max: FacilityDrugMapMaxAggregateOutputType | null
+  }
+
+  export type FacilityDrugMapAvgAggregateOutputType = {
+    giaVat: Decimal | null
+    demandPackageSize: Decimal | null
+  }
+
+  export type FacilityDrugMapSumAggregateOutputType = {
+    giaVat: Decimal | null
+    demandPackageSize: Decimal | null
   }
 
   export type FacilityDrugMapMinAggregateOutputType = {
@@ -10383,10 +10884,30 @@ export namespace Prisma {
     soDangKyNoiBo: string | null
     donViTinhNoiBo: string | null
     nhomTckt: string | null
+    giaVat: Decimal | null
+    bhyt: string | null
+    dichVu: string | null
+    soQdTrungThau: string | null
+    tenCongTy: string | null
+    ngayBatDauHd: string | null
+    ngayKetThucHd: string | null
+    demandRoundingEnabled: boolean | null
+    demandPackageUnit: string | null
+    demandPackageSize: Decimal | null
+    demandPlanningLocked: boolean | null
+    demandPlanningLockedAt: Date | null
+    demandPlanningUnlockedAt: Date | null
+    demandPlanningLockReason: string | null
     masterDrugId: string | null
     status: $Enums.MappingStatus | null
     adminNote: string | null
     isOutOfCatalog: boolean | null
+    isActive: boolean | null
+    inactiveFromMonth: string | null
+    inactiveReason: string | null
+    inactiveAt: Date | null
+    reactivatedFromMonth: string | null
+    reactivatedAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -10400,10 +10921,30 @@ export namespace Prisma {
     soDangKyNoiBo: string | null
     donViTinhNoiBo: string | null
     nhomTckt: string | null
+    giaVat: Decimal | null
+    bhyt: string | null
+    dichVu: string | null
+    soQdTrungThau: string | null
+    tenCongTy: string | null
+    ngayBatDauHd: string | null
+    ngayKetThucHd: string | null
+    demandRoundingEnabled: boolean | null
+    demandPackageUnit: string | null
+    demandPackageSize: Decimal | null
+    demandPlanningLocked: boolean | null
+    demandPlanningLockedAt: Date | null
+    demandPlanningUnlockedAt: Date | null
+    demandPlanningLockReason: string | null
     masterDrugId: string | null
     status: $Enums.MappingStatus | null
     adminNote: string | null
     isOutOfCatalog: boolean | null
+    isActive: boolean | null
+    inactiveFromMonth: string | null
+    inactiveReason: string | null
+    inactiveAt: Date | null
+    reactivatedFromMonth: string | null
+    reactivatedAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -10417,15 +10958,45 @@ export namespace Prisma {
     soDangKyNoiBo: number
     donViTinhNoiBo: number
     nhomTckt: number
+    giaVat: number
+    bhyt: number
+    dichVu: number
+    soQdTrungThau: number
+    tenCongTy: number
+    ngayBatDauHd: number
+    ngayKetThucHd: number
+    demandRoundingEnabled: number
+    demandPackageUnit: number
+    demandPackageSize: number
+    demandPlanningLocked: number
+    demandPlanningLockedAt: number
+    demandPlanningUnlockedAt: number
+    demandPlanningLockReason: number
     masterDrugId: number
     status: number
     adminNote: number
     isOutOfCatalog: number
+    isActive: number
+    inactiveFromMonth: number
+    inactiveReason: number
+    inactiveAt: number
+    reactivatedFromMonth: number
+    reactivatedAt: number
     createdAt: number
     updatedAt: number
     _all: number
   }
 
+
+  export type FacilityDrugMapAvgAggregateInputType = {
+    giaVat?: true
+    demandPackageSize?: true
+  }
+
+  export type FacilityDrugMapSumAggregateInputType = {
+    giaVat?: true
+    demandPackageSize?: true
+  }
 
   export type FacilityDrugMapMinAggregateInputType = {
     id?: true
@@ -10436,10 +11007,30 @@ export namespace Prisma {
     soDangKyNoiBo?: true
     donViTinhNoiBo?: true
     nhomTckt?: true
+    giaVat?: true
+    bhyt?: true
+    dichVu?: true
+    soQdTrungThau?: true
+    tenCongTy?: true
+    ngayBatDauHd?: true
+    ngayKetThucHd?: true
+    demandRoundingEnabled?: true
+    demandPackageUnit?: true
+    demandPackageSize?: true
+    demandPlanningLocked?: true
+    demandPlanningLockedAt?: true
+    demandPlanningUnlockedAt?: true
+    demandPlanningLockReason?: true
     masterDrugId?: true
     status?: true
     adminNote?: true
     isOutOfCatalog?: true
+    isActive?: true
+    inactiveFromMonth?: true
+    inactiveReason?: true
+    inactiveAt?: true
+    reactivatedFromMonth?: true
+    reactivatedAt?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -10453,10 +11044,30 @@ export namespace Prisma {
     soDangKyNoiBo?: true
     donViTinhNoiBo?: true
     nhomTckt?: true
+    giaVat?: true
+    bhyt?: true
+    dichVu?: true
+    soQdTrungThau?: true
+    tenCongTy?: true
+    ngayBatDauHd?: true
+    ngayKetThucHd?: true
+    demandRoundingEnabled?: true
+    demandPackageUnit?: true
+    demandPackageSize?: true
+    demandPlanningLocked?: true
+    demandPlanningLockedAt?: true
+    demandPlanningUnlockedAt?: true
+    demandPlanningLockReason?: true
     masterDrugId?: true
     status?: true
     adminNote?: true
     isOutOfCatalog?: true
+    isActive?: true
+    inactiveFromMonth?: true
+    inactiveReason?: true
+    inactiveAt?: true
+    reactivatedFromMonth?: true
+    reactivatedAt?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -10470,10 +11081,30 @@ export namespace Prisma {
     soDangKyNoiBo?: true
     donViTinhNoiBo?: true
     nhomTckt?: true
+    giaVat?: true
+    bhyt?: true
+    dichVu?: true
+    soQdTrungThau?: true
+    tenCongTy?: true
+    ngayBatDauHd?: true
+    ngayKetThucHd?: true
+    demandRoundingEnabled?: true
+    demandPackageUnit?: true
+    demandPackageSize?: true
+    demandPlanningLocked?: true
+    demandPlanningLockedAt?: true
+    demandPlanningUnlockedAt?: true
+    demandPlanningLockReason?: true
     masterDrugId?: true
     status?: true
     adminNote?: true
     isOutOfCatalog?: true
+    isActive?: true
+    inactiveFromMonth?: true
+    inactiveReason?: true
+    inactiveAt?: true
+    reactivatedFromMonth?: true
+    reactivatedAt?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -10517,6 +11148,18 @@ export namespace Prisma {
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
+     * Select which fields to average
+    **/
+    _avg?: FacilityDrugMapAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: FacilityDrugMapSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
      * Select which fields to find the minimum value
     **/
     _min?: FacilityDrugMapMinAggregateInputType
@@ -10547,6 +11190,8 @@ export namespace Prisma {
     take?: number
     skip?: number
     _count?: FacilityDrugMapCountAggregateInputType | true
+    _avg?: FacilityDrugMapAvgAggregateInputType
+    _sum?: FacilityDrugMapSumAggregateInputType
     _min?: FacilityDrugMapMinAggregateInputType
     _max?: FacilityDrugMapMaxAggregateInputType
   }
@@ -10560,13 +11205,35 @@ export namespace Prisma {
     soDangKyNoiBo: string | null
     donViTinhNoiBo: string | null
     nhomTckt: string | null
+    giaVat: Decimal
+    bhyt: string | null
+    dichVu: string | null
+    soQdTrungThau: string | null
+    tenCongTy: string | null
+    ngayBatDauHd: string | null
+    ngayKetThucHd: string | null
+    demandRoundingEnabled: boolean
+    demandPackageUnit: string | null
+    demandPackageSize: Decimal | null
+    demandPlanningLocked: boolean
+    demandPlanningLockedAt: Date | null
+    demandPlanningUnlockedAt: Date | null
+    demandPlanningLockReason: string | null
     masterDrugId: string | null
     status: $Enums.MappingStatus
     adminNote: string | null
     isOutOfCatalog: boolean
+    isActive: boolean
+    inactiveFromMonth: string | null
+    inactiveReason: string | null
+    inactiveAt: Date | null
+    reactivatedFromMonth: string | null
+    reactivatedAt: Date | null
     createdAt: Date
     updatedAt: Date
     _count: FacilityDrugMapCountAggregateOutputType | null
+    _avg: FacilityDrugMapAvgAggregateOutputType | null
+    _sum: FacilityDrugMapSumAggregateOutputType | null
     _min: FacilityDrugMapMinAggregateOutputType | null
     _max: FacilityDrugMapMaxAggregateOutputType | null
   }
@@ -10594,15 +11261,36 @@ export namespace Prisma {
     soDangKyNoiBo?: boolean
     donViTinhNoiBo?: boolean
     nhomTckt?: boolean
+    giaVat?: boolean
+    bhyt?: boolean
+    dichVu?: boolean
+    soQdTrungThau?: boolean
+    tenCongTy?: boolean
+    ngayBatDauHd?: boolean
+    ngayKetThucHd?: boolean
+    demandRoundingEnabled?: boolean
+    demandPackageUnit?: boolean
+    demandPackageSize?: boolean
+    demandPlanningLocked?: boolean
+    demandPlanningLockedAt?: boolean
+    demandPlanningUnlockedAt?: boolean
+    demandPlanningLockReason?: boolean
     masterDrugId?: boolean
     status?: boolean
     adminNote?: boolean
     isOutOfCatalog?: boolean
+    isActive?: boolean
+    inactiveFromMonth?: boolean
+    inactiveReason?: boolean
+    inactiveAt?: boolean
+    reactivatedFromMonth?: boolean
+    reactivatedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     facility?: boolean | UserDefaultArgs<ExtArgs>
     masterDrug?: boolean | FacilityDrugMap$masterDrugArgs<ExtArgs>
     reports?: boolean | FacilityDrugMap$reportsArgs<ExtArgs>
+    demandPlanLines?: boolean | FacilityDrugMap$demandPlanLinesArgs<ExtArgs>
     _count?: boolean | FacilityDrugMapCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["facilityDrugMap"]>
 
@@ -10615,10 +11303,30 @@ export namespace Prisma {
     soDangKyNoiBo?: boolean
     donViTinhNoiBo?: boolean
     nhomTckt?: boolean
+    giaVat?: boolean
+    bhyt?: boolean
+    dichVu?: boolean
+    soQdTrungThau?: boolean
+    tenCongTy?: boolean
+    ngayBatDauHd?: boolean
+    ngayKetThucHd?: boolean
+    demandRoundingEnabled?: boolean
+    demandPackageUnit?: boolean
+    demandPackageSize?: boolean
+    demandPlanningLocked?: boolean
+    demandPlanningLockedAt?: boolean
+    demandPlanningUnlockedAt?: boolean
+    demandPlanningLockReason?: boolean
     masterDrugId?: boolean
     status?: boolean
     adminNote?: boolean
     isOutOfCatalog?: boolean
+    isActive?: boolean
+    inactiveFromMonth?: boolean
+    inactiveReason?: boolean
+    inactiveAt?: boolean
+    reactivatedFromMonth?: boolean
+    reactivatedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     facility?: boolean | UserDefaultArgs<ExtArgs>
@@ -10634,10 +11342,30 @@ export namespace Prisma {
     soDangKyNoiBo?: boolean
     donViTinhNoiBo?: boolean
     nhomTckt?: boolean
+    giaVat?: boolean
+    bhyt?: boolean
+    dichVu?: boolean
+    soQdTrungThau?: boolean
+    tenCongTy?: boolean
+    ngayBatDauHd?: boolean
+    ngayKetThucHd?: boolean
+    demandRoundingEnabled?: boolean
+    demandPackageUnit?: boolean
+    demandPackageSize?: boolean
+    demandPlanningLocked?: boolean
+    demandPlanningLockedAt?: boolean
+    demandPlanningUnlockedAt?: boolean
+    demandPlanningLockReason?: boolean
     masterDrugId?: boolean
     status?: boolean
     adminNote?: boolean
     isOutOfCatalog?: boolean
+    isActive?: boolean
+    inactiveFromMonth?: boolean
+    inactiveReason?: boolean
+    inactiveAt?: boolean
+    reactivatedFromMonth?: boolean
+    reactivatedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     facility?: boolean | UserDefaultArgs<ExtArgs>
@@ -10653,19 +11381,40 @@ export namespace Prisma {
     soDangKyNoiBo?: boolean
     donViTinhNoiBo?: boolean
     nhomTckt?: boolean
+    giaVat?: boolean
+    bhyt?: boolean
+    dichVu?: boolean
+    soQdTrungThau?: boolean
+    tenCongTy?: boolean
+    ngayBatDauHd?: boolean
+    ngayKetThucHd?: boolean
+    demandRoundingEnabled?: boolean
+    demandPackageUnit?: boolean
+    demandPackageSize?: boolean
+    demandPlanningLocked?: boolean
+    demandPlanningLockedAt?: boolean
+    demandPlanningUnlockedAt?: boolean
+    demandPlanningLockReason?: boolean
     masterDrugId?: boolean
     status?: boolean
     adminNote?: boolean
     isOutOfCatalog?: boolean
+    isActive?: boolean
+    inactiveFromMonth?: boolean
+    inactiveReason?: boolean
+    inactiveAt?: boolean
+    reactivatedFromMonth?: boolean
+    reactivatedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type FacilityDrugMapOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "facilityId" | "maNoiBo" | "tenThuocNoiBo" | "hoatChatNoiBo" | "soDangKyNoiBo" | "donViTinhNoiBo" | "nhomTckt" | "masterDrugId" | "status" | "adminNote" | "isOutOfCatalog" | "createdAt" | "updatedAt", ExtArgs["result"]["facilityDrugMap"]>
+  export type FacilityDrugMapOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "facilityId" | "maNoiBo" | "tenThuocNoiBo" | "hoatChatNoiBo" | "soDangKyNoiBo" | "donViTinhNoiBo" | "nhomTckt" | "giaVat" | "bhyt" | "dichVu" | "soQdTrungThau" | "tenCongTy" | "ngayBatDauHd" | "ngayKetThucHd" | "demandRoundingEnabled" | "demandPackageUnit" | "demandPackageSize" | "demandPlanningLocked" | "demandPlanningLockedAt" | "demandPlanningUnlockedAt" | "demandPlanningLockReason" | "masterDrugId" | "status" | "adminNote" | "isOutOfCatalog" | "isActive" | "inactiveFromMonth" | "inactiveReason" | "inactiveAt" | "reactivatedFromMonth" | "reactivatedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["facilityDrugMap"]>
   export type FacilityDrugMapInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     facility?: boolean | UserDefaultArgs<ExtArgs>
     masterDrug?: boolean | FacilityDrugMap$masterDrugArgs<ExtArgs>
     reports?: boolean | FacilityDrugMap$reportsArgs<ExtArgs>
+    demandPlanLines?: boolean | FacilityDrugMap$demandPlanLinesArgs<ExtArgs>
     _count?: boolean | FacilityDrugMapCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type FacilityDrugMapIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -10683,6 +11432,7 @@ export namespace Prisma {
       facility: Prisma.$UserPayload<ExtArgs>
       masterDrug: Prisma.$MasterDrugPayload<ExtArgs> | null
       reports: Prisma.$InventoryReportPayload<ExtArgs>[]
+      demandPlanLines: Prisma.$FacilityDemandPlanLinePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -10693,10 +11443,30 @@ export namespace Prisma {
       soDangKyNoiBo: string | null
       donViTinhNoiBo: string | null
       nhomTckt: string | null
+      giaVat: Prisma.Decimal
+      bhyt: string | null
+      dichVu: string | null
+      soQdTrungThau: string | null
+      tenCongTy: string | null
+      ngayBatDauHd: string | null
+      ngayKetThucHd: string | null
+      demandRoundingEnabled: boolean
+      demandPackageUnit: string | null
+      demandPackageSize: Prisma.Decimal | null
+      demandPlanningLocked: boolean
+      demandPlanningLockedAt: Date | null
+      demandPlanningUnlockedAt: Date | null
+      demandPlanningLockReason: string | null
       masterDrugId: string | null
       status: $Enums.MappingStatus
       adminNote: string | null
       isOutOfCatalog: boolean
+      isActive: boolean
+      inactiveFromMonth: string | null
+      inactiveReason: string | null
+      inactiveAt: Date | null
+      reactivatedFromMonth: string | null
+      reactivatedAt: Date | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["facilityDrugMap"]>
@@ -11096,6 +11866,7 @@ export namespace Prisma {
     facility<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     masterDrug<T extends FacilityDrugMap$masterDrugArgs<ExtArgs> = {}>(args?: Subset<T, FacilityDrugMap$masterDrugArgs<ExtArgs>>): Prisma__MasterDrugClient<$Result.GetResult<Prisma.$MasterDrugPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     reports<T extends FacilityDrugMap$reportsArgs<ExtArgs> = {}>(args?: Subset<T, FacilityDrugMap$reportsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    demandPlanLines<T extends FacilityDrugMap$demandPlanLinesArgs<ExtArgs> = {}>(args?: Subset<T, FacilityDrugMap$demandPlanLinesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FacilityDemandPlanLinePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -11133,10 +11904,30 @@ export namespace Prisma {
     readonly soDangKyNoiBo: FieldRef<"FacilityDrugMap", 'String'>
     readonly donViTinhNoiBo: FieldRef<"FacilityDrugMap", 'String'>
     readonly nhomTckt: FieldRef<"FacilityDrugMap", 'String'>
+    readonly giaVat: FieldRef<"FacilityDrugMap", 'Decimal'>
+    readonly bhyt: FieldRef<"FacilityDrugMap", 'String'>
+    readonly dichVu: FieldRef<"FacilityDrugMap", 'String'>
+    readonly soQdTrungThau: FieldRef<"FacilityDrugMap", 'String'>
+    readonly tenCongTy: FieldRef<"FacilityDrugMap", 'String'>
+    readonly ngayBatDauHd: FieldRef<"FacilityDrugMap", 'String'>
+    readonly ngayKetThucHd: FieldRef<"FacilityDrugMap", 'String'>
+    readonly demandRoundingEnabled: FieldRef<"FacilityDrugMap", 'Boolean'>
+    readonly demandPackageUnit: FieldRef<"FacilityDrugMap", 'String'>
+    readonly demandPackageSize: FieldRef<"FacilityDrugMap", 'Decimal'>
+    readonly demandPlanningLocked: FieldRef<"FacilityDrugMap", 'Boolean'>
+    readonly demandPlanningLockedAt: FieldRef<"FacilityDrugMap", 'DateTime'>
+    readonly demandPlanningUnlockedAt: FieldRef<"FacilityDrugMap", 'DateTime'>
+    readonly demandPlanningLockReason: FieldRef<"FacilityDrugMap", 'String'>
     readonly masterDrugId: FieldRef<"FacilityDrugMap", 'String'>
     readonly status: FieldRef<"FacilityDrugMap", 'MappingStatus'>
     readonly adminNote: FieldRef<"FacilityDrugMap", 'String'>
     readonly isOutOfCatalog: FieldRef<"FacilityDrugMap", 'Boolean'>
+    readonly isActive: FieldRef<"FacilityDrugMap", 'Boolean'>
+    readonly inactiveFromMonth: FieldRef<"FacilityDrugMap", 'String'>
+    readonly inactiveReason: FieldRef<"FacilityDrugMap", 'String'>
+    readonly inactiveAt: FieldRef<"FacilityDrugMap", 'DateTime'>
+    readonly reactivatedFromMonth: FieldRef<"FacilityDrugMap", 'String'>
+    readonly reactivatedAt: FieldRef<"FacilityDrugMap", 'DateTime'>
     readonly createdAt: FieldRef<"FacilityDrugMap", 'DateTime'>
     readonly updatedAt: FieldRef<"FacilityDrugMap", 'DateTime'>
   }
@@ -11578,6 +12369,30 @@ export namespace Prisma {
   }
 
   /**
+   * FacilityDrugMap.demandPlanLines
+   */
+  export type FacilityDrugMap$demandPlanLinesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FacilityDemandPlanLine
+     */
+    select?: FacilityDemandPlanLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FacilityDemandPlanLine
+     */
+    omit?: FacilityDemandPlanLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacilityDemandPlanLineInclude<ExtArgs> | null
+    where?: FacilityDemandPlanLineWhereInput
+    orderBy?: FacilityDemandPlanLineOrderByWithRelationInput | FacilityDemandPlanLineOrderByWithRelationInput[]
+    cursor?: FacilityDemandPlanLineWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: FacilityDemandPlanLineScalarFieldEnum | FacilityDemandPlanLineScalarFieldEnum[]
+  }
+
+  /**
    * FacilityDrugMap without action
    */
   export type FacilityDrugMapDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -11597,6 +12412,2504 @@ export namespace Prisma {
 
 
   /**
+   * Model FacilityDemandPlan
+   */
+
+  export type AggregateFacilityDemandPlan = {
+    _count: FacilityDemandPlanCountAggregateOutputType | null
+    _min: FacilityDemandPlanMinAggregateOutputType | null
+    _max: FacilityDemandPlanMaxAggregateOutputType | null
+  }
+
+  export type FacilityDemandPlanMinAggregateOutputType = {
+    id: string | null
+    planNo: string | null
+    facilityId: string | null
+    status: $Enums.FacilityDemandPlanStatus | null
+    baseReportMonth: string | null
+    note: string | null
+    finalizedAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type FacilityDemandPlanMaxAggregateOutputType = {
+    id: string | null
+    planNo: string | null
+    facilityId: string | null
+    status: $Enums.FacilityDemandPlanStatus | null
+    baseReportMonth: string | null
+    note: string | null
+    finalizedAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type FacilityDemandPlanCountAggregateOutputType = {
+    id: number
+    planNo: number
+    facilityId: number
+    status: number
+    baseReportMonth: number
+    note: number
+    finalizedAt: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type FacilityDemandPlanMinAggregateInputType = {
+    id?: true
+    planNo?: true
+    facilityId?: true
+    status?: true
+    baseReportMonth?: true
+    note?: true
+    finalizedAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type FacilityDemandPlanMaxAggregateInputType = {
+    id?: true
+    planNo?: true
+    facilityId?: true
+    status?: true
+    baseReportMonth?: true
+    note?: true
+    finalizedAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type FacilityDemandPlanCountAggregateInputType = {
+    id?: true
+    planNo?: true
+    facilityId?: true
+    status?: true
+    baseReportMonth?: true
+    note?: true
+    finalizedAt?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type FacilityDemandPlanAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FacilityDemandPlan to aggregate.
+     */
+    where?: FacilityDemandPlanWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FacilityDemandPlans to fetch.
+     */
+    orderBy?: FacilityDemandPlanOrderByWithRelationInput | FacilityDemandPlanOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: FacilityDemandPlanWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FacilityDemandPlans from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FacilityDemandPlans.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned FacilityDemandPlans
+    **/
+    _count?: true | FacilityDemandPlanCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: FacilityDemandPlanMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: FacilityDemandPlanMaxAggregateInputType
+  }
+
+  export type GetFacilityDemandPlanAggregateType<T extends FacilityDemandPlanAggregateArgs> = {
+        [P in keyof T & keyof AggregateFacilityDemandPlan]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateFacilityDemandPlan[P]>
+      : GetScalarType<T[P], AggregateFacilityDemandPlan[P]>
+  }
+
+
+
+
+  export type FacilityDemandPlanGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FacilityDemandPlanWhereInput
+    orderBy?: FacilityDemandPlanOrderByWithAggregationInput | FacilityDemandPlanOrderByWithAggregationInput[]
+    by: FacilityDemandPlanScalarFieldEnum[] | FacilityDemandPlanScalarFieldEnum
+    having?: FacilityDemandPlanScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: FacilityDemandPlanCountAggregateInputType | true
+    _min?: FacilityDemandPlanMinAggregateInputType
+    _max?: FacilityDemandPlanMaxAggregateInputType
+  }
+
+  export type FacilityDemandPlanGroupByOutputType = {
+    id: string
+    planNo: string
+    facilityId: string
+    status: $Enums.FacilityDemandPlanStatus
+    baseReportMonth: string | null
+    note: string | null
+    finalizedAt: Date | null
+    createdAt: Date
+    updatedAt: Date
+    _count: FacilityDemandPlanCountAggregateOutputType | null
+    _min: FacilityDemandPlanMinAggregateOutputType | null
+    _max: FacilityDemandPlanMaxAggregateOutputType | null
+  }
+
+  type GetFacilityDemandPlanGroupByPayload<T extends FacilityDemandPlanGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<FacilityDemandPlanGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof FacilityDemandPlanGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], FacilityDemandPlanGroupByOutputType[P]>
+            : GetScalarType<T[P], FacilityDemandPlanGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type FacilityDemandPlanSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    planNo?: boolean
+    facilityId?: boolean
+    status?: boolean
+    baseReportMonth?: boolean
+    note?: boolean
+    finalizedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    facility?: boolean | UserDefaultArgs<ExtArgs>
+    lines?: boolean | FacilityDemandPlan$linesArgs<ExtArgs>
+    _count?: boolean | FacilityDemandPlanCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["facilityDemandPlan"]>
+
+  export type FacilityDemandPlanSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    planNo?: boolean
+    facilityId?: boolean
+    status?: boolean
+    baseReportMonth?: boolean
+    note?: boolean
+    finalizedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    facility?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["facilityDemandPlan"]>
+
+  export type FacilityDemandPlanSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    planNo?: boolean
+    facilityId?: boolean
+    status?: boolean
+    baseReportMonth?: boolean
+    note?: boolean
+    finalizedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    facility?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["facilityDemandPlan"]>
+
+  export type FacilityDemandPlanSelectScalar = {
+    id?: boolean
+    planNo?: boolean
+    facilityId?: boolean
+    status?: boolean
+    baseReportMonth?: boolean
+    note?: boolean
+    finalizedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type FacilityDemandPlanOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "planNo" | "facilityId" | "status" | "baseReportMonth" | "note" | "finalizedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["facilityDemandPlan"]>
+  export type FacilityDemandPlanInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    facility?: boolean | UserDefaultArgs<ExtArgs>
+    lines?: boolean | FacilityDemandPlan$linesArgs<ExtArgs>
+    _count?: boolean | FacilityDemandPlanCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type FacilityDemandPlanIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    facility?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type FacilityDemandPlanIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    facility?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $FacilityDemandPlanPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "FacilityDemandPlan"
+    objects: {
+      facility: Prisma.$UserPayload<ExtArgs>
+      lines: Prisma.$FacilityDemandPlanLinePayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      planNo: string
+      facilityId: string
+      status: $Enums.FacilityDemandPlanStatus
+      baseReportMonth: string | null
+      note: string | null
+      finalizedAt: Date | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["facilityDemandPlan"]>
+    composites: {}
+  }
+
+  type FacilityDemandPlanGetPayload<S extends boolean | null | undefined | FacilityDemandPlanDefaultArgs> = $Result.GetResult<Prisma.$FacilityDemandPlanPayload, S>
+
+  type FacilityDemandPlanCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<FacilityDemandPlanFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: FacilityDemandPlanCountAggregateInputType | true
+    }
+
+  export interface FacilityDemandPlanDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['FacilityDemandPlan'], meta: { name: 'FacilityDemandPlan' } }
+    /**
+     * Find zero or one FacilityDemandPlan that matches the filter.
+     * @param {FacilityDemandPlanFindUniqueArgs} args - Arguments to find a FacilityDemandPlan
+     * @example
+     * // Get one FacilityDemandPlan
+     * const facilityDemandPlan = await prisma.facilityDemandPlan.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends FacilityDemandPlanFindUniqueArgs>(args: SelectSubset<T, FacilityDemandPlanFindUniqueArgs<ExtArgs>>): Prisma__FacilityDemandPlanClient<$Result.GetResult<Prisma.$FacilityDemandPlanPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one FacilityDemandPlan that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {FacilityDemandPlanFindUniqueOrThrowArgs} args - Arguments to find a FacilityDemandPlan
+     * @example
+     * // Get one FacilityDemandPlan
+     * const facilityDemandPlan = await prisma.facilityDemandPlan.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends FacilityDemandPlanFindUniqueOrThrowArgs>(args: SelectSubset<T, FacilityDemandPlanFindUniqueOrThrowArgs<ExtArgs>>): Prisma__FacilityDemandPlanClient<$Result.GetResult<Prisma.$FacilityDemandPlanPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first FacilityDemandPlan that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FacilityDemandPlanFindFirstArgs} args - Arguments to find a FacilityDemandPlan
+     * @example
+     * // Get one FacilityDemandPlan
+     * const facilityDemandPlan = await prisma.facilityDemandPlan.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends FacilityDemandPlanFindFirstArgs>(args?: SelectSubset<T, FacilityDemandPlanFindFirstArgs<ExtArgs>>): Prisma__FacilityDemandPlanClient<$Result.GetResult<Prisma.$FacilityDemandPlanPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first FacilityDemandPlan that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FacilityDemandPlanFindFirstOrThrowArgs} args - Arguments to find a FacilityDemandPlan
+     * @example
+     * // Get one FacilityDemandPlan
+     * const facilityDemandPlan = await prisma.facilityDemandPlan.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends FacilityDemandPlanFindFirstOrThrowArgs>(args?: SelectSubset<T, FacilityDemandPlanFindFirstOrThrowArgs<ExtArgs>>): Prisma__FacilityDemandPlanClient<$Result.GetResult<Prisma.$FacilityDemandPlanPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more FacilityDemandPlans that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FacilityDemandPlanFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all FacilityDemandPlans
+     * const facilityDemandPlans = await prisma.facilityDemandPlan.findMany()
+     * 
+     * // Get first 10 FacilityDemandPlans
+     * const facilityDemandPlans = await prisma.facilityDemandPlan.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const facilityDemandPlanWithIdOnly = await prisma.facilityDemandPlan.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends FacilityDemandPlanFindManyArgs>(args?: SelectSubset<T, FacilityDemandPlanFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FacilityDemandPlanPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a FacilityDemandPlan.
+     * @param {FacilityDemandPlanCreateArgs} args - Arguments to create a FacilityDemandPlan.
+     * @example
+     * // Create one FacilityDemandPlan
+     * const FacilityDemandPlan = await prisma.facilityDemandPlan.create({
+     *   data: {
+     *     // ... data to create a FacilityDemandPlan
+     *   }
+     * })
+     * 
+     */
+    create<T extends FacilityDemandPlanCreateArgs>(args: SelectSubset<T, FacilityDemandPlanCreateArgs<ExtArgs>>): Prisma__FacilityDemandPlanClient<$Result.GetResult<Prisma.$FacilityDemandPlanPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many FacilityDemandPlans.
+     * @param {FacilityDemandPlanCreateManyArgs} args - Arguments to create many FacilityDemandPlans.
+     * @example
+     * // Create many FacilityDemandPlans
+     * const facilityDemandPlan = await prisma.facilityDemandPlan.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends FacilityDemandPlanCreateManyArgs>(args?: SelectSubset<T, FacilityDemandPlanCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many FacilityDemandPlans and returns the data saved in the database.
+     * @param {FacilityDemandPlanCreateManyAndReturnArgs} args - Arguments to create many FacilityDemandPlans.
+     * @example
+     * // Create many FacilityDemandPlans
+     * const facilityDemandPlan = await prisma.facilityDemandPlan.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many FacilityDemandPlans and only return the `id`
+     * const facilityDemandPlanWithIdOnly = await prisma.facilityDemandPlan.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends FacilityDemandPlanCreateManyAndReturnArgs>(args?: SelectSubset<T, FacilityDemandPlanCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FacilityDemandPlanPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a FacilityDemandPlan.
+     * @param {FacilityDemandPlanDeleteArgs} args - Arguments to delete one FacilityDemandPlan.
+     * @example
+     * // Delete one FacilityDemandPlan
+     * const FacilityDemandPlan = await prisma.facilityDemandPlan.delete({
+     *   where: {
+     *     // ... filter to delete one FacilityDemandPlan
+     *   }
+     * })
+     * 
+     */
+    delete<T extends FacilityDemandPlanDeleteArgs>(args: SelectSubset<T, FacilityDemandPlanDeleteArgs<ExtArgs>>): Prisma__FacilityDemandPlanClient<$Result.GetResult<Prisma.$FacilityDemandPlanPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one FacilityDemandPlan.
+     * @param {FacilityDemandPlanUpdateArgs} args - Arguments to update one FacilityDemandPlan.
+     * @example
+     * // Update one FacilityDemandPlan
+     * const facilityDemandPlan = await prisma.facilityDemandPlan.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends FacilityDemandPlanUpdateArgs>(args: SelectSubset<T, FacilityDemandPlanUpdateArgs<ExtArgs>>): Prisma__FacilityDemandPlanClient<$Result.GetResult<Prisma.$FacilityDemandPlanPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more FacilityDemandPlans.
+     * @param {FacilityDemandPlanDeleteManyArgs} args - Arguments to filter FacilityDemandPlans to delete.
+     * @example
+     * // Delete a few FacilityDemandPlans
+     * const { count } = await prisma.facilityDemandPlan.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends FacilityDemandPlanDeleteManyArgs>(args?: SelectSubset<T, FacilityDemandPlanDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FacilityDemandPlans.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FacilityDemandPlanUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many FacilityDemandPlans
+     * const facilityDemandPlan = await prisma.facilityDemandPlan.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends FacilityDemandPlanUpdateManyArgs>(args: SelectSubset<T, FacilityDemandPlanUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FacilityDemandPlans and returns the data updated in the database.
+     * @param {FacilityDemandPlanUpdateManyAndReturnArgs} args - Arguments to update many FacilityDemandPlans.
+     * @example
+     * // Update many FacilityDemandPlans
+     * const facilityDemandPlan = await prisma.facilityDemandPlan.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more FacilityDemandPlans and only return the `id`
+     * const facilityDemandPlanWithIdOnly = await prisma.facilityDemandPlan.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends FacilityDemandPlanUpdateManyAndReturnArgs>(args: SelectSubset<T, FacilityDemandPlanUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FacilityDemandPlanPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one FacilityDemandPlan.
+     * @param {FacilityDemandPlanUpsertArgs} args - Arguments to update or create a FacilityDemandPlan.
+     * @example
+     * // Update or create a FacilityDemandPlan
+     * const facilityDemandPlan = await prisma.facilityDemandPlan.upsert({
+     *   create: {
+     *     // ... data to create a FacilityDemandPlan
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the FacilityDemandPlan we want to update
+     *   }
+     * })
+     */
+    upsert<T extends FacilityDemandPlanUpsertArgs>(args: SelectSubset<T, FacilityDemandPlanUpsertArgs<ExtArgs>>): Prisma__FacilityDemandPlanClient<$Result.GetResult<Prisma.$FacilityDemandPlanPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of FacilityDemandPlans.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FacilityDemandPlanCountArgs} args - Arguments to filter FacilityDemandPlans to count.
+     * @example
+     * // Count the number of FacilityDemandPlans
+     * const count = await prisma.facilityDemandPlan.count({
+     *   where: {
+     *     // ... the filter for the FacilityDemandPlans we want to count
+     *   }
+     * })
+    **/
+    count<T extends FacilityDemandPlanCountArgs>(
+      args?: Subset<T, FacilityDemandPlanCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], FacilityDemandPlanCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a FacilityDemandPlan.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FacilityDemandPlanAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends FacilityDemandPlanAggregateArgs>(args: Subset<T, FacilityDemandPlanAggregateArgs>): Prisma.PrismaPromise<GetFacilityDemandPlanAggregateType<T>>
+
+    /**
+     * Group by FacilityDemandPlan.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FacilityDemandPlanGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends FacilityDemandPlanGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: FacilityDemandPlanGroupByArgs['orderBy'] }
+        : { orderBy?: FacilityDemandPlanGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, FacilityDemandPlanGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetFacilityDemandPlanGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the FacilityDemandPlan model
+   */
+  readonly fields: FacilityDemandPlanFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for FacilityDemandPlan.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__FacilityDemandPlanClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    facility<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    lines<T extends FacilityDemandPlan$linesArgs<ExtArgs> = {}>(args?: Subset<T, FacilityDemandPlan$linesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FacilityDemandPlanLinePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the FacilityDemandPlan model
+   */
+  interface FacilityDemandPlanFieldRefs {
+    readonly id: FieldRef<"FacilityDemandPlan", 'String'>
+    readonly planNo: FieldRef<"FacilityDemandPlan", 'String'>
+    readonly facilityId: FieldRef<"FacilityDemandPlan", 'String'>
+    readonly status: FieldRef<"FacilityDemandPlan", 'FacilityDemandPlanStatus'>
+    readonly baseReportMonth: FieldRef<"FacilityDemandPlan", 'String'>
+    readonly note: FieldRef<"FacilityDemandPlan", 'String'>
+    readonly finalizedAt: FieldRef<"FacilityDemandPlan", 'DateTime'>
+    readonly createdAt: FieldRef<"FacilityDemandPlan", 'DateTime'>
+    readonly updatedAt: FieldRef<"FacilityDemandPlan", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * FacilityDemandPlan findUnique
+   */
+  export type FacilityDemandPlanFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FacilityDemandPlan
+     */
+    select?: FacilityDemandPlanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FacilityDemandPlan
+     */
+    omit?: FacilityDemandPlanOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacilityDemandPlanInclude<ExtArgs> | null
+    /**
+     * Filter, which FacilityDemandPlan to fetch.
+     */
+    where: FacilityDemandPlanWhereUniqueInput
+  }
+
+  /**
+   * FacilityDemandPlan findUniqueOrThrow
+   */
+  export type FacilityDemandPlanFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FacilityDemandPlan
+     */
+    select?: FacilityDemandPlanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FacilityDemandPlan
+     */
+    omit?: FacilityDemandPlanOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacilityDemandPlanInclude<ExtArgs> | null
+    /**
+     * Filter, which FacilityDemandPlan to fetch.
+     */
+    where: FacilityDemandPlanWhereUniqueInput
+  }
+
+  /**
+   * FacilityDemandPlan findFirst
+   */
+  export type FacilityDemandPlanFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FacilityDemandPlan
+     */
+    select?: FacilityDemandPlanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FacilityDemandPlan
+     */
+    omit?: FacilityDemandPlanOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacilityDemandPlanInclude<ExtArgs> | null
+    /**
+     * Filter, which FacilityDemandPlan to fetch.
+     */
+    where?: FacilityDemandPlanWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FacilityDemandPlans to fetch.
+     */
+    orderBy?: FacilityDemandPlanOrderByWithRelationInput | FacilityDemandPlanOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FacilityDemandPlans.
+     */
+    cursor?: FacilityDemandPlanWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FacilityDemandPlans from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FacilityDemandPlans.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FacilityDemandPlans.
+     */
+    distinct?: FacilityDemandPlanScalarFieldEnum | FacilityDemandPlanScalarFieldEnum[]
+  }
+
+  /**
+   * FacilityDemandPlan findFirstOrThrow
+   */
+  export type FacilityDemandPlanFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FacilityDemandPlan
+     */
+    select?: FacilityDemandPlanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FacilityDemandPlan
+     */
+    omit?: FacilityDemandPlanOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacilityDemandPlanInclude<ExtArgs> | null
+    /**
+     * Filter, which FacilityDemandPlan to fetch.
+     */
+    where?: FacilityDemandPlanWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FacilityDemandPlans to fetch.
+     */
+    orderBy?: FacilityDemandPlanOrderByWithRelationInput | FacilityDemandPlanOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FacilityDemandPlans.
+     */
+    cursor?: FacilityDemandPlanWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FacilityDemandPlans from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FacilityDemandPlans.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FacilityDemandPlans.
+     */
+    distinct?: FacilityDemandPlanScalarFieldEnum | FacilityDemandPlanScalarFieldEnum[]
+  }
+
+  /**
+   * FacilityDemandPlan findMany
+   */
+  export type FacilityDemandPlanFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FacilityDemandPlan
+     */
+    select?: FacilityDemandPlanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FacilityDemandPlan
+     */
+    omit?: FacilityDemandPlanOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacilityDemandPlanInclude<ExtArgs> | null
+    /**
+     * Filter, which FacilityDemandPlans to fetch.
+     */
+    where?: FacilityDemandPlanWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FacilityDemandPlans to fetch.
+     */
+    orderBy?: FacilityDemandPlanOrderByWithRelationInput | FacilityDemandPlanOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing FacilityDemandPlans.
+     */
+    cursor?: FacilityDemandPlanWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FacilityDemandPlans from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FacilityDemandPlans.
+     */
+    skip?: number
+    distinct?: FacilityDemandPlanScalarFieldEnum | FacilityDemandPlanScalarFieldEnum[]
+  }
+
+  /**
+   * FacilityDemandPlan create
+   */
+  export type FacilityDemandPlanCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FacilityDemandPlan
+     */
+    select?: FacilityDemandPlanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FacilityDemandPlan
+     */
+    omit?: FacilityDemandPlanOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacilityDemandPlanInclude<ExtArgs> | null
+    /**
+     * The data needed to create a FacilityDemandPlan.
+     */
+    data: XOR<FacilityDemandPlanCreateInput, FacilityDemandPlanUncheckedCreateInput>
+  }
+
+  /**
+   * FacilityDemandPlan createMany
+   */
+  export type FacilityDemandPlanCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many FacilityDemandPlans.
+     */
+    data: FacilityDemandPlanCreateManyInput | FacilityDemandPlanCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * FacilityDemandPlan createManyAndReturn
+   */
+  export type FacilityDemandPlanCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FacilityDemandPlan
+     */
+    select?: FacilityDemandPlanSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the FacilityDemandPlan
+     */
+    omit?: FacilityDemandPlanOmit<ExtArgs> | null
+    /**
+     * The data used to create many FacilityDemandPlans.
+     */
+    data: FacilityDemandPlanCreateManyInput | FacilityDemandPlanCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacilityDemandPlanIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * FacilityDemandPlan update
+   */
+  export type FacilityDemandPlanUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FacilityDemandPlan
+     */
+    select?: FacilityDemandPlanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FacilityDemandPlan
+     */
+    omit?: FacilityDemandPlanOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacilityDemandPlanInclude<ExtArgs> | null
+    /**
+     * The data needed to update a FacilityDemandPlan.
+     */
+    data: XOR<FacilityDemandPlanUpdateInput, FacilityDemandPlanUncheckedUpdateInput>
+    /**
+     * Choose, which FacilityDemandPlan to update.
+     */
+    where: FacilityDemandPlanWhereUniqueInput
+  }
+
+  /**
+   * FacilityDemandPlan updateMany
+   */
+  export type FacilityDemandPlanUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update FacilityDemandPlans.
+     */
+    data: XOR<FacilityDemandPlanUpdateManyMutationInput, FacilityDemandPlanUncheckedUpdateManyInput>
+    /**
+     * Filter which FacilityDemandPlans to update
+     */
+    where?: FacilityDemandPlanWhereInput
+    /**
+     * Limit how many FacilityDemandPlans to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * FacilityDemandPlan updateManyAndReturn
+   */
+  export type FacilityDemandPlanUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FacilityDemandPlan
+     */
+    select?: FacilityDemandPlanSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the FacilityDemandPlan
+     */
+    omit?: FacilityDemandPlanOmit<ExtArgs> | null
+    /**
+     * The data used to update FacilityDemandPlans.
+     */
+    data: XOR<FacilityDemandPlanUpdateManyMutationInput, FacilityDemandPlanUncheckedUpdateManyInput>
+    /**
+     * Filter which FacilityDemandPlans to update
+     */
+    where?: FacilityDemandPlanWhereInput
+    /**
+     * Limit how many FacilityDemandPlans to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacilityDemandPlanIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * FacilityDemandPlan upsert
+   */
+  export type FacilityDemandPlanUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FacilityDemandPlan
+     */
+    select?: FacilityDemandPlanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FacilityDemandPlan
+     */
+    omit?: FacilityDemandPlanOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacilityDemandPlanInclude<ExtArgs> | null
+    /**
+     * The filter to search for the FacilityDemandPlan to update in case it exists.
+     */
+    where: FacilityDemandPlanWhereUniqueInput
+    /**
+     * In case the FacilityDemandPlan found by the `where` argument doesn't exist, create a new FacilityDemandPlan with this data.
+     */
+    create: XOR<FacilityDemandPlanCreateInput, FacilityDemandPlanUncheckedCreateInput>
+    /**
+     * In case the FacilityDemandPlan was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<FacilityDemandPlanUpdateInput, FacilityDemandPlanUncheckedUpdateInput>
+  }
+
+  /**
+   * FacilityDemandPlan delete
+   */
+  export type FacilityDemandPlanDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FacilityDemandPlan
+     */
+    select?: FacilityDemandPlanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FacilityDemandPlan
+     */
+    omit?: FacilityDemandPlanOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacilityDemandPlanInclude<ExtArgs> | null
+    /**
+     * Filter which FacilityDemandPlan to delete.
+     */
+    where: FacilityDemandPlanWhereUniqueInput
+  }
+
+  /**
+   * FacilityDemandPlan deleteMany
+   */
+  export type FacilityDemandPlanDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FacilityDemandPlans to delete
+     */
+    where?: FacilityDemandPlanWhereInput
+    /**
+     * Limit how many FacilityDemandPlans to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * FacilityDemandPlan.lines
+   */
+  export type FacilityDemandPlan$linesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FacilityDemandPlanLine
+     */
+    select?: FacilityDemandPlanLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FacilityDemandPlanLine
+     */
+    omit?: FacilityDemandPlanLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacilityDemandPlanLineInclude<ExtArgs> | null
+    where?: FacilityDemandPlanLineWhereInput
+    orderBy?: FacilityDemandPlanLineOrderByWithRelationInput | FacilityDemandPlanLineOrderByWithRelationInput[]
+    cursor?: FacilityDemandPlanLineWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: FacilityDemandPlanLineScalarFieldEnum | FacilityDemandPlanLineScalarFieldEnum[]
+  }
+
+  /**
+   * FacilityDemandPlan without action
+   */
+  export type FacilityDemandPlanDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FacilityDemandPlan
+     */
+    select?: FacilityDemandPlanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FacilityDemandPlan
+     */
+    omit?: FacilityDemandPlanOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacilityDemandPlanInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model FacilityDemandPlanLine
+   */
+
+  export type AggregateFacilityDemandPlanLine = {
+    _count: FacilityDemandPlanLineCountAggregateOutputType | null
+    _avg: FacilityDemandPlanLineAvgAggregateOutputType | null
+    _sum: FacilityDemandPlanLineSumAggregateOutputType | null
+    _min: FacilityDemandPlanLineMinAggregateOutputType | null
+    _max: FacilityDemandPlanLineMaxAggregateOutputType | null
+  }
+
+  export type FacilityDemandPlanLineAvgAggregateOutputType = {
+    suggestedQty: Decimal | null
+    rawSuggestedQty: Decimal | null
+    roundedSuggestedQty: Decimal | null
+    packageSizeSnapshot: Decimal | null
+    finalQty: Decimal | null
+  }
+
+  export type FacilityDemandPlanLineSumAggregateOutputType = {
+    suggestedQty: Decimal | null
+    rawSuggestedQty: Decimal | null
+    roundedSuggestedQty: Decimal | null
+    packageSizeSnapshot: Decimal | null
+    finalQty: Decimal | null
+  }
+
+  export type FacilityDemandPlanLineMinAggregateOutputType = {
+    id: string | null
+    planId: string | null
+    mapId: string | null
+    masterDrugId: string | null
+    maNoiBoSnapshot: string | null
+    tenThuocSnapshot: string | null
+    hoatChatSnapshot: string | null
+    donViTinhSnapshot: string | null
+    nhomTcktSnapshot: string | null
+    maChungSnapshot: string | null
+    suggestedQty: Decimal | null
+    rawSuggestedQty: Decimal | null
+    roundedSuggestedQty: Decimal | null
+    packageUnitSnapshot: string | null
+    packageSizeSnapshot: Decimal | null
+    roundingNote: string | null
+    finalQty: Decimal | null
+    suggestionBasis: string | null
+    suggestionReportMonth: string | null
+    suggestionRuleVersion: string | null
+    note: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type FacilityDemandPlanLineMaxAggregateOutputType = {
+    id: string | null
+    planId: string | null
+    mapId: string | null
+    masterDrugId: string | null
+    maNoiBoSnapshot: string | null
+    tenThuocSnapshot: string | null
+    hoatChatSnapshot: string | null
+    donViTinhSnapshot: string | null
+    nhomTcktSnapshot: string | null
+    maChungSnapshot: string | null
+    suggestedQty: Decimal | null
+    rawSuggestedQty: Decimal | null
+    roundedSuggestedQty: Decimal | null
+    packageUnitSnapshot: string | null
+    packageSizeSnapshot: Decimal | null
+    roundingNote: string | null
+    finalQty: Decimal | null
+    suggestionBasis: string | null
+    suggestionReportMonth: string | null
+    suggestionRuleVersion: string | null
+    note: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type FacilityDemandPlanLineCountAggregateOutputType = {
+    id: number
+    planId: number
+    mapId: number
+    masterDrugId: number
+    maNoiBoSnapshot: number
+    tenThuocSnapshot: number
+    hoatChatSnapshot: number
+    donViTinhSnapshot: number
+    nhomTcktSnapshot: number
+    maChungSnapshot: number
+    suggestedQty: number
+    rawSuggestedQty: number
+    roundedSuggestedQty: number
+    packageUnitSnapshot: number
+    packageSizeSnapshot: number
+    roundingNote: number
+    finalQty: number
+    suggestionBasis: number
+    suggestionReportMonth: number
+    suggestionRuleVersion: number
+    note: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type FacilityDemandPlanLineAvgAggregateInputType = {
+    suggestedQty?: true
+    rawSuggestedQty?: true
+    roundedSuggestedQty?: true
+    packageSizeSnapshot?: true
+    finalQty?: true
+  }
+
+  export type FacilityDemandPlanLineSumAggregateInputType = {
+    suggestedQty?: true
+    rawSuggestedQty?: true
+    roundedSuggestedQty?: true
+    packageSizeSnapshot?: true
+    finalQty?: true
+  }
+
+  export type FacilityDemandPlanLineMinAggregateInputType = {
+    id?: true
+    planId?: true
+    mapId?: true
+    masterDrugId?: true
+    maNoiBoSnapshot?: true
+    tenThuocSnapshot?: true
+    hoatChatSnapshot?: true
+    donViTinhSnapshot?: true
+    nhomTcktSnapshot?: true
+    maChungSnapshot?: true
+    suggestedQty?: true
+    rawSuggestedQty?: true
+    roundedSuggestedQty?: true
+    packageUnitSnapshot?: true
+    packageSizeSnapshot?: true
+    roundingNote?: true
+    finalQty?: true
+    suggestionBasis?: true
+    suggestionReportMonth?: true
+    suggestionRuleVersion?: true
+    note?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type FacilityDemandPlanLineMaxAggregateInputType = {
+    id?: true
+    planId?: true
+    mapId?: true
+    masterDrugId?: true
+    maNoiBoSnapshot?: true
+    tenThuocSnapshot?: true
+    hoatChatSnapshot?: true
+    donViTinhSnapshot?: true
+    nhomTcktSnapshot?: true
+    maChungSnapshot?: true
+    suggestedQty?: true
+    rawSuggestedQty?: true
+    roundedSuggestedQty?: true
+    packageUnitSnapshot?: true
+    packageSizeSnapshot?: true
+    roundingNote?: true
+    finalQty?: true
+    suggestionBasis?: true
+    suggestionReportMonth?: true
+    suggestionRuleVersion?: true
+    note?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type FacilityDemandPlanLineCountAggregateInputType = {
+    id?: true
+    planId?: true
+    mapId?: true
+    masterDrugId?: true
+    maNoiBoSnapshot?: true
+    tenThuocSnapshot?: true
+    hoatChatSnapshot?: true
+    donViTinhSnapshot?: true
+    nhomTcktSnapshot?: true
+    maChungSnapshot?: true
+    suggestedQty?: true
+    rawSuggestedQty?: true
+    roundedSuggestedQty?: true
+    packageUnitSnapshot?: true
+    packageSizeSnapshot?: true
+    roundingNote?: true
+    finalQty?: true
+    suggestionBasis?: true
+    suggestionReportMonth?: true
+    suggestionRuleVersion?: true
+    note?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type FacilityDemandPlanLineAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FacilityDemandPlanLine to aggregate.
+     */
+    where?: FacilityDemandPlanLineWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FacilityDemandPlanLines to fetch.
+     */
+    orderBy?: FacilityDemandPlanLineOrderByWithRelationInput | FacilityDemandPlanLineOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: FacilityDemandPlanLineWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FacilityDemandPlanLines from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FacilityDemandPlanLines.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned FacilityDemandPlanLines
+    **/
+    _count?: true | FacilityDemandPlanLineCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: FacilityDemandPlanLineAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: FacilityDemandPlanLineSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: FacilityDemandPlanLineMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: FacilityDemandPlanLineMaxAggregateInputType
+  }
+
+  export type GetFacilityDemandPlanLineAggregateType<T extends FacilityDemandPlanLineAggregateArgs> = {
+        [P in keyof T & keyof AggregateFacilityDemandPlanLine]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateFacilityDemandPlanLine[P]>
+      : GetScalarType<T[P], AggregateFacilityDemandPlanLine[P]>
+  }
+
+
+
+
+  export type FacilityDemandPlanLineGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FacilityDemandPlanLineWhereInput
+    orderBy?: FacilityDemandPlanLineOrderByWithAggregationInput | FacilityDemandPlanLineOrderByWithAggregationInput[]
+    by: FacilityDemandPlanLineScalarFieldEnum[] | FacilityDemandPlanLineScalarFieldEnum
+    having?: FacilityDemandPlanLineScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: FacilityDemandPlanLineCountAggregateInputType | true
+    _avg?: FacilityDemandPlanLineAvgAggregateInputType
+    _sum?: FacilityDemandPlanLineSumAggregateInputType
+    _min?: FacilityDemandPlanLineMinAggregateInputType
+    _max?: FacilityDemandPlanLineMaxAggregateInputType
+  }
+
+  export type FacilityDemandPlanLineGroupByOutputType = {
+    id: string
+    planId: string
+    mapId: string
+    masterDrugId: string
+    maNoiBoSnapshot: string
+    tenThuocSnapshot: string
+    hoatChatSnapshot: string | null
+    donViTinhSnapshot: string | null
+    nhomTcktSnapshot: string | null
+    maChungSnapshot: string | null
+    suggestedQty: Decimal | null
+    rawSuggestedQty: Decimal | null
+    roundedSuggestedQty: Decimal | null
+    packageUnitSnapshot: string | null
+    packageSizeSnapshot: Decimal | null
+    roundingNote: string | null
+    finalQty: Decimal
+    suggestionBasis: string | null
+    suggestionReportMonth: string | null
+    suggestionRuleVersion: string | null
+    note: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: FacilityDemandPlanLineCountAggregateOutputType | null
+    _avg: FacilityDemandPlanLineAvgAggregateOutputType | null
+    _sum: FacilityDemandPlanLineSumAggregateOutputType | null
+    _min: FacilityDemandPlanLineMinAggregateOutputType | null
+    _max: FacilityDemandPlanLineMaxAggregateOutputType | null
+  }
+
+  type GetFacilityDemandPlanLineGroupByPayload<T extends FacilityDemandPlanLineGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<FacilityDemandPlanLineGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof FacilityDemandPlanLineGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], FacilityDemandPlanLineGroupByOutputType[P]>
+            : GetScalarType<T[P], FacilityDemandPlanLineGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type FacilityDemandPlanLineSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    planId?: boolean
+    mapId?: boolean
+    masterDrugId?: boolean
+    maNoiBoSnapshot?: boolean
+    tenThuocSnapshot?: boolean
+    hoatChatSnapshot?: boolean
+    donViTinhSnapshot?: boolean
+    nhomTcktSnapshot?: boolean
+    maChungSnapshot?: boolean
+    suggestedQty?: boolean
+    rawSuggestedQty?: boolean
+    roundedSuggestedQty?: boolean
+    packageUnitSnapshot?: boolean
+    packageSizeSnapshot?: boolean
+    roundingNote?: boolean
+    finalQty?: boolean
+    suggestionBasis?: boolean
+    suggestionReportMonth?: boolean
+    suggestionRuleVersion?: boolean
+    note?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    plan?: boolean | FacilityDemandPlanDefaultArgs<ExtArgs>
+    drugMap?: boolean | FacilityDrugMapDefaultArgs<ExtArgs>
+    masterDrug?: boolean | MasterDrugDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["facilityDemandPlanLine"]>
+
+  export type FacilityDemandPlanLineSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    planId?: boolean
+    mapId?: boolean
+    masterDrugId?: boolean
+    maNoiBoSnapshot?: boolean
+    tenThuocSnapshot?: boolean
+    hoatChatSnapshot?: boolean
+    donViTinhSnapshot?: boolean
+    nhomTcktSnapshot?: boolean
+    maChungSnapshot?: boolean
+    suggestedQty?: boolean
+    rawSuggestedQty?: boolean
+    roundedSuggestedQty?: boolean
+    packageUnitSnapshot?: boolean
+    packageSizeSnapshot?: boolean
+    roundingNote?: boolean
+    finalQty?: boolean
+    suggestionBasis?: boolean
+    suggestionReportMonth?: boolean
+    suggestionRuleVersion?: boolean
+    note?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    plan?: boolean | FacilityDemandPlanDefaultArgs<ExtArgs>
+    drugMap?: boolean | FacilityDrugMapDefaultArgs<ExtArgs>
+    masterDrug?: boolean | MasterDrugDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["facilityDemandPlanLine"]>
+
+  export type FacilityDemandPlanLineSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    planId?: boolean
+    mapId?: boolean
+    masterDrugId?: boolean
+    maNoiBoSnapshot?: boolean
+    tenThuocSnapshot?: boolean
+    hoatChatSnapshot?: boolean
+    donViTinhSnapshot?: boolean
+    nhomTcktSnapshot?: boolean
+    maChungSnapshot?: boolean
+    suggestedQty?: boolean
+    rawSuggestedQty?: boolean
+    roundedSuggestedQty?: boolean
+    packageUnitSnapshot?: boolean
+    packageSizeSnapshot?: boolean
+    roundingNote?: boolean
+    finalQty?: boolean
+    suggestionBasis?: boolean
+    suggestionReportMonth?: boolean
+    suggestionRuleVersion?: boolean
+    note?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    plan?: boolean | FacilityDemandPlanDefaultArgs<ExtArgs>
+    drugMap?: boolean | FacilityDrugMapDefaultArgs<ExtArgs>
+    masterDrug?: boolean | MasterDrugDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["facilityDemandPlanLine"]>
+
+  export type FacilityDemandPlanLineSelectScalar = {
+    id?: boolean
+    planId?: boolean
+    mapId?: boolean
+    masterDrugId?: boolean
+    maNoiBoSnapshot?: boolean
+    tenThuocSnapshot?: boolean
+    hoatChatSnapshot?: boolean
+    donViTinhSnapshot?: boolean
+    nhomTcktSnapshot?: boolean
+    maChungSnapshot?: boolean
+    suggestedQty?: boolean
+    rawSuggestedQty?: boolean
+    roundedSuggestedQty?: boolean
+    packageUnitSnapshot?: boolean
+    packageSizeSnapshot?: boolean
+    roundingNote?: boolean
+    finalQty?: boolean
+    suggestionBasis?: boolean
+    suggestionReportMonth?: boolean
+    suggestionRuleVersion?: boolean
+    note?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type FacilityDemandPlanLineOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "planId" | "mapId" | "masterDrugId" | "maNoiBoSnapshot" | "tenThuocSnapshot" | "hoatChatSnapshot" | "donViTinhSnapshot" | "nhomTcktSnapshot" | "maChungSnapshot" | "suggestedQty" | "rawSuggestedQty" | "roundedSuggestedQty" | "packageUnitSnapshot" | "packageSizeSnapshot" | "roundingNote" | "finalQty" | "suggestionBasis" | "suggestionReportMonth" | "suggestionRuleVersion" | "note" | "createdAt" | "updatedAt", ExtArgs["result"]["facilityDemandPlanLine"]>
+  export type FacilityDemandPlanLineInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    plan?: boolean | FacilityDemandPlanDefaultArgs<ExtArgs>
+    drugMap?: boolean | FacilityDrugMapDefaultArgs<ExtArgs>
+    masterDrug?: boolean | MasterDrugDefaultArgs<ExtArgs>
+  }
+  export type FacilityDemandPlanLineIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    plan?: boolean | FacilityDemandPlanDefaultArgs<ExtArgs>
+    drugMap?: boolean | FacilityDrugMapDefaultArgs<ExtArgs>
+    masterDrug?: boolean | MasterDrugDefaultArgs<ExtArgs>
+  }
+  export type FacilityDemandPlanLineIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    plan?: boolean | FacilityDemandPlanDefaultArgs<ExtArgs>
+    drugMap?: boolean | FacilityDrugMapDefaultArgs<ExtArgs>
+    masterDrug?: boolean | MasterDrugDefaultArgs<ExtArgs>
+  }
+
+  export type $FacilityDemandPlanLinePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "FacilityDemandPlanLine"
+    objects: {
+      plan: Prisma.$FacilityDemandPlanPayload<ExtArgs>
+      drugMap: Prisma.$FacilityDrugMapPayload<ExtArgs>
+      masterDrug: Prisma.$MasterDrugPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      planId: string
+      mapId: string
+      masterDrugId: string
+      maNoiBoSnapshot: string
+      tenThuocSnapshot: string
+      hoatChatSnapshot: string | null
+      donViTinhSnapshot: string | null
+      nhomTcktSnapshot: string | null
+      maChungSnapshot: string | null
+      suggestedQty: Prisma.Decimal | null
+      rawSuggestedQty: Prisma.Decimal | null
+      roundedSuggestedQty: Prisma.Decimal | null
+      packageUnitSnapshot: string | null
+      packageSizeSnapshot: Prisma.Decimal | null
+      roundingNote: string | null
+      finalQty: Prisma.Decimal
+      suggestionBasis: string | null
+      suggestionReportMonth: string | null
+      suggestionRuleVersion: string | null
+      note: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["facilityDemandPlanLine"]>
+    composites: {}
+  }
+
+  type FacilityDemandPlanLineGetPayload<S extends boolean | null | undefined | FacilityDemandPlanLineDefaultArgs> = $Result.GetResult<Prisma.$FacilityDemandPlanLinePayload, S>
+
+  type FacilityDemandPlanLineCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<FacilityDemandPlanLineFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: FacilityDemandPlanLineCountAggregateInputType | true
+    }
+
+  export interface FacilityDemandPlanLineDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['FacilityDemandPlanLine'], meta: { name: 'FacilityDemandPlanLine' } }
+    /**
+     * Find zero or one FacilityDemandPlanLine that matches the filter.
+     * @param {FacilityDemandPlanLineFindUniqueArgs} args - Arguments to find a FacilityDemandPlanLine
+     * @example
+     * // Get one FacilityDemandPlanLine
+     * const facilityDemandPlanLine = await prisma.facilityDemandPlanLine.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends FacilityDemandPlanLineFindUniqueArgs>(args: SelectSubset<T, FacilityDemandPlanLineFindUniqueArgs<ExtArgs>>): Prisma__FacilityDemandPlanLineClient<$Result.GetResult<Prisma.$FacilityDemandPlanLinePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one FacilityDemandPlanLine that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {FacilityDemandPlanLineFindUniqueOrThrowArgs} args - Arguments to find a FacilityDemandPlanLine
+     * @example
+     * // Get one FacilityDemandPlanLine
+     * const facilityDemandPlanLine = await prisma.facilityDemandPlanLine.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends FacilityDemandPlanLineFindUniqueOrThrowArgs>(args: SelectSubset<T, FacilityDemandPlanLineFindUniqueOrThrowArgs<ExtArgs>>): Prisma__FacilityDemandPlanLineClient<$Result.GetResult<Prisma.$FacilityDemandPlanLinePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first FacilityDemandPlanLine that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FacilityDemandPlanLineFindFirstArgs} args - Arguments to find a FacilityDemandPlanLine
+     * @example
+     * // Get one FacilityDemandPlanLine
+     * const facilityDemandPlanLine = await prisma.facilityDemandPlanLine.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends FacilityDemandPlanLineFindFirstArgs>(args?: SelectSubset<T, FacilityDemandPlanLineFindFirstArgs<ExtArgs>>): Prisma__FacilityDemandPlanLineClient<$Result.GetResult<Prisma.$FacilityDemandPlanLinePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first FacilityDemandPlanLine that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FacilityDemandPlanLineFindFirstOrThrowArgs} args - Arguments to find a FacilityDemandPlanLine
+     * @example
+     * // Get one FacilityDemandPlanLine
+     * const facilityDemandPlanLine = await prisma.facilityDemandPlanLine.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends FacilityDemandPlanLineFindFirstOrThrowArgs>(args?: SelectSubset<T, FacilityDemandPlanLineFindFirstOrThrowArgs<ExtArgs>>): Prisma__FacilityDemandPlanLineClient<$Result.GetResult<Prisma.$FacilityDemandPlanLinePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more FacilityDemandPlanLines that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FacilityDemandPlanLineFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all FacilityDemandPlanLines
+     * const facilityDemandPlanLines = await prisma.facilityDemandPlanLine.findMany()
+     * 
+     * // Get first 10 FacilityDemandPlanLines
+     * const facilityDemandPlanLines = await prisma.facilityDemandPlanLine.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const facilityDemandPlanLineWithIdOnly = await prisma.facilityDemandPlanLine.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends FacilityDemandPlanLineFindManyArgs>(args?: SelectSubset<T, FacilityDemandPlanLineFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FacilityDemandPlanLinePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a FacilityDemandPlanLine.
+     * @param {FacilityDemandPlanLineCreateArgs} args - Arguments to create a FacilityDemandPlanLine.
+     * @example
+     * // Create one FacilityDemandPlanLine
+     * const FacilityDemandPlanLine = await prisma.facilityDemandPlanLine.create({
+     *   data: {
+     *     // ... data to create a FacilityDemandPlanLine
+     *   }
+     * })
+     * 
+     */
+    create<T extends FacilityDemandPlanLineCreateArgs>(args: SelectSubset<T, FacilityDemandPlanLineCreateArgs<ExtArgs>>): Prisma__FacilityDemandPlanLineClient<$Result.GetResult<Prisma.$FacilityDemandPlanLinePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many FacilityDemandPlanLines.
+     * @param {FacilityDemandPlanLineCreateManyArgs} args - Arguments to create many FacilityDemandPlanLines.
+     * @example
+     * // Create many FacilityDemandPlanLines
+     * const facilityDemandPlanLine = await prisma.facilityDemandPlanLine.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends FacilityDemandPlanLineCreateManyArgs>(args?: SelectSubset<T, FacilityDemandPlanLineCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many FacilityDemandPlanLines and returns the data saved in the database.
+     * @param {FacilityDemandPlanLineCreateManyAndReturnArgs} args - Arguments to create many FacilityDemandPlanLines.
+     * @example
+     * // Create many FacilityDemandPlanLines
+     * const facilityDemandPlanLine = await prisma.facilityDemandPlanLine.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many FacilityDemandPlanLines and only return the `id`
+     * const facilityDemandPlanLineWithIdOnly = await prisma.facilityDemandPlanLine.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends FacilityDemandPlanLineCreateManyAndReturnArgs>(args?: SelectSubset<T, FacilityDemandPlanLineCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FacilityDemandPlanLinePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a FacilityDemandPlanLine.
+     * @param {FacilityDemandPlanLineDeleteArgs} args - Arguments to delete one FacilityDemandPlanLine.
+     * @example
+     * // Delete one FacilityDemandPlanLine
+     * const FacilityDemandPlanLine = await prisma.facilityDemandPlanLine.delete({
+     *   where: {
+     *     // ... filter to delete one FacilityDemandPlanLine
+     *   }
+     * })
+     * 
+     */
+    delete<T extends FacilityDemandPlanLineDeleteArgs>(args: SelectSubset<T, FacilityDemandPlanLineDeleteArgs<ExtArgs>>): Prisma__FacilityDemandPlanLineClient<$Result.GetResult<Prisma.$FacilityDemandPlanLinePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one FacilityDemandPlanLine.
+     * @param {FacilityDemandPlanLineUpdateArgs} args - Arguments to update one FacilityDemandPlanLine.
+     * @example
+     * // Update one FacilityDemandPlanLine
+     * const facilityDemandPlanLine = await prisma.facilityDemandPlanLine.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends FacilityDemandPlanLineUpdateArgs>(args: SelectSubset<T, FacilityDemandPlanLineUpdateArgs<ExtArgs>>): Prisma__FacilityDemandPlanLineClient<$Result.GetResult<Prisma.$FacilityDemandPlanLinePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more FacilityDemandPlanLines.
+     * @param {FacilityDemandPlanLineDeleteManyArgs} args - Arguments to filter FacilityDemandPlanLines to delete.
+     * @example
+     * // Delete a few FacilityDemandPlanLines
+     * const { count } = await prisma.facilityDemandPlanLine.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends FacilityDemandPlanLineDeleteManyArgs>(args?: SelectSubset<T, FacilityDemandPlanLineDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FacilityDemandPlanLines.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FacilityDemandPlanLineUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many FacilityDemandPlanLines
+     * const facilityDemandPlanLine = await prisma.facilityDemandPlanLine.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends FacilityDemandPlanLineUpdateManyArgs>(args: SelectSubset<T, FacilityDemandPlanLineUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FacilityDemandPlanLines and returns the data updated in the database.
+     * @param {FacilityDemandPlanLineUpdateManyAndReturnArgs} args - Arguments to update many FacilityDemandPlanLines.
+     * @example
+     * // Update many FacilityDemandPlanLines
+     * const facilityDemandPlanLine = await prisma.facilityDemandPlanLine.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more FacilityDemandPlanLines and only return the `id`
+     * const facilityDemandPlanLineWithIdOnly = await prisma.facilityDemandPlanLine.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends FacilityDemandPlanLineUpdateManyAndReturnArgs>(args: SelectSubset<T, FacilityDemandPlanLineUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FacilityDemandPlanLinePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one FacilityDemandPlanLine.
+     * @param {FacilityDemandPlanLineUpsertArgs} args - Arguments to update or create a FacilityDemandPlanLine.
+     * @example
+     * // Update or create a FacilityDemandPlanLine
+     * const facilityDemandPlanLine = await prisma.facilityDemandPlanLine.upsert({
+     *   create: {
+     *     // ... data to create a FacilityDemandPlanLine
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the FacilityDemandPlanLine we want to update
+     *   }
+     * })
+     */
+    upsert<T extends FacilityDemandPlanLineUpsertArgs>(args: SelectSubset<T, FacilityDemandPlanLineUpsertArgs<ExtArgs>>): Prisma__FacilityDemandPlanLineClient<$Result.GetResult<Prisma.$FacilityDemandPlanLinePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of FacilityDemandPlanLines.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FacilityDemandPlanLineCountArgs} args - Arguments to filter FacilityDemandPlanLines to count.
+     * @example
+     * // Count the number of FacilityDemandPlanLines
+     * const count = await prisma.facilityDemandPlanLine.count({
+     *   where: {
+     *     // ... the filter for the FacilityDemandPlanLines we want to count
+     *   }
+     * })
+    **/
+    count<T extends FacilityDemandPlanLineCountArgs>(
+      args?: Subset<T, FacilityDemandPlanLineCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], FacilityDemandPlanLineCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a FacilityDemandPlanLine.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FacilityDemandPlanLineAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends FacilityDemandPlanLineAggregateArgs>(args: Subset<T, FacilityDemandPlanLineAggregateArgs>): Prisma.PrismaPromise<GetFacilityDemandPlanLineAggregateType<T>>
+
+    /**
+     * Group by FacilityDemandPlanLine.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FacilityDemandPlanLineGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends FacilityDemandPlanLineGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: FacilityDemandPlanLineGroupByArgs['orderBy'] }
+        : { orderBy?: FacilityDemandPlanLineGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, FacilityDemandPlanLineGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetFacilityDemandPlanLineGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the FacilityDemandPlanLine model
+   */
+  readonly fields: FacilityDemandPlanLineFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for FacilityDemandPlanLine.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__FacilityDemandPlanLineClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    plan<T extends FacilityDemandPlanDefaultArgs<ExtArgs> = {}>(args?: Subset<T, FacilityDemandPlanDefaultArgs<ExtArgs>>): Prisma__FacilityDemandPlanClient<$Result.GetResult<Prisma.$FacilityDemandPlanPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    drugMap<T extends FacilityDrugMapDefaultArgs<ExtArgs> = {}>(args?: Subset<T, FacilityDrugMapDefaultArgs<ExtArgs>>): Prisma__FacilityDrugMapClient<$Result.GetResult<Prisma.$FacilityDrugMapPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    masterDrug<T extends MasterDrugDefaultArgs<ExtArgs> = {}>(args?: Subset<T, MasterDrugDefaultArgs<ExtArgs>>): Prisma__MasterDrugClient<$Result.GetResult<Prisma.$MasterDrugPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the FacilityDemandPlanLine model
+   */
+  interface FacilityDemandPlanLineFieldRefs {
+    readonly id: FieldRef<"FacilityDemandPlanLine", 'String'>
+    readonly planId: FieldRef<"FacilityDemandPlanLine", 'String'>
+    readonly mapId: FieldRef<"FacilityDemandPlanLine", 'String'>
+    readonly masterDrugId: FieldRef<"FacilityDemandPlanLine", 'String'>
+    readonly maNoiBoSnapshot: FieldRef<"FacilityDemandPlanLine", 'String'>
+    readonly tenThuocSnapshot: FieldRef<"FacilityDemandPlanLine", 'String'>
+    readonly hoatChatSnapshot: FieldRef<"FacilityDemandPlanLine", 'String'>
+    readonly donViTinhSnapshot: FieldRef<"FacilityDemandPlanLine", 'String'>
+    readonly nhomTcktSnapshot: FieldRef<"FacilityDemandPlanLine", 'String'>
+    readonly maChungSnapshot: FieldRef<"FacilityDemandPlanLine", 'String'>
+    readonly suggestedQty: FieldRef<"FacilityDemandPlanLine", 'Decimal'>
+    readonly rawSuggestedQty: FieldRef<"FacilityDemandPlanLine", 'Decimal'>
+    readonly roundedSuggestedQty: FieldRef<"FacilityDemandPlanLine", 'Decimal'>
+    readonly packageUnitSnapshot: FieldRef<"FacilityDemandPlanLine", 'String'>
+    readonly packageSizeSnapshot: FieldRef<"FacilityDemandPlanLine", 'Decimal'>
+    readonly roundingNote: FieldRef<"FacilityDemandPlanLine", 'String'>
+    readonly finalQty: FieldRef<"FacilityDemandPlanLine", 'Decimal'>
+    readonly suggestionBasis: FieldRef<"FacilityDemandPlanLine", 'String'>
+    readonly suggestionReportMonth: FieldRef<"FacilityDemandPlanLine", 'String'>
+    readonly suggestionRuleVersion: FieldRef<"FacilityDemandPlanLine", 'String'>
+    readonly note: FieldRef<"FacilityDemandPlanLine", 'String'>
+    readonly createdAt: FieldRef<"FacilityDemandPlanLine", 'DateTime'>
+    readonly updatedAt: FieldRef<"FacilityDemandPlanLine", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * FacilityDemandPlanLine findUnique
+   */
+  export type FacilityDemandPlanLineFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FacilityDemandPlanLine
+     */
+    select?: FacilityDemandPlanLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FacilityDemandPlanLine
+     */
+    omit?: FacilityDemandPlanLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacilityDemandPlanLineInclude<ExtArgs> | null
+    /**
+     * Filter, which FacilityDemandPlanLine to fetch.
+     */
+    where: FacilityDemandPlanLineWhereUniqueInput
+  }
+
+  /**
+   * FacilityDemandPlanLine findUniqueOrThrow
+   */
+  export type FacilityDemandPlanLineFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FacilityDemandPlanLine
+     */
+    select?: FacilityDemandPlanLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FacilityDemandPlanLine
+     */
+    omit?: FacilityDemandPlanLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacilityDemandPlanLineInclude<ExtArgs> | null
+    /**
+     * Filter, which FacilityDemandPlanLine to fetch.
+     */
+    where: FacilityDemandPlanLineWhereUniqueInput
+  }
+
+  /**
+   * FacilityDemandPlanLine findFirst
+   */
+  export type FacilityDemandPlanLineFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FacilityDemandPlanLine
+     */
+    select?: FacilityDemandPlanLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FacilityDemandPlanLine
+     */
+    omit?: FacilityDemandPlanLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacilityDemandPlanLineInclude<ExtArgs> | null
+    /**
+     * Filter, which FacilityDemandPlanLine to fetch.
+     */
+    where?: FacilityDemandPlanLineWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FacilityDemandPlanLines to fetch.
+     */
+    orderBy?: FacilityDemandPlanLineOrderByWithRelationInput | FacilityDemandPlanLineOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FacilityDemandPlanLines.
+     */
+    cursor?: FacilityDemandPlanLineWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FacilityDemandPlanLines from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FacilityDemandPlanLines.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FacilityDemandPlanLines.
+     */
+    distinct?: FacilityDemandPlanLineScalarFieldEnum | FacilityDemandPlanLineScalarFieldEnum[]
+  }
+
+  /**
+   * FacilityDemandPlanLine findFirstOrThrow
+   */
+  export type FacilityDemandPlanLineFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FacilityDemandPlanLine
+     */
+    select?: FacilityDemandPlanLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FacilityDemandPlanLine
+     */
+    omit?: FacilityDemandPlanLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacilityDemandPlanLineInclude<ExtArgs> | null
+    /**
+     * Filter, which FacilityDemandPlanLine to fetch.
+     */
+    where?: FacilityDemandPlanLineWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FacilityDemandPlanLines to fetch.
+     */
+    orderBy?: FacilityDemandPlanLineOrderByWithRelationInput | FacilityDemandPlanLineOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FacilityDemandPlanLines.
+     */
+    cursor?: FacilityDemandPlanLineWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FacilityDemandPlanLines from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FacilityDemandPlanLines.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FacilityDemandPlanLines.
+     */
+    distinct?: FacilityDemandPlanLineScalarFieldEnum | FacilityDemandPlanLineScalarFieldEnum[]
+  }
+
+  /**
+   * FacilityDemandPlanLine findMany
+   */
+  export type FacilityDemandPlanLineFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FacilityDemandPlanLine
+     */
+    select?: FacilityDemandPlanLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FacilityDemandPlanLine
+     */
+    omit?: FacilityDemandPlanLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacilityDemandPlanLineInclude<ExtArgs> | null
+    /**
+     * Filter, which FacilityDemandPlanLines to fetch.
+     */
+    where?: FacilityDemandPlanLineWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FacilityDemandPlanLines to fetch.
+     */
+    orderBy?: FacilityDemandPlanLineOrderByWithRelationInput | FacilityDemandPlanLineOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing FacilityDemandPlanLines.
+     */
+    cursor?: FacilityDemandPlanLineWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FacilityDemandPlanLines from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FacilityDemandPlanLines.
+     */
+    skip?: number
+    distinct?: FacilityDemandPlanLineScalarFieldEnum | FacilityDemandPlanLineScalarFieldEnum[]
+  }
+
+  /**
+   * FacilityDemandPlanLine create
+   */
+  export type FacilityDemandPlanLineCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FacilityDemandPlanLine
+     */
+    select?: FacilityDemandPlanLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FacilityDemandPlanLine
+     */
+    omit?: FacilityDemandPlanLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacilityDemandPlanLineInclude<ExtArgs> | null
+    /**
+     * The data needed to create a FacilityDemandPlanLine.
+     */
+    data: XOR<FacilityDemandPlanLineCreateInput, FacilityDemandPlanLineUncheckedCreateInput>
+  }
+
+  /**
+   * FacilityDemandPlanLine createMany
+   */
+  export type FacilityDemandPlanLineCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many FacilityDemandPlanLines.
+     */
+    data: FacilityDemandPlanLineCreateManyInput | FacilityDemandPlanLineCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * FacilityDemandPlanLine createManyAndReturn
+   */
+  export type FacilityDemandPlanLineCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FacilityDemandPlanLine
+     */
+    select?: FacilityDemandPlanLineSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the FacilityDemandPlanLine
+     */
+    omit?: FacilityDemandPlanLineOmit<ExtArgs> | null
+    /**
+     * The data used to create many FacilityDemandPlanLines.
+     */
+    data: FacilityDemandPlanLineCreateManyInput | FacilityDemandPlanLineCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacilityDemandPlanLineIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * FacilityDemandPlanLine update
+   */
+  export type FacilityDemandPlanLineUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FacilityDemandPlanLine
+     */
+    select?: FacilityDemandPlanLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FacilityDemandPlanLine
+     */
+    omit?: FacilityDemandPlanLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacilityDemandPlanLineInclude<ExtArgs> | null
+    /**
+     * The data needed to update a FacilityDemandPlanLine.
+     */
+    data: XOR<FacilityDemandPlanLineUpdateInput, FacilityDemandPlanLineUncheckedUpdateInput>
+    /**
+     * Choose, which FacilityDemandPlanLine to update.
+     */
+    where: FacilityDemandPlanLineWhereUniqueInput
+  }
+
+  /**
+   * FacilityDemandPlanLine updateMany
+   */
+  export type FacilityDemandPlanLineUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update FacilityDemandPlanLines.
+     */
+    data: XOR<FacilityDemandPlanLineUpdateManyMutationInput, FacilityDemandPlanLineUncheckedUpdateManyInput>
+    /**
+     * Filter which FacilityDemandPlanLines to update
+     */
+    where?: FacilityDemandPlanLineWhereInput
+    /**
+     * Limit how many FacilityDemandPlanLines to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * FacilityDemandPlanLine updateManyAndReturn
+   */
+  export type FacilityDemandPlanLineUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FacilityDemandPlanLine
+     */
+    select?: FacilityDemandPlanLineSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the FacilityDemandPlanLine
+     */
+    omit?: FacilityDemandPlanLineOmit<ExtArgs> | null
+    /**
+     * The data used to update FacilityDemandPlanLines.
+     */
+    data: XOR<FacilityDemandPlanLineUpdateManyMutationInput, FacilityDemandPlanLineUncheckedUpdateManyInput>
+    /**
+     * Filter which FacilityDemandPlanLines to update
+     */
+    where?: FacilityDemandPlanLineWhereInput
+    /**
+     * Limit how many FacilityDemandPlanLines to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacilityDemandPlanLineIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * FacilityDemandPlanLine upsert
+   */
+  export type FacilityDemandPlanLineUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FacilityDemandPlanLine
+     */
+    select?: FacilityDemandPlanLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FacilityDemandPlanLine
+     */
+    omit?: FacilityDemandPlanLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacilityDemandPlanLineInclude<ExtArgs> | null
+    /**
+     * The filter to search for the FacilityDemandPlanLine to update in case it exists.
+     */
+    where: FacilityDemandPlanLineWhereUniqueInput
+    /**
+     * In case the FacilityDemandPlanLine found by the `where` argument doesn't exist, create a new FacilityDemandPlanLine with this data.
+     */
+    create: XOR<FacilityDemandPlanLineCreateInput, FacilityDemandPlanLineUncheckedCreateInput>
+    /**
+     * In case the FacilityDemandPlanLine was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<FacilityDemandPlanLineUpdateInput, FacilityDemandPlanLineUncheckedUpdateInput>
+  }
+
+  /**
+   * FacilityDemandPlanLine delete
+   */
+  export type FacilityDemandPlanLineDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FacilityDemandPlanLine
+     */
+    select?: FacilityDemandPlanLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FacilityDemandPlanLine
+     */
+    omit?: FacilityDemandPlanLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacilityDemandPlanLineInclude<ExtArgs> | null
+    /**
+     * Filter which FacilityDemandPlanLine to delete.
+     */
+    where: FacilityDemandPlanLineWhereUniqueInput
+  }
+
+  /**
+   * FacilityDemandPlanLine deleteMany
+   */
+  export type FacilityDemandPlanLineDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FacilityDemandPlanLines to delete
+     */
+    where?: FacilityDemandPlanLineWhereInput
+    /**
+     * Limit how many FacilityDemandPlanLines to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * FacilityDemandPlanLine without action
+   */
+  export type FacilityDemandPlanLineDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FacilityDemandPlanLine
+     */
+    select?: FacilityDemandPlanLineSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FacilityDemandPlanLine
+     */
+    omit?: FacilityDemandPlanLineOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FacilityDemandPlanLineInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Model InventoryReport
    */
 
@@ -11611,6 +14924,7 @@ export namespace Prisma {
   export type InventoryReportAvgAggregateOutputType = {
     tonDau: Decimal | null
     nhap: Decimal | null
+    nhapHoanTra: Decimal | null
     xuat: Decimal | null
     tonCuoi: Decimal | null
     giaVat: Decimal | null
@@ -11620,6 +14934,7 @@ export namespace Prisma {
   export type InventoryReportSumAggregateOutputType = {
     tonDau: Decimal | null
     nhap: Decimal | null
+    nhapHoanTra: Decimal | null
     xuat: Decimal | null
     tonCuoi: Decimal | null
     giaVat: Decimal | null
@@ -11633,6 +14948,7 @@ export namespace Prisma {
     reportMonth: string | null
     tonDau: Decimal | null
     nhap: Decimal | null
+    nhapHoanTra: Decimal | null
     xuat: Decimal | null
     tonCuoi: Decimal | null
     giaVat: Decimal | null
@@ -11656,6 +14972,7 @@ export namespace Prisma {
     reportMonth: string | null
     tonDau: Decimal | null
     nhap: Decimal | null
+    nhapHoanTra: Decimal | null
     xuat: Decimal | null
     tonCuoi: Decimal | null
     giaVat: Decimal | null
@@ -11679,6 +14996,7 @@ export namespace Prisma {
     reportMonth: number
     tonDau: number
     nhap: number
+    nhapHoanTra: number
     xuat: number
     tonCuoi: number
     giaVat: number
@@ -11700,6 +15018,7 @@ export namespace Prisma {
   export type InventoryReportAvgAggregateInputType = {
     tonDau?: true
     nhap?: true
+    nhapHoanTra?: true
     xuat?: true
     tonCuoi?: true
     giaVat?: true
@@ -11709,6 +15028,7 @@ export namespace Prisma {
   export type InventoryReportSumAggregateInputType = {
     tonDau?: true
     nhap?: true
+    nhapHoanTra?: true
     xuat?: true
     tonCuoi?: true
     giaVat?: true
@@ -11722,6 +15042,7 @@ export namespace Prisma {
     reportMonth?: true
     tonDau?: true
     nhap?: true
+    nhapHoanTra?: true
     xuat?: true
     tonCuoi?: true
     giaVat?: true
@@ -11745,6 +15066,7 @@ export namespace Prisma {
     reportMonth?: true
     tonDau?: true
     nhap?: true
+    nhapHoanTra?: true
     xuat?: true
     tonCuoi?: true
     giaVat?: true
@@ -11768,6 +15090,7 @@ export namespace Prisma {
     reportMonth?: true
     tonDau?: true
     nhap?: true
+    nhapHoanTra?: true
     xuat?: true
     tonCuoi?: true
     giaVat?: true
@@ -11878,6 +15201,7 @@ export namespace Prisma {
     reportMonth: string
     tonDau: Decimal
     nhap: Decimal
+    nhapHoanTra: Decimal
     xuat: Decimal
     tonCuoi: Decimal
     giaVat: Decimal
@@ -11920,6 +15244,7 @@ export namespace Prisma {
     reportMonth?: boolean
     tonDau?: boolean
     nhap?: boolean
+    nhapHoanTra?: boolean
     xuat?: boolean
     tonCuoi?: boolean
     giaVat?: boolean
@@ -11945,6 +15270,7 @@ export namespace Prisma {
     reportMonth?: boolean
     tonDau?: boolean
     nhap?: boolean
+    nhapHoanTra?: boolean
     xuat?: boolean
     tonCuoi?: boolean
     giaVat?: boolean
@@ -11970,6 +15296,7 @@ export namespace Prisma {
     reportMonth?: boolean
     tonDau?: boolean
     nhap?: boolean
+    nhapHoanTra?: boolean
     xuat?: boolean
     tonCuoi?: boolean
     giaVat?: boolean
@@ -11995,6 +15322,7 @@ export namespace Prisma {
     reportMonth?: boolean
     tonDau?: boolean
     nhap?: boolean
+    nhapHoanTra?: boolean
     xuat?: boolean
     tonCuoi?: boolean
     giaVat?: boolean
@@ -12011,7 +15339,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type InventoryReportOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "facilityId" | "mapId" | "reportMonth" | "tonDau" | "nhap" | "xuat" | "tonCuoi" | "giaVat" | "thanhTienTonCuoi" | "soQdTrungThau" | "tenCongTy" | "ngayBatDauHd" | "ngayKetThucHd" | "bhyt" | "dichVu" | "status" | "adminNote" | "createdAt" | "updatedAt", ExtArgs["result"]["inventoryReport"]>
+  export type InventoryReportOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "facilityId" | "mapId" | "reportMonth" | "tonDau" | "nhap" | "nhapHoanTra" | "xuat" | "tonCuoi" | "giaVat" | "thanhTienTonCuoi" | "soQdTrungThau" | "tenCongTy" | "ngayBatDauHd" | "ngayKetThucHd" | "bhyt" | "dichVu" | "status" | "adminNote" | "createdAt" | "updatedAt", ExtArgs["result"]["inventoryReport"]>
   export type InventoryReportInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     facility?: boolean | UserDefaultArgs<ExtArgs>
     drugMap?: boolean | FacilityDrugMapDefaultArgs<ExtArgs>
@@ -12038,6 +15366,7 @@ export namespace Prisma {
       reportMonth: string
       tonDau: Prisma.Decimal
       nhap: Prisma.Decimal
+      nhapHoanTra: Prisma.Decimal
       xuat: Prisma.Decimal
       tonCuoi: Prisma.Decimal
       giaVat: Prisma.Decimal
@@ -12483,6 +15812,7 @@ export namespace Prisma {
     readonly reportMonth: FieldRef<"InventoryReport", 'String'>
     readonly tonDau: FieldRef<"InventoryReport", 'Decimal'>
     readonly nhap: FieldRef<"InventoryReport", 'Decimal'>
+    readonly nhapHoanTra: FieldRef<"InventoryReport", 'Decimal'>
     readonly xuat: FieldRef<"InventoryReport", 'Decimal'>
     readonly tonCuoi: FieldRef<"InventoryReport", 'Decimal'>
     readonly giaVat: FieldRef<"InventoryReport", 'Decimal'>
@@ -24732,6 +28062,7 @@ export namespace Prisma {
     thoiGianThucHien: string | null
     trangThai: string | null
     maThongBao: string | null
+    yeuCauTBMT: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -24753,6 +28084,7 @@ export namespace Prisma {
     thoiGianThucHien: string | null
     trangThai: string | null
     maThongBao: string | null
+    yeuCauTBMT: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -24774,6 +28106,7 @@ export namespace Prisma {
     thoiGianThucHien: number
     trangThai: number
     maThongBao: number
+    yeuCauTBMT: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -24807,6 +28140,7 @@ export namespace Prisma {
     thoiGianThucHien?: true
     trangThai?: true
     maThongBao?: true
+    yeuCauTBMT?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -24828,6 +28162,7 @@ export namespace Prisma {
     thoiGianThucHien?: true
     trangThai?: true
     maThongBao?: true
+    yeuCauTBMT?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -24849,6 +28184,7 @@ export namespace Prisma {
     thoiGianThucHien?: true
     trangThai?: true
     maThongBao?: true
+    yeuCauTBMT?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -24957,6 +28293,7 @@ export namespace Prisma {
     thoiGianThucHien: string | null
     trangThai: string | null
     maThongBao: string | null
+    yeuCauTBMT: boolean
     createdAt: Date
     updatedAt: Date
     _count: GoiThauCountAggregateOutputType | null
@@ -24997,6 +28334,7 @@ export namespace Prisma {
     thoiGianThucHien?: boolean
     trangThai?: boolean
     maThongBao?: boolean
+    yeuCauTBMT?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     keHoach?: boolean | KeHoachLCNTDefaultArgs<ExtArgs>
@@ -25023,6 +28361,7 @@ export namespace Prisma {
     thoiGianThucHien?: boolean
     trangThai?: boolean
     maThongBao?: boolean
+    yeuCauTBMT?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     keHoach?: boolean | KeHoachLCNTDefaultArgs<ExtArgs>
@@ -25045,6 +28384,7 @@ export namespace Prisma {
     thoiGianThucHien?: boolean
     trangThai?: boolean
     maThongBao?: boolean
+    yeuCauTBMT?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     keHoach?: boolean | KeHoachLCNTDefaultArgs<ExtArgs>
@@ -25067,11 +28407,12 @@ export namespace Prisma {
     thoiGianThucHien?: boolean
     trangThai?: boolean
     maThongBao?: boolean
+    yeuCauTBMT?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type GoiThauOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "keHoachId" | "tenGoiThau" | "giaGoiThau" | "linhVuc" | "hinhThucLCNT" | "phuongThucLCNT" | "loaiHopDong" | "phanLoaiGoiThau" | "chiTietNguonVon" | "soLuongPhanLo" | "thoiGianToChuc" | "thoiGianBatDau" | "thoiGianThucHien" | "trangThai" | "maThongBao" | "createdAt" | "updatedAt", ExtArgs["result"]["goiThau"]>
+  export type GoiThauOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "keHoachId" | "tenGoiThau" | "giaGoiThau" | "linhVuc" | "hinhThucLCNT" | "phuongThucLCNT" | "loaiHopDong" | "phanLoaiGoiThau" | "chiTietNguonVon" | "soLuongPhanLo" | "thoiGianToChuc" | "thoiGianBatDau" | "thoiGianThucHien" | "trangThai" | "maThongBao" | "yeuCauTBMT" | "createdAt" | "updatedAt", ExtArgs["result"]["goiThau"]>
   export type GoiThauInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     keHoach?: boolean | KeHoachLCNTDefaultArgs<ExtArgs>
     phanLos?: boolean | GoiThau$phanLosArgs<ExtArgs>
@@ -25111,6 +28452,7 @@ export namespace Prisma {
       thoiGianThucHien: string | null
       trangThai: string | null
       maThongBao: string | null
+      yeuCauTBMT: boolean
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["goiThau"]>
@@ -25556,6 +28898,7 @@ export namespace Prisma {
     readonly thoiGianThucHien: FieldRef<"GoiThau", 'String'>
     readonly trangThai: FieldRef<"GoiThau", 'String'>
     readonly maThongBao: FieldRef<"GoiThau", 'String'>
+    readonly yeuCauTBMT: FieldRef<"GoiThau", 'Boolean'>
     readonly createdAt: FieldRef<"GoiThau", 'DateTime'>
     readonly updatedAt: FieldRef<"GoiThau", 'DateTime'>
   }
@@ -28615,7 +31958,7 @@ export namespace Prisma {
   export type KetQuaLCNTGroupByOutputType = {
     id: string
     goiThauId: string
-    thongBaoMoiThauId: string
+    thongBaoMoiThauId: string | null
     soQdPheDuyetKQLCNT: string
     ngayPheDuyetKQLCNT: Date
     soMatHangMoiThau: number
@@ -28656,7 +31999,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     goiThau?: boolean | GoiThauDefaultArgs<ExtArgs>
-    thongBaoMoiThau?: boolean | ThongBaoMoiThauDefaultArgs<ExtArgs>
+    thongBaoMoiThau?: boolean | KetQuaLCNT$thongBaoMoiThauArgs<ExtArgs>
     ketQuaPhanLos?: boolean | KetQuaLCNT$ketQuaPhanLosArgs<ExtArgs>
     _count?: boolean | KetQuaLCNTCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["ketQuaLCNT"]>
@@ -28673,7 +32016,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     goiThau?: boolean | GoiThauDefaultArgs<ExtArgs>
-    thongBaoMoiThau?: boolean | ThongBaoMoiThauDefaultArgs<ExtArgs>
+    thongBaoMoiThau?: boolean | KetQuaLCNT$thongBaoMoiThauArgs<ExtArgs>
   }, ExtArgs["result"]["ketQuaLCNT"]>
 
   export type KetQuaLCNTSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -28688,7 +32031,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     goiThau?: boolean | GoiThauDefaultArgs<ExtArgs>
-    thongBaoMoiThau?: boolean | ThongBaoMoiThauDefaultArgs<ExtArgs>
+    thongBaoMoiThau?: boolean | KetQuaLCNT$thongBaoMoiThauArgs<ExtArgs>
   }, ExtArgs["result"]["ketQuaLCNT"]>
 
   export type KetQuaLCNTSelectScalar = {
@@ -28707,30 +32050,30 @@ export namespace Prisma {
   export type KetQuaLCNTOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "goiThauId" | "thongBaoMoiThauId" | "soQdPheDuyetKQLCNT" | "ngayPheDuyetKQLCNT" | "soMatHangMoiThau" | "soMatHangTrungThau" | "tongGiaTriTrungThau" | "createdAt" | "updatedAt", ExtArgs["result"]["ketQuaLCNT"]>
   export type KetQuaLCNTInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     goiThau?: boolean | GoiThauDefaultArgs<ExtArgs>
-    thongBaoMoiThau?: boolean | ThongBaoMoiThauDefaultArgs<ExtArgs>
+    thongBaoMoiThau?: boolean | KetQuaLCNT$thongBaoMoiThauArgs<ExtArgs>
     ketQuaPhanLos?: boolean | KetQuaLCNT$ketQuaPhanLosArgs<ExtArgs>
     _count?: boolean | KetQuaLCNTCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type KetQuaLCNTIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     goiThau?: boolean | GoiThauDefaultArgs<ExtArgs>
-    thongBaoMoiThau?: boolean | ThongBaoMoiThauDefaultArgs<ExtArgs>
+    thongBaoMoiThau?: boolean | KetQuaLCNT$thongBaoMoiThauArgs<ExtArgs>
   }
   export type KetQuaLCNTIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     goiThau?: boolean | GoiThauDefaultArgs<ExtArgs>
-    thongBaoMoiThau?: boolean | ThongBaoMoiThauDefaultArgs<ExtArgs>
+    thongBaoMoiThau?: boolean | KetQuaLCNT$thongBaoMoiThauArgs<ExtArgs>
   }
 
   export type $KetQuaLCNTPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "KetQuaLCNT"
     objects: {
       goiThau: Prisma.$GoiThauPayload<ExtArgs>
-      thongBaoMoiThau: Prisma.$ThongBaoMoiThauPayload<ExtArgs>
+      thongBaoMoiThau: Prisma.$ThongBaoMoiThauPayload<ExtArgs> | null
       ketQuaPhanLos: Prisma.$KetQuaPhanLoPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       goiThauId: string
-      thongBaoMoiThauId: string
+      thongBaoMoiThauId: string | null
       soQdPheDuyetKQLCNT: string
       ngayPheDuyetKQLCNT: Date
       soMatHangMoiThau: number
@@ -29133,7 +32476,7 @@ export namespace Prisma {
   export interface Prisma__KetQuaLCNTClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     goiThau<T extends GoiThauDefaultArgs<ExtArgs> = {}>(args?: Subset<T, GoiThauDefaultArgs<ExtArgs>>): Prisma__GoiThauClient<$Result.GetResult<Prisma.$GoiThauPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    thongBaoMoiThau<T extends ThongBaoMoiThauDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ThongBaoMoiThauDefaultArgs<ExtArgs>>): Prisma__ThongBaoMoiThauClient<$Result.GetResult<Prisma.$ThongBaoMoiThauPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    thongBaoMoiThau<T extends KetQuaLCNT$thongBaoMoiThauArgs<ExtArgs> = {}>(args?: Subset<T, KetQuaLCNT$thongBaoMoiThauArgs<ExtArgs>>): Prisma__ThongBaoMoiThauClient<$Result.GetResult<Prisma.$ThongBaoMoiThauPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     ketQuaPhanLos<T extends KetQuaLCNT$ketQuaPhanLosArgs<ExtArgs> = {}>(args?: Subset<T, KetQuaLCNT$ketQuaPhanLosArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KetQuaPhanLoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -29567,6 +32910,25 @@ export namespace Prisma {
      * Limit how many KetQuaLCNTS to delete.
      */
     limit?: number
+  }
+
+  /**
+   * KetQuaLCNT.thongBaoMoiThau
+   */
+  export type KetQuaLCNT$thongBaoMoiThauArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ThongBaoMoiThau
+     */
+    select?: ThongBaoMoiThauSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ThongBaoMoiThau
+     */
+    omit?: ThongBaoMoiThauOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ThongBaoMoiThauInclude<ExtArgs> | null
+    where?: ThongBaoMoiThauWhereInput
   }
 
   /**
@@ -33963,6 +37325,1010 @@ export namespace Prisma {
 
 
   /**
+   * Model SystemSetting
+   */
+
+  export type AggregateSystemSetting = {
+    _count: SystemSettingCountAggregateOutputType | null
+    _min: SystemSettingMinAggregateOutputType | null
+    _max: SystemSettingMaxAggregateOutputType | null
+  }
+
+  export type SystemSettingMinAggregateOutputType = {
+    id: string | null
+    key: string | null
+    updatedById: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type SystemSettingMaxAggregateOutputType = {
+    id: string | null
+    key: string | null
+    updatedById: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type SystemSettingCountAggregateOutputType = {
+    id: number
+    key: number
+    value: number
+    updatedById: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type SystemSettingMinAggregateInputType = {
+    id?: true
+    key?: true
+    updatedById?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type SystemSettingMaxAggregateInputType = {
+    id?: true
+    key?: true
+    updatedById?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type SystemSettingCountAggregateInputType = {
+    id?: true
+    key?: true
+    value?: true
+    updatedById?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type SystemSettingAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which SystemSetting to aggregate.
+     */
+    where?: SystemSettingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SystemSettings to fetch.
+     */
+    orderBy?: SystemSettingOrderByWithRelationInput | SystemSettingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: SystemSettingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SystemSettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SystemSettings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned SystemSettings
+    **/
+    _count?: true | SystemSettingCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: SystemSettingMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: SystemSettingMaxAggregateInputType
+  }
+
+  export type GetSystemSettingAggregateType<T extends SystemSettingAggregateArgs> = {
+        [P in keyof T & keyof AggregateSystemSetting]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateSystemSetting[P]>
+      : GetScalarType<T[P], AggregateSystemSetting[P]>
+  }
+
+
+
+
+  export type SystemSettingGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SystemSettingWhereInput
+    orderBy?: SystemSettingOrderByWithAggregationInput | SystemSettingOrderByWithAggregationInput[]
+    by: SystemSettingScalarFieldEnum[] | SystemSettingScalarFieldEnum
+    having?: SystemSettingScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: SystemSettingCountAggregateInputType | true
+    _min?: SystemSettingMinAggregateInputType
+    _max?: SystemSettingMaxAggregateInputType
+  }
+
+  export type SystemSettingGroupByOutputType = {
+    id: string
+    key: string
+    value: JsonValue
+    updatedById: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: SystemSettingCountAggregateOutputType | null
+    _min: SystemSettingMinAggregateOutputType | null
+    _max: SystemSettingMaxAggregateOutputType | null
+  }
+
+  type GetSystemSettingGroupByPayload<T extends SystemSettingGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<SystemSettingGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof SystemSettingGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], SystemSettingGroupByOutputType[P]>
+            : GetScalarType<T[P], SystemSettingGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type SystemSettingSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    key?: boolean
+    value?: boolean
+    updatedById?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["systemSetting"]>
+
+  export type SystemSettingSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    key?: boolean
+    value?: boolean
+    updatedById?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["systemSetting"]>
+
+  export type SystemSettingSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    key?: boolean
+    value?: boolean
+    updatedById?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["systemSetting"]>
+
+  export type SystemSettingSelectScalar = {
+    id?: boolean
+    key?: boolean
+    value?: boolean
+    updatedById?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type SystemSettingOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "key" | "value" | "updatedById" | "createdAt" | "updatedAt", ExtArgs["result"]["systemSetting"]>
+
+  export type $SystemSettingPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "SystemSetting"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      key: string
+      value: Prisma.JsonValue
+      updatedById: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["systemSetting"]>
+    composites: {}
+  }
+
+  type SystemSettingGetPayload<S extends boolean | null | undefined | SystemSettingDefaultArgs> = $Result.GetResult<Prisma.$SystemSettingPayload, S>
+
+  type SystemSettingCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<SystemSettingFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: SystemSettingCountAggregateInputType | true
+    }
+
+  export interface SystemSettingDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['SystemSetting'], meta: { name: 'SystemSetting' } }
+    /**
+     * Find zero or one SystemSetting that matches the filter.
+     * @param {SystemSettingFindUniqueArgs} args - Arguments to find a SystemSetting
+     * @example
+     * // Get one SystemSetting
+     * const systemSetting = await prisma.systemSetting.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends SystemSettingFindUniqueArgs>(args: SelectSubset<T, SystemSettingFindUniqueArgs<ExtArgs>>): Prisma__SystemSettingClient<$Result.GetResult<Prisma.$SystemSettingPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one SystemSetting that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {SystemSettingFindUniqueOrThrowArgs} args - Arguments to find a SystemSetting
+     * @example
+     * // Get one SystemSetting
+     * const systemSetting = await prisma.systemSetting.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends SystemSettingFindUniqueOrThrowArgs>(args: SelectSubset<T, SystemSettingFindUniqueOrThrowArgs<ExtArgs>>): Prisma__SystemSettingClient<$Result.GetResult<Prisma.$SystemSettingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first SystemSetting that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SystemSettingFindFirstArgs} args - Arguments to find a SystemSetting
+     * @example
+     * // Get one SystemSetting
+     * const systemSetting = await prisma.systemSetting.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends SystemSettingFindFirstArgs>(args?: SelectSubset<T, SystemSettingFindFirstArgs<ExtArgs>>): Prisma__SystemSettingClient<$Result.GetResult<Prisma.$SystemSettingPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first SystemSetting that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SystemSettingFindFirstOrThrowArgs} args - Arguments to find a SystemSetting
+     * @example
+     * // Get one SystemSetting
+     * const systemSetting = await prisma.systemSetting.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends SystemSettingFindFirstOrThrowArgs>(args?: SelectSubset<T, SystemSettingFindFirstOrThrowArgs<ExtArgs>>): Prisma__SystemSettingClient<$Result.GetResult<Prisma.$SystemSettingPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more SystemSettings that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SystemSettingFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all SystemSettings
+     * const systemSettings = await prisma.systemSetting.findMany()
+     * 
+     * // Get first 10 SystemSettings
+     * const systemSettings = await prisma.systemSetting.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const systemSettingWithIdOnly = await prisma.systemSetting.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends SystemSettingFindManyArgs>(args?: SelectSubset<T, SystemSettingFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SystemSettingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a SystemSetting.
+     * @param {SystemSettingCreateArgs} args - Arguments to create a SystemSetting.
+     * @example
+     * // Create one SystemSetting
+     * const SystemSetting = await prisma.systemSetting.create({
+     *   data: {
+     *     // ... data to create a SystemSetting
+     *   }
+     * })
+     * 
+     */
+    create<T extends SystemSettingCreateArgs>(args: SelectSubset<T, SystemSettingCreateArgs<ExtArgs>>): Prisma__SystemSettingClient<$Result.GetResult<Prisma.$SystemSettingPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many SystemSettings.
+     * @param {SystemSettingCreateManyArgs} args - Arguments to create many SystemSettings.
+     * @example
+     * // Create many SystemSettings
+     * const systemSetting = await prisma.systemSetting.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends SystemSettingCreateManyArgs>(args?: SelectSubset<T, SystemSettingCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many SystemSettings and returns the data saved in the database.
+     * @param {SystemSettingCreateManyAndReturnArgs} args - Arguments to create many SystemSettings.
+     * @example
+     * // Create many SystemSettings
+     * const systemSetting = await prisma.systemSetting.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many SystemSettings and only return the `id`
+     * const systemSettingWithIdOnly = await prisma.systemSetting.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends SystemSettingCreateManyAndReturnArgs>(args?: SelectSubset<T, SystemSettingCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SystemSettingPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a SystemSetting.
+     * @param {SystemSettingDeleteArgs} args - Arguments to delete one SystemSetting.
+     * @example
+     * // Delete one SystemSetting
+     * const SystemSetting = await prisma.systemSetting.delete({
+     *   where: {
+     *     // ... filter to delete one SystemSetting
+     *   }
+     * })
+     * 
+     */
+    delete<T extends SystemSettingDeleteArgs>(args: SelectSubset<T, SystemSettingDeleteArgs<ExtArgs>>): Prisma__SystemSettingClient<$Result.GetResult<Prisma.$SystemSettingPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one SystemSetting.
+     * @param {SystemSettingUpdateArgs} args - Arguments to update one SystemSetting.
+     * @example
+     * // Update one SystemSetting
+     * const systemSetting = await prisma.systemSetting.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends SystemSettingUpdateArgs>(args: SelectSubset<T, SystemSettingUpdateArgs<ExtArgs>>): Prisma__SystemSettingClient<$Result.GetResult<Prisma.$SystemSettingPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more SystemSettings.
+     * @param {SystemSettingDeleteManyArgs} args - Arguments to filter SystemSettings to delete.
+     * @example
+     * // Delete a few SystemSettings
+     * const { count } = await prisma.systemSetting.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends SystemSettingDeleteManyArgs>(args?: SelectSubset<T, SystemSettingDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more SystemSettings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SystemSettingUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many SystemSettings
+     * const systemSetting = await prisma.systemSetting.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends SystemSettingUpdateManyArgs>(args: SelectSubset<T, SystemSettingUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more SystemSettings and returns the data updated in the database.
+     * @param {SystemSettingUpdateManyAndReturnArgs} args - Arguments to update many SystemSettings.
+     * @example
+     * // Update many SystemSettings
+     * const systemSetting = await prisma.systemSetting.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more SystemSettings and only return the `id`
+     * const systemSettingWithIdOnly = await prisma.systemSetting.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends SystemSettingUpdateManyAndReturnArgs>(args: SelectSubset<T, SystemSettingUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SystemSettingPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one SystemSetting.
+     * @param {SystemSettingUpsertArgs} args - Arguments to update or create a SystemSetting.
+     * @example
+     * // Update or create a SystemSetting
+     * const systemSetting = await prisma.systemSetting.upsert({
+     *   create: {
+     *     // ... data to create a SystemSetting
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the SystemSetting we want to update
+     *   }
+     * })
+     */
+    upsert<T extends SystemSettingUpsertArgs>(args: SelectSubset<T, SystemSettingUpsertArgs<ExtArgs>>): Prisma__SystemSettingClient<$Result.GetResult<Prisma.$SystemSettingPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of SystemSettings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SystemSettingCountArgs} args - Arguments to filter SystemSettings to count.
+     * @example
+     * // Count the number of SystemSettings
+     * const count = await prisma.systemSetting.count({
+     *   where: {
+     *     // ... the filter for the SystemSettings we want to count
+     *   }
+     * })
+    **/
+    count<T extends SystemSettingCountArgs>(
+      args?: Subset<T, SystemSettingCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], SystemSettingCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a SystemSetting.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SystemSettingAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends SystemSettingAggregateArgs>(args: Subset<T, SystemSettingAggregateArgs>): Prisma.PrismaPromise<GetSystemSettingAggregateType<T>>
+
+    /**
+     * Group by SystemSetting.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SystemSettingGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends SystemSettingGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: SystemSettingGroupByArgs['orderBy'] }
+        : { orderBy?: SystemSettingGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, SystemSettingGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetSystemSettingGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the SystemSetting model
+   */
+  readonly fields: SystemSettingFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for SystemSetting.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__SystemSettingClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the SystemSetting model
+   */
+  interface SystemSettingFieldRefs {
+    readonly id: FieldRef<"SystemSetting", 'String'>
+    readonly key: FieldRef<"SystemSetting", 'String'>
+    readonly value: FieldRef<"SystemSetting", 'Json'>
+    readonly updatedById: FieldRef<"SystemSetting", 'String'>
+    readonly createdAt: FieldRef<"SystemSetting", 'DateTime'>
+    readonly updatedAt: FieldRef<"SystemSetting", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * SystemSetting findUnique
+   */
+  export type SystemSettingFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SystemSetting
+     */
+    select?: SystemSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SystemSetting
+     */
+    omit?: SystemSettingOmit<ExtArgs> | null
+    /**
+     * Filter, which SystemSetting to fetch.
+     */
+    where: SystemSettingWhereUniqueInput
+  }
+
+  /**
+   * SystemSetting findUniqueOrThrow
+   */
+  export type SystemSettingFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SystemSetting
+     */
+    select?: SystemSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SystemSetting
+     */
+    omit?: SystemSettingOmit<ExtArgs> | null
+    /**
+     * Filter, which SystemSetting to fetch.
+     */
+    where: SystemSettingWhereUniqueInput
+  }
+
+  /**
+   * SystemSetting findFirst
+   */
+  export type SystemSettingFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SystemSetting
+     */
+    select?: SystemSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SystemSetting
+     */
+    omit?: SystemSettingOmit<ExtArgs> | null
+    /**
+     * Filter, which SystemSetting to fetch.
+     */
+    where?: SystemSettingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SystemSettings to fetch.
+     */
+    orderBy?: SystemSettingOrderByWithRelationInput | SystemSettingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for SystemSettings.
+     */
+    cursor?: SystemSettingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SystemSettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SystemSettings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SystemSettings.
+     */
+    distinct?: SystemSettingScalarFieldEnum | SystemSettingScalarFieldEnum[]
+  }
+
+  /**
+   * SystemSetting findFirstOrThrow
+   */
+  export type SystemSettingFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SystemSetting
+     */
+    select?: SystemSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SystemSetting
+     */
+    omit?: SystemSettingOmit<ExtArgs> | null
+    /**
+     * Filter, which SystemSetting to fetch.
+     */
+    where?: SystemSettingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SystemSettings to fetch.
+     */
+    orderBy?: SystemSettingOrderByWithRelationInput | SystemSettingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for SystemSettings.
+     */
+    cursor?: SystemSettingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SystemSettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SystemSettings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SystemSettings.
+     */
+    distinct?: SystemSettingScalarFieldEnum | SystemSettingScalarFieldEnum[]
+  }
+
+  /**
+   * SystemSetting findMany
+   */
+  export type SystemSettingFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SystemSetting
+     */
+    select?: SystemSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SystemSetting
+     */
+    omit?: SystemSettingOmit<ExtArgs> | null
+    /**
+     * Filter, which SystemSettings to fetch.
+     */
+    where?: SystemSettingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SystemSettings to fetch.
+     */
+    orderBy?: SystemSettingOrderByWithRelationInput | SystemSettingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing SystemSettings.
+     */
+    cursor?: SystemSettingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SystemSettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SystemSettings.
+     */
+    skip?: number
+    distinct?: SystemSettingScalarFieldEnum | SystemSettingScalarFieldEnum[]
+  }
+
+  /**
+   * SystemSetting create
+   */
+  export type SystemSettingCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SystemSetting
+     */
+    select?: SystemSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SystemSetting
+     */
+    omit?: SystemSettingOmit<ExtArgs> | null
+    /**
+     * The data needed to create a SystemSetting.
+     */
+    data: XOR<SystemSettingCreateInput, SystemSettingUncheckedCreateInput>
+  }
+
+  /**
+   * SystemSetting createMany
+   */
+  export type SystemSettingCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many SystemSettings.
+     */
+    data: SystemSettingCreateManyInput | SystemSettingCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * SystemSetting createManyAndReturn
+   */
+  export type SystemSettingCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SystemSetting
+     */
+    select?: SystemSettingSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the SystemSetting
+     */
+    omit?: SystemSettingOmit<ExtArgs> | null
+    /**
+     * The data used to create many SystemSettings.
+     */
+    data: SystemSettingCreateManyInput | SystemSettingCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * SystemSetting update
+   */
+  export type SystemSettingUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SystemSetting
+     */
+    select?: SystemSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SystemSetting
+     */
+    omit?: SystemSettingOmit<ExtArgs> | null
+    /**
+     * The data needed to update a SystemSetting.
+     */
+    data: XOR<SystemSettingUpdateInput, SystemSettingUncheckedUpdateInput>
+    /**
+     * Choose, which SystemSetting to update.
+     */
+    where: SystemSettingWhereUniqueInput
+  }
+
+  /**
+   * SystemSetting updateMany
+   */
+  export type SystemSettingUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update SystemSettings.
+     */
+    data: XOR<SystemSettingUpdateManyMutationInput, SystemSettingUncheckedUpdateManyInput>
+    /**
+     * Filter which SystemSettings to update
+     */
+    where?: SystemSettingWhereInput
+    /**
+     * Limit how many SystemSettings to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * SystemSetting updateManyAndReturn
+   */
+  export type SystemSettingUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SystemSetting
+     */
+    select?: SystemSettingSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the SystemSetting
+     */
+    omit?: SystemSettingOmit<ExtArgs> | null
+    /**
+     * The data used to update SystemSettings.
+     */
+    data: XOR<SystemSettingUpdateManyMutationInput, SystemSettingUncheckedUpdateManyInput>
+    /**
+     * Filter which SystemSettings to update
+     */
+    where?: SystemSettingWhereInput
+    /**
+     * Limit how many SystemSettings to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * SystemSetting upsert
+   */
+  export type SystemSettingUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SystemSetting
+     */
+    select?: SystemSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SystemSetting
+     */
+    omit?: SystemSettingOmit<ExtArgs> | null
+    /**
+     * The filter to search for the SystemSetting to update in case it exists.
+     */
+    where: SystemSettingWhereUniqueInput
+    /**
+     * In case the SystemSetting found by the `where` argument doesn't exist, create a new SystemSetting with this data.
+     */
+    create: XOR<SystemSettingCreateInput, SystemSettingUncheckedCreateInput>
+    /**
+     * In case the SystemSetting was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<SystemSettingUpdateInput, SystemSettingUncheckedUpdateInput>
+  }
+
+  /**
+   * SystemSetting delete
+   */
+  export type SystemSettingDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SystemSetting
+     */
+    select?: SystemSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SystemSetting
+     */
+    omit?: SystemSettingOmit<ExtArgs> | null
+    /**
+     * Filter which SystemSetting to delete.
+     */
+    where: SystemSettingWhereUniqueInput
+  }
+
+  /**
+   * SystemSetting deleteMany
+   */
+  export type SystemSettingDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which SystemSettings to delete
+     */
+    where?: SystemSettingWhereInput
+    /**
+     * Limit how many SystemSettings to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * SystemSetting without action
+   */
+  export type SystemSettingDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SystemSetting
+     */
+    select?: SystemSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SystemSetting
+     */
+    omit?: SystemSettingOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Model AIUserPolicy
    */
 
@@ -36172,6 +40538,8 @@ export namespace Prisma {
     contactPerson: 'contactPerson',
     phoneNumber: 'phoneNumber',
     address: 'address',
+    latitude: 'latitude',
+    longitude: 'longitude',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -36211,6 +40579,7 @@ export namespace Prisma {
     id: 'id',
     maChung: 'maChung',
     maBhyt: 'maBhyt',
+    maAtc: 'maAtc',
     tenThuoc: 'tenThuoc',
     hoatChat: 'hoatChat',
     hamLuong: 'hamLuong',
@@ -36232,6 +40601,7 @@ export namespace Prisma {
     therapeuticGroupId: 'therapeuticGroupId',
     isKeDon: 'isKeDon',
     kiemSoatDacBiet: 'kiemSoatDacBiet',
+    isThuocHiem: 'isThuocHiem',
     isTrongNuoc: 'isTrongNuoc',
     isActive: 'isActive',
     createdAt: 'createdAt',
@@ -36267,15 +40637,79 @@ export namespace Prisma {
     soDangKyNoiBo: 'soDangKyNoiBo',
     donViTinhNoiBo: 'donViTinhNoiBo',
     nhomTckt: 'nhomTckt',
+    giaVat: 'giaVat',
+    bhyt: 'bhyt',
+    dichVu: 'dichVu',
+    soQdTrungThau: 'soQdTrungThau',
+    tenCongTy: 'tenCongTy',
+    ngayBatDauHd: 'ngayBatDauHd',
+    ngayKetThucHd: 'ngayKetThucHd',
+    demandRoundingEnabled: 'demandRoundingEnabled',
+    demandPackageUnit: 'demandPackageUnit',
+    demandPackageSize: 'demandPackageSize',
+    demandPlanningLocked: 'demandPlanningLocked',
+    demandPlanningLockedAt: 'demandPlanningLockedAt',
+    demandPlanningUnlockedAt: 'demandPlanningUnlockedAt',
+    demandPlanningLockReason: 'demandPlanningLockReason',
     masterDrugId: 'masterDrugId',
     status: 'status',
     adminNote: 'adminNote',
     isOutOfCatalog: 'isOutOfCatalog',
+    isActive: 'isActive',
+    inactiveFromMonth: 'inactiveFromMonth',
+    inactiveReason: 'inactiveReason',
+    inactiveAt: 'inactiveAt',
+    reactivatedFromMonth: 'reactivatedFromMonth',
+    reactivatedAt: 'reactivatedAt',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
 
   export type FacilityDrugMapScalarFieldEnum = (typeof FacilityDrugMapScalarFieldEnum)[keyof typeof FacilityDrugMapScalarFieldEnum]
+
+
+  export const FacilityDemandPlanScalarFieldEnum: {
+    id: 'id',
+    planNo: 'planNo',
+    facilityId: 'facilityId',
+    status: 'status',
+    baseReportMonth: 'baseReportMonth',
+    note: 'note',
+    finalizedAt: 'finalizedAt',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type FacilityDemandPlanScalarFieldEnum = (typeof FacilityDemandPlanScalarFieldEnum)[keyof typeof FacilityDemandPlanScalarFieldEnum]
+
+
+  export const FacilityDemandPlanLineScalarFieldEnum: {
+    id: 'id',
+    planId: 'planId',
+    mapId: 'mapId',
+    masterDrugId: 'masterDrugId',
+    maNoiBoSnapshot: 'maNoiBoSnapshot',
+    tenThuocSnapshot: 'tenThuocSnapshot',
+    hoatChatSnapshot: 'hoatChatSnapshot',
+    donViTinhSnapshot: 'donViTinhSnapshot',
+    nhomTcktSnapshot: 'nhomTcktSnapshot',
+    maChungSnapshot: 'maChungSnapshot',
+    suggestedQty: 'suggestedQty',
+    rawSuggestedQty: 'rawSuggestedQty',
+    roundedSuggestedQty: 'roundedSuggestedQty',
+    packageUnitSnapshot: 'packageUnitSnapshot',
+    packageSizeSnapshot: 'packageSizeSnapshot',
+    roundingNote: 'roundingNote',
+    finalQty: 'finalQty',
+    suggestionBasis: 'suggestionBasis',
+    suggestionReportMonth: 'suggestionReportMonth',
+    suggestionRuleVersion: 'suggestionRuleVersion',
+    note: 'note',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type FacilityDemandPlanLineScalarFieldEnum = (typeof FacilityDemandPlanLineScalarFieldEnum)[keyof typeof FacilityDemandPlanLineScalarFieldEnum]
 
 
   export const InventoryReportScalarFieldEnum: {
@@ -36285,6 +40719,7 @@ export namespace Prisma {
     reportMonth: 'reportMonth',
     tonDau: 'tonDau',
     nhap: 'nhap',
+    nhapHoanTra: 'nhapHoanTra',
     xuat: 'xuat',
     tonCuoi: 'tonCuoi',
     giaVat: 'giaVat',
@@ -36483,6 +40918,7 @@ export namespace Prisma {
     thoiGianThucHien: 'thoiGianThucHien',
     trangThai: 'trangThai',
     maThongBao: 'maThongBao',
+    yeuCauTBMT: 'yeuCauTBMT',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -36592,6 +41028,18 @@ export namespace Prisma {
   };
 
   export type AISettingScalarFieldEnum = (typeof AISettingScalarFieldEnum)[keyof typeof AISettingScalarFieldEnum]
+
+
+  export const SystemSettingScalarFieldEnum: {
+    id: 'id',
+    key: 'key',
+    value: 'value',
+    updatedById: 'updatedById',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type SystemSettingScalarFieldEnum = (typeof SystemSettingScalarFieldEnum)[keyof typeof SystemSettingScalarFieldEnum]
 
 
   export const AIUserPolicyScalarFieldEnum: {
@@ -36704,6 +41152,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'Float'
+   */
+  export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+    
+
+
+  /**
+   * Reference to a field of type 'Float[]'
+   */
+  export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+    
+
+
+  /**
    * Reference to a field of type 'DateTime'
    */
   export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
@@ -36714,6 +41176,20 @@ export namespace Prisma {
    * Reference to a field of type 'DateTime[]'
    */
   export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Decimal'
+   */
+  export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal'>
+    
+
+
+  /**
+   * Reference to a field of type 'Decimal[]'
+   */
+  export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal[]'>
     
 
 
@@ -36732,16 +41208,16 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'Decimal'
+   * Reference to a field of type 'FacilityDemandPlanStatus'
    */
-  export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal'>
+  export type EnumFacilityDemandPlanStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FacilityDemandPlanStatus'>
     
 
 
   /**
-   * Reference to a field of type 'Decimal[]'
+   * Reference to a field of type 'FacilityDemandPlanStatus[]'
    */
-  export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal[]'>
+  export type ListEnumFacilityDemandPlanStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FacilityDemandPlanStatus[]'>
     
 
 
@@ -36841,20 +41317,6 @@ export namespace Prisma {
    */
   export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
-
-
-  /**
-   * Reference to a field of type 'Float'
-   */
-  export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
-    
-
-
-  /**
-   * Reference to a field of type 'Float[]'
-   */
-  export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
-    
   /**
    * Deep Input Types
    */
@@ -36877,12 +41339,15 @@ export namespace Prisma {
     contactPerson?: StringNullableFilter<"User"> | string | null
     phoneNumber?: StringNullableFilter<"User"> | string | null
     address?: StringNullableFilter<"User"> | string | null
+    latitude?: FloatNullableFilter<"User"> | number | null
+    longitude?: FloatNullableFilter<"User"> | number | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     company?: XOR<CompanyNullableScalarRelationFilter, CompanyWhereInput> | null
     drugMaps?: FacilityDrugMapListRelationFilter
     reports?: InventoryReportListRelationFilter
     reportSubmissions?: FacilityReportSubmissionListRelationFilter
+    facilityDemandPlans?: FacilityDemandPlanListRelationFilter
     keHoachLCNTs?: KeHoachLCNTListRelationFilter
     drugOrders?: DrugOrderListRelationFilter
     drugOrderReceipts?: DrugOrderReceiptListRelationFilter
@@ -36905,12 +41370,15 @@ export namespace Prisma {
     contactPerson?: SortOrderInput | SortOrder
     phoneNumber?: SortOrderInput | SortOrder
     address?: SortOrderInput | SortOrder
+    latitude?: SortOrderInput | SortOrder
+    longitude?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     company?: CompanyOrderByWithRelationInput
     drugMaps?: FacilityDrugMapOrderByRelationAggregateInput
     reports?: InventoryReportOrderByRelationAggregateInput
     reportSubmissions?: FacilityReportSubmissionOrderByRelationAggregateInput
+    facilityDemandPlans?: FacilityDemandPlanOrderByRelationAggregateInput
     keHoachLCNTs?: KeHoachLCNTOrderByRelationAggregateInput
     drugOrders?: DrugOrderOrderByRelationAggregateInput
     drugOrderReceipts?: DrugOrderReceiptOrderByRelationAggregateInput
@@ -36936,12 +41404,15 @@ export namespace Prisma {
     contactPerson?: StringNullableFilter<"User"> | string | null
     phoneNumber?: StringNullableFilter<"User"> | string | null
     address?: StringNullableFilter<"User"> | string | null
+    latitude?: FloatNullableFilter<"User"> | number | null
+    longitude?: FloatNullableFilter<"User"> | number | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     company?: XOR<CompanyNullableScalarRelationFilter, CompanyWhereInput> | null
     drugMaps?: FacilityDrugMapListRelationFilter
     reports?: InventoryReportListRelationFilter
     reportSubmissions?: FacilityReportSubmissionListRelationFilter
+    facilityDemandPlans?: FacilityDemandPlanListRelationFilter
     keHoachLCNTs?: KeHoachLCNTListRelationFilter
     drugOrders?: DrugOrderListRelationFilter
     drugOrderReceipts?: DrugOrderReceiptListRelationFilter
@@ -36964,11 +41435,15 @@ export namespace Prisma {
     contactPerson?: SortOrderInput | SortOrder
     phoneNumber?: SortOrderInput | SortOrder
     address?: SortOrderInput | SortOrder
+    latitude?: SortOrderInput | SortOrder
+    longitude?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: UserCountOrderByAggregateInput
+    _avg?: UserAvgOrderByAggregateInput
     _max?: UserMaxOrderByAggregateInput
     _min?: UserMinOrderByAggregateInput
+    _sum?: UserSumOrderByAggregateInput
   }
 
   export type UserScalarWhereWithAggregatesInput = {
@@ -36988,6 +41463,8 @@ export namespace Prisma {
     contactPerson?: StringNullableWithAggregatesFilter<"User"> | string | null
     phoneNumber?: StringNullableWithAggregatesFilter<"User"> | string | null
     address?: StringNullableWithAggregatesFilter<"User"> | string | null
+    latitude?: FloatNullableWithAggregatesFilter<"User"> | number | null
+    longitude?: FloatNullableWithAggregatesFilter<"User"> | number | null
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
   }
@@ -37145,6 +41622,7 @@ export namespace Prisma {
     id?: StringFilter<"MasterDrug"> | string
     maChung?: StringFilter<"MasterDrug"> | string
     maBhyt?: StringNullableFilter<"MasterDrug"> | string | null
+    maAtc?: StringNullableFilter<"MasterDrug"> | string | null
     tenThuoc?: StringFilter<"MasterDrug"> | string
     hoatChat?: StringNullableFilter<"MasterDrug"> | string | null
     hamLuong?: StringNullableFilter<"MasterDrug"> | string | null
@@ -37166,6 +41644,7 @@ export namespace Prisma {
     therapeuticGroupId?: StringNullableFilter<"MasterDrug"> | string | null
     isKeDon?: StringNullableFilter<"MasterDrug"> | string | null
     kiemSoatDacBiet?: StringNullableFilter<"MasterDrug"> | string | null
+    isThuocHiem?: BoolFilter<"MasterDrug"> | boolean
     isTrongNuoc?: StringNullableFilter<"MasterDrug"> | string | null
     isActive?: BoolFilter<"MasterDrug"> | boolean
     createdAt?: DateTimeFilter<"MasterDrug"> | Date | string
@@ -37174,12 +41653,14 @@ export namespace Prisma {
     drugMaps?: FacilityDrugMapListRelationFilter
     companyDrugs?: CompanyDrugListRelationFilter
     drugOrderLines?: DrugOrderLineListRelationFilter
+    facilityDemandPlanLines?: FacilityDemandPlanLineListRelationFilter
   }
 
   export type MasterDrugOrderByWithRelationInput = {
     id?: SortOrder
     maChung?: SortOrder
     maBhyt?: SortOrderInput | SortOrder
+    maAtc?: SortOrderInput | SortOrder
     tenThuoc?: SortOrder
     hoatChat?: SortOrderInput | SortOrder
     hamLuong?: SortOrderInput | SortOrder
@@ -37201,6 +41682,7 @@ export namespace Prisma {
     therapeuticGroupId?: SortOrderInput | SortOrder
     isKeDon?: SortOrderInput | SortOrder
     kiemSoatDacBiet?: SortOrderInput | SortOrder
+    isThuocHiem?: SortOrder
     isTrongNuoc?: SortOrderInput | SortOrder
     isActive?: SortOrder
     createdAt?: SortOrder
@@ -37209,6 +41691,7 @@ export namespace Prisma {
     drugMaps?: FacilityDrugMapOrderByRelationAggregateInput
     companyDrugs?: CompanyDrugOrderByRelationAggregateInput
     drugOrderLines?: DrugOrderLineOrderByRelationAggregateInput
+    facilityDemandPlanLines?: FacilityDemandPlanLineOrderByRelationAggregateInput
   }
 
   export type MasterDrugWhereUniqueInput = Prisma.AtLeast<{
@@ -37218,6 +41701,7 @@ export namespace Prisma {
     OR?: MasterDrugWhereInput[]
     NOT?: MasterDrugWhereInput | MasterDrugWhereInput[]
     maBhyt?: StringNullableFilter<"MasterDrug"> | string | null
+    maAtc?: StringNullableFilter<"MasterDrug"> | string | null
     tenThuoc?: StringFilter<"MasterDrug"> | string
     hoatChat?: StringNullableFilter<"MasterDrug"> | string | null
     hamLuong?: StringNullableFilter<"MasterDrug"> | string | null
@@ -37239,6 +41723,7 @@ export namespace Prisma {
     therapeuticGroupId?: StringNullableFilter<"MasterDrug"> | string | null
     isKeDon?: StringNullableFilter<"MasterDrug"> | string | null
     kiemSoatDacBiet?: StringNullableFilter<"MasterDrug"> | string | null
+    isThuocHiem?: BoolFilter<"MasterDrug"> | boolean
     isTrongNuoc?: StringNullableFilter<"MasterDrug"> | string | null
     isActive?: BoolFilter<"MasterDrug"> | boolean
     createdAt?: DateTimeFilter<"MasterDrug"> | Date | string
@@ -37247,12 +41732,14 @@ export namespace Prisma {
     drugMaps?: FacilityDrugMapListRelationFilter
     companyDrugs?: CompanyDrugListRelationFilter
     drugOrderLines?: DrugOrderLineListRelationFilter
+    facilityDemandPlanLines?: FacilityDemandPlanLineListRelationFilter
   }, "id" | "maChung">
 
   export type MasterDrugOrderByWithAggregationInput = {
     id?: SortOrder
     maChung?: SortOrder
     maBhyt?: SortOrderInput | SortOrder
+    maAtc?: SortOrderInput | SortOrder
     tenThuoc?: SortOrder
     hoatChat?: SortOrderInput | SortOrder
     hamLuong?: SortOrderInput | SortOrder
@@ -37274,6 +41761,7 @@ export namespace Prisma {
     therapeuticGroupId?: SortOrderInput | SortOrder
     isKeDon?: SortOrderInput | SortOrder
     kiemSoatDacBiet?: SortOrderInput | SortOrder
+    isThuocHiem?: SortOrder
     isTrongNuoc?: SortOrderInput | SortOrder
     isActive?: SortOrder
     createdAt?: SortOrder
@@ -37290,6 +41778,7 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"MasterDrug"> | string
     maChung?: StringWithAggregatesFilter<"MasterDrug"> | string
     maBhyt?: StringNullableWithAggregatesFilter<"MasterDrug"> | string | null
+    maAtc?: StringNullableWithAggregatesFilter<"MasterDrug"> | string | null
     tenThuoc?: StringWithAggregatesFilter<"MasterDrug"> | string
     hoatChat?: StringNullableWithAggregatesFilter<"MasterDrug"> | string | null
     hamLuong?: StringNullableWithAggregatesFilter<"MasterDrug"> | string | null
@@ -37311,6 +41800,7 @@ export namespace Prisma {
     therapeuticGroupId?: StringNullableWithAggregatesFilter<"MasterDrug"> | string | null
     isKeDon?: StringNullableWithAggregatesFilter<"MasterDrug"> | string | null
     kiemSoatDacBiet?: StringNullableWithAggregatesFilter<"MasterDrug"> | string | null
+    isThuocHiem?: BoolWithAggregatesFilter<"MasterDrug"> | boolean
     isTrongNuoc?: StringNullableWithAggregatesFilter<"MasterDrug"> | string | null
     isActive?: BoolWithAggregatesFilter<"MasterDrug"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"MasterDrug"> | Date | string
@@ -37421,15 +41911,36 @@ export namespace Prisma {
     soDangKyNoiBo?: StringNullableFilter<"FacilityDrugMap"> | string | null
     donViTinhNoiBo?: StringNullableFilter<"FacilityDrugMap"> | string | null
     nhomTckt?: StringNullableFilter<"FacilityDrugMap"> | string | null
+    giaVat?: DecimalFilter<"FacilityDrugMap"> | Decimal | DecimalJsLike | number | string
+    bhyt?: StringNullableFilter<"FacilityDrugMap"> | string | null
+    dichVu?: StringNullableFilter<"FacilityDrugMap"> | string | null
+    soQdTrungThau?: StringNullableFilter<"FacilityDrugMap"> | string | null
+    tenCongTy?: StringNullableFilter<"FacilityDrugMap"> | string | null
+    ngayBatDauHd?: StringNullableFilter<"FacilityDrugMap"> | string | null
+    ngayKetThucHd?: StringNullableFilter<"FacilityDrugMap"> | string | null
+    demandRoundingEnabled?: BoolFilter<"FacilityDrugMap"> | boolean
+    demandPackageUnit?: StringNullableFilter<"FacilityDrugMap"> | string | null
+    demandPackageSize?: DecimalNullableFilter<"FacilityDrugMap"> | Decimal | DecimalJsLike | number | string | null
+    demandPlanningLocked?: BoolFilter<"FacilityDrugMap"> | boolean
+    demandPlanningLockedAt?: DateTimeNullableFilter<"FacilityDrugMap"> | Date | string | null
+    demandPlanningUnlockedAt?: DateTimeNullableFilter<"FacilityDrugMap"> | Date | string | null
+    demandPlanningLockReason?: StringNullableFilter<"FacilityDrugMap"> | string | null
     masterDrugId?: StringNullableFilter<"FacilityDrugMap"> | string | null
     status?: EnumMappingStatusFilter<"FacilityDrugMap"> | $Enums.MappingStatus
     adminNote?: StringNullableFilter<"FacilityDrugMap"> | string | null
     isOutOfCatalog?: BoolFilter<"FacilityDrugMap"> | boolean
+    isActive?: BoolFilter<"FacilityDrugMap"> | boolean
+    inactiveFromMonth?: StringNullableFilter<"FacilityDrugMap"> | string | null
+    inactiveReason?: StringNullableFilter<"FacilityDrugMap"> | string | null
+    inactiveAt?: DateTimeNullableFilter<"FacilityDrugMap"> | Date | string | null
+    reactivatedFromMonth?: StringNullableFilter<"FacilityDrugMap"> | string | null
+    reactivatedAt?: DateTimeNullableFilter<"FacilityDrugMap"> | Date | string | null
     createdAt?: DateTimeFilter<"FacilityDrugMap"> | Date | string
     updatedAt?: DateTimeFilter<"FacilityDrugMap"> | Date | string
     facility?: XOR<UserScalarRelationFilter, UserWhereInput>
     masterDrug?: XOR<MasterDrugNullableScalarRelationFilter, MasterDrugWhereInput> | null
     reports?: InventoryReportListRelationFilter
+    demandPlanLines?: FacilityDemandPlanLineListRelationFilter
   }
 
   export type FacilityDrugMapOrderByWithRelationInput = {
@@ -37441,15 +41952,36 @@ export namespace Prisma {
     soDangKyNoiBo?: SortOrderInput | SortOrder
     donViTinhNoiBo?: SortOrderInput | SortOrder
     nhomTckt?: SortOrderInput | SortOrder
+    giaVat?: SortOrder
+    bhyt?: SortOrderInput | SortOrder
+    dichVu?: SortOrderInput | SortOrder
+    soQdTrungThau?: SortOrderInput | SortOrder
+    tenCongTy?: SortOrderInput | SortOrder
+    ngayBatDauHd?: SortOrderInput | SortOrder
+    ngayKetThucHd?: SortOrderInput | SortOrder
+    demandRoundingEnabled?: SortOrder
+    demandPackageUnit?: SortOrderInput | SortOrder
+    demandPackageSize?: SortOrderInput | SortOrder
+    demandPlanningLocked?: SortOrder
+    demandPlanningLockedAt?: SortOrderInput | SortOrder
+    demandPlanningUnlockedAt?: SortOrderInput | SortOrder
+    demandPlanningLockReason?: SortOrderInput | SortOrder
     masterDrugId?: SortOrderInput | SortOrder
     status?: SortOrder
     adminNote?: SortOrderInput | SortOrder
     isOutOfCatalog?: SortOrder
+    isActive?: SortOrder
+    inactiveFromMonth?: SortOrderInput | SortOrder
+    inactiveReason?: SortOrderInput | SortOrder
+    inactiveAt?: SortOrderInput | SortOrder
+    reactivatedFromMonth?: SortOrderInput | SortOrder
+    reactivatedAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     facility?: UserOrderByWithRelationInput
     masterDrug?: MasterDrugOrderByWithRelationInput
     reports?: InventoryReportOrderByRelationAggregateInput
+    demandPlanLines?: FacilityDemandPlanLineOrderByRelationAggregateInput
   }
 
   export type FacilityDrugMapWhereUniqueInput = Prisma.AtLeast<{
@@ -37465,15 +41997,36 @@ export namespace Prisma {
     soDangKyNoiBo?: StringNullableFilter<"FacilityDrugMap"> | string | null
     donViTinhNoiBo?: StringNullableFilter<"FacilityDrugMap"> | string | null
     nhomTckt?: StringNullableFilter<"FacilityDrugMap"> | string | null
+    giaVat?: DecimalFilter<"FacilityDrugMap"> | Decimal | DecimalJsLike | number | string
+    bhyt?: StringNullableFilter<"FacilityDrugMap"> | string | null
+    dichVu?: StringNullableFilter<"FacilityDrugMap"> | string | null
+    soQdTrungThau?: StringNullableFilter<"FacilityDrugMap"> | string | null
+    tenCongTy?: StringNullableFilter<"FacilityDrugMap"> | string | null
+    ngayBatDauHd?: StringNullableFilter<"FacilityDrugMap"> | string | null
+    ngayKetThucHd?: StringNullableFilter<"FacilityDrugMap"> | string | null
+    demandRoundingEnabled?: BoolFilter<"FacilityDrugMap"> | boolean
+    demandPackageUnit?: StringNullableFilter<"FacilityDrugMap"> | string | null
+    demandPackageSize?: DecimalNullableFilter<"FacilityDrugMap"> | Decimal | DecimalJsLike | number | string | null
+    demandPlanningLocked?: BoolFilter<"FacilityDrugMap"> | boolean
+    demandPlanningLockedAt?: DateTimeNullableFilter<"FacilityDrugMap"> | Date | string | null
+    demandPlanningUnlockedAt?: DateTimeNullableFilter<"FacilityDrugMap"> | Date | string | null
+    demandPlanningLockReason?: StringNullableFilter<"FacilityDrugMap"> | string | null
     masterDrugId?: StringNullableFilter<"FacilityDrugMap"> | string | null
     status?: EnumMappingStatusFilter<"FacilityDrugMap"> | $Enums.MappingStatus
     adminNote?: StringNullableFilter<"FacilityDrugMap"> | string | null
     isOutOfCatalog?: BoolFilter<"FacilityDrugMap"> | boolean
+    isActive?: BoolFilter<"FacilityDrugMap"> | boolean
+    inactiveFromMonth?: StringNullableFilter<"FacilityDrugMap"> | string | null
+    inactiveReason?: StringNullableFilter<"FacilityDrugMap"> | string | null
+    inactiveAt?: DateTimeNullableFilter<"FacilityDrugMap"> | Date | string | null
+    reactivatedFromMonth?: StringNullableFilter<"FacilityDrugMap"> | string | null
+    reactivatedAt?: DateTimeNullableFilter<"FacilityDrugMap"> | Date | string | null
     createdAt?: DateTimeFilter<"FacilityDrugMap"> | Date | string
     updatedAt?: DateTimeFilter<"FacilityDrugMap"> | Date | string
     facility?: XOR<UserScalarRelationFilter, UserWhereInput>
     masterDrug?: XOR<MasterDrugNullableScalarRelationFilter, MasterDrugWhereInput> | null
     reports?: InventoryReportListRelationFilter
+    demandPlanLines?: FacilityDemandPlanLineListRelationFilter
   }, "id" | "facilityId_maNoiBo">
 
   export type FacilityDrugMapOrderByWithAggregationInput = {
@@ -37485,15 +42038,37 @@ export namespace Prisma {
     soDangKyNoiBo?: SortOrderInput | SortOrder
     donViTinhNoiBo?: SortOrderInput | SortOrder
     nhomTckt?: SortOrderInput | SortOrder
+    giaVat?: SortOrder
+    bhyt?: SortOrderInput | SortOrder
+    dichVu?: SortOrderInput | SortOrder
+    soQdTrungThau?: SortOrderInput | SortOrder
+    tenCongTy?: SortOrderInput | SortOrder
+    ngayBatDauHd?: SortOrderInput | SortOrder
+    ngayKetThucHd?: SortOrderInput | SortOrder
+    demandRoundingEnabled?: SortOrder
+    demandPackageUnit?: SortOrderInput | SortOrder
+    demandPackageSize?: SortOrderInput | SortOrder
+    demandPlanningLocked?: SortOrder
+    demandPlanningLockedAt?: SortOrderInput | SortOrder
+    demandPlanningUnlockedAt?: SortOrderInput | SortOrder
+    demandPlanningLockReason?: SortOrderInput | SortOrder
     masterDrugId?: SortOrderInput | SortOrder
     status?: SortOrder
     adminNote?: SortOrderInput | SortOrder
     isOutOfCatalog?: SortOrder
+    isActive?: SortOrder
+    inactiveFromMonth?: SortOrderInput | SortOrder
+    inactiveReason?: SortOrderInput | SortOrder
+    inactiveAt?: SortOrderInput | SortOrder
+    reactivatedFromMonth?: SortOrderInput | SortOrder
+    reactivatedAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: FacilityDrugMapCountOrderByAggregateInput
+    _avg?: FacilityDrugMapAvgOrderByAggregateInput
     _max?: FacilityDrugMapMaxOrderByAggregateInput
     _min?: FacilityDrugMapMinOrderByAggregateInput
+    _sum?: FacilityDrugMapSumOrderByAggregateInput
   }
 
   export type FacilityDrugMapScalarWhereWithAggregatesInput = {
@@ -37508,12 +42083,264 @@ export namespace Prisma {
     soDangKyNoiBo?: StringNullableWithAggregatesFilter<"FacilityDrugMap"> | string | null
     donViTinhNoiBo?: StringNullableWithAggregatesFilter<"FacilityDrugMap"> | string | null
     nhomTckt?: StringNullableWithAggregatesFilter<"FacilityDrugMap"> | string | null
+    giaVat?: DecimalWithAggregatesFilter<"FacilityDrugMap"> | Decimal | DecimalJsLike | number | string
+    bhyt?: StringNullableWithAggregatesFilter<"FacilityDrugMap"> | string | null
+    dichVu?: StringNullableWithAggregatesFilter<"FacilityDrugMap"> | string | null
+    soQdTrungThau?: StringNullableWithAggregatesFilter<"FacilityDrugMap"> | string | null
+    tenCongTy?: StringNullableWithAggregatesFilter<"FacilityDrugMap"> | string | null
+    ngayBatDauHd?: StringNullableWithAggregatesFilter<"FacilityDrugMap"> | string | null
+    ngayKetThucHd?: StringNullableWithAggregatesFilter<"FacilityDrugMap"> | string | null
+    demandRoundingEnabled?: BoolWithAggregatesFilter<"FacilityDrugMap"> | boolean
+    demandPackageUnit?: StringNullableWithAggregatesFilter<"FacilityDrugMap"> | string | null
+    demandPackageSize?: DecimalNullableWithAggregatesFilter<"FacilityDrugMap"> | Decimal | DecimalJsLike | number | string | null
+    demandPlanningLocked?: BoolWithAggregatesFilter<"FacilityDrugMap"> | boolean
+    demandPlanningLockedAt?: DateTimeNullableWithAggregatesFilter<"FacilityDrugMap"> | Date | string | null
+    demandPlanningUnlockedAt?: DateTimeNullableWithAggregatesFilter<"FacilityDrugMap"> | Date | string | null
+    demandPlanningLockReason?: StringNullableWithAggregatesFilter<"FacilityDrugMap"> | string | null
     masterDrugId?: StringNullableWithAggregatesFilter<"FacilityDrugMap"> | string | null
     status?: EnumMappingStatusWithAggregatesFilter<"FacilityDrugMap"> | $Enums.MappingStatus
     adminNote?: StringNullableWithAggregatesFilter<"FacilityDrugMap"> | string | null
     isOutOfCatalog?: BoolWithAggregatesFilter<"FacilityDrugMap"> | boolean
+    isActive?: BoolWithAggregatesFilter<"FacilityDrugMap"> | boolean
+    inactiveFromMonth?: StringNullableWithAggregatesFilter<"FacilityDrugMap"> | string | null
+    inactiveReason?: StringNullableWithAggregatesFilter<"FacilityDrugMap"> | string | null
+    inactiveAt?: DateTimeNullableWithAggregatesFilter<"FacilityDrugMap"> | Date | string | null
+    reactivatedFromMonth?: StringNullableWithAggregatesFilter<"FacilityDrugMap"> | string | null
+    reactivatedAt?: DateTimeNullableWithAggregatesFilter<"FacilityDrugMap"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"FacilityDrugMap"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"FacilityDrugMap"> | Date | string
+  }
+
+  export type FacilityDemandPlanWhereInput = {
+    AND?: FacilityDemandPlanWhereInput | FacilityDemandPlanWhereInput[]
+    OR?: FacilityDemandPlanWhereInput[]
+    NOT?: FacilityDemandPlanWhereInput | FacilityDemandPlanWhereInput[]
+    id?: StringFilter<"FacilityDemandPlan"> | string
+    planNo?: StringFilter<"FacilityDemandPlan"> | string
+    facilityId?: StringFilter<"FacilityDemandPlan"> | string
+    status?: EnumFacilityDemandPlanStatusFilter<"FacilityDemandPlan"> | $Enums.FacilityDemandPlanStatus
+    baseReportMonth?: StringNullableFilter<"FacilityDemandPlan"> | string | null
+    note?: StringNullableFilter<"FacilityDemandPlan"> | string | null
+    finalizedAt?: DateTimeNullableFilter<"FacilityDemandPlan"> | Date | string | null
+    createdAt?: DateTimeFilter<"FacilityDemandPlan"> | Date | string
+    updatedAt?: DateTimeFilter<"FacilityDemandPlan"> | Date | string
+    facility?: XOR<UserScalarRelationFilter, UserWhereInput>
+    lines?: FacilityDemandPlanLineListRelationFilter
+  }
+
+  export type FacilityDemandPlanOrderByWithRelationInput = {
+    id?: SortOrder
+    planNo?: SortOrder
+    facilityId?: SortOrder
+    status?: SortOrder
+    baseReportMonth?: SortOrderInput | SortOrder
+    note?: SortOrderInput | SortOrder
+    finalizedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    facility?: UserOrderByWithRelationInput
+    lines?: FacilityDemandPlanLineOrderByRelationAggregateInput
+  }
+
+  export type FacilityDemandPlanWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    planNo?: string
+    AND?: FacilityDemandPlanWhereInput | FacilityDemandPlanWhereInput[]
+    OR?: FacilityDemandPlanWhereInput[]
+    NOT?: FacilityDemandPlanWhereInput | FacilityDemandPlanWhereInput[]
+    facilityId?: StringFilter<"FacilityDemandPlan"> | string
+    status?: EnumFacilityDemandPlanStatusFilter<"FacilityDemandPlan"> | $Enums.FacilityDemandPlanStatus
+    baseReportMonth?: StringNullableFilter<"FacilityDemandPlan"> | string | null
+    note?: StringNullableFilter<"FacilityDemandPlan"> | string | null
+    finalizedAt?: DateTimeNullableFilter<"FacilityDemandPlan"> | Date | string | null
+    createdAt?: DateTimeFilter<"FacilityDemandPlan"> | Date | string
+    updatedAt?: DateTimeFilter<"FacilityDemandPlan"> | Date | string
+    facility?: XOR<UserScalarRelationFilter, UserWhereInput>
+    lines?: FacilityDemandPlanLineListRelationFilter
+  }, "id" | "planNo">
+
+  export type FacilityDemandPlanOrderByWithAggregationInput = {
+    id?: SortOrder
+    planNo?: SortOrder
+    facilityId?: SortOrder
+    status?: SortOrder
+    baseReportMonth?: SortOrderInput | SortOrder
+    note?: SortOrderInput | SortOrder
+    finalizedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: FacilityDemandPlanCountOrderByAggregateInput
+    _max?: FacilityDemandPlanMaxOrderByAggregateInput
+    _min?: FacilityDemandPlanMinOrderByAggregateInput
+  }
+
+  export type FacilityDemandPlanScalarWhereWithAggregatesInput = {
+    AND?: FacilityDemandPlanScalarWhereWithAggregatesInput | FacilityDemandPlanScalarWhereWithAggregatesInput[]
+    OR?: FacilityDemandPlanScalarWhereWithAggregatesInput[]
+    NOT?: FacilityDemandPlanScalarWhereWithAggregatesInput | FacilityDemandPlanScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"FacilityDemandPlan"> | string
+    planNo?: StringWithAggregatesFilter<"FacilityDemandPlan"> | string
+    facilityId?: StringWithAggregatesFilter<"FacilityDemandPlan"> | string
+    status?: EnumFacilityDemandPlanStatusWithAggregatesFilter<"FacilityDemandPlan"> | $Enums.FacilityDemandPlanStatus
+    baseReportMonth?: StringNullableWithAggregatesFilter<"FacilityDemandPlan"> | string | null
+    note?: StringNullableWithAggregatesFilter<"FacilityDemandPlan"> | string | null
+    finalizedAt?: DateTimeNullableWithAggregatesFilter<"FacilityDemandPlan"> | Date | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"FacilityDemandPlan"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"FacilityDemandPlan"> | Date | string
+  }
+
+  export type FacilityDemandPlanLineWhereInput = {
+    AND?: FacilityDemandPlanLineWhereInput | FacilityDemandPlanLineWhereInput[]
+    OR?: FacilityDemandPlanLineWhereInput[]
+    NOT?: FacilityDemandPlanLineWhereInput | FacilityDemandPlanLineWhereInput[]
+    id?: StringFilter<"FacilityDemandPlanLine"> | string
+    planId?: StringFilter<"FacilityDemandPlanLine"> | string
+    mapId?: StringFilter<"FacilityDemandPlanLine"> | string
+    masterDrugId?: StringFilter<"FacilityDemandPlanLine"> | string
+    maNoiBoSnapshot?: StringFilter<"FacilityDemandPlanLine"> | string
+    tenThuocSnapshot?: StringFilter<"FacilityDemandPlanLine"> | string
+    hoatChatSnapshot?: StringNullableFilter<"FacilityDemandPlanLine"> | string | null
+    donViTinhSnapshot?: StringNullableFilter<"FacilityDemandPlanLine"> | string | null
+    nhomTcktSnapshot?: StringNullableFilter<"FacilityDemandPlanLine"> | string | null
+    maChungSnapshot?: StringNullableFilter<"FacilityDemandPlanLine"> | string | null
+    suggestedQty?: DecimalNullableFilter<"FacilityDemandPlanLine"> | Decimal | DecimalJsLike | number | string | null
+    rawSuggestedQty?: DecimalNullableFilter<"FacilityDemandPlanLine"> | Decimal | DecimalJsLike | number | string | null
+    roundedSuggestedQty?: DecimalNullableFilter<"FacilityDemandPlanLine"> | Decimal | DecimalJsLike | number | string | null
+    packageUnitSnapshot?: StringNullableFilter<"FacilityDemandPlanLine"> | string | null
+    packageSizeSnapshot?: DecimalNullableFilter<"FacilityDemandPlanLine"> | Decimal | DecimalJsLike | number | string | null
+    roundingNote?: StringNullableFilter<"FacilityDemandPlanLine"> | string | null
+    finalQty?: DecimalFilter<"FacilityDemandPlanLine"> | Decimal | DecimalJsLike | number | string
+    suggestionBasis?: StringNullableFilter<"FacilityDemandPlanLine"> | string | null
+    suggestionReportMonth?: StringNullableFilter<"FacilityDemandPlanLine"> | string | null
+    suggestionRuleVersion?: StringNullableFilter<"FacilityDemandPlanLine"> | string | null
+    note?: StringNullableFilter<"FacilityDemandPlanLine"> | string | null
+    createdAt?: DateTimeFilter<"FacilityDemandPlanLine"> | Date | string
+    updatedAt?: DateTimeFilter<"FacilityDemandPlanLine"> | Date | string
+    plan?: XOR<FacilityDemandPlanScalarRelationFilter, FacilityDemandPlanWhereInput>
+    drugMap?: XOR<FacilityDrugMapScalarRelationFilter, FacilityDrugMapWhereInput>
+    masterDrug?: XOR<MasterDrugScalarRelationFilter, MasterDrugWhereInput>
+  }
+
+  export type FacilityDemandPlanLineOrderByWithRelationInput = {
+    id?: SortOrder
+    planId?: SortOrder
+    mapId?: SortOrder
+    masterDrugId?: SortOrder
+    maNoiBoSnapshot?: SortOrder
+    tenThuocSnapshot?: SortOrder
+    hoatChatSnapshot?: SortOrderInput | SortOrder
+    donViTinhSnapshot?: SortOrderInput | SortOrder
+    nhomTcktSnapshot?: SortOrderInput | SortOrder
+    maChungSnapshot?: SortOrderInput | SortOrder
+    suggestedQty?: SortOrderInput | SortOrder
+    rawSuggestedQty?: SortOrderInput | SortOrder
+    roundedSuggestedQty?: SortOrderInput | SortOrder
+    packageUnitSnapshot?: SortOrderInput | SortOrder
+    packageSizeSnapshot?: SortOrderInput | SortOrder
+    roundingNote?: SortOrderInput | SortOrder
+    finalQty?: SortOrder
+    suggestionBasis?: SortOrderInput | SortOrder
+    suggestionReportMonth?: SortOrderInput | SortOrder
+    suggestionRuleVersion?: SortOrderInput | SortOrder
+    note?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    plan?: FacilityDemandPlanOrderByWithRelationInput
+    drugMap?: FacilityDrugMapOrderByWithRelationInput
+    masterDrug?: MasterDrugOrderByWithRelationInput
+  }
+
+  export type FacilityDemandPlanLineWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    planId_mapId?: FacilityDemandPlanLinePlanIdMapIdCompoundUniqueInput
+    AND?: FacilityDemandPlanLineWhereInput | FacilityDemandPlanLineWhereInput[]
+    OR?: FacilityDemandPlanLineWhereInput[]
+    NOT?: FacilityDemandPlanLineWhereInput | FacilityDemandPlanLineWhereInput[]
+    planId?: StringFilter<"FacilityDemandPlanLine"> | string
+    mapId?: StringFilter<"FacilityDemandPlanLine"> | string
+    masterDrugId?: StringFilter<"FacilityDemandPlanLine"> | string
+    maNoiBoSnapshot?: StringFilter<"FacilityDemandPlanLine"> | string
+    tenThuocSnapshot?: StringFilter<"FacilityDemandPlanLine"> | string
+    hoatChatSnapshot?: StringNullableFilter<"FacilityDemandPlanLine"> | string | null
+    donViTinhSnapshot?: StringNullableFilter<"FacilityDemandPlanLine"> | string | null
+    nhomTcktSnapshot?: StringNullableFilter<"FacilityDemandPlanLine"> | string | null
+    maChungSnapshot?: StringNullableFilter<"FacilityDemandPlanLine"> | string | null
+    suggestedQty?: DecimalNullableFilter<"FacilityDemandPlanLine"> | Decimal | DecimalJsLike | number | string | null
+    rawSuggestedQty?: DecimalNullableFilter<"FacilityDemandPlanLine"> | Decimal | DecimalJsLike | number | string | null
+    roundedSuggestedQty?: DecimalNullableFilter<"FacilityDemandPlanLine"> | Decimal | DecimalJsLike | number | string | null
+    packageUnitSnapshot?: StringNullableFilter<"FacilityDemandPlanLine"> | string | null
+    packageSizeSnapshot?: DecimalNullableFilter<"FacilityDemandPlanLine"> | Decimal | DecimalJsLike | number | string | null
+    roundingNote?: StringNullableFilter<"FacilityDemandPlanLine"> | string | null
+    finalQty?: DecimalFilter<"FacilityDemandPlanLine"> | Decimal | DecimalJsLike | number | string
+    suggestionBasis?: StringNullableFilter<"FacilityDemandPlanLine"> | string | null
+    suggestionReportMonth?: StringNullableFilter<"FacilityDemandPlanLine"> | string | null
+    suggestionRuleVersion?: StringNullableFilter<"FacilityDemandPlanLine"> | string | null
+    note?: StringNullableFilter<"FacilityDemandPlanLine"> | string | null
+    createdAt?: DateTimeFilter<"FacilityDemandPlanLine"> | Date | string
+    updatedAt?: DateTimeFilter<"FacilityDemandPlanLine"> | Date | string
+    plan?: XOR<FacilityDemandPlanScalarRelationFilter, FacilityDemandPlanWhereInput>
+    drugMap?: XOR<FacilityDrugMapScalarRelationFilter, FacilityDrugMapWhereInput>
+    masterDrug?: XOR<MasterDrugScalarRelationFilter, MasterDrugWhereInput>
+  }, "id" | "planId_mapId">
+
+  export type FacilityDemandPlanLineOrderByWithAggregationInput = {
+    id?: SortOrder
+    planId?: SortOrder
+    mapId?: SortOrder
+    masterDrugId?: SortOrder
+    maNoiBoSnapshot?: SortOrder
+    tenThuocSnapshot?: SortOrder
+    hoatChatSnapshot?: SortOrderInput | SortOrder
+    donViTinhSnapshot?: SortOrderInput | SortOrder
+    nhomTcktSnapshot?: SortOrderInput | SortOrder
+    maChungSnapshot?: SortOrderInput | SortOrder
+    suggestedQty?: SortOrderInput | SortOrder
+    rawSuggestedQty?: SortOrderInput | SortOrder
+    roundedSuggestedQty?: SortOrderInput | SortOrder
+    packageUnitSnapshot?: SortOrderInput | SortOrder
+    packageSizeSnapshot?: SortOrderInput | SortOrder
+    roundingNote?: SortOrderInput | SortOrder
+    finalQty?: SortOrder
+    suggestionBasis?: SortOrderInput | SortOrder
+    suggestionReportMonth?: SortOrderInput | SortOrder
+    suggestionRuleVersion?: SortOrderInput | SortOrder
+    note?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: FacilityDemandPlanLineCountOrderByAggregateInput
+    _avg?: FacilityDemandPlanLineAvgOrderByAggregateInput
+    _max?: FacilityDemandPlanLineMaxOrderByAggregateInput
+    _min?: FacilityDemandPlanLineMinOrderByAggregateInput
+    _sum?: FacilityDemandPlanLineSumOrderByAggregateInput
+  }
+
+  export type FacilityDemandPlanLineScalarWhereWithAggregatesInput = {
+    AND?: FacilityDemandPlanLineScalarWhereWithAggregatesInput | FacilityDemandPlanLineScalarWhereWithAggregatesInput[]
+    OR?: FacilityDemandPlanLineScalarWhereWithAggregatesInput[]
+    NOT?: FacilityDemandPlanLineScalarWhereWithAggregatesInput | FacilityDemandPlanLineScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"FacilityDemandPlanLine"> | string
+    planId?: StringWithAggregatesFilter<"FacilityDemandPlanLine"> | string
+    mapId?: StringWithAggregatesFilter<"FacilityDemandPlanLine"> | string
+    masterDrugId?: StringWithAggregatesFilter<"FacilityDemandPlanLine"> | string
+    maNoiBoSnapshot?: StringWithAggregatesFilter<"FacilityDemandPlanLine"> | string
+    tenThuocSnapshot?: StringWithAggregatesFilter<"FacilityDemandPlanLine"> | string
+    hoatChatSnapshot?: StringNullableWithAggregatesFilter<"FacilityDemandPlanLine"> | string | null
+    donViTinhSnapshot?: StringNullableWithAggregatesFilter<"FacilityDemandPlanLine"> | string | null
+    nhomTcktSnapshot?: StringNullableWithAggregatesFilter<"FacilityDemandPlanLine"> | string | null
+    maChungSnapshot?: StringNullableWithAggregatesFilter<"FacilityDemandPlanLine"> | string | null
+    suggestedQty?: DecimalNullableWithAggregatesFilter<"FacilityDemandPlanLine"> | Decimal | DecimalJsLike | number | string | null
+    rawSuggestedQty?: DecimalNullableWithAggregatesFilter<"FacilityDemandPlanLine"> | Decimal | DecimalJsLike | number | string | null
+    roundedSuggestedQty?: DecimalNullableWithAggregatesFilter<"FacilityDemandPlanLine"> | Decimal | DecimalJsLike | number | string | null
+    packageUnitSnapshot?: StringNullableWithAggregatesFilter<"FacilityDemandPlanLine"> | string | null
+    packageSizeSnapshot?: DecimalNullableWithAggregatesFilter<"FacilityDemandPlanLine"> | Decimal | DecimalJsLike | number | string | null
+    roundingNote?: StringNullableWithAggregatesFilter<"FacilityDemandPlanLine"> | string | null
+    finalQty?: DecimalWithAggregatesFilter<"FacilityDemandPlanLine"> | Decimal | DecimalJsLike | number | string
+    suggestionBasis?: StringNullableWithAggregatesFilter<"FacilityDemandPlanLine"> | string | null
+    suggestionReportMonth?: StringNullableWithAggregatesFilter<"FacilityDemandPlanLine"> | string | null
+    suggestionRuleVersion?: StringNullableWithAggregatesFilter<"FacilityDemandPlanLine"> | string | null
+    note?: StringNullableWithAggregatesFilter<"FacilityDemandPlanLine"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"FacilityDemandPlanLine"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"FacilityDemandPlanLine"> | Date | string
   }
 
   export type InventoryReportWhereInput = {
@@ -37526,6 +42353,7 @@ export namespace Prisma {
     reportMonth?: StringFilter<"InventoryReport"> | string
     tonDau?: DecimalFilter<"InventoryReport"> | Decimal | DecimalJsLike | number | string
     nhap?: DecimalFilter<"InventoryReport"> | Decimal | DecimalJsLike | number | string
+    nhapHoanTra?: DecimalFilter<"InventoryReport"> | Decimal | DecimalJsLike | number | string
     xuat?: DecimalFilter<"InventoryReport"> | Decimal | DecimalJsLike | number | string
     tonCuoi?: DecimalFilter<"InventoryReport"> | Decimal | DecimalJsLike | number | string
     giaVat?: DecimalFilter<"InventoryReport"> | Decimal | DecimalJsLike | number | string
@@ -37551,6 +42379,7 @@ export namespace Prisma {
     reportMonth?: SortOrder
     tonDau?: SortOrder
     nhap?: SortOrder
+    nhapHoanTra?: SortOrder
     xuat?: SortOrder
     tonCuoi?: SortOrder
     giaVat?: SortOrder
@@ -37580,6 +42409,7 @@ export namespace Prisma {
     reportMonth?: StringFilter<"InventoryReport"> | string
     tonDau?: DecimalFilter<"InventoryReport"> | Decimal | DecimalJsLike | number | string
     nhap?: DecimalFilter<"InventoryReport"> | Decimal | DecimalJsLike | number | string
+    nhapHoanTra?: DecimalFilter<"InventoryReport"> | Decimal | DecimalJsLike | number | string
     xuat?: DecimalFilter<"InventoryReport"> | Decimal | DecimalJsLike | number | string
     tonCuoi?: DecimalFilter<"InventoryReport"> | Decimal | DecimalJsLike | number | string
     giaVat?: DecimalFilter<"InventoryReport"> | Decimal | DecimalJsLike | number | string
@@ -37605,6 +42435,7 @@ export namespace Prisma {
     reportMonth?: SortOrder
     tonDau?: SortOrder
     nhap?: SortOrder
+    nhapHoanTra?: SortOrder
     xuat?: SortOrder
     tonCuoi?: SortOrder
     giaVat?: SortOrder
@@ -37636,6 +42467,7 @@ export namespace Prisma {
     reportMonth?: StringWithAggregatesFilter<"InventoryReport"> | string
     tonDau?: DecimalWithAggregatesFilter<"InventoryReport"> | Decimal | DecimalJsLike | number | string
     nhap?: DecimalWithAggregatesFilter<"InventoryReport"> | Decimal | DecimalJsLike | number | string
+    nhapHoanTra?: DecimalWithAggregatesFilter<"InventoryReport"> | Decimal | DecimalJsLike | number | string
     xuat?: DecimalWithAggregatesFilter<"InventoryReport"> | Decimal | DecimalJsLike | number | string
     tonCuoi?: DecimalWithAggregatesFilter<"InventoryReport"> | Decimal | DecimalJsLike | number | string
     giaVat?: DecimalWithAggregatesFilter<"InventoryReport"> | Decimal | DecimalJsLike | number | string
@@ -38548,6 +43380,7 @@ export namespace Prisma {
     thoiGianThucHien?: StringNullableFilter<"GoiThau"> | string | null
     trangThai?: StringNullableFilter<"GoiThau"> | string | null
     maThongBao?: StringNullableFilter<"GoiThau"> | string | null
+    yeuCauTBMT?: BoolFilter<"GoiThau"> | boolean
     createdAt?: DateTimeFilter<"GoiThau"> | Date | string
     updatedAt?: DateTimeFilter<"GoiThau"> | Date | string
     keHoach?: XOR<KeHoachLCNTScalarRelationFilter, KeHoachLCNTWhereInput>
@@ -38573,6 +43406,7 @@ export namespace Prisma {
     thoiGianThucHien?: SortOrderInput | SortOrder
     trangThai?: SortOrderInput | SortOrder
     maThongBao?: SortOrderInput | SortOrder
+    yeuCauTBMT?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     keHoach?: KeHoachLCNTOrderByWithRelationInput
@@ -38601,6 +43435,7 @@ export namespace Prisma {
     thoiGianThucHien?: StringNullableFilter<"GoiThau"> | string | null
     trangThai?: StringNullableFilter<"GoiThau"> | string | null
     maThongBao?: StringNullableFilter<"GoiThau"> | string | null
+    yeuCauTBMT?: BoolFilter<"GoiThau"> | boolean
     createdAt?: DateTimeFilter<"GoiThau"> | Date | string
     updatedAt?: DateTimeFilter<"GoiThau"> | Date | string
     keHoach?: XOR<KeHoachLCNTScalarRelationFilter, KeHoachLCNTWhereInput>
@@ -38626,6 +43461,7 @@ export namespace Prisma {
     thoiGianThucHien?: SortOrderInput | SortOrder
     trangThai?: SortOrderInput | SortOrder
     maThongBao?: SortOrderInput | SortOrder
+    yeuCauTBMT?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: GoiThauCountOrderByAggregateInput
@@ -38655,6 +43491,7 @@ export namespace Prisma {
     thoiGianThucHien?: StringNullableWithAggregatesFilter<"GoiThau"> | string | null
     trangThai?: StringNullableWithAggregatesFilter<"GoiThau"> | string | null
     maThongBao?: StringNullableWithAggregatesFilter<"GoiThau"> | string | null
+    yeuCauTBMT?: BoolWithAggregatesFilter<"GoiThau"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"GoiThau"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"GoiThau"> | Date | string
   }
@@ -38838,7 +43675,7 @@ export namespace Prisma {
     NOT?: KetQuaLCNTWhereInput | KetQuaLCNTWhereInput[]
     id?: StringFilter<"KetQuaLCNT"> | string
     goiThauId?: StringFilter<"KetQuaLCNT"> | string
-    thongBaoMoiThauId?: StringFilter<"KetQuaLCNT"> | string
+    thongBaoMoiThauId?: StringNullableFilter<"KetQuaLCNT"> | string | null
     soQdPheDuyetKQLCNT?: StringFilter<"KetQuaLCNT"> | string
     ngayPheDuyetKQLCNT?: DateTimeFilter<"KetQuaLCNT"> | Date | string
     soMatHangMoiThau?: IntFilter<"KetQuaLCNT"> | number
@@ -38847,14 +43684,14 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"KetQuaLCNT"> | Date | string
     updatedAt?: DateTimeFilter<"KetQuaLCNT"> | Date | string
     goiThau?: XOR<GoiThauScalarRelationFilter, GoiThauWhereInput>
-    thongBaoMoiThau?: XOR<ThongBaoMoiThauScalarRelationFilter, ThongBaoMoiThauWhereInput>
+    thongBaoMoiThau?: XOR<ThongBaoMoiThauNullableScalarRelationFilter, ThongBaoMoiThauWhereInput> | null
     ketQuaPhanLos?: KetQuaPhanLoListRelationFilter
   }
 
   export type KetQuaLCNTOrderByWithRelationInput = {
     id?: SortOrder
     goiThauId?: SortOrder
-    thongBaoMoiThauId?: SortOrder
+    thongBaoMoiThauId?: SortOrderInput | SortOrder
     soQdPheDuyetKQLCNT?: SortOrder
     ngayPheDuyetKQLCNT?: SortOrder
     soMatHangMoiThau?: SortOrder
@@ -38873,7 +43710,7 @@ export namespace Prisma {
     OR?: KetQuaLCNTWhereInput[]
     NOT?: KetQuaLCNTWhereInput | KetQuaLCNTWhereInput[]
     goiThauId?: StringFilter<"KetQuaLCNT"> | string
-    thongBaoMoiThauId?: StringFilter<"KetQuaLCNT"> | string
+    thongBaoMoiThauId?: StringNullableFilter<"KetQuaLCNT"> | string | null
     soQdPheDuyetKQLCNT?: StringFilter<"KetQuaLCNT"> | string
     ngayPheDuyetKQLCNT?: DateTimeFilter<"KetQuaLCNT"> | Date | string
     soMatHangMoiThau?: IntFilter<"KetQuaLCNT"> | number
@@ -38882,14 +43719,14 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"KetQuaLCNT"> | Date | string
     updatedAt?: DateTimeFilter<"KetQuaLCNT"> | Date | string
     goiThau?: XOR<GoiThauScalarRelationFilter, GoiThauWhereInput>
-    thongBaoMoiThau?: XOR<ThongBaoMoiThauScalarRelationFilter, ThongBaoMoiThauWhereInput>
+    thongBaoMoiThau?: XOR<ThongBaoMoiThauNullableScalarRelationFilter, ThongBaoMoiThauWhereInput> | null
     ketQuaPhanLos?: KetQuaPhanLoListRelationFilter
   }, "id">
 
   export type KetQuaLCNTOrderByWithAggregationInput = {
     id?: SortOrder
     goiThauId?: SortOrder
-    thongBaoMoiThauId?: SortOrder
+    thongBaoMoiThauId?: SortOrderInput | SortOrder
     soQdPheDuyetKQLCNT?: SortOrder
     ngayPheDuyetKQLCNT?: SortOrder
     soMatHangMoiThau?: SortOrder
@@ -38910,7 +43747,7 @@ export namespace Prisma {
     NOT?: KetQuaLCNTScalarWhereWithAggregatesInput | KetQuaLCNTScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"KetQuaLCNT"> | string
     goiThauId?: StringWithAggregatesFilter<"KetQuaLCNT"> | string
-    thongBaoMoiThauId?: StringWithAggregatesFilter<"KetQuaLCNT"> | string
+    thongBaoMoiThauId?: StringNullableWithAggregatesFilter<"KetQuaLCNT"> | string | null
     soQdPheDuyetKQLCNT?: StringWithAggregatesFilter<"KetQuaLCNT"> | string
     ngayPheDuyetKQLCNT?: DateTimeWithAggregatesFilter<"KetQuaLCNT"> | Date | string
     soMatHangMoiThau?: IntWithAggregatesFilter<"KetQuaLCNT"> | number
@@ -39197,6 +44034,63 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"AISetting"> | Date | string
   }
 
+  export type SystemSettingWhereInput = {
+    AND?: SystemSettingWhereInput | SystemSettingWhereInput[]
+    OR?: SystemSettingWhereInput[]
+    NOT?: SystemSettingWhereInput | SystemSettingWhereInput[]
+    id?: StringFilter<"SystemSetting"> | string
+    key?: StringFilter<"SystemSetting"> | string
+    value?: JsonFilter<"SystemSetting">
+    updatedById?: StringNullableFilter<"SystemSetting"> | string | null
+    createdAt?: DateTimeFilter<"SystemSetting"> | Date | string
+    updatedAt?: DateTimeFilter<"SystemSetting"> | Date | string
+  }
+
+  export type SystemSettingOrderByWithRelationInput = {
+    id?: SortOrder
+    key?: SortOrder
+    value?: SortOrder
+    updatedById?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SystemSettingWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    key?: string
+    AND?: SystemSettingWhereInput | SystemSettingWhereInput[]
+    OR?: SystemSettingWhereInput[]
+    NOT?: SystemSettingWhereInput | SystemSettingWhereInput[]
+    value?: JsonFilter<"SystemSetting">
+    updatedById?: StringNullableFilter<"SystemSetting"> | string | null
+    createdAt?: DateTimeFilter<"SystemSetting"> | Date | string
+    updatedAt?: DateTimeFilter<"SystemSetting"> | Date | string
+  }, "id" | "key">
+
+  export type SystemSettingOrderByWithAggregationInput = {
+    id?: SortOrder
+    key?: SortOrder
+    value?: SortOrder
+    updatedById?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: SystemSettingCountOrderByAggregateInput
+    _max?: SystemSettingMaxOrderByAggregateInput
+    _min?: SystemSettingMinOrderByAggregateInput
+  }
+
+  export type SystemSettingScalarWhereWithAggregatesInput = {
+    AND?: SystemSettingScalarWhereWithAggregatesInput | SystemSettingScalarWhereWithAggregatesInput[]
+    OR?: SystemSettingScalarWhereWithAggregatesInput[]
+    NOT?: SystemSettingScalarWhereWithAggregatesInput | SystemSettingScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"SystemSetting"> | string
+    key?: StringWithAggregatesFilter<"SystemSetting"> | string
+    value?: JsonWithAggregatesFilter<"SystemSetting">
+    updatedById?: StringNullableWithAggregatesFilter<"SystemSetting"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"SystemSetting"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"SystemSetting"> | Date | string
+  }
+
   export type AIUserPolicyWhereInput = {
     AND?: AIUserPolicyWhereInput | AIUserPolicyWhereInput[]
     OR?: AIUserPolicyWhereInput[]
@@ -39355,12 +44249,15 @@ export namespace Prisma {
     contactPerson?: string | null
     phoneNumber?: string | null
     address?: string | null
+    latitude?: number | null
+    longitude?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     company?: CompanyCreateNestedOneWithoutUsersInput
     drugMaps?: FacilityDrugMapCreateNestedManyWithoutFacilityInput
     reports?: InventoryReportCreateNestedManyWithoutFacilityInput
     reportSubmissions?: FacilityReportSubmissionCreateNestedManyWithoutFacilityInput
+    facilityDemandPlans?: FacilityDemandPlanCreateNestedManyWithoutFacilityInput
     keHoachLCNTs?: KeHoachLCNTCreateNestedManyWithoutFacilityInput
     drugOrders?: DrugOrderCreateNestedManyWithoutFacilityInput
     drugOrderReceipts?: DrugOrderReceiptCreateNestedManyWithoutFacilityInput
@@ -39383,11 +44280,14 @@ export namespace Prisma {
     contactPerson?: string | null
     phoneNumber?: string | null
     address?: string | null
+    latitude?: number | null
+    longitude?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     drugMaps?: FacilityDrugMapUncheckedCreateNestedManyWithoutFacilityInput
     reports?: InventoryReportUncheckedCreateNestedManyWithoutFacilityInput
     reportSubmissions?: FacilityReportSubmissionUncheckedCreateNestedManyWithoutFacilityInput
+    facilityDemandPlans?: FacilityDemandPlanUncheckedCreateNestedManyWithoutFacilityInput
     keHoachLCNTs?: KeHoachLCNTUncheckedCreateNestedManyWithoutFacilityInput
     drugOrders?: DrugOrderUncheckedCreateNestedManyWithoutFacilityInput
     drugOrderReceipts?: DrugOrderReceiptUncheckedCreateNestedManyWithoutFacilityInput
@@ -39409,12 +44309,15 @@ export namespace Prisma {
     contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     company?: CompanyUpdateOneWithoutUsersNestedInput
     drugMaps?: FacilityDrugMapUpdateManyWithoutFacilityNestedInput
     reports?: InventoryReportUpdateManyWithoutFacilityNestedInput
     reportSubmissions?: FacilityReportSubmissionUpdateManyWithoutFacilityNestedInput
+    facilityDemandPlans?: FacilityDemandPlanUpdateManyWithoutFacilityNestedInput
     keHoachLCNTs?: KeHoachLCNTUpdateManyWithoutFacilityNestedInput
     drugOrders?: DrugOrderUpdateManyWithoutFacilityNestedInput
     drugOrderReceipts?: DrugOrderReceiptUpdateManyWithoutFacilityNestedInput
@@ -39437,11 +44340,14 @@ export namespace Prisma {
     contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     drugMaps?: FacilityDrugMapUncheckedUpdateManyWithoutFacilityNestedInput
     reports?: InventoryReportUncheckedUpdateManyWithoutFacilityNestedInput
     reportSubmissions?: FacilityReportSubmissionUncheckedUpdateManyWithoutFacilityNestedInput
+    facilityDemandPlans?: FacilityDemandPlanUncheckedUpdateManyWithoutFacilityNestedInput
     keHoachLCNTs?: KeHoachLCNTUncheckedUpdateManyWithoutFacilityNestedInput
     drugOrders?: DrugOrderUncheckedUpdateManyWithoutFacilityNestedInput
     drugOrderReceipts?: DrugOrderReceiptUncheckedUpdateManyWithoutFacilityNestedInput
@@ -39464,6 +44370,8 @@ export namespace Prisma {
     contactPerson?: string | null
     phoneNumber?: string | null
     address?: string | null
+    latitude?: number | null
+    longitude?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -39481,6 +44389,8 @@ export namespace Prisma {
     contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -39499,6 +44409,8 @@ export namespace Prisma {
     contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -39677,6 +44589,7 @@ export namespace Prisma {
     id?: string
     maChung: string
     maBhyt?: string | null
+    maAtc?: string | null
     tenThuoc: string
     hoatChat?: string | null
     hamLuong?: string | null
@@ -39697,6 +44610,7 @@ export namespace Prisma {
     nhomThuoc?: string | null
     isKeDon?: string | null
     kiemSoatDacBiet?: string | null
+    isThuocHiem?: boolean
     isTrongNuoc?: string | null
     isActive?: boolean
     createdAt?: Date | string
@@ -39705,12 +44619,14 @@ export namespace Prisma {
     drugMaps?: FacilityDrugMapCreateNestedManyWithoutMasterDrugInput
     companyDrugs?: CompanyDrugCreateNestedManyWithoutMasterDrugInput
     drugOrderLines?: DrugOrderLineCreateNestedManyWithoutMasterDrugInput
+    facilityDemandPlanLines?: FacilityDemandPlanLineCreateNestedManyWithoutMasterDrugInput
   }
 
   export type MasterDrugUncheckedCreateInput = {
     id?: string
     maChung: string
     maBhyt?: string | null
+    maAtc?: string | null
     tenThuoc: string
     hoatChat?: string | null
     hamLuong?: string | null
@@ -39732,6 +44648,7 @@ export namespace Prisma {
     therapeuticGroupId?: string | null
     isKeDon?: string | null
     kiemSoatDacBiet?: string | null
+    isThuocHiem?: boolean
     isTrongNuoc?: string | null
     isActive?: boolean
     createdAt?: Date | string
@@ -39739,12 +44656,14 @@ export namespace Prisma {
     drugMaps?: FacilityDrugMapUncheckedCreateNestedManyWithoutMasterDrugInput
     companyDrugs?: CompanyDrugUncheckedCreateNestedManyWithoutMasterDrugInput
     drugOrderLines?: DrugOrderLineUncheckedCreateNestedManyWithoutMasterDrugInput
+    facilityDemandPlanLines?: FacilityDemandPlanLineUncheckedCreateNestedManyWithoutMasterDrugInput
   }
 
   export type MasterDrugUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     maChung?: StringFieldUpdateOperationsInput | string
     maBhyt?: NullableStringFieldUpdateOperationsInput | string | null
+    maAtc?: NullableStringFieldUpdateOperationsInput | string | null
     tenThuoc?: StringFieldUpdateOperationsInput | string
     hoatChat?: NullableStringFieldUpdateOperationsInput | string | null
     hamLuong?: NullableStringFieldUpdateOperationsInput | string | null
@@ -39765,6 +44684,7 @@ export namespace Prisma {
     nhomThuoc?: NullableStringFieldUpdateOperationsInput | string | null
     isKeDon?: NullableStringFieldUpdateOperationsInput | string | null
     kiemSoatDacBiet?: NullableStringFieldUpdateOperationsInput | string | null
+    isThuocHiem?: BoolFieldUpdateOperationsInput | boolean
     isTrongNuoc?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -39773,12 +44693,14 @@ export namespace Prisma {
     drugMaps?: FacilityDrugMapUpdateManyWithoutMasterDrugNestedInput
     companyDrugs?: CompanyDrugUpdateManyWithoutMasterDrugNestedInput
     drugOrderLines?: DrugOrderLineUpdateManyWithoutMasterDrugNestedInput
+    facilityDemandPlanLines?: FacilityDemandPlanLineUpdateManyWithoutMasterDrugNestedInput
   }
 
   export type MasterDrugUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     maChung?: StringFieldUpdateOperationsInput | string
     maBhyt?: NullableStringFieldUpdateOperationsInput | string | null
+    maAtc?: NullableStringFieldUpdateOperationsInput | string | null
     tenThuoc?: StringFieldUpdateOperationsInput | string
     hoatChat?: NullableStringFieldUpdateOperationsInput | string | null
     hamLuong?: NullableStringFieldUpdateOperationsInput | string | null
@@ -39800,6 +44722,7 @@ export namespace Prisma {
     therapeuticGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     isKeDon?: NullableStringFieldUpdateOperationsInput | string | null
     kiemSoatDacBiet?: NullableStringFieldUpdateOperationsInput | string | null
+    isThuocHiem?: BoolFieldUpdateOperationsInput | boolean
     isTrongNuoc?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -39807,12 +44730,14 @@ export namespace Prisma {
     drugMaps?: FacilityDrugMapUncheckedUpdateManyWithoutMasterDrugNestedInput
     companyDrugs?: CompanyDrugUncheckedUpdateManyWithoutMasterDrugNestedInput
     drugOrderLines?: DrugOrderLineUncheckedUpdateManyWithoutMasterDrugNestedInput
+    facilityDemandPlanLines?: FacilityDemandPlanLineUncheckedUpdateManyWithoutMasterDrugNestedInput
   }
 
   export type MasterDrugCreateManyInput = {
     id?: string
     maChung: string
     maBhyt?: string | null
+    maAtc?: string | null
     tenThuoc: string
     hoatChat?: string | null
     hamLuong?: string | null
@@ -39834,6 +44759,7 @@ export namespace Prisma {
     therapeuticGroupId?: string | null
     isKeDon?: string | null
     kiemSoatDacBiet?: string | null
+    isThuocHiem?: boolean
     isTrongNuoc?: string | null
     isActive?: boolean
     createdAt?: Date | string
@@ -39844,6 +44770,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     maChung?: StringFieldUpdateOperationsInput | string
     maBhyt?: NullableStringFieldUpdateOperationsInput | string | null
+    maAtc?: NullableStringFieldUpdateOperationsInput | string | null
     tenThuoc?: StringFieldUpdateOperationsInput | string
     hoatChat?: NullableStringFieldUpdateOperationsInput | string | null
     hamLuong?: NullableStringFieldUpdateOperationsInput | string | null
@@ -39864,6 +44791,7 @@ export namespace Prisma {
     nhomThuoc?: NullableStringFieldUpdateOperationsInput | string | null
     isKeDon?: NullableStringFieldUpdateOperationsInput | string | null
     kiemSoatDacBiet?: NullableStringFieldUpdateOperationsInput | string | null
+    isThuocHiem?: BoolFieldUpdateOperationsInput | boolean
     isTrongNuoc?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -39874,6 +44802,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     maChung?: StringFieldUpdateOperationsInput | string
     maBhyt?: NullableStringFieldUpdateOperationsInput | string | null
+    maAtc?: NullableStringFieldUpdateOperationsInput | string | null
     tenThuoc?: StringFieldUpdateOperationsInput | string
     hoatChat?: NullableStringFieldUpdateOperationsInput | string | null
     hamLuong?: NullableStringFieldUpdateOperationsInput | string | null
@@ -39895,6 +44824,7 @@ export namespace Prisma {
     therapeuticGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     isKeDon?: NullableStringFieldUpdateOperationsInput | string | null
     kiemSoatDacBiet?: NullableStringFieldUpdateOperationsInput | string | null
+    isThuocHiem?: BoolFieldUpdateOperationsInput | boolean
     isTrongNuoc?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -40009,14 +44939,35 @@ export namespace Prisma {
     soDangKyNoiBo?: string | null
     donViTinhNoiBo?: string | null
     nhomTckt?: string | null
+    giaVat?: Decimal | DecimalJsLike | number | string
+    bhyt?: string | null
+    dichVu?: string | null
+    soQdTrungThau?: string | null
+    tenCongTy?: string | null
+    ngayBatDauHd?: string | null
+    ngayKetThucHd?: string | null
+    demandRoundingEnabled?: boolean
+    demandPackageUnit?: string | null
+    demandPackageSize?: Decimal | DecimalJsLike | number | string | null
+    demandPlanningLocked?: boolean
+    demandPlanningLockedAt?: Date | string | null
+    demandPlanningUnlockedAt?: Date | string | null
+    demandPlanningLockReason?: string | null
     status?: $Enums.MappingStatus
     adminNote?: string | null
     isOutOfCatalog?: boolean
+    isActive?: boolean
+    inactiveFromMonth?: string | null
+    inactiveReason?: string | null
+    inactiveAt?: Date | string | null
+    reactivatedFromMonth?: string | null
+    reactivatedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     facility: UserCreateNestedOneWithoutDrugMapsInput
     masterDrug?: MasterDrugCreateNestedOneWithoutDrugMapsInput
     reports?: InventoryReportCreateNestedManyWithoutDrugMapInput
+    demandPlanLines?: FacilityDemandPlanLineCreateNestedManyWithoutDrugMapInput
   }
 
   export type FacilityDrugMapUncheckedCreateInput = {
@@ -40028,13 +44979,34 @@ export namespace Prisma {
     soDangKyNoiBo?: string | null
     donViTinhNoiBo?: string | null
     nhomTckt?: string | null
+    giaVat?: Decimal | DecimalJsLike | number | string
+    bhyt?: string | null
+    dichVu?: string | null
+    soQdTrungThau?: string | null
+    tenCongTy?: string | null
+    ngayBatDauHd?: string | null
+    ngayKetThucHd?: string | null
+    demandRoundingEnabled?: boolean
+    demandPackageUnit?: string | null
+    demandPackageSize?: Decimal | DecimalJsLike | number | string | null
+    demandPlanningLocked?: boolean
+    demandPlanningLockedAt?: Date | string | null
+    demandPlanningUnlockedAt?: Date | string | null
+    demandPlanningLockReason?: string | null
     masterDrugId?: string | null
     status?: $Enums.MappingStatus
     adminNote?: string | null
     isOutOfCatalog?: boolean
+    isActive?: boolean
+    inactiveFromMonth?: string | null
+    inactiveReason?: string | null
+    inactiveAt?: Date | string | null
+    reactivatedFromMonth?: string | null
+    reactivatedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     reports?: InventoryReportUncheckedCreateNestedManyWithoutDrugMapInput
+    demandPlanLines?: FacilityDemandPlanLineUncheckedCreateNestedManyWithoutDrugMapInput
   }
 
   export type FacilityDrugMapUpdateInput = {
@@ -40045,14 +45017,35 @@ export namespace Prisma {
     soDangKyNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     donViTinhNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     nhomTckt?: NullableStringFieldUpdateOperationsInput | string | null
+    giaVat?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    bhyt?: NullableStringFieldUpdateOperationsInput | string | null
+    dichVu?: NullableStringFieldUpdateOperationsInput | string | null
+    soQdTrungThau?: NullableStringFieldUpdateOperationsInput | string | null
+    tenCongTy?: NullableStringFieldUpdateOperationsInput | string | null
+    ngayBatDauHd?: NullableStringFieldUpdateOperationsInput | string | null
+    ngayKetThucHd?: NullableStringFieldUpdateOperationsInput | string | null
+    demandRoundingEnabled?: BoolFieldUpdateOperationsInput | boolean
+    demandPackageUnit?: NullableStringFieldUpdateOperationsInput | string | null
+    demandPackageSize?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    demandPlanningLocked?: BoolFieldUpdateOperationsInput | boolean
+    demandPlanningLockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    demandPlanningUnlockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    demandPlanningLockReason?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumMappingStatusFieldUpdateOperationsInput | $Enums.MappingStatus
     adminNote?: NullableStringFieldUpdateOperationsInput | string | null
     isOutOfCatalog?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    inactiveFromMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    inactiveReason?: NullableStringFieldUpdateOperationsInput | string | null
+    inactiveAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reactivatedFromMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    reactivatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     facility?: UserUpdateOneRequiredWithoutDrugMapsNestedInput
     masterDrug?: MasterDrugUpdateOneWithoutDrugMapsNestedInput
     reports?: InventoryReportUpdateManyWithoutDrugMapNestedInput
+    demandPlanLines?: FacilityDemandPlanLineUpdateManyWithoutDrugMapNestedInput
   }
 
   export type FacilityDrugMapUncheckedUpdateInput = {
@@ -40064,13 +45057,34 @@ export namespace Prisma {
     soDangKyNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     donViTinhNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     nhomTckt?: NullableStringFieldUpdateOperationsInput | string | null
+    giaVat?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    bhyt?: NullableStringFieldUpdateOperationsInput | string | null
+    dichVu?: NullableStringFieldUpdateOperationsInput | string | null
+    soQdTrungThau?: NullableStringFieldUpdateOperationsInput | string | null
+    tenCongTy?: NullableStringFieldUpdateOperationsInput | string | null
+    ngayBatDauHd?: NullableStringFieldUpdateOperationsInput | string | null
+    ngayKetThucHd?: NullableStringFieldUpdateOperationsInput | string | null
+    demandRoundingEnabled?: BoolFieldUpdateOperationsInput | boolean
+    demandPackageUnit?: NullableStringFieldUpdateOperationsInput | string | null
+    demandPackageSize?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    demandPlanningLocked?: BoolFieldUpdateOperationsInput | boolean
+    demandPlanningLockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    demandPlanningUnlockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    demandPlanningLockReason?: NullableStringFieldUpdateOperationsInput | string | null
     masterDrugId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumMappingStatusFieldUpdateOperationsInput | $Enums.MappingStatus
     adminNote?: NullableStringFieldUpdateOperationsInput | string | null
     isOutOfCatalog?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    inactiveFromMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    inactiveReason?: NullableStringFieldUpdateOperationsInput | string | null
+    inactiveAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reactivatedFromMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    reactivatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     reports?: InventoryReportUncheckedUpdateManyWithoutDrugMapNestedInput
+    demandPlanLines?: FacilityDemandPlanLineUncheckedUpdateManyWithoutDrugMapNestedInput
   }
 
   export type FacilityDrugMapCreateManyInput = {
@@ -40082,10 +45096,30 @@ export namespace Prisma {
     soDangKyNoiBo?: string | null
     donViTinhNoiBo?: string | null
     nhomTckt?: string | null
+    giaVat?: Decimal | DecimalJsLike | number | string
+    bhyt?: string | null
+    dichVu?: string | null
+    soQdTrungThau?: string | null
+    tenCongTy?: string | null
+    ngayBatDauHd?: string | null
+    ngayKetThucHd?: string | null
+    demandRoundingEnabled?: boolean
+    demandPackageUnit?: string | null
+    demandPackageSize?: Decimal | DecimalJsLike | number | string | null
+    demandPlanningLocked?: boolean
+    demandPlanningLockedAt?: Date | string | null
+    demandPlanningUnlockedAt?: Date | string | null
+    demandPlanningLockReason?: string | null
     masterDrugId?: string | null
     status?: $Enums.MappingStatus
     adminNote?: string | null
     isOutOfCatalog?: boolean
+    isActive?: boolean
+    inactiveFromMonth?: string | null
+    inactiveReason?: string | null
+    inactiveAt?: Date | string | null
+    reactivatedFromMonth?: string | null
+    reactivatedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -40098,9 +45132,29 @@ export namespace Prisma {
     soDangKyNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     donViTinhNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     nhomTckt?: NullableStringFieldUpdateOperationsInput | string | null
+    giaVat?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    bhyt?: NullableStringFieldUpdateOperationsInput | string | null
+    dichVu?: NullableStringFieldUpdateOperationsInput | string | null
+    soQdTrungThau?: NullableStringFieldUpdateOperationsInput | string | null
+    tenCongTy?: NullableStringFieldUpdateOperationsInput | string | null
+    ngayBatDauHd?: NullableStringFieldUpdateOperationsInput | string | null
+    ngayKetThucHd?: NullableStringFieldUpdateOperationsInput | string | null
+    demandRoundingEnabled?: BoolFieldUpdateOperationsInput | boolean
+    demandPackageUnit?: NullableStringFieldUpdateOperationsInput | string | null
+    demandPackageSize?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    demandPlanningLocked?: BoolFieldUpdateOperationsInput | boolean
+    demandPlanningLockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    demandPlanningUnlockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    demandPlanningLockReason?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumMappingStatusFieldUpdateOperationsInput | $Enums.MappingStatus
     adminNote?: NullableStringFieldUpdateOperationsInput | string | null
     isOutOfCatalog?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    inactiveFromMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    inactiveReason?: NullableStringFieldUpdateOperationsInput | string | null
+    inactiveAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reactivatedFromMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    reactivatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -40114,10 +45168,296 @@ export namespace Prisma {
     soDangKyNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     donViTinhNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     nhomTckt?: NullableStringFieldUpdateOperationsInput | string | null
+    giaVat?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    bhyt?: NullableStringFieldUpdateOperationsInput | string | null
+    dichVu?: NullableStringFieldUpdateOperationsInput | string | null
+    soQdTrungThau?: NullableStringFieldUpdateOperationsInput | string | null
+    tenCongTy?: NullableStringFieldUpdateOperationsInput | string | null
+    ngayBatDauHd?: NullableStringFieldUpdateOperationsInput | string | null
+    ngayKetThucHd?: NullableStringFieldUpdateOperationsInput | string | null
+    demandRoundingEnabled?: BoolFieldUpdateOperationsInput | boolean
+    demandPackageUnit?: NullableStringFieldUpdateOperationsInput | string | null
+    demandPackageSize?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    demandPlanningLocked?: BoolFieldUpdateOperationsInput | boolean
+    demandPlanningLockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    demandPlanningUnlockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    demandPlanningLockReason?: NullableStringFieldUpdateOperationsInput | string | null
     masterDrugId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumMappingStatusFieldUpdateOperationsInput | $Enums.MappingStatus
     adminNote?: NullableStringFieldUpdateOperationsInput | string | null
     isOutOfCatalog?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    inactiveFromMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    inactiveReason?: NullableStringFieldUpdateOperationsInput | string | null
+    inactiveAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reactivatedFromMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    reactivatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FacilityDemandPlanCreateInput = {
+    id?: string
+    planNo: string
+    status?: $Enums.FacilityDemandPlanStatus
+    baseReportMonth?: string | null
+    note?: string | null
+    finalizedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    facility: UserCreateNestedOneWithoutFacilityDemandPlansInput
+    lines?: FacilityDemandPlanLineCreateNestedManyWithoutPlanInput
+  }
+
+  export type FacilityDemandPlanUncheckedCreateInput = {
+    id?: string
+    planNo: string
+    facilityId: string
+    status?: $Enums.FacilityDemandPlanStatus
+    baseReportMonth?: string | null
+    note?: string | null
+    finalizedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    lines?: FacilityDemandPlanLineUncheckedCreateNestedManyWithoutPlanInput
+  }
+
+  export type FacilityDemandPlanUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    planNo?: StringFieldUpdateOperationsInput | string
+    status?: EnumFacilityDemandPlanStatusFieldUpdateOperationsInput | $Enums.FacilityDemandPlanStatus
+    baseReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    finalizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    facility?: UserUpdateOneRequiredWithoutFacilityDemandPlansNestedInput
+    lines?: FacilityDemandPlanLineUpdateManyWithoutPlanNestedInput
+  }
+
+  export type FacilityDemandPlanUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    planNo?: StringFieldUpdateOperationsInput | string
+    facilityId?: StringFieldUpdateOperationsInput | string
+    status?: EnumFacilityDemandPlanStatusFieldUpdateOperationsInput | $Enums.FacilityDemandPlanStatus
+    baseReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    finalizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lines?: FacilityDemandPlanLineUncheckedUpdateManyWithoutPlanNestedInput
+  }
+
+  export type FacilityDemandPlanCreateManyInput = {
+    id?: string
+    planNo: string
+    facilityId: string
+    status?: $Enums.FacilityDemandPlanStatus
+    baseReportMonth?: string | null
+    note?: string | null
+    finalizedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FacilityDemandPlanUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    planNo?: StringFieldUpdateOperationsInput | string
+    status?: EnumFacilityDemandPlanStatusFieldUpdateOperationsInput | $Enums.FacilityDemandPlanStatus
+    baseReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    finalizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FacilityDemandPlanUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    planNo?: StringFieldUpdateOperationsInput | string
+    facilityId?: StringFieldUpdateOperationsInput | string
+    status?: EnumFacilityDemandPlanStatusFieldUpdateOperationsInput | $Enums.FacilityDemandPlanStatus
+    baseReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    finalizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FacilityDemandPlanLineCreateInput = {
+    id?: string
+    maNoiBoSnapshot: string
+    tenThuocSnapshot: string
+    hoatChatSnapshot?: string | null
+    donViTinhSnapshot?: string | null
+    nhomTcktSnapshot?: string | null
+    maChungSnapshot?: string | null
+    suggestedQty?: Decimal | DecimalJsLike | number | string | null
+    rawSuggestedQty?: Decimal | DecimalJsLike | number | string | null
+    roundedSuggestedQty?: Decimal | DecimalJsLike | number | string | null
+    packageUnitSnapshot?: string | null
+    packageSizeSnapshot?: Decimal | DecimalJsLike | number | string | null
+    roundingNote?: string | null
+    finalQty?: Decimal | DecimalJsLike | number | string
+    suggestionBasis?: string | null
+    suggestionReportMonth?: string | null
+    suggestionRuleVersion?: string | null
+    note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    plan: FacilityDemandPlanCreateNestedOneWithoutLinesInput
+    drugMap: FacilityDrugMapCreateNestedOneWithoutDemandPlanLinesInput
+    masterDrug: MasterDrugCreateNestedOneWithoutFacilityDemandPlanLinesInput
+  }
+
+  export type FacilityDemandPlanLineUncheckedCreateInput = {
+    id?: string
+    planId: string
+    mapId: string
+    masterDrugId: string
+    maNoiBoSnapshot: string
+    tenThuocSnapshot: string
+    hoatChatSnapshot?: string | null
+    donViTinhSnapshot?: string | null
+    nhomTcktSnapshot?: string | null
+    maChungSnapshot?: string | null
+    suggestedQty?: Decimal | DecimalJsLike | number | string | null
+    rawSuggestedQty?: Decimal | DecimalJsLike | number | string | null
+    roundedSuggestedQty?: Decimal | DecimalJsLike | number | string | null
+    packageUnitSnapshot?: string | null
+    packageSizeSnapshot?: Decimal | DecimalJsLike | number | string | null
+    roundingNote?: string | null
+    finalQty?: Decimal | DecimalJsLike | number | string
+    suggestionBasis?: string | null
+    suggestionReportMonth?: string | null
+    suggestionRuleVersion?: string | null
+    note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FacilityDemandPlanLineUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    maNoiBoSnapshot?: StringFieldUpdateOperationsInput | string
+    tenThuocSnapshot?: StringFieldUpdateOperationsInput | string
+    hoatChatSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    donViTinhSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    nhomTcktSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    maChungSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rawSuggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roundedSuggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    packageUnitSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    packageSizeSnapshot?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roundingNote?: NullableStringFieldUpdateOperationsInput | string | null
+    finalQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    suggestionBasis?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionRuleVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    plan?: FacilityDemandPlanUpdateOneRequiredWithoutLinesNestedInput
+    drugMap?: FacilityDrugMapUpdateOneRequiredWithoutDemandPlanLinesNestedInput
+    masterDrug?: MasterDrugUpdateOneRequiredWithoutFacilityDemandPlanLinesNestedInput
+  }
+
+  export type FacilityDemandPlanLineUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    planId?: StringFieldUpdateOperationsInput | string
+    mapId?: StringFieldUpdateOperationsInput | string
+    masterDrugId?: StringFieldUpdateOperationsInput | string
+    maNoiBoSnapshot?: StringFieldUpdateOperationsInput | string
+    tenThuocSnapshot?: StringFieldUpdateOperationsInput | string
+    hoatChatSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    donViTinhSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    nhomTcktSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    maChungSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rawSuggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roundedSuggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    packageUnitSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    packageSizeSnapshot?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roundingNote?: NullableStringFieldUpdateOperationsInput | string | null
+    finalQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    suggestionBasis?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionRuleVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FacilityDemandPlanLineCreateManyInput = {
+    id?: string
+    planId: string
+    mapId: string
+    masterDrugId: string
+    maNoiBoSnapshot: string
+    tenThuocSnapshot: string
+    hoatChatSnapshot?: string | null
+    donViTinhSnapshot?: string | null
+    nhomTcktSnapshot?: string | null
+    maChungSnapshot?: string | null
+    suggestedQty?: Decimal | DecimalJsLike | number | string | null
+    rawSuggestedQty?: Decimal | DecimalJsLike | number | string | null
+    roundedSuggestedQty?: Decimal | DecimalJsLike | number | string | null
+    packageUnitSnapshot?: string | null
+    packageSizeSnapshot?: Decimal | DecimalJsLike | number | string | null
+    roundingNote?: string | null
+    finalQty?: Decimal | DecimalJsLike | number | string
+    suggestionBasis?: string | null
+    suggestionReportMonth?: string | null
+    suggestionRuleVersion?: string | null
+    note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FacilityDemandPlanLineUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    maNoiBoSnapshot?: StringFieldUpdateOperationsInput | string
+    tenThuocSnapshot?: StringFieldUpdateOperationsInput | string
+    hoatChatSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    donViTinhSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    nhomTcktSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    maChungSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rawSuggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roundedSuggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    packageUnitSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    packageSizeSnapshot?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roundingNote?: NullableStringFieldUpdateOperationsInput | string | null
+    finalQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    suggestionBasis?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionRuleVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FacilityDemandPlanLineUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    planId?: StringFieldUpdateOperationsInput | string
+    mapId?: StringFieldUpdateOperationsInput | string
+    masterDrugId?: StringFieldUpdateOperationsInput | string
+    maNoiBoSnapshot?: StringFieldUpdateOperationsInput | string
+    tenThuocSnapshot?: StringFieldUpdateOperationsInput | string
+    hoatChatSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    donViTinhSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    nhomTcktSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    maChungSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rawSuggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roundedSuggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    packageUnitSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    packageSizeSnapshot?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roundingNote?: NullableStringFieldUpdateOperationsInput | string | null
+    finalQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    suggestionBasis?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionRuleVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -40127,6 +45467,7 @@ export namespace Prisma {
     reportMonth: string
     tonDau?: Decimal | DecimalJsLike | number | string
     nhap?: Decimal | DecimalJsLike | number | string
+    nhapHoanTra?: Decimal | DecimalJsLike | number | string
     xuat?: Decimal | DecimalJsLike | number | string
     tonCuoi?: Decimal | DecimalJsLike | number | string
     giaVat?: Decimal | DecimalJsLike | number | string
@@ -40152,6 +45493,7 @@ export namespace Prisma {
     reportMonth: string
     tonDau?: Decimal | DecimalJsLike | number | string
     nhap?: Decimal | DecimalJsLike | number | string
+    nhapHoanTra?: Decimal | DecimalJsLike | number | string
     xuat?: Decimal | DecimalJsLike | number | string
     tonCuoi?: Decimal | DecimalJsLike | number | string
     giaVat?: Decimal | DecimalJsLike | number | string
@@ -40173,6 +45515,7 @@ export namespace Prisma {
     reportMonth?: StringFieldUpdateOperationsInput | string
     tonDau?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     nhap?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    nhapHoanTra?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     xuat?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     tonCuoi?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     giaVat?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -40198,6 +45541,7 @@ export namespace Prisma {
     reportMonth?: StringFieldUpdateOperationsInput | string
     tonDau?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     nhap?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    nhapHoanTra?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     xuat?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     tonCuoi?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     giaVat?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -40221,6 +45565,7 @@ export namespace Prisma {
     reportMonth: string
     tonDau?: Decimal | DecimalJsLike | number | string
     nhap?: Decimal | DecimalJsLike | number | string
+    nhapHoanTra?: Decimal | DecimalJsLike | number | string
     xuat?: Decimal | DecimalJsLike | number | string
     tonCuoi?: Decimal | DecimalJsLike | number | string
     giaVat?: Decimal | DecimalJsLike | number | string
@@ -40242,6 +45587,7 @@ export namespace Prisma {
     reportMonth?: StringFieldUpdateOperationsInput | string
     tonDau?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     nhap?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    nhapHoanTra?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     xuat?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     tonCuoi?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     giaVat?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -40265,6 +45611,7 @@ export namespace Prisma {
     reportMonth?: StringFieldUpdateOperationsInput | string
     tonDau?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     nhap?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    nhapHoanTra?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     xuat?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     tonCuoi?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     giaVat?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -41245,6 +46592,7 @@ export namespace Prisma {
     thoiGianThucHien?: string | null
     trangThai?: string | null
     maThongBao?: string | null
+    yeuCauTBMT?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     keHoach: KeHoachLCNTCreateNestedOneWithoutGoiThausInput
@@ -41270,6 +46618,7 @@ export namespace Prisma {
     thoiGianThucHien?: string | null
     trangThai?: string | null
     maThongBao?: string | null
+    yeuCauTBMT?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     phanLos?: PhanLoGoiThauUncheckedCreateNestedManyWithoutGoiThauInput
@@ -41293,6 +46642,7 @@ export namespace Prisma {
     thoiGianThucHien?: NullableStringFieldUpdateOperationsInput | string | null
     trangThai?: NullableStringFieldUpdateOperationsInput | string | null
     maThongBao?: NullableStringFieldUpdateOperationsInput | string | null
+    yeuCauTBMT?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     keHoach?: KeHoachLCNTUpdateOneRequiredWithoutGoiThausNestedInput
@@ -41318,6 +46668,7 @@ export namespace Prisma {
     thoiGianThucHien?: NullableStringFieldUpdateOperationsInput | string | null
     trangThai?: NullableStringFieldUpdateOperationsInput | string | null
     maThongBao?: NullableStringFieldUpdateOperationsInput | string | null
+    yeuCauTBMT?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     phanLos?: PhanLoGoiThauUncheckedUpdateManyWithoutGoiThauNestedInput
@@ -41342,6 +46693,7 @@ export namespace Prisma {
     thoiGianThucHien?: string | null
     trangThai?: string | null
     maThongBao?: string | null
+    yeuCauTBMT?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -41362,6 +46714,7 @@ export namespace Prisma {
     thoiGianThucHien?: NullableStringFieldUpdateOperationsInput | string | null
     trangThai?: NullableStringFieldUpdateOperationsInput | string | null
     maThongBao?: NullableStringFieldUpdateOperationsInput | string | null
+    yeuCauTBMT?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -41383,6 +46736,7 @@ export namespace Prisma {
     thoiGianThucHien?: NullableStringFieldUpdateOperationsInput | string | null
     trangThai?: NullableStringFieldUpdateOperationsInput | string | null
     maThongBao?: NullableStringFieldUpdateOperationsInput | string | null
+    yeuCauTBMT?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -41592,14 +46946,14 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     goiThau: GoiThauCreateNestedOneWithoutKetQuaLCNTsInput
-    thongBaoMoiThau: ThongBaoMoiThauCreateNestedOneWithoutKetQuaLCNTsInput
+    thongBaoMoiThau?: ThongBaoMoiThauCreateNestedOneWithoutKetQuaLCNTsInput
     ketQuaPhanLos?: KetQuaPhanLoCreateNestedManyWithoutKetQuaLCNTInput
   }
 
   export type KetQuaLCNTUncheckedCreateInput = {
     id?: string
     goiThauId: string
-    thongBaoMoiThauId: string
+    thongBaoMoiThauId?: string | null
     soQdPheDuyetKQLCNT: string
     ngayPheDuyetKQLCNT: Date | string
     soMatHangMoiThau: number
@@ -41620,14 +46974,14 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     goiThau?: GoiThauUpdateOneRequiredWithoutKetQuaLCNTsNestedInput
-    thongBaoMoiThau?: ThongBaoMoiThauUpdateOneRequiredWithoutKetQuaLCNTsNestedInput
+    thongBaoMoiThau?: ThongBaoMoiThauUpdateOneWithoutKetQuaLCNTsNestedInput
     ketQuaPhanLos?: KetQuaPhanLoUpdateManyWithoutKetQuaLCNTNestedInput
   }
 
   export type KetQuaLCNTUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     goiThauId?: StringFieldUpdateOperationsInput | string
-    thongBaoMoiThauId?: StringFieldUpdateOperationsInput | string
+    thongBaoMoiThauId?: NullableStringFieldUpdateOperationsInput | string | null
     soQdPheDuyetKQLCNT?: StringFieldUpdateOperationsInput | string
     ngayPheDuyetKQLCNT?: DateTimeFieldUpdateOperationsInput | Date | string
     soMatHangMoiThau?: IntFieldUpdateOperationsInput | number
@@ -41641,7 +46995,7 @@ export namespace Prisma {
   export type KetQuaLCNTCreateManyInput = {
     id?: string
     goiThauId: string
-    thongBaoMoiThauId: string
+    thongBaoMoiThauId?: string | null
     soQdPheDuyetKQLCNT: string
     ngayPheDuyetKQLCNT: Date | string
     soMatHangMoiThau: number
@@ -41665,7 +47019,7 @@ export namespace Prisma {
   export type KetQuaLCNTUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     goiThauId?: StringFieldUpdateOperationsInput | string
-    thongBaoMoiThauId?: StringFieldUpdateOperationsInput | string
+    thongBaoMoiThauId?: NullableStringFieldUpdateOperationsInput | string | null
     soQdPheDuyetKQLCNT?: StringFieldUpdateOperationsInput | string
     ngayPheDuyetKQLCNT?: DateTimeFieldUpdateOperationsInput | Date | string
     soMatHangMoiThau?: IntFieldUpdateOperationsInput | number
@@ -41972,6 +47326,69 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type SystemSettingCreateInput = {
+    id?: string
+    key: string
+    value: JsonNullValueInput | InputJsonValue
+    updatedById?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type SystemSettingUncheckedCreateInput = {
+    id?: string
+    key: string
+    value: JsonNullValueInput | InputJsonValue
+    updatedById?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type SystemSettingUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    key?: StringFieldUpdateOperationsInput | string
+    value?: JsonNullValueInput | InputJsonValue
+    updatedById?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SystemSettingUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    key?: StringFieldUpdateOperationsInput | string
+    value?: JsonNullValueInput | InputJsonValue
+    updatedById?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SystemSettingCreateManyInput = {
+    id?: string
+    key: string
+    value: JsonNullValueInput | InputJsonValue
+    updatedById?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type SystemSettingUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    key?: StringFieldUpdateOperationsInput | string
+    value?: JsonNullValueInput | InputJsonValue
+    updatedById?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SystemSettingUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    key?: StringFieldUpdateOperationsInput | string
+    value?: JsonNullValueInput | InputJsonValue
+    updatedById?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type AIUserPolicyCreateInput = {
     id?: string
     enabled?: boolean | null
@@ -42174,6 +47591,17 @@ export namespace Prisma {
     not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
+  export type FloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
+  }
+
   export type DateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -42206,6 +47634,12 @@ export namespace Prisma {
     every?: FacilityReportSubmissionWhereInput
     some?: FacilityReportSubmissionWhereInput
     none?: FacilityReportSubmissionWhereInput
+  }
+
+  export type FacilityDemandPlanListRelationFilter = {
+    every?: FacilityDemandPlanWhereInput
+    some?: FacilityDemandPlanWhereInput
+    none?: FacilityDemandPlanWhereInput
   }
 
   export type KeHoachLCNTListRelationFilter = {
@@ -42260,6 +47694,10 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
+  export type FacilityDemandPlanOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type KeHoachLCNTOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -42294,8 +47732,15 @@ export namespace Prisma {
     contactPerson?: SortOrder
     phoneNumber?: SortOrder
     address?: SortOrder
+    latitude?: SortOrder
+    longitude?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+  }
+
+  export type UserAvgOrderByAggregateInput = {
+    latitude?: SortOrder
+    longitude?: SortOrder
   }
 
   export type UserMaxOrderByAggregateInput = {
@@ -42312,6 +47757,8 @@ export namespace Prisma {
     contactPerson?: SortOrder
     phoneNumber?: SortOrder
     address?: SortOrder
+    latitude?: SortOrder
+    longitude?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -42330,8 +47777,15 @@ export namespace Prisma {
     contactPerson?: SortOrder
     phoneNumber?: SortOrder
     address?: SortOrder
+    latitude?: SortOrder
+    longitude?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+  }
+
+  export type UserSumOrderByAggregateInput = {
+    latitude?: SortOrder
+    longitude?: SortOrder
   }
 
   export type StringWithAggregatesFilter<$PrismaModel = never> = {
@@ -42386,6 +47840,22 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedBoolFilter<$PrismaModel>
     _max?: NestedBoolFilter<$PrismaModel>
+  }
+
+  export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedFloatNullableFilter<$PrismaModel>
+    _min?: NestedFloatNullableFilter<$PrismaModel>
+    _max?: NestedFloatNullableFilter<$PrismaModel>
   }
 
   export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
@@ -42509,7 +47979,17 @@ export namespace Prisma {
     none?: DrugOrderLineWhereInput
   }
 
+  export type FacilityDemandPlanLineListRelationFilter = {
+    every?: FacilityDemandPlanLineWhereInput
+    some?: FacilityDemandPlanLineWhereInput
+    none?: FacilityDemandPlanLineWhereInput
+  }
+
   export type DrugOrderLineOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type FacilityDemandPlanLineOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -42517,6 +47997,7 @@ export namespace Prisma {
     id?: SortOrder
     maChung?: SortOrder
     maBhyt?: SortOrder
+    maAtc?: SortOrder
     tenThuoc?: SortOrder
     hoatChat?: SortOrder
     hamLuong?: SortOrder
@@ -42538,6 +48019,7 @@ export namespace Prisma {
     therapeuticGroupId?: SortOrder
     isKeDon?: SortOrder
     kiemSoatDacBiet?: SortOrder
+    isThuocHiem?: SortOrder
     isTrongNuoc?: SortOrder
     isActive?: SortOrder
     createdAt?: SortOrder
@@ -42548,6 +48030,7 @@ export namespace Prisma {
     id?: SortOrder
     maChung?: SortOrder
     maBhyt?: SortOrder
+    maAtc?: SortOrder
     tenThuoc?: SortOrder
     hoatChat?: SortOrder
     hamLuong?: SortOrder
@@ -42569,6 +48052,7 @@ export namespace Prisma {
     therapeuticGroupId?: SortOrder
     isKeDon?: SortOrder
     kiemSoatDacBiet?: SortOrder
+    isThuocHiem?: SortOrder
     isTrongNuoc?: SortOrder
     isActive?: SortOrder
     createdAt?: SortOrder
@@ -42579,6 +48063,7 @@ export namespace Prisma {
     id?: SortOrder
     maChung?: SortOrder
     maBhyt?: SortOrder
+    maAtc?: SortOrder
     tenThuoc?: SortOrder
     hoatChat?: SortOrder
     hamLuong?: SortOrder
@@ -42600,6 +48085,7 @@ export namespace Prisma {
     therapeuticGroupId?: SortOrder
     isKeDon?: SortOrder
     kiemSoatDacBiet?: SortOrder
+    isThuocHiem?: SortOrder
     isTrongNuoc?: SortOrder
     isActive?: SortOrder
     createdAt?: SortOrder
@@ -42663,6 +48149,39 @@ export namespace Prisma {
     updatedAt?: SortOrder
   }
 
+  export type DecimalFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string
+  }
+
+  export type DecimalNullableFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalNullableFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
+  }
+
+  export type DateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
   export type EnumMappingStatusFilter<$PrismaModel = never> = {
     equals?: $Enums.MappingStatus | EnumMappingStatusFieldRefInput<$PrismaModel>
     in?: $Enums.MappingStatus[] | ListEnumMappingStatusFieldRefInput<$PrismaModel>
@@ -42689,12 +48208,37 @@ export namespace Prisma {
     soDangKyNoiBo?: SortOrder
     donViTinhNoiBo?: SortOrder
     nhomTckt?: SortOrder
+    giaVat?: SortOrder
+    bhyt?: SortOrder
+    dichVu?: SortOrder
+    soQdTrungThau?: SortOrder
+    tenCongTy?: SortOrder
+    ngayBatDauHd?: SortOrder
+    ngayKetThucHd?: SortOrder
+    demandRoundingEnabled?: SortOrder
+    demandPackageUnit?: SortOrder
+    demandPackageSize?: SortOrder
+    demandPlanningLocked?: SortOrder
+    demandPlanningLockedAt?: SortOrder
+    demandPlanningUnlockedAt?: SortOrder
+    demandPlanningLockReason?: SortOrder
     masterDrugId?: SortOrder
     status?: SortOrder
     adminNote?: SortOrder
     isOutOfCatalog?: SortOrder
+    isActive?: SortOrder
+    inactiveFromMonth?: SortOrder
+    inactiveReason?: SortOrder
+    inactiveAt?: SortOrder
+    reactivatedFromMonth?: SortOrder
+    reactivatedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+  }
+
+  export type FacilityDrugMapAvgOrderByAggregateInput = {
+    giaVat?: SortOrder
+    demandPackageSize?: SortOrder
   }
 
   export type FacilityDrugMapMaxOrderByAggregateInput = {
@@ -42706,10 +48250,30 @@ export namespace Prisma {
     soDangKyNoiBo?: SortOrder
     donViTinhNoiBo?: SortOrder
     nhomTckt?: SortOrder
+    giaVat?: SortOrder
+    bhyt?: SortOrder
+    dichVu?: SortOrder
+    soQdTrungThau?: SortOrder
+    tenCongTy?: SortOrder
+    ngayBatDauHd?: SortOrder
+    ngayKetThucHd?: SortOrder
+    demandRoundingEnabled?: SortOrder
+    demandPackageUnit?: SortOrder
+    demandPackageSize?: SortOrder
+    demandPlanningLocked?: SortOrder
+    demandPlanningLockedAt?: SortOrder
+    demandPlanningUnlockedAt?: SortOrder
+    demandPlanningLockReason?: SortOrder
     masterDrugId?: SortOrder
     status?: SortOrder
     adminNote?: SortOrder
     isOutOfCatalog?: SortOrder
+    isActive?: SortOrder
+    inactiveFromMonth?: SortOrder
+    inactiveReason?: SortOrder
+    inactiveAt?: SortOrder
+    reactivatedFromMonth?: SortOrder
+    reactivatedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -42723,12 +48287,83 @@ export namespace Prisma {
     soDangKyNoiBo?: SortOrder
     donViTinhNoiBo?: SortOrder
     nhomTckt?: SortOrder
+    giaVat?: SortOrder
+    bhyt?: SortOrder
+    dichVu?: SortOrder
+    soQdTrungThau?: SortOrder
+    tenCongTy?: SortOrder
+    ngayBatDauHd?: SortOrder
+    ngayKetThucHd?: SortOrder
+    demandRoundingEnabled?: SortOrder
+    demandPackageUnit?: SortOrder
+    demandPackageSize?: SortOrder
+    demandPlanningLocked?: SortOrder
+    demandPlanningLockedAt?: SortOrder
+    demandPlanningUnlockedAt?: SortOrder
+    demandPlanningLockReason?: SortOrder
     masterDrugId?: SortOrder
     status?: SortOrder
     adminNote?: SortOrder
     isOutOfCatalog?: SortOrder
+    isActive?: SortOrder
+    inactiveFromMonth?: SortOrder
+    inactiveReason?: SortOrder
+    inactiveAt?: SortOrder
+    reactivatedFromMonth?: SortOrder
+    reactivatedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+  }
+
+  export type FacilityDrugMapSumOrderByAggregateInput = {
+    giaVat?: SortOrder
+    demandPackageSize?: SortOrder
+  }
+
+  export type DecimalWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalWithAggregatesFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedDecimalFilter<$PrismaModel>
+    _sum?: NestedDecimalFilter<$PrismaModel>
+    _min?: NestedDecimalFilter<$PrismaModel>
+    _max?: NestedDecimalFilter<$PrismaModel>
+  }
+
+  export type DecimalNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalNullableWithAggregatesFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedDecimalNullableFilter<$PrismaModel>
+    _sum?: NestedDecimalNullableFilter<$PrismaModel>
+    _min?: NestedDecimalNullableFilter<$PrismaModel>
+    _max?: NestedDecimalNullableFilter<$PrismaModel>
+  }
+
+  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
   export type EnumMappingStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -42741,15 +48376,171 @@ export namespace Prisma {
     _max?: NestedEnumMappingStatusFilter<$PrismaModel>
   }
 
-  export type DecimalFilter<$PrismaModel = never> = {
-    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
-    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
-    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    not?: NestedDecimalFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string
+  export type EnumFacilityDemandPlanStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.FacilityDemandPlanStatus | EnumFacilityDemandPlanStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.FacilityDemandPlanStatus[] | ListEnumFacilityDemandPlanStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.FacilityDemandPlanStatus[] | ListEnumFacilityDemandPlanStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumFacilityDemandPlanStatusFilter<$PrismaModel> | $Enums.FacilityDemandPlanStatus
+  }
+
+  export type FacilityDemandPlanCountOrderByAggregateInput = {
+    id?: SortOrder
+    planNo?: SortOrder
+    facilityId?: SortOrder
+    status?: SortOrder
+    baseReportMonth?: SortOrder
+    note?: SortOrder
+    finalizedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FacilityDemandPlanMaxOrderByAggregateInput = {
+    id?: SortOrder
+    planNo?: SortOrder
+    facilityId?: SortOrder
+    status?: SortOrder
+    baseReportMonth?: SortOrder
+    note?: SortOrder
+    finalizedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FacilityDemandPlanMinOrderByAggregateInput = {
+    id?: SortOrder
+    planNo?: SortOrder
+    facilityId?: SortOrder
+    status?: SortOrder
+    baseReportMonth?: SortOrder
+    note?: SortOrder
+    finalizedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type EnumFacilityDemandPlanStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.FacilityDemandPlanStatus | EnumFacilityDemandPlanStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.FacilityDemandPlanStatus[] | ListEnumFacilityDemandPlanStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.FacilityDemandPlanStatus[] | ListEnumFacilityDemandPlanStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumFacilityDemandPlanStatusWithAggregatesFilter<$PrismaModel> | $Enums.FacilityDemandPlanStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumFacilityDemandPlanStatusFilter<$PrismaModel>
+    _max?: NestedEnumFacilityDemandPlanStatusFilter<$PrismaModel>
+  }
+
+  export type FacilityDemandPlanScalarRelationFilter = {
+    is?: FacilityDemandPlanWhereInput
+    isNot?: FacilityDemandPlanWhereInput
+  }
+
+  export type FacilityDrugMapScalarRelationFilter = {
+    is?: FacilityDrugMapWhereInput
+    isNot?: FacilityDrugMapWhereInput
+  }
+
+  export type MasterDrugScalarRelationFilter = {
+    is?: MasterDrugWhereInput
+    isNot?: MasterDrugWhereInput
+  }
+
+  export type FacilityDemandPlanLinePlanIdMapIdCompoundUniqueInput = {
+    planId: string
+    mapId: string
+  }
+
+  export type FacilityDemandPlanLineCountOrderByAggregateInput = {
+    id?: SortOrder
+    planId?: SortOrder
+    mapId?: SortOrder
+    masterDrugId?: SortOrder
+    maNoiBoSnapshot?: SortOrder
+    tenThuocSnapshot?: SortOrder
+    hoatChatSnapshot?: SortOrder
+    donViTinhSnapshot?: SortOrder
+    nhomTcktSnapshot?: SortOrder
+    maChungSnapshot?: SortOrder
+    suggestedQty?: SortOrder
+    rawSuggestedQty?: SortOrder
+    roundedSuggestedQty?: SortOrder
+    packageUnitSnapshot?: SortOrder
+    packageSizeSnapshot?: SortOrder
+    roundingNote?: SortOrder
+    finalQty?: SortOrder
+    suggestionBasis?: SortOrder
+    suggestionReportMonth?: SortOrder
+    suggestionRuleVersion?: SortOrder
+    note?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FacilityDemandPlanLineAvgOrderByAggregateInput = {
+    suggestedQty?: SortOrder
+    rawSuggestedQty?: SortOrder
+    roundedSuggestedQty?: SortOrder
+    packageSizeSnapshot?: SortOrder
+    finalQty?: SortOrder
+  }
+
+  export type FacilityDemandPlanLineMaxOrderByAggregateInput = {
+    id?: SortOrder
+    planId?: SortOrder
+    mapId?: SortOrder
+    masterDrugId?: SortOrder
+    maNoiBoSnapshot?: SortOrder
+    tenThuocSnapshot?: SortOrder
+    hoatChatSnapshot?: SortOrder
+    donViTinhSnapshot?: SortOrder
+    nhomTcktSnapshot?: SortOrder
+    maChungSnapshot?: SortOrder
+    suggestedQty?: SortOrder
+    rawSuggestedQty?: SortOrder
+    roundedSuggestedQty?: SortOrder
+    packageUnitSnapshot?: SortOrder
+    packageSizeSnapshot?: SortOrder
+    roundingNote?: SortOrder
+    finalQty?: SortOrder
+    suggestionBasis?: SortOrder
+    suggestionReportMonth?: SortOrder
+    suggestionRuleVersion?: SortOrder
+    note?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FacilityDemandPlanLineMinOrderByAggregateInput = {
+    id?: SortOrder
+    planId?: SortOrder
+    mapId?: SortOrder
+    masterDrugId?: SortOrder
+    maNoiBoSnapshot?: SortOrder
+    tenThuocSnapshot?: SortOrder
+    hoatChatSnapshot?: SortOrder
+    donViTinhSnapshot?: SortOrder
+    nhomTcktSnapshot?: SortOrder
+    maChungSnapshot?: SortOrder
+    suggestedQty?: SortOrder
+    rawSuggestedQty?: SortOrder
+    roundedSuggestedQty?: SortOrder
+    packageUnitSnapshot?: SortOrder
+    packageSizeSnapshot?: SortOrder
+    roundingNote?: SortOrder
+    finalQty?: SortOrder
+    suggestionBasis?: SortOrder
+    suggestionReportMonth?: SortOrder
+    suggestionRuleVersion?: SortOrder
+    note?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FacilityDemandPlanLineSumOrderByAggregateInput = {
+    suggestedQty?: SortOrder
+    rawSuggestedQty?: SortOrder
+    roundedSuggestedQty?: SortOrder
+    packageSizeSnapshot?: SortOrder
+    finalQty?: SortOrder
   }
 
   export type EnumReportStatusFilter<$PrismaModel = never> = {
@@ -42757,11 +48548,6 @@ export namespace Prisma {
     in?: $Enums.ReportStatus[] | ListEnumReportStatusFieldRefInput<$PrismaModel>
     notIn?: $Enums.ReportStatus[] | ListEnumReportStatusFieldRefInput<$PrismaModel>
     not?: NestedEnumReportStatusFilter<$PrismaModel> | $Enums.ReportStatus
-  }
-
-  export type FacilityDrugMapScalarRelationFilter = {
-    is?: FacilityDrugMapWhereInput
-    isNot?: FacilityDrugMapWhereInput
   }
 
   export type InventoryReportFacilityIdMapIdReportMonthCompoundUniqueInput = {
@@ -42777,6 +48563,7 @@ export namespace Prisma {
     reportMonth?: SortOrder
     tonDau?: SortOrder
     nhap?: SortOrder
+    nhapHoanTra?: SortOrder
     xuat?: SortOrder
     tonCuoi?: SortOrder
     giaVat?: SortOrder
@@ -42796,6 +48583,7 @@ export namespace Prisma {
   export type InventoryReportAvgOrderByAggregateInput = {
     tonDau?: SortOrder
     nhap?: SortOrder
+    nhapHoanTra?: SortOrder
     xuat?: SortOrder
     tonCuoi?: SortOrder
     giaVat?: SortOrder
@@ -42809,6 +48597,7 @@ export namespace Prisma {
     reportMonth?: SortOrder
     tonDau?: SortOrder
     nhap?: SortOrder
+    nhapHoanTra?: SortOrder
     xuat?: SortOrder
     tonCuoi?: SortOrder
     giaVat?: SortOrder
@@ -42832,6 +48621,7 @@ export namespace Prisma {
     reportMonth?: SortOrder
     tonDau?: SortOrder
     nhap?: SortOrder
+    nhapHoanTra?: SortOrder
     xuat?: SortOrder
     tonCuoi?: SortOrder
     giaVat?: SortOrder
@@ -42851,26 +48641,11 @@ export namespace Prisma {
   export type InventoryReportSumOrderByAggregateInput = {
     tonDau?: SortOrder
     nhap?: SortOrder
+    nhapHoanTra?: SortOrder
     xuat?: SortOrder
     tonCuoi?: SortOrder
     giaVat?: SortOrder
     thanhTienTonCuoi?: SortOrder
-  }
-
-  export type DecimalWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
-    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
-    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    not?: NestedDecimalWithAggregatesFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedDecimalFilter<$PrismaModel>
-    _sum?: NestedDecimalFilter<$PrismaModel>
-    _min?: NestedDecimalFilter<$PrismaModel>
-    _max?: NestedDecimalFilter<$PrismaModel>
   }
 
   export type EnumReportStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -42965,17 +48740,6 @@ export namespace Prisma {
     not?: NestedEnumDrugOrderStatusFilter<$PrismaModel> | $Enums.DrugOrderStatus
   }
 
-  export type DateTimeNullableFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
-  }
-
   export type DrugOrderShipmentListRelationFilter = {
     every?: DrugOrderShipmentWhereInput
     some?: DrugOrderShipmentWhereInput
@@ -43038,36 +48802,11 @@ export namespace Prisma {
     _max?: NestedEnumDrugOrderStatusFilter<$PrismaModel>
   }
 
-  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedDateTimeNullableFilter<$PrismaModel>
-    _max?: NestedDateTimeNullableFilter<$PrismaModel>
-  }
-
   export type EnumDrugOrderLineSourceTypeFilter<$PrismaModel = never> = {
     equals?: $Enums.DrugOrderLineSourceType | EnumDrugOrderLineSourceTypeFieldRefInput<$PrismaModel>
     in?: $Enums.DrugOrderLineSourceType[] | ListEnumDrugOrderLineSourceTypeFieldRefInput<$PrismaModel>
     notIn?: $Enums.DrugOrderLineSourceType[] | ListEnumDrugOrderLineSourceTypeFieldRefInput<$PrismaModel>
     not?: NestedEnumDrugOrderLineSourceTypeFilter<$PrismaModel> | $Enums.DrugOrderLineSourceType
-  }
-
-  export type DecimalNullableFilter<$PrismaModel = never> = {
-    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
-    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
-    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
-    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    not?: NestedDecimalNullableFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
   }
 
   export type EnumDrugOrderLineStatusFilter<$PrismaModel = never> = {
@@ -43187,22 +48926,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumDrugOrderLineSourceTypeFilter<$PrismaModel>
     _max?: NestedEnumDrugOrderLineSourceTypeFilter<$PrismaModel>
-  }
-
-  export type DecimalNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
-    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
-    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
-    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    not?: NestedDecimalNullableWithAggregatesFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedDecimalNullableFilter<$PrismaModel>
-    _sum?: NestedDecimalNullableFilter<$PrismaModel>
-    _min?: NestedDecimalNullableFilter<$PrismaModel>
-    _max?: NestedDecimalNullableFilter<$PrismaModel>
   }
 
   export type EnumDrugOrderLineStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -43661,6 +49384,7 @@ export namespace Prisma {
     thoiGianThucHien?: SortOrder
     trangThai?: SortOrder
     maThongBao?: SortOrder
+    yeuCauTBMT?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -43687,6 +49411,7 @@ export namespace Prisma {
     thoiGianThucHien?: SortOrder
     trangThai?: SortOrder
     maThongBao?: SortOrder
+    yeuCauTBMT?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -43708,6 +49433,7 @@ export namespace Prisma {
     thoiGianThucHien?: SortOrder
     trangThai?: SortOrder
     maThongBao?: SortOrder
+    yeuCauTBMT?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -43827,9 +49553,9 @@ export namespace Prisma {
     thanhTien?: SortOrder
   }
 
-  export type ThongBaoMoiThauScalarRelationFilter = {
-    is?: ThongBaoMoiThauWhereInput
-    isNot?: ThongBaoMoiThauWhereInput
+  export type ThongBaoMoiThauNullableScalarRelationFilter = {
+    is?: ThongBaoMoiThauWhereInput | null
+    isNot?: ThongBaoMoiThauWhereInput | null
   }
 
   export type KetQuaLCNTCountOrderByAggregateInput = {
@@ -44077,6 +49803,31 @@ export namespace Prisma {
     _max?: NestedJsonFilter<$PrismaModel>
   }
 
+  export type SystemSettingCountOrderByAggregateInput = {
+    id?: SortOrder
+    key?: SortOrder
+    value?: SortOrder
+    updatedById?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SystemSettingMaxOrderByAggregateInput = {
+    id?: SortOrder
+    key?: SortOrder
+    updatedById?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SystemSettingMinOrderByAggregateInput = {
+    id?: SortOrder
+    key?: SortOrder
+    updatedById?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
   export type BoolNullableFilter<$PrismaModel = never> = {
     equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
     not?: NestedBoolNullableFilter<$PrismaModel> | boolean | null
@@ -44201,6 +49952,13 @@ export namespace Prisma {
     connect?: FacilityReportSubmissionWhereUniqueInput | FacilityReportSubmissionWhereUniqueInput[]
   }
 
+  export type FacilityDemandPlanCreateNestedManyWithoutFacilityInput = {
+    create?: XOR<FacilityDemandPlanCreateWithoutFacilityInput, FacilityDemandPlanUncheckedCreateWithoutFacilityInput> | FacilityDemandPlanCreateWithoutFacilityInput[] | FacilityDemandPlanUncheckedCreateWithoutFacilityInput[]
+    connectOrCreate?: FacilityDemandPlanCreateOrConnectWithoutFacilityInput | FacilityDemandPlanCreateOrConnectWithoutFacilityInput[]
+    createMany?: FacilityDemandPlanCreateManyFacilityInputEnvelope
+    connect?: FacilityDemandPlanWhereUniqueInput | FacilityDemandPlanWhereUniqueInput[]
+  }
+
   export type KeHoachLCNTCreateNestedManyWithoutFacilityInput = {
     create?: XOR<KeHoachLCNTCreateWithoutFacilityInput, KeHoachLCNTUncheckedCreateWithoutFacilityInput> | KeHoachLCNTCreateWithoutFacilityInput[] | KeHoachLCNTUncheckedCreateWithoutFacilityInput[]
     connectOrCreate?: KeHoachLCNTCreateOrConnectWithoutFacilityInput | KeHoachLCNTCreateOrConnectWithoutFacilityInput[]
@@ -44263,6 +50021,13 @@ export namespace Prisma {
     connect?: FacilityReportSubmissionWhereUniqueInput | FacilityReportSubmissionWhereUniqueInput[]
   }
 
+  export type FacilityDemandPlanUncheckedCreateNestedManyWithoutFacilityInput = {
+    create?: XOR<FacilityDemandPlanCreateWithoutFacilityInput, FacilityDemandPlanUncheckedCreateWithoutFacilityInput> | FacilityDemandPlanCreateWithoutFacilityInput[] | FacilityDemandPlanUncheckedCreateWithoutFacilityInput[]
+    connectOrCreate?: FacilityDemandPlanCreateOrConnectWithoutFacilityInput | FacilityDemandPlanCreateOrConnectWithoutFacilityInput[]
+    createMany?: FacilityDemandPlanCreateManyFacilityInputEnvelope
+    connect?: FacilityDemandPlanWhereUniqueInput | FacilityDemandPlanWhereUniqueInput[]
+  }
+
   export type KeHoachLCNTUncheckedCreateNestedManyWithoutFacilityInput = {
     create?: XOR<KeHoachLCNTCreateWithoutFacilityInput, KeHoachLCNTUncheckedCreateWithoutFacilityInput> | KeHoachLCNTCreateWithoutFacilityInput[] | KeHoachLCNTUncheckedCreateWithoutFacilityInput[]
     connectOrCreate?: KeHoachLCNTCreateOrConnectWithoutFacilityInput | KeHoachLCNTCreateOrConnectWithoutFacilityInput[]
@@ -44320,6 +50085,14 @@ export namespace Prisma {
     set?: boolean
   }
 
+  export type NullableFloatFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
   export type DateTimeFieldUpdateOperationsInput = {
     set?: Date | string
   }
@@ -44374,6 +50147,20 @@ export namespace Prisma {
     update?: FacilityReportSubmissionUpdateWithWhereUniqueWithoutFacilityInput | FacilityReportSubmissionUpdateWithWhereUniqueWithoutFacilityInput[]
     updateMany?: FacilityReportSubmissionUpdateManyWithWhereWithoutFacilityInput | FacilityReportSubmissionUpdateManyWithWhereWithoutFacilityInput[]
     deleteMany?: FacilityReportSubmissionScalarWhereInput | FacilityReportSubmissionScalarWhereInput[]
+  }
+
+  export type FacilityDemandPlanUpdateManyWithoutFacilityNestedInput = {
+    create?: XOR<FacilityDemandPlanCreateWithoutFacilityInput, FacilityDemandPlanUncheckedCreateWithoutFacilityInput> | FacilityDemandPlanCreateWithoutFacilityInput[] | FacilityDemandPlanUncheckedCreateWithoutFacilityInput[]
+    connectOrCreate?: FacilityDemandPlanCreateOrConnectWithoutFacilityInput | FacilityDemandPlanCreateOrConnectWithoutFacilityInput[]
+    upsert?: FacilityDemandPlanUpsertWithWhereUniqueWithoutFacilityInput | FacilityDemandPlanUpsertWithWhereUniqueWithoutFacilityInput[]
+    createMany?: FacilityDemandPlanCreateManyFacilityInputEnvelope
+    set?: FacilityDemandPlanWhereUniqueInput | FacilityDemandPlanWhereUniqueInput[]
+    disconnect?: FacilityDemandPlanWhereUniqueInput | FacilityDemandPlanWhereUniqueInput[]
+    delete?: FacilityDemandPlanWhereUniqueInput | FacilityDemandPlanWhereUniqueInput[]
+    connect?: FacilityDemandPlanWhereUniqueInput | FacilityDemandPlanWhereUniqueInput[]
+    update?: FacilityDemandPlanUpdateWithWhereUniqueWithoutFacilityInput | FacilityDemandPlanUpdateWithWhereUniqueWithoutFacilityInput[]
+    updateMany?: FacilityDemandPlanUpdateManyWithWhereWithoutFacilityInput | FacilityDemandPlanUpdateManyWithWhereWithoutFacilityInput[]
+    deleteMany?: FacilityDemandPlanScalarWhereInput | FacilityDemandPlanScalarWhereInput[]
   }
 
   export type KeHoachLCNTUpdateManyWithoutFacilityNestedInput = {
@@ -44496,6 +50283,20 @@ export namespace Prisma {
     update?: FacilityReportSubmissionUpdateWithWhereUniqueWithoutFacilityInput | FacilityReportSubmissionUpdateWithWhereUniqueWithoutFacilityInput[]
     updateMany?: FacilityReportSubmissionUpdateManyWithWhereWithoutFacilityInput | FacilityReportSubmissionUpdateManyWithWhereWithoutFacilityInput[]
     deleteMany?: FacilityReportSubmissionScalarWhereInput | FacilityReportSubmissionScalarWhereInput[]
+  }
+
+  export type FacilityDemandPlanUncheckedUpdateManyWithoutFacilityNestedInput = {
+    create?: XOR<FacilityDemandPlanCreateWithoutFacilityInput, FacilityDemandPlanUncheckedCreateWithoutFacilityInput> | FacilityDemandPlanCreateWithoutFacilityInput[] | FacilityDemandPlanUncheckedCreateWithoutFacilityInput[]
+    connectOrCreate?: FacilityDemandPlanCreateOrConnectWithoutFacilityInput | FacilityDemandPlanCreateOrConnectWithoutFacilityInput[]
+    upsert?: FacilityDemandPlanUpsertWithWhereUniqueWithoutFacilityInput | FacilityDemandPlanUpsertWithWhereUniqueWithoutFacilityInput[]
+    createMany?: FacilityDemandPlanCreateManyFacilityInputEnvelope
+    set?: FacilityDemandPlanWhereUniqueInput | FacilityDemandPlanWhereUniqueInput[]
+    disconnect?: FacilityDemandPlanWhereUniqueInput | FacilityDemandPlanWhereUniqueInput[]
+    delete?: FacilityDemandPlanWhereUniqueInput | FacilityDemandPlanWhereUniqueInput[]
+    connect?: FacilityDemandPlanWhereUniqueInput | FacilityDemandPlanWhereUniqueInput[]
+    update?: FacilityDemandPlanUpdateWithWhereUniqueWithoutFacilityInput | FacilityDemandPlanUpdateWithWhereUniqueWithoutFacilityInput[]
+    updateMany?: FacilityDemandPlanUpdateManyWithWhereWithoutFacilityInput | FacilityDemandPlanUpdateManyWithWhereWithoutFacilityInput[]
+    deleteMany?: FacilityDemandPlanScalarWhereInput | FacilityDemandPlanScalarWhereInput[]
   }
 
   export type KeHoachLCNTUncheckedUpdateManyWithoutFacilityNestedInput = {
@@ -44773,6 +50574,13 @@ export namespace Prisma {
     connect?: DrugOrderLineWhereUniqueInput | DrugOrderLineWhereUniqueInput[]
   }
 
+  export type FacilityDemandPlanLineCreateNestedManyWithoutMasterDrugInput = {
+    create?: XOR<FacilityDemandPlanLineCreateWithoutMasterDrugInput, FacilityDemandPlanLineUncheckedCreateWithoutMasterDrugInput> | FacilityDemandPlanLineCreateWithoutMasterDrugInput[] | FacilityDemandPlanLineUncheckedCreateWithoutMasterDrugInput[]
+    connectOrCreate?: FacilityDemandPlanLineCreateOrConnectWithoutMasterDrugInput | FacilityDemandPlanLineCreateOrConnectWithoutMasterDrugInput[]
+    createMany?: FacilityDemandPlanLineCreateManyMasterDrugInputEnvelope
+    connect?: FacilityDemandPlanLineWhereUniqueInput | FacilityDemandPlanLineWhereUniqueInput[]
+  }
+
   export type FacilityDrugMapUncheckedCreateNestedManyWithoutMasterDrugInput = {
     create?: XOR<FacilityDrugMapCreateWithoutMasterDrugInput, FacilityDrugMapUncheckedCreateWithoutMasterDrugInput> | FacilityDrugMapCreateWithoutMasterDrugInput[] | FacilityDrugMapUncheckedCreateWithoutMasterDrugInput[]
     connectOrCreate?: FacilityDrugMapCreateOrConnectWithoutMasterDrugInput | FacilityDrugMapCreateOrConnectWithoutMasterDrugInput[]
@@ -44792,6 +50600,13 @@ export namespace Prisma {
     connectOrCreate?: DrugOrderLineCreateOrConnectWithoutMasterDrugInput | DrugOrderLineCreateOrConnectWithoutMasterDrugInput[]
     createMany?: DrugOrderLineCreateManyMasterDrugInputEnvelope
     connect?: DrugOrderLineWhereUniqueInput | DrugOrderLineWhereUniqueInput[]
+  }
+
+  export type FacilityDemandPlanLineUncheckedCreateNestedManyWithoutMasterDrugInput = {
+    create?: XOR<FacilityDemandPlanLineCreateWithoutMasterDrugInput, FacilityDemandPlanLineUncheckedCreateWithoutMasterDrugInput> | FacilityDemandPlanLineCreateWithoutMasterDrugInput[] | FacilityDemandPlanLineUncheckedCreateWithoutMasterDrugInput[]
+    connectOrCreate?: FacilityDemandPlanLineCreateOrConnectWithoutMasterDrugInput | FacilityDemandPlanLineCreateOrConnectWithoutMasterDrugInput[]
+    createMany?: FacilityDemandPlanLineCreateManyMasterDrugInputEnvelope
+    connect?: FacilityDemandPlanLineWhereUniqueInput | FacilityDemandPlanLineWhereUniqueInput[]
   }
 
   export type TherapeuticGroupUpdateOneWithoutMasterDrugsNestedInput = {
@@ -44846,6 +50661,20 @@ export namespace Prisma {
     deleteMany?: DrugOrderLineScalarWhereInput | DrugOrderLineScalarWhereInput[]
   }
 
+  export type FacilityDemandPlanLineUpdateManyWithoutMasterDrugNestedInput = {
+    create?: XOR<FacilityDemandPlanLineCreateWithoutMasterDrugInput, FacilityDemandPlanLineUncheckedCreateWithoutMasterDrugInput> | FacilityDemandPlanLineCreateWithoutMasterDrugInput[] | FacilityDemandPlanLineUncheckedCreateWithoutMasterDrugInput[]
+    connectOrCreate?: FacilityDemandPlanLineCreateOrConnectWithoutMasterDrugInput | FacilityDemandPlanLineCreateOrConnectWithoutMasterDrugInput[]
+    upsert?: FacilityDemandPlanLineUpsertWithWhereUniqueWithoutMasterDrugInput | FacilityDemandPlanLineUpsertWithWhereUniqueWithoutMasterDrugInput[]
+    createMany?: FacilityDemandPlanLineCreateManyMasterDrugInputEnvelope
+    set?: FacilityDemandPlanLineWhereUniqueInput | FacilityDemandPlanLineWhereUniqueInput[]
+    disconnect?: FacilityDemandPlanLineWhereUniqueInput | FacilityDemandPlanLineWhereUniqueInput[]
+    delete?: FacilityDemandPlanLineWhereUniqueInput | FacilityDemandPlanLineWhereUniqueInput[]
+    connect?: FacilityDemandPlanLineWhereUniqueInput | FacilityDemandPlanLineWhereUniqueInput[]
+    update?: FacilityDemandPlanLineUpdateWithWhereUniqueWithoutMasterDrugInput | FacilityDemandPlanLineUpdateWithWhereUniqueWithoutMasterDrugInput[]
+    updateMany?: FacilityDemandPlanLineUpdateManyWithWhereWithoutMasterDrugInput | FacilityDemandPlanLineUpdateManyWithWhereWithoutMasterDrugInput[]
+    deleteMany?: FacilityDemandPlanLineScalarWhereInput | FacilityDemandPlanLineScalarWhereInput[]
+  }
+
   export type FacilityDrugMapUncheckedUpdateManyWithoutMasterDrugNestedInput = {
     create?: XOR<FacilityDrugMapCreateWithoutMasterDrugInput, FacilityDrugMapUncheckedCreateWithoutMasterDrugInput> | FacilityDrugMapCreateWithoutMasterDrugInput[] | FacilityDrugMapUncheckedCreateWithoutMasterDrugInput[]
     connectOrCreate?: FacilityDrugMapCreateOrConnectWithoutMasterDrugInput | FacilityDrugMapCreateOrConnectWithoutMasterDrugInput[]
@@ -44886,6 +50715,20 @@ export namespace Prisma {
     update?: DrugOrderLineUpdateWithWhereUniqueWithoutMasterDrugInput | DrugOrderLineUpdateWithWhereUniqueWithoutMasterDrugInput[]
     updateMany?: DrugOrderLineUpdateManyWithWhereWithoutMasterDrugInput | DrugOrderLineUpdateManyWithWhereWithoutMasterDrugInput[]
     deleteMany?: DrugOrderLineScalarWhereInput | DrugOrderLineScalarWhereInput[]
+  }
+
+  export type FacilityDemandPlanLineUncheckedUpdateManyWithoutMasterDrugNestedInput = {
+    create?: XOR<FacilityDemandPlanLineCreateWithoutMasterDrugInput, FacilityDemandPlanLineUncheckedCreateWithoutMasterDrugInput> | FacilityDemandPlanLineCreateWithoutMasterDrugInput[] | FacilityDemandPlanLineUncheckedCreateWithoutMasterDrugInput[]
+    connectOrCreate?: FacilityDemandPlanLineCreateOrConnectWithoutMasterDrugInput | FacilityDemandPlanLineCreateOrConnectWithoutMasterDrugInput[]
+    upsert?: FacilityDemandPlanLineUpsertWithWhereUniqueWithoutMasterDrugInput | FacilityDemandPlanLineUpsertWithWhereUniqueWithoutMasterDrugInput[]
+    createMany?: FacilityDemandPlanLineCreateManyMasterDrugInputEnvelope
+    set?: FacilityDemandPlanLineWhereUniqueInput | FacilityDemandPlanLineWhereUniqueInput[]
+    disconnect?: FacilityDemandPlanLineWhereUniqueInput | FacilityDemandPlanLineWhereUniqueInput[]
+    delete?: FacilityDemandPlanLineWhereUniqueInput | FacilityDemandPlanLineWhereUniqueInput[]
+    connect?: FacilityDemandPlanLineWhereUniqueInput | FacilityDemandPlanLineWhereUniqueInput[]
+    update?: FacilityDemandPlanLineUpdateWithWhereUniqueWithoutMasterDrugInput | FacilityDemandPlanLineUpdateWithWhereUniqueWithoutMasterDrugInput[]
+    updateMany?: FacilityDemandPlanLineUpdateManyWithWhereWithoutMasterDrugInput | FacilityDemandPlanLineUpdateManyWithWhereWithoutMasterDrugInput[]
+    deleteMany?: FacilityDemandPlanLineScalarWhereInput | FacilityDemandPlanLineScalarWhereInput[]
   }
 
   export type CompanyCreateNestedOneWithoutCompanyDrugsInput = {
@@ -44979,11 +50822,45 @@ export namespace Prisma {
     connect?: InventoryReportWhereUniqueInput | InventoryReportWhereUniqueInput[]
   }
 
+  export type FacilityDemandPlanLineCreateNestedManyWithoutDrugMapInput = {
+    create?: XOR<FacilityDemandPlanLineCreateWithoutDrugMapInput, FacilityDemandPlanLineUncheckedCreateWithoutDrugMapInput> | FacilityDemandPlanLineCreateWithoutDrugMapInput[] | FacilityDemandPlanLineUncheckedCreateWithoutDrugMapInput[]
+    connectOrCreate?: FacilityDemandPlanLineCreateOrConnectWithoutDrugMapInput | FacilityDemandPlanLineCreateOrConnectWithoutDrugMapInput[]
+    createMany?: FacilityDemandPlanLineCreateManyDrugMapInputEnvelope
+    connect?: FacilityDemandPlanLineWhereUniqueInput | FacilityDemandPlanLineWhereUniqueInput[]
+  }
+
   export type InventoryReportUncheckedCreateNestedManyWithoutDrugMapInput = {
     create?: XOR<InventoryReportCreateWithoutDrugMapInput, InventoryReportUncheckedCreateWithoutDrugMapInput> | InventoryReportCreateWithoutDrugMapInput[] | InventoryReportUncheckedCreateWithoutDrugMapInput[]
     connectOrCreate?: InventoryReportCreateOrConnectWithoutDrugMapInput | InventoryReportCreateOrConnectWithoutDrugMapInput[]
     createMany?: InventoryReportCreateManyDrugMapInputEnvelope
     connect?: InventoryReportWhereUniqueInput | InventoryReportWhereUniqueInput[]
+  }
+
+  export type FacilityDemandPlanLineUncheckedCreateNestedManyWithoutDrugMapInput = {
+    create?: XOR<FacilityDemandPlanLineCreateWithoutDrugMapInput, FacilityDemandPlanLineUncheckedCreateWithoutDrugMapInput> | FacilityDemandPlanLineCreateWithoutDrugMapInput[] | FacilityDemandPlanLineUncheckedCreateWithoutDrugMapInput[]
+    connectOrCreate?: FacilityDemandPlanLineCreateOrConnectWithoutDrugMapInput | FacilityDemandPlanLineCreateOrConnectWithoutDrugMapInput[]
+    createMany?: FacilityDemandPlanLineCreateManyDrugMapInputEnvelope
+    connect?: FacilityDemandPlanLineWhereUniqueInput | FacilityDemandPlanLineWhereUniqueInput[]
+  }
+
+  export type DecimalFieldUpdateOperationsInput = {
+    set?: Decimal | DecimalJsLike | number | string
+    increment?: Decimal | DecimalJsLike | number | string
+    decrement?: Decimal | DecimalJsLike | number | string
+    multiply?: Decimal | DecimalJsLike | number | string
+    divide?: Decimal | DecimalJsLike | number | string
+  }
+
+  export type NullableDecimalFieldUpdateOperationsInput = {
+    set?: Decimal | DecimalJsLike | number | string | null
+    increment?: Decimal | DecimalJsLike | number | string
+    decrement?: Decimal | DecimalJsLike | number | string
+    multiply?: Decimal | DecimalJsLike | number | string
+    divide?: Decimal | DecimalJsLike | number | string
+  }
+
+  export type NullableDateTimeFieldUpdateOperationsInput = {
+    set?: Date | string | null
   }
 
   export type EnumMappingStatusFieldUpdateOperationsInput = {
@@ -45022,6 +50899,20 @@ export namespace Prisma {
     deleteMany?: InventoryReportScalarWhereInput | InventoryReportScalarWhereInput[]
   }
 
+  export type FacilityDemandPlanLineUpdateManyWithoutDrugMapNestedInput = {
+    create?: XOR<FacilityDemandPlanLineCreateWithoutDrugMapInput, FacilityDemandPlanLineUncheckedCreateWithoutDrugMapInput> | FacilityDemandPlanLineCreateWithoutDrugMapInput[] | FacilityDemandPlanLineUncheckedCreateWithoutDrugMapInput[]
+    connectOrCreate?: FacilityDemandPlanLineCreateOrConnectWithoutDrugMapInput | FacilityDemandPlanLineCreateOrConnectWithoutDrugMapInput[]
+    upsert?: FacilityDemandPlanLineUpsertWithWhereUniqueWithoutDrugMapInput | FacilityDemandPlanLineUpsertWithWhereUniqueWithoutDrugMapInput[]
+    createMany?: FacilityDemandPlanLineCreateManyDrugMapInputEnvelope
+    set?: FacilityDemandPlanLineWhereUniqueInput | FacilityDemandPlanLineWhereUniqueInput[]
+    disconnect?: FacilityDemandPlanLineWhereUniqueInput | FacilityDemandPlanLineWhereUniqueInput[]
+    delete?: FacilityDemandPlanLineWhereUniqueInput | FacilityDemandPlanLineWhereUniqueInput[]
+    connect?: FacilityDemandPlanLineWhereUniqueInput | FacilityDemandPlanLineWhereUniqueInput[]
+    update?: FacilityDemandPlanLineUpdateWithWhereUniqueWithoutDrugMapInput | FacilityDemandPlanLineUpdateWithWhereUniqueWithoutDrugMapInput[]
+    updateMany?: FacilityDemandPlanLineUpdateManyWithWhereWithoutDrugMapInput | FacilityDemandPlanLineUpdateManyWithWhereWithoutDrugMapInput[]
+    deleteMany?: FacilityDemandPlanLineScalarWhereInput | FacilityDemandPlanLineScalarWhereInput[]
+  }
+
   export type InventoryReportUncheckedUpdateManyWithoutDrugMapNestedInput = {
     create?: XOR<InventoryReportCreateWithoutDrugMapInput, InventoryReportUncheckedCreateWithoutDrugMapInput> | InventoryReportCreateWithoutDrugMapInput[] | InventoryReportUncheckedCreateWithoutDrugMapInput[]
     connectOrCreate?: InventoryReportCreateOrConnectWithoutDrugMapInput | InventoryReportCreateOrConnectWithoutDrugMapInput[]
@@ -45036,6 +50927,122 @@ export namespace Prisma {
     deleteMany?: InventoryReportScalarWhereInput | InventoryReportScalarWhereInput[]
   }
 
+  export type FacilityDemandPlanLineUncheckedUpdateManyWithoutDrugMapNestedInput = {
+    create?: XOR<FacilityDemandPlanLineCreateWithoutDrugMapInput, FacilityDemandPlanLineUncheckedCreateWithoutDrugMapInput> | FacilityDemandPlanLineCreateWithoutDrugMapInput[] | FacilityDemandPlanLineUncheckedCreateWithoutDrugMapInput[]
+    connectOrCreate?: FacilityDemandPlanLineCreateOrConnectWithoutDrugMapInput | FacilityDemandPlanLineCreateOrConnectWithoutDrugMapInput[]
+    upsert?: FacilityDemandPlanLineUpsertWithWhereUniqueWithoutDrugMapInput | FacilityDemandPlanLineUpsertWithWhereUniqueWithoutDrugMapInput[]
+    createMany?: FacilityDemandPlanLineCreateManyDrugMapInputEnvelope
+    set?: FacilityDemandPlanLineWhereUniqueInput | FacilityDemandPlanLineWhereUniqueInput[]
+    disconnect?: FacilityDemandPlanLineWhereUniqueInput | FacilityDemandPlanLineWhereUniqueInput[]
+    delete?: FacilityDemandPlanLineWhereUniqueInput | FacilityDemandPlanLineWhereUniqueInput[]
+    connect?: FacilityDemandPlanLineWhereUniqueInput | FacilityDemandPlanLineWhereUniqueInput[]
+    update?: FacilityDemandPlanLineUpdateWithWhereUniqueWithoutDrugMapInput | FacilityDemandPlanLineUpdateWithWhereUniqueWithoutDrugMapInput[]
+    updateMany?: FacilityDemandPlanLineUpdateManyWithWhereWithoutDrugMapInput | FacilityDemandPlanLineUpdateManyWithWhereWithoutDrugMapInput[]
+    deleteMany?: FacilityDemandPlanLineScalarWhereInput | FacilityDemandPlanLineScalarWhereInput[]
+  }
+
+  export type UserCreateNestedOneWithoutFacilityDemandPlansInput = {
+    create?: XOR<UserCreateWithoutFacilityDemandPlansInput, UserUncheckedCreateWithoutFacilityDemandPlansInput>
+    connectOrCreate?: UserCreateOrConnectWithoutFacilityDemandPlansInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type FacilityDemandPlanLineCreateNestedManyWithoutPlanInput = {
+    create?: XOR<FacilityDemandPlanLineCreateWithoutPlanInput, FacilityDemandPlanLineUncheckedCreateWithoutPlanInput> | FacilityDemandPlanLineCreateWithoutPlanInput[] | FacilityDemandPlanLineUncheckedCreateWithoutPlanInput[]
+    connectOrCreate?: FacilityDemandPlanLineCreateOrConnectWithoutPlanInput | FacilityDemandPlanLineCreateOrConnectWithoutPlanInput[]
+    createMany?: FacilityDemandPlanLineCreateManyPlanInputEnvelope
+    connect?: FacilityDemandPlanLineWhereUniqueInput | FacilityDemandPlanLineWhereUniqueInput[]
+  }
+
+  export type FacilityDemandPlanLineUncheckedCreateNestedManyWithoutPlanInput = {
+    create?: XOR<FacilityDemandPlanLineCreateWithoutPlanInput, FacilityDemandPlanLineUncheckedCreateWithoutPlanInput> | FacilityDemandPlanLineCreateWithoutPlanInput[] | FacilityDemandPlanLineUncheckedCreateWithoutPlanInput[]
+    connectOrCreate?: FacilityDemandPlanLineCreateOrConnectWithoutPlanInput | FacilityDemandPlanLineCreateOrConnectWithoutPlanInput[]
+    createMany?: FacilityDemandPlanLineCreateManyPlanInputEnvelope
+    connect?: FacilityDemandPlanLineWhereUniqueInput | FacilityDemandPlanLineWhereUniqueInput[]
+  }
+
+  export type EnumFacilityDemandPlanStatusFieldUpdateOperationsInput = {
+    set?: $Enums.FacilityDemandPlanStatus
+  }
+
+  export type UserUpdateOneRequiredWithoutFacilityDemandPlansNestedInput = {
+    create?: XOR<UserCreateWithoutFacilityDemandPlansInput, UserUncheckedCreateWithoutFacilityDemandPlansInput>
+    connectOrCreate?: UserCreateOrConnectWithoutFacilityDemandPlansInput
+    upsert?: UserUpsertWithoutFacilityDemandPlansInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutFacilityDemandPlansInput, UserUpdateWithoutFacilityDemandPlansInput>, UserUncheckedUpdateWithoutFacilityDemandPlansInput>
+  }
+
+  export type FacilityDemandPlanLineUpdateManyWithoutPlanNestedInput = {
+    create?: XOR<FacilityDemandPlanLineCreateWithoutPlanInput, FacilityDemandPlanLineUncheckedCreateWithoutPlanInput> | FacilityDemandPlanLineCreateWithoutPlanInput[] | FacilityDemandPlanLineUncheckedCreateWithoutPlanInput[]
+    connectOrCreate?: FacilityDemandPlanLineCreateOrConnectWithoutPlanInput | FacilityDemandPlanLineCreateOrConnectWithoutPlanInput[]
+    upsert?: FacilityDemandPlanLineUpsertWithWhereUniqueWithoutPlanInput | FacilityDemandPlanLineUpsertWithWhereUniqueWithoutPlanInput[]
+    createMany?: FacilityDemandPlanLineCreateManyPlanInputEnvelope
+    set?: FacilityDemandPlanLineWhereUniqueInput | FacilityDemandPlanLineWhereUniqueInput[]
+    disconnect?: FacilityDemandPlanLineWhereUniqueInput | FacilityDemandPlanLineWhereUniqueInput[]
+    delete?: FacilityDemandPlanLineWhereUniqueInput | FacilityDemandPlanLineWhereUniqueInput[]
+    connect?: FacilityDemandPlanLineWhereUniqueInput | FacilityDemandPlanLineWhereUniqueInput[]
+    update?: FacilityDemandPlanLineUpdateWithWhereUniqueWithoutPlanInput | FacilityDemandPlanLineUpdateWithWhereUniqueWithoutPlanInput[]
+    updateMany?: FacilityDemandPlanLineUpdateManyWithWhereWithoutPlanInput | FacilityDemandPlanLineUpdateManyWithWhereWithoutPlanInput[]
+    deleteMany?: FacilityDemandPlanLineScalarWhereInput | FacilityDemandPlanLineScalarWhereInput[]
+  }
+
+  export type FacilityDemandPlanLineUncheckedUpdateManyWithoutPlanNestedInput = {
+    create?: XOR<FacilityDemandPlanLineCreateWithoutPlanInput, FacilityDemandPlanLineUncheckedCreateWithoutPlanInput> | FacilityDemandPlanLineCreateWithoutPlanInput[] | FacilityDemandPlanLineUncheckedCreateWithoutPlanInput[]
+    connectOrCreate?: FacilityDemandPlanLineCreateOrConnectWithoutPlanInput | FacilityDemandPlanLineCreateOrConnectWithoutPlanInput[]
+    upsert?: FacilityDemandPlanLineUpsertWithWhereUniqueWithoutPlanInput | FacilityDemandPlanLineUpsertWithWhereUniqueWithoutPlanInput[]
+    createMany?: FacilityDemandPlanLineCreateManyPlanInputEnvelope
+    set?: FacilityDemandPlanLineWhereUniqueInput | FacilityDemandPlanLineWhereUniqueInput[]
+    disconnect?: FacilityDemandPlanLineWhereUniqueInput | FacilityDemandPlanLineWhereUniqueInput[]
+    delete?: FacilityDemandPlanLineWhereUniqueInput | FacilityDemandPlanLineWhereUniqueInput[]
+    connect?: FacilityDemandPlanLineWhereUniqueInput | FacilityDemandPlanLineWhereUniqueInput[]
+    update?: FacilityDemandPlanLineUpdateWithWhereUniqueWithoutPlanInput | FacilityDemandPlanLineUpdateWithWhereUniqueWithoutPlanInput[]
+    updateMany?: FacilityDemandPlanLineUpdateManyWithWhereWithoutPlanInput | FacilityDemandPlanLineUpdateManyWithWhereWithoutPlanInput[]
+    deleteMany?: FacilityDemandPlanLineScalarWhereInput | FacilityDemandPlanLineScalarWhereInput[]
+  }
+
+  export type FacilityDemandPlanCreateNestedOneWithoutLinesInput = {
+    create?: XOR<FacilityDemandPlanCreateWithoutLinesInput, FacilityDemandPlanUncheckedCreateWithoutLinesInput>
+    connectOrCreate?: FacilityDemandPlanCreateOrConnectWithoutLinesInput
+    connect?: FacilityDemandPlanWhereUniqueInput
+  }
+
+  export type FacilityDrugMapCreateNestedOneWithoutDemandPlanLinesInput = {
+    create?: XOR<FacilityDrugMapCreateWithoutDemandPlanLinesInput, FacilityDrugMapUncheckedCreateWithoutDemandPlanLinesInput>
+    connectOrCreate?: FacilityDrugMapCreateOrConnectWithoutDemandPlanLinesInput
+    connect?: FacilityDrugMapWhereUniqueInput
+  }
+
+  export type MasterDrugCreateNestedOneWithoutFacilityDemandPlanLinesInput = {
+    create?: XOR<MasterDrugCreateWithoutFacilityDemandPlanLinesInput, MasterDrugUncheckedCreateWithoutFacilityDemandPlanLinesInput>
+    connectOrCreate?: MasterDrugCreateOrConnectWithoutFacilityDemandPlanLinesInput
+    connect?: MasterDrugWhereUniqueInput
+  }
+
+  export type FacilityDemandPlanUpdateOneRequiredWithoutLinesNestedInput = {
+    create?: XOR<FacilityDemandPlanCreateWithoutLinesInput, FacilityDemandPlanUncheckedCreateWithoutLinesInput>
+    connectOrCreate?: FacilityDemandPlanCreateOrConnectWithoutLinesInput
+    upsert?: FacilityDemandPlanUpsertWithoutLinesInput
+    connect?: FacilityDemandPlanWhereUniqueInput
+    update?: XOR<XOR<FacilityDemandPlanUpdateToOneWithWhereWithoutLinesInput, FacilityDemandPlanUpdateWithoutLinesInput>, FacilityDemandPlanUncheckedUpdateWithoutLinesInput>
+  }
+
+  export type FacilityDrugMapUpdateOneRequiredWithoutDemandPlanLinesNestedInput = {
+    create?: XOR<FacilityDrugMapCreateWithoutDemandPlanLinesInput, FacilityDrugMapUncheckedCreateWithoutDemandPlanLinesInput>
+    connectOrCreate?: FacilityDrugMapCreateOrConnectWithoutDemandPlanLinesInput
+    upsert?: FacilityDrugMapUpsertWithoutDemandPlanLinesInput
+    connect?: FacilityDrugMapWhereUniqueInput
+    update?: XOR<XOR<FacilityDrugMapUpdateToOneWithWhereWithoutDemandPlanLinesInput, FacilityDrugMapUpdateWithoutDemandPlanLinesInput>, FacilityDrugMapUncheckedUpdateWithoutDemandPlanLinesInput>
+  }
+
+  export type MasterDrugUpdateOneRequiredWithoutFacilityDemandPlanLinesNestedInput = {
+    create?: XOR<MasterDrugCreateWithoutFacilityDemandPlanLinesInput, MasterDrugUncheckedCreateWithoutFacilityDemandPlanLinesInput>
+    connectOrCreate?: MasterDrugCreateOrConnectWithoutFacilityDemandPlanLinesInput
+    upsert?: MasterDrugUpsertWithoutFacilityDemandPlanLinesInput
+    connect?: MasterDrugWhereUniqueInput
+    update?: XOR<XOR<MasterDrugUpdateToOneWithWhereWithoutFacilityDemandPlanLinesInput, MasterDrugUpdateWithoutFacilityDemandPlanLinesInput>, MasterDrugUncheckedUpdateWithoutFacilityDemandPlanLinesInput>
+  }
+
   export type UserCreateNestedOneWithoutReportsInput = {
     create?: XOR<UserCreateWithoutReportsInput, UserUncheckedCreateWithoutReportsInput>
     connectOrCreate?: UserCreateOrConnectWithoutReportsInput
@@ -45046,14 +51053,6 @@ export namespace Prisma {
     create?: XOR<FacilityDrugMapCreateWithoutReportsInput, FacilityDrugMapUncheckedCreateWithoutReportsInput>
     connectOrCreate?: FacilityDrugMapCreateOrConnectWithoutReportsInput
     connect?: FacilityDrugMapWhereUniqueInput
-  }
-
-  export type DecimalFieldUpdateOperationsInput = {
-    set?: Decimal | DecimalJsLike | number | string
-    increment?: Decimal | DecimalJsLike | number | string
-    decrement?: Decimal | DecimalJsLike | number | string
-    multiply?: Decimal | DecimalJsLike | number | string
-    divide?: Decimal | DecimalJsLike | number | string
   }
 
   export type EnumReportStatusFieldUpdateOperationsInput = {
@@ -45154,10 +51153,6 @@ export namespace Prisma {
 
   export type EnumDrugOrderStatusFieldUpdateOperationsInput = {
     set?: $Enums.DrugOrderStatus
-  }
-
-  export type NullableDateTimeFieldUpdateOperationsInput = {
-    set?: Date | string | null
   }
 
   export type UserUpdateOneRequiredWithoutDrugOrdersNestedInput = {
@@ -45308,14 +51303,6 @@ export namespace Prisma {
 
   export type EnumDrugOrderLineSourceTypeFieldUpdateOperationsInput = {
     set?: $Enums.DrugOrderLineSourceType
-  }
-
-  export type NullableDecimalFieldUpdateOperationsInput = {
-    set?: Decimal | DecimalJsLike | number | string | null
-    increment?: Decimal | DecimalJsLike | number | string
-    decrement?: Decimal | DecimalJsLike | number | string
-    multiply?: Decimal | DecimalJsLike | number | string
-    divide?: Decimal | DecimalJsLike | number | string
   }
 
   export type EnumDrugOrderLineStatusFieldUpdateOperationsInput = {
@@ -46054,10 +52041,12 @@ export namespace Prisma {
     update?: XOR<XOR<GoiThauUpdateToOneWithWhereWithoutKetQuaLCNTsInput, GoiThauUpdateWithoutKetQuaLCNTsInput>, GoiThauUncheckedUpdateWithoutKetQuaLCNTsInput>
   }
 
-  export type ThongBaoMoiThauUpdateOneRequiredWithoutKetQuaLCNTsNestedInput = {
+  export type ThongBaoMoiThauUpdateOneWithoutKetQuaLCNTsNestedInput = {
     create?: XOR<ThongBaoMoiThauCreateWithoutKetQuaLCNTsInput, ThongBaoMoiThauUncheckedCreateWithoutKetQuaLCNTsInput>
     connectOrCreate?: ThongBaoMoiThauCreateOrConnectWithoutKetQuaLCNTsInput
     upsert?: ThongBaoMoiThauUpsertWithoutKetQuaLCNTsInput
+    disconnect?: ThongBaoMoiThauWhereInput | boolean
+    delete?: ThongBaoMoiThauWhereInput | boolean
     connect?: ThongBaoMoiThauWhereUniqueInput
     update?: XOR<XOR<ThongBaoMoiThauUpdateToOneWithWhereWithoutKetQuaLCNTsInput, ThongBaoMoiThauUpdateWithoutKetQuaLCNTsInput>, ThongBaoMoiThauUncheckedUpdateWithoutKetQuaLCNTsInput>
   }
@@ -46204,6 +52193,17 @@ export namespace Prisma {
     not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
+  export type NestedFloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
+  }
+
   export type NestedDateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -46289,6 +52289,22 @@ export namespace Prisma {
     _max?: NestedBoolFilter<$PrismaModel>
   }
 
+  export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedFloatNullableFilter<$PrismaModel>
+    _min?: NestedFloatNullableFilter<$PrismaModel>
+    _max?: NestedFloatNullableFilter<$PrismaModel>
+  }
+
   export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -46303,23 +52319,6 @@ export namespace Prisma {
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
-  export type NestedEnumMappingStatusFilter<$PrismaModel = never> = {
-    equals?: $Enums.MappingStatus | EnumMappingStatusFieldRefInput<$PrismaModel>
-    in?: $Enums.MappingStatus[] | ListEnumMappingStatusFieldRefInput<$PrismaModel>
-    notIn?: $Enums.MappingStatus[] | ListEnumMappingStatusFieldRefInput<$PrismaModel>
-    not?: NestedEnumMappingStatusFilter<$PrismaModel> | $Enums.MappingStatus
-  }
-
-  export type NestedEnumMappingStatusWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.MappingStatus | EnumMappingStatusFieldRefInput<$PrismaModel>
-    in?: $Enums.MappingStatus[] | ListEnumMappingStatusFieldRefInput<$PrismaModel>
-    notIn?: $Enums.MappingStatus[] | ListEnumMappingStatusFieldRefInput<$PrismaModel>
-    not?: NestedEnumMappingStatusWithAggregatesFilter<$PrismaModel> | $Enums.MappingStatus
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedEnumMappingStatusFilter<$PrismaModel>
-    _max?: NestedEnumMappingStatusFilter<$PrismaModel>
-  }
-
   export type NestedDecimalFilter<$PrismaModel = never> = {
     equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
     in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
@@ -46331,11 +52330,33 @@ export namespace Prisma {
     not?: NestedDecimalFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string
   }
 
-  export type NestedEnumReportStatusFilter<$PrismaModel = never> = {
-    equals?: $Enums.ReportStatus | EnumReportStatusFieldRefInput<$PrismaModel>
-    in?: $Enums.ReportStatus[] | ListEnumReportStatusFieldRefInput<$PrismaModel>
-    notIn?: $Enums.ReportStatus[] | ListEnumReportStatusFieldRefInput<$PrismaModel>
-    not?: NestedEnumReportStatusFilter<$PrismaModel> | $Enums.ReportStatus
+  export type NestedDecimalNullableFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalNullableFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
+  }
+
+  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
+  export type NestedEnumMappingStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.MappingStatus | EnumMappingStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.MappingStatus[] | ListEnumMappingStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.MappingStatus[] | ListEnumMappingStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumMappingStatusFilter<$PrismaModel> | $Enums.MappingStatus
   }
 
   export type NestedDecimalWithAggregatesFilter<$PrismaModel = never> = {
@@ -46352,6 +52373,70 @@ export namespace Prisma {
     _sum?: NestedDecimalFilter<$PrismaModel>
     _min?: NestedDecimalFilter<$PrismaModel>
     _max?: NestedDecimalFilter<$PrismaModel>
+  }
+
+  export type NestedDecimalNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalNullableWithAggregatesFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedDecimalNullableFilter<$PrismaModel>
+    _sum?: NestedDecimalNullableFilter<$PrismaModel>
+    _min?: NestedDecimalNullableFilter<$PrismaModel>
+    _max?: NestedDecimalNullableFilter<$PrismaModel>
+  }
+
+  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
+  export type NestedEnumMappingStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.MappingStatus | EnumMappingStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.MappingStatus[] | ListEnumMappingStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.MappingStatus[] | ListEnumMappingStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumMappingStatusWithAggregatesFilter<$PrismaModel> | $Enums.MappingStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumMappingStatusFilter<$PrismaModel>
+    _max?: NestedEnumMappingStatusFilter<$PrismaModel>
+  }
+
+  export type NestedEnumFacilityDemandPlanStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.FacilityDemandPlanStatus | EnumFacilityDemandPlanStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.FacilityDemandPlanStatus[] | ListEnumFacilityDemandPlanStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.FacilityDemandPlanStatus[] | ListEnumFacilityDemandPlanStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumFacilityDemandPlanStatusFilter<$PrismaModel> | $Enums.FacilityDemandPlanStatus
+  }
+
+  export type NestedEnumFacilityDemandPlanStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.FacilityDemandPlanStatus | EnumFacilityDemandPlanStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.FacilityDemandPlanStatus[] | ListEnumFacilityDemandPlanStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.FacilityDemandPlanStatus[] | ListEnumFacilityDemandPlanStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumFacilityDemandPlanStatusWithAggregatesFilter<$PrismaModel> | $Enums.FacilityDemandPlanStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumFacilityDemandPlanStatusFilter<$PrismaModel>
+    _max?: NestedEnumFacilityDemandPlanStatusFilter<$PrismaModel>
+  }
+
+  export type NestedEnumReportStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.ReportStatus | EnumReportStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ReportStatus[] | ListEnumReportStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ReportStatus[] | ListEnumReportStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumReportStatusFilter<$PrismaModel> | $Enums.ReportStatus
   }
 
   export type NestedEnumReportStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -46398,17 +52483,6 @@ export namespace Prisma {
     not?: NestedEnumDrugOrderStatusFilter<$PrismaModel> | $Enums.DrugOrderStatus
   }
 
-  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
-  }
-
   export type NestedEnumDrugOrderStatusWithAggregatesFilter<$PrismaModel = never> = {
     equals?: $Enums.DrugOrderStatus | EnumDrugOrderStatusFieldRefInput<$PrismaModel>
     in?: $Enums.DrugOrderStatus[] | ListEnumDrugOrderStatusFieldRefInput<$PrismaModel>
@@ -46419,36 +52493,11 @@ export namespace Prisma {
     _max?: NestedEnumDrugOrderStatusFilter<$PrismaModel>
   }
 
-  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedDateTimeNullableFilter<$PrismaModel>
-    _max?: NestedDateTimeNullableFilter<$PrismaModel>
-  }
-
   export type NestedEnumDrugOrderLineSourceTypeFilter<$PrismaModel = never> = {
     equals?: $Enums.DrugOrderLineSourceType | EnumDrugOrderLineSourceTypeFieldRefInput<$PrismaModel>
     in?: $Enums.DrugOrderLineSourceType[] | ListEnumDrugOrderLineSourceTypeFieldRefInput<$PrismaModel>
     notIn?: $Enums.DrugOrderLineSourceType[] | ListEnumDrugOrderLineSourceTypeFieldRefInput<$PrismaModel>
     not?: NestedEnumDrugOrderLineSourceTypeFilter<$PrismaModel> | $Enums.DrugOrderLineSourceType
-  }
-
-  export type NestedDecimalNullableFilter<$PrismaModel = never> = {
-    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
-    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
-    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
-    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    not?: NestedDecimalNullableFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
   }
 
   export type NestedEnumDrugOrderLineStatusFilter<$PrismaModel = never> = {
@@ -46466,22 +52515,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumDrugOrderLineSourceTypeFilter<$PrismaModel>
     _max?: NestedEnumDrugOrderLineSourceTypeFilter<$PrismaModel>
-  }
-
-  export type NestedDecimalNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
-    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
-    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
-    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    not?: NestedDecimalNullableWithAggregatesFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedDecimalNullableFilter<$PrismaModel>
-    _sum?: NestedDecimalNullableFilter<$PrismaModel>
-    _min?: NestedDecimalNullableFilter<$PrismaModel>
-    _max?: NestedDecimalNullableFilter<$PrismaModel>
   }
 
   export type NestedEnumDrugOrderLineStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -46525,17 +52558,6 @@ export namespace Prisma {
     _sum?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedIntNullableFilter<$PrismaModel>
     _max?: NestedIntNullableFilter<$PrismaModel>
-  }
-
-  export type NestedFloatNullableFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
   export type NestedJsonFilter<$PrismaModel = never> =
     | PatchUndefined<
@@ -46617,13 +52639,34 @@ export namespace Prisma {
     soDangKyNoiBo?: string | null
     donViTinhNoiBo?: string | null
     nhomTckt?: string | null
+    giaVat?: Decimal | DecimalJsLike | number | string
+    bhyt?: string | null
+    dichVu?: string | null
+    soQdTrungThau?: string | null
+    tenCongTy?: string | null
+    ngayBatDauHd?: string | null
+    ngayKetThucHd?: string | null
+    demandRoundingEnabled?: boolean
+    demandPackageUnit?: string | null
+    demandPackageSize?: Decimal | DecimalJsLike | number | string | null
+    demandPlanningLocked?: boolean
+    demandPlanningLockedAt?: Date | string | null
+    demandPlanningUnlockedAt?: Date | string | null
+    demandPlanningLockReason?: string | null
     status?: $Enums.MappingStatus
     adminNote?: string | null
     isOutOfCatalog?: boolean
+    isActive?: boolean
+    inactiveFromMonth?: string | null
+    inactiveReason?: string | null
+    inactiveAt?: Date | string | null
+    reactivatedFromMonth?: string | null
+    reactivatedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     masterDrug?: MasterDrugCreateNestedOneWithoutDrugMapsInput
     reports?: InventoryReportCreateNestedManyWithoutDrugMapInput
+    demandPlanLines?: FacilityDemandPlanLineCreateNestedManyWithoutDrugMapInput
   }
 
   export type FacilityDrugMapUncheckedCreateWithoutFacilityInput = {
@@ -46634,13 +52677,34 @@ export namespace Prisma {
     soDangKyNoiBo?: string | null
     donViTinhNoiBo?: string | null
     nhomTckt?: string | null
+    giaVat?: Decimal | DecimalJsLike | number | string
+    bhyt?: string | null
+    dichVu?: string | null
+    soQdTrungThau?: string | null
+    tenCongTy?: string | null
+    ngayBatDauHd?: string | null
+    ngayKetThucHd?: string | null
+    demandRoundingEnabled?: boolean
+    demandPackageUnit?: string | null
+    demandPackageSize?: Decimal | DecimalJsLike | number | string | null
+    demandPlanningLocked?: boolean
+    demandPlanningLockedAt?: Date | string | null
+    demandPlanningUnlockedAt?: Date | string | null
+    demandPlanningLockReason?: string | null
     masterDrugId?: string | null
     status?: $Enums.MappingStatus
     adminNote?: string | null
     isOutOfCatalog?: boolean
+    isActive?: boolean
+    inactiveFromMonth?: string | null
+    inactiveReason?: string | null
+    inactiveAt?: Date | string | null
+    reactivatedFromMonth?: string | null
+    reactivatedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     reports?: InventoryReportUncheckedCreateNestedManyWithoutDrugMapInput
+    demandPlanLines?: FacilityDemandPlanLineUncheckedCreateNestedManyWithoutDrugMapInput
   }
 
   export type FacilityDrugMapCreateOrConnectWithoutFacilityInput = {
@@ -46658,6 +52722,7 @@ export namespace Prisma {
     reportMonth: string
     tonDau?: Decimal | DecimalJsLike | number | string
     nhap?: Decimal | DecimalJsLike | number | string
+    nhapHoanTra?: Decimal | DecimalJsLike | number | string
     xuat?: Decimal | DecimalJsLike | number | string
     tonCuoi?: Decimal | DecimalJsLike | number | string
     giaVat?: Decimal | DecimalJsLike | number | string
@@ -46681,6 +52746,7 @@ export namespace Prisma {
     reportMonth: string
     tonDau?: Decimal | DecimalJsLike | number | string
     nhap?: Decimal | DecimalJsLike | number | string
+    nhapHoanTra?: Decimal | DecimalJsLike | number | string
     xuat?: Decimal | DecimalJsLike | number | string
     tonCuoi?: Decimal | DecimalJsLike | number | string
     giaVat?: Decimal | DecimalJsLike | number | string
@@ -46734,6 +52800,40 @@ export namespace Prisma {
 
   export type FacilityReportSubmissionCreateManyFacilityInputEnvelope = {
     data: FacilityReportSubmissionCreateManyFacilityInput | FacilityReportSubmissionCreateManyFacilityInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type FacilityDemandPlanCreateWithoutFacilityInput = {
+    id?: string
+    planNo: string
+    status?: $Enums.FacilityDemandPlanStatus
+    baseReportMonth?: string | null
+    note?: string | null
+    finalizedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    lines?: FacilityDemandPlanLineCreateNestedManyWithoutPlanInput
+  }
+
+  export type FacilityDemandPlanUncheckedCreateWithoutFacilityInput = {
+    id?: string
+    planNo: string
+    status?: $Enums.FacilityDemandPlanStatus
+    baseReportMonth?: string | null
+    note?: string | null
+    finalizedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    lines?: FacilityDemandPlanLineUncheckedCreateNestedManyWithoutPlanInput
+  }
+
+  export type FacilityDemandPlanCreateOrConnectWithoutFacilityInput = {
+    where: FacilityDemandPlanWhereUniqueInput
+    create: XOR<FacilityDemandPlanCreateWithoutFacilityInput, FacilityDemandPlanUncheckedCreateWithoutFacilityInput>
+  }
+
+  export type FacilityDemandPlanCreateManyFacilityInputEnvelope = {
+    data: FacilityDemandPlanCreateManyFacilityInput | FacilityDemandPlanCreateManyFacilityInput[]
     skipDuplicates?: boolean
   }
 
@@ -47021,10 +53121,30 @@ export namespace Prisma {
     soDangKyNoiBo?: StringNullableFilter<"FacilityDrugMap"> | string | null
     donViTinhNoiBo?: StringNullableFilter<"FacilityDrugMap"> | string | null
     nhomTckt?: StringNullableFilter<"FacilityDrugMap"> | string | null
+    giaVat?: DecimalFilter<"FacilityDrugMap"> | Decimal | DecimalJsLike | number | string
+    bhyt?: StringNullableFilter<"FacilityDrugMap"> | string | null
+    dichVu?: StringNullableFilter<"FacilityDrugMap"> | string | null
+    soQdTrungThau?: StringNullableFilter<"FacilityDrugMap"> | string | null
+    tenCongTy?: StringNullableFilter<"FacilityDrugMap"> | string | null
+    ngayBatDauHd?: StringNullableFilter<"FacilityDrugMap"> | string | null
+    ngayKetThucHd?: StringNullableFilter<"FacilityDrugMap"> | string | null
+    demandRoundingEnabled?: BoolFilter<"FacilityDrugMap"> | boolean
+    demandPackageUnit?: StringNullableFilter<"FacilityDrugMap"> | string | null
+    demandPackageSize?: DecimalNullableFilter<"FacilityDrugMap"> | Decimal | DecimalJsLike | number | string | null
+    demandPlanningLocked?: BoolFilter<"FacilityDrugMap"> | boolean
+    demandPlanningLockedAt?: DateTimeNullableFilter<"FacilityDrugMap"> | Date | string | null
+    demandPlanningUnlockedAt?: DateTimeNullableFilter<"FacilityDrugMap"> | Date | string | null
+    demandPlanningLockReason?: StringNullableFilter<"FacilityDrugMap"> | string | null
     masterDrugId?: StringNullableFilter<"FacilityDrugMap"> | string | null
     status?: EnumMappingStatusFilter<"FacilityDrugMap"> | $Enums.MappingStatus
     adminNote?: StringNullableFilter<"FacilityDrugMap"> | string | null
     isOutOfCatalog?: BoolFilter<"FacilityDrugMap"> | boolean
+    isActive?: BoolFilter<"FacilityDrugMap"> | boolean
+    inactiveFromMonth?: StringNullableFilter<"FacilityDrugMap"> | string | null
+    inactiveReason?: StringNullableFilter<"FacilityDrugMap"> | string | null
+    inactiveAt?: DateTimeNullableFilter<"FacilityDrugMap"> | Date | string | null
+    reactivatedFromMonth?: StringNullableFilter<"FacilityDrugMap"> | string | null
+    reactivatedAt?: DateTimeNullableFilter<"FacilityDrugMap"> | Date | string | null
     createdAt?: DateTimeFilter<"FacilityDrugMap"> | Date | string
     updatedAt?: DateTimeFilter<"FacilityDrugMap"> | Date | string
   }
@@ -47055,6 +53175,7 @@ export namespace Prisma {
     reportMonth?: StringFilter<"InventoryReport"> | string
     tonDau?: DecimalFilter<"InventoryReport"> | Decimal | DecimalJsLike | number | string
     nhap?: DecimalFilter<"InventoryReport"> | Decimal | DecimalJsLike | number | string
+    nhapHoanTra?: DecimalFilter<"InventoryReport"> | Decimal | DecimalJsLike | number | string
     xuat?: DecimalFilter<"InventoryReport"> | Decimal | DecimalJsLike | number | string
     tonCuoi?: DecimalFilter<"InventoryReport"> | Decimal | DecimalJsLike | number | string
     giaVat?: DecimalFilter<"InventoryReport"> | Decimal | DecimalJsLike | number | string
@@ -47099,6 +53220,37 @@ export namespace Prisma {
     skippedRowCount?: IntFilter<"FacilityReportSubmission"> | number
     createdAt?: DateTimeFilter<"FacilityReportSubmission"> | Date | string
     updatedAt?: DateTimeFilter<"FacilityReportSubmission"> | Date | string
+  }
+
+  export type FacilityDemandPlanUpsertWithWhereUniqueWithoutFacilityInput = {
+    where: FacilityDemandPlanWhereUniqueInput
+    update: XOR<FacilityDemandPlanUpdateWithoutFacilityInput, FacilityDemandPlanUncheckedUpdateWithoutFacilityInput>
+    create: XOR<FacilityDemandPlanCreateWithoutFacilityInput, FacilityDemandPlanUncheckedCreateWithoutFacilityInput>
+  }
+
+  export type FacilityDemandPlanUpdateWithWhereUniqueWithoutFacilityInput = {
+    where: FacilityDemandPlanWhereUniqueInput
+    data: XOR<FacilityDemandPlanUpdateWithoutFacilityInput, FacilityDemandPlanUncheckedUpdateWithoutFacilityInput>
+  }
+
+  export type FacilityDemandPlanUpdateManyWithWhereWithoutFacilityInput = {
+    where: FacilityDemandPlanScalarWhereInput
+    data: XOR<FacilityDemandPlanUpdateManyMutationInput, FacilityDemandPlanUncheckedUpdateManyWithoutFacilityInput>
+  }
+
+  export type FacilityDemandPlanScalarWhereInput = {
+    AND?: FacilityDemandPlanScalarWhereInput | FacilityDemandPlanScalarWhereInput[]
+    OR?: FacilityDemandPlanScalarWhereInput[]
+    NOT?: FacilityDemandPlanScalarWhereInput | FacilityDemandPlanScalarWhereInput[]
+    id?: StringFilter<"FacilityDemandPlan"> | string
+    planNo?: StringFilter<"FacilityDemandPlan"> | string
+    facilityId?: StringFilter<"FacilityDemandPlan"> | string
+    status?: EnumFacilityDemandPlanStatusFilter<"FacilityDemandPlan"> | $Enums.FacilityDemandPlanStatus
+    baseReportMonth?: StringNullableFilter<"FacilityDemandPlan"> | string | null
+    note?: StringNullableFilter<"FacilityDemandPlan"> | string | null
+    finalizedAt?: DateTimeNullableFilter<"FacilityDemandPlan"> | Date | string | null
+    createdAt?: DateTimeFilter<"FacilityDemandPlan"> | Date | string
+    updatedAt?: DateTimeFilter<"FacilityDemandPlan"> | Date | string
   }
 
   export type KeHoachLCNTUpsertWithWhereUniqueWithoutFacilityInput = {
@@ -47312,11 +53464,14 @@ export namespace Prisma {
     contactPerson?: string | null
     phoneNumber?: string | null
     address?: string | null
+    latitude?: number | null
+    longitude?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     drugMaps?: FacilityDrugMapCreateNestedManyWithoutFacilityInput
     reports?: InventoryReportCreateNestedManyWithoutFacilityInput
     reportSubmissions?: FacilityReportSubmissionCreateNestedManyWithoutFacilityInput
+    facilityDemandPlans?: FacilityDemandPlanCreateNestedManyWithoutFacilityInput
     keHoachLCNTs?: KeHoachLCNTCreateNestedManyWithoutFacilityInput
     drugOrders?: DrugOrderCreateNestedManyWithoutFacilityInput
     drugOrderReceipts?: DrugOrderReceiptCreateNestedManyWithoutFacilityInput
@@ -47338,11 +53493,14 @@ export namespace Prisma {
     contactPerson?: string | null
     phoneNumber?: string | null
     address?: string | null
+    latitude?: number | null
+    longitude?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     drugMaps?: FacilityDrugMapUncheckedCreateNestedManyWithoutFacilityInput
     reports?: InventoryReportUncheckedCreateNestedManyWithoutFacilityInput
     reportSubmissions?: FacilityReportSubmissionUncheckedCreateNestedManyWithoutFacilityInput
+    facilityDemandPlans?: FacilityDemandPlanUncheckedCreateNestedManyWithoutFacilityInput
     keHoachLCNTs?: KeHoachLCNTUncheckedCreateNestedManyWithoutFacilityInput
     drugOrders?: DrugOrderUncheckedCreateNestedManyWithoutFacilityInput
     drugOrderReceipts?: DrugOrderReceiptUncheckedCreateNestedManyWithoutFacilityInput
@@ -47474,6 +53632,8 @@ export namespace Prisma {
     contactPerson?: StringNullableFilter<"User"> | string | null
     phoneNumber?: StringNullableFilter<"User"> | string | null
     address?: StringNullableFilter<"User"> | string | null
+    latitude?: FloatNullableFilter<"User"> | number | null
+    longitude?: FloatNullableFilter<"User"> | number | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
   }
@@ -47531,6 +53691,7 @@ export namespace Prisma {
     id?: string
     maChung: string
     maBhyt?: string | null
+    maAtc?: string | null
     tenThuoc: string
     hoatChat?: string | null
     hamLuong?: string | null
@@ -47551,6 +53712,7 @@ export namespace Prisma {
     nhomThuoc?: string | null
     isKeDon?: string | null
     kiemSoatDacBiet?: string | null
+    isThuocHiem?: boolean
     isTrongNuoc?: string | null
     isActive?: boolean
     createdAt?: Date | string
@@ -47558,12 +53720,14 @@ export namespace Prisma {
     drugMaps?: FacilityDrugMapCreateNestedManyWithoutMasterDrugInput
     companyDrugs?: CompanyDrugCreateNestedManyWithoutMasterDrugInput
     drugOrderLines?: DrugOrderLineCreateNestedManyWithoutMasterDrugInput
+    facilityDemandPlanLines?: FacilityDemandPlanLineCreateNestedManyWithoutMasterDrugInput
   }
 
   export type MasterDrugUncheckedCreateWithoutTherapeuticGroupInput = {
     id?: string
     maChung: string
     maBhyt?: string | null
+    maAtc?: string | null
     tenThuoc: string
     hoatChat?: string | null
     hamLuong?: string | null
@@ -47584,6 +53748,7 @@ export namespace Prisma {
     nhomThuoc?: string | null
     isKeDon?: string | null
     kiemSoatDacBiet?: string | null
+    isThuocHiem?: boolean
     isTrongNuoc?: string | null
     isActive?: boolean
     createdAt?: Date | string
@@ -47591,6 +53756,7 @@ export namespace Prisma {
     drugMaps?: FacilityDrugMapUncheckedCreateNestedManyWithoutMasterDrugInput
     companyDrugs?: CompanyDrugUncheckedCreateNestedManyWithoutMasterDrugInput
     drugOrderLines?: DrugOrderLineUncheckedCreateNestedManyWithoutMasterDrugInput
+    facilityDemandPlanLines?: FacilityDemandPlanLineUncheckedCreateNestedManyWithoutMasterDrugInput
   }
 
   export type MasterDrugCreateOrConnectWithoutTherapeuticGroupInput = {
@@ -47626,6 +53792,7 @@ export namespace Prisma {
     id?: StringFilter<"MasterDrug"> | string
     maChung?: StringFilter<"MasterDrug"> | string
     maBhyt?: StringNullableFilter<"MasterDrug"> | string | null
+    maAtc?: StringNullableFilter<"MasterDrug"> | string | null
     tenThuoc?: StringFilter<"MasterDrug"> | string
     hoatChat?: StringNullableFilter<"MasterDrug"> | string | null
     hamLuong?: StringNullableFilter<"MasterDrug"> | string | null
@@ -47647,6 +53814,7 @@ export namespace Prisma {
     therapeuticGroupId?: StringNullableFilter<"MasterDrug"> | string | null
     isKeDon?: StringNullableFilter<"MasterDrug"> | string | null
     kiemSoatDacBiet?: StringNullableFilter<"MasterDrug"> | string | null
+    isThuocHiem?: BoolFilter<"MasterDrug"> | boolean
     isTrongNuoc?: StringNullableFilter<"MasterDrug"> | string | null
     isActive?: BoolFilter<"MasterDrug"> | boolean
     createdAt?: DateTimeFilter<"MasterDrug"> | Date | string
@@ -47684,13 +53852,34 @@ export namespace Prisma {
     soDangKyNoiBo?: string | null
     donViTinhNoiBo?: string | null
     nhomTckt?: string | null
+    giaVat?: Decimal | DecimalJsLike | number | string
+    bhyt?: string | null
+    dichVu?: string | null
+    soQdTrungThau?: string | null
+    tenCongTy?: string | null
+    ngayBatDauHd?: string | null
+    ngayKetThucHd?: string | null
+    demandRoundingEnabled?: boolean
+    demandPackageUnit?: string | null
+    demandPackageSize?: Decimal | DecimalJsLike | number | string | null
+    demandPlanningLocked?: boolean
+    demandPlanningLockedAt?: Date | string | null
+    demandPlanningUnlockedAt?: Date | string | null
+    demandPlanningLockReason?: string | null
     status?: $Enums.MappingStatus
     adminNote?: string | null
     isOutOfCatalog?: boolean
+    isActive?: boolean
+    inactiveFromMonth?: string | null
+    inactiveReason?: string | null
+    inactiveAt?: Date | string | null
+    reactivatedFromMonth?: string | null
+    reactivatedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     facility: UserCreateNestedOneWithoutDrugMapsInput
     reports?: InventoryReportCreateNestedManyWithoutDrugMapInput
+    demandPlanLines?: FacilityDemandPlanLineCreateNestedManyWithoutDrugMapInput
   }
 
   export type FacilityDrugMapUncheckedCreateWithoutMasterDrugInput = {
@@ -47702,12 +53891,33 @@ export namespace Prisma {
     soDangKyNoiBo?: string | null
     donViTinhNoiBo?: string | null
     nhomTckt?: string | null
+    giaVat?: Decimal | DecimalJsLike | number | string
+    bhyt?: string | null
+    dichVu?: string | null
+    soQdTrungThau?: string | null
+    tenCongTy?: string | null
+    ngayBatDauHd?: string | null
+    ngayKetThucHd?: string | null
+    demandRoundingEnabled?: boolean
+    demandPackageUnit?: string | null
+    demandPackageSize?: Decimal | DecimalJsLike | number | string | null
+    demandPlanningLocked?: boolean
+    demandPlanningLockedAt?: Date | string | null
+    demandPlanningUnlockedAt?: Date | string | null
+    demandPlanningLockReason?: string | null
     status?: $Enums.MappingStatus
     adminNote?: string | null
     isOutOfCatalog?: boolean
+    isActive?: boolean
+    inactiveFromMonth?: string | null
+    inactiveReason?: string | null
+    inactiveAt?: Date | string | null
+    reactivatedFromMonth?: string | null
+    reactivatedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     reports?: InventoryReportUncheckedCreateNestedManyWithoutDrugMapInput
+    demandPlanLines?: FacilityDemandPlanLineUncheckedCreateNestedManyWithoutDrugMapInput
   }
 
   export type FacilityDrugMapCreateOrConnectWithoutMasterDrugInput = {
@@ -47807,6 +54017,66 @@ export namespace Prisma {
 
   export type DrugOrderLineCreateManyMasterDrugInputEnvelope = {
     data: DrugOrderLineCreateManyMasterDrugInput | DrugOrderLineCreateManyMasterDrugInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type FacilityDemandPlanLineCreateWithoutMasterDrugInput = {
+    id?: string
+    maNoiBoSnapshot: string
+    tenThuocSnapshot: string
+    hoatChatSnapshot?: string | null
+    donViTinhSnapshot?: string | null
+    nhomTcktSnapshot?: string | null
+    maChungSnapshot?: string | null
+    suggestedQty?: Decimal | DecimalJsLike | number | string | null
+    rawSuggestedQty?: Decimal | DecimalJsLike | number | string | null
+    roundedSuggestedQty?: Decimal | DecimalJsLike | number | string | null
+    packageUnitSnapshot?: string | null
+    packageSizeSnapshot?: Decimal | DecimalJsLike | number | string | null
+    roundingNote?: string | null
+    finalQty?: Decimal | DecimalJsLike | number | string
+    suggestionBasis?: string | null
+    suggestionReportMonth?: string | null
+    suggestionRuleVersion?: string | null
+    note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    plan: FacilityDemandPlanCreateNestedOneWithoutLinesInput
+    drugMap: FacilityDrugMapCreateNestedOneWithoutDemandPlanLinesInput
+  }
+
+  export type FacilityDemandPlanLineUncheckedCreateWithoutMasterDrugInput = {
+    id?: string
+    planId: string
+    mapId: string
+    maNoiBoSnapshot: string
+    tenThuocSnapshot: string
+    hoatChatSnapshot?: string | null
+    donViTinhSnapshot?: string | null
+    nhomTcktSnapshot?: string | null
+    maChungSnapshot?: string | null
+    suggestedQty?: Decimal | DecimalJsLike | number | string | null
+    rawSuggestedQty?: Decimal | DecimalJsLike | number | string | null
+    roundedSuggestedQty?: Decimal | DecimalJsLike | number | string | null
+    packageUnitSnapshot?: string | null
+    packageSizeSnapshot?: Decimal | DecimalJsLike | number | string | null
+    roundingNote?: string | null
+    finalQty?: Decimal | DecimalJsLike | number | string
+    suggestionBasis?: string | null
+    suggestionReportMonth?: string | null
+    suggestionRuleVersion?: string | null
+    note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FacilityDemandPlanLineCreateOrConnectWithoutMasterDrugInput = {
+    where: FacilityDemandPlanLineWhereUniqueInput
+    create: XOR<FacilityDemandPlanLineCreateWithoutMasterDrugInput, FacilityDemandPlanLineUncheckedCreateWithoutMasterDrugInput>
+  }
+
+  export type FacilityDemandPlanLineCreateManyMasterDrugInputEnvelope = {
+    data: FacilityDemandPlanLineCreateManyMasterDrugInput | FacilityDemandPlanLineCreateManyMasterDrugInput[]
     skipDuplicates?: boolean
   }
 
@@ -47910,6 +54180,51 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"DrugOrderLine"> | Date | string
   }
 
+  export type FacilityDemandPlanLineUpsertWithWhereUniqueWithoutMasterDrugInput = {
+    where: FacilityDemandPlanLineWhereUniqueInput
+    update: XOR<FacilityDemandPlanLineUpdateWithoutMasterDrugInput, FacilityDemandPlanLineUncheckedUpdateWithoutMasterDrugInput>
+    create: XOR<FacilityDemandPlanLineCreateWithoutMasterDrugInput, FacilityDemandPlanLineUncheckedCreateWithoutMasterDrugInput>
+  }
+
+  export type FacilityDemandPlanLineUpdateWithWhereUniqueWithoutMasterDrugInput = {
+    where: FacilityDemandPlanLineWhereUniqueInput
+    data: XOR<FacilityDemandPlanLineUpdateWithoutMasterDrugInput, FacilityDemandPlanLineUncheckedUpdateWithoutMasterDrugInput>
+  }
+
+  export type FacilityDemandPlanLineUpdateManyWithWhereWithoutMasterDrugInput = {
+    where: FacilityDemandPlanLineScalarWhereInput
+    data: XOR<FacilityDemandPlanLineUpdateManyMutationInput, FacilityDemandPlanLineUncheckedUpdateManyWithoutMasterDrugInput>
+  }
+
+  export type FacilityDemandPlanLineScalarWhereInput = {
+    AND?: FacilityDemandPlanLineScalarWhereInput | FacilityDemandPlanLineScalarWhereInput[]
+    OR?: FacilityDemandPlanLineScalarWhereInput[]
+    NOT?: FacilityDemandPlanLineScalarWhereInput | FacilityDemandPlanLineScalarWhereInput[]
+    id?: StringFilter<"FacilityDemandPlanLine"> | string
+    planId?: StringFilter<"FacilityDemandPlanLine"> | string
+    mapId?: StringFilter<"FacilityDemandPlanLine"> | string
+    masterDrugId?: StringFilter<"FacilityDemandPlanLine"> | string
+    maNoiBoSnapshot?: StringFilter<"FacilityDemandPlanLine"> | string
+    tenThuocSnapshot?: StringFilter<"FacilityDemandPlanLine"> | string
+    hoatChatSnapshot?: StringNullableFilter<"FacilityDemandPlanLine"> | string | null
+    donViTinhSnapshot?: StringNullableFilter<"FacilityDemandPlanLine"> | string | null
+    nhomTcktSnapshot?: StringNullableFilter<"FacilityDemandPlanLine"> | string | null
+    maChungSnapshot?: StringNullableFilter<"FacilityDemandPlanLine"> | string | null
+    suggestedQty?: DecimalNullableFilter<"FacilityDemandPlanLine"> | Decimal | DecimalJsLike | number | string | null
+    rawSuggestedQty?: DecimalNullableFilter<"FacilityDemandPlanLine"> | Decimal | DecimalJsLike | number | string | null
+    roundedSuggestedQty?: DecimalNullableFilter<"FacilityDemandPlanLine"> | Decimal | DecimalJsLike | number | string | null
+    packageUnitSnapshot?: StringNullableFilter<"FacilityDemandPlanLine"> | string | null
+    packageSizeSnapshot?: DecimalNullableFilter<"FacilityDemandPlanLine"> | Decimal | DecimalJsLike | number | string | null
+    roundingNote?: StringNullableFilter<"FacilityDemandPlanLine"> | string | null
+    finalQty?: DecimalFilter<"FacilityDemandPlanLine"> | Decimal | DecimalJsLike | number | string
+    suggestionBasis?: StringNullableFilter<"FacilityDemandPlanLine"> | string | null
+    suggestionReportMonth?: StringNullableFilter<"FacilityDemandPlanLine"> | string | null
+    suggestionRuleVersion?: StringNullableFilter<"FacilityDemandPlanLine"> | string | null
+    note?: StringNullableFilter<"FacilityDemandPlanLine"> | string | null
+    createdAt?: DateTimeFilter<"FacilityDemandPlanLine"> | Date | string
+    updatedAt?: DateTimeFilter<"FacilityDemandPlanLine"> | Date | string
+  }
+
   export type CompanyCreateWithoutCompanyDrugsInput = {
     id?: string
     code: string
@@ -47949,6 +54264,7 @@ export namespace Prisma {
     id?: string
     maChung: string
     maBhyt?: string | null
+    maAtc?: string | null
     tenThuoc: string
     hoatChat?: string | null
     hamLuong?: string | null
@@ -47969,6 +54285,7 @@ export namespace Prisma {
     nhomThuoc?: string | null
     isKeDon?: string | null
     kiemSoatDacBiet?: string | null
+    isThuocHiem?: boolean
     isTrongNuoc?: string | null
     isActive?: boolean
     createdAt?: Date | string
@@ -47976,12 +54293,14 @@ export namespace Prisma {
     therapeuticGroup?: TherapeuticGroupCreateNestedOneWithoutMasterDrugsInput
     drugMaps?: FacilityDrugMapCreateNestedManyWithoutMasterDrugInput
     drugOrderLines?: DrugOrderLineCreateNestedManyWithoutMasterDrugInput
+    facilityDemandPlanLines?: FacilityDemandPlanLineCreateNestedManyWithoutMasterDrugInput
   }
 
   export type MasterDrugUncheckedCreateWithoutCompanyDrugsInput = {
     id?: string
     maChung: string
     maBhyt?: string | null
+    maAtc?: string | null
     tenThuoc: string
     hoatChat?: string | null
     hamLuong?: string | null
@@ -48003,12 +54322,14 @@ export namespace Prisma {
     therapeuticGroupId?: string | null
     isKeDon?: string | null
     kiemSoatDacBiet?: string | null
+    isThuocHiem?: boolean
     isTrongNuoc?: string | null
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     drugMaps?: FacilityDrugMapUncheckedCreateNestedManyWithoutMasterDrugInput
     drugOrderLines?: DrugOrderLineUncheckedCreateNestedManyWithoutMasterDrugInput
+    facilityDemandPlanLines?: FacilityDemandPlanLineUncheckedCreateNestedManyWithoutMasterDrugInput
   }
 
   export type MasterDrugCreateOrConnectWithoutCompanyDrugsInput = {
@@ -48124,6 +54445,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     maChung?: StringFieldUpdateOperationsInput | string
     maBhyt?: NullableStringFieldUpdateOperationsInput | string | null
+    maAtc?: NullableStringFieldUpdateOperationsInput | string | null
     tenThuoc?: StringFieldUpdateOperationsInput | string
     hoatChat?: NullableStringFieldUpdateOperationsInput | string | null
     hamLuong?: NullableStringFieldUpdateOperationsInput | string | null
@@ -48144,6 +54466,7 @@ export namespace Prisma {
     nhomThuoc?: NullableStringFieldUpdateOperationsInput | string | null
     isKeDon?: NullableStringFieldUpdateOperationsInput | string | null
     kiemSoatDacBiet?: NullableStringFieldUpdateOperationsInput | string | null
+    isThuocHiem?: BoolFieldUpdateOperationsInput | boolean
     isTrongNuoc?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -48151,12 +54474,14 @@ export namespace Prisma {
     therapeuticGroup?: TherapeuticGroupUpdateOneWithoutMasterDrugsNestedInput
     drugMaps?: FacilityDrugMapUpdateManyWithoutMasterDrugNestedInput
     drugOrderLines?: DrugOrderLineUpdateManyWithoutMasterDrugNestedInput
+    facilityDemandPlanLines?: FacilityDemandPlanLineUpdateManyWithoutMasterDrugNestedInput
   }
 
   export type MasterDrugUncheckedUpdateWithoutCompanyDrugsInput = {
     id?: StringFieldUpdateOperationsInput | string
     maChung?: StringFieldUpdateOperationsInput | string
     maBhyt?: NullableStringFieldUpdateOperationsInput | string | null
+    maAtc?: NullableStringFieldUpdateOperationsInput | string | null
     tenThuoc?: StringFieldUpdateOperationsInput | string
     hoatChat?: NullableStringFieldUpdateOperationsInput | string | null
     hamLuong?: NullableStringFieldUpdateOperationsInput | string | null
@@ -48178,12 +54503,14 @@ export namespace Prisma {
     therapeuticGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     isKeDon?: NullableStringFieldUpdateOperationsInput | string | null
     kiemSoatDacBiet?: NullableStringFieldUpdateOperationsInput | string | null
+    isThuocHiem?: BoolFieldUpdateOperationsInput | boolean
     isTrongNuoc?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     drugMaps?: FacilityDrugMapUncheckedUpdateManyWithoutMasterDrugNestedInput
     drugOrderLines?: DrugOrderLineUncheckedUpdateManyWithoutMasterDrugNestedInput
+    facilityDemandPlanLines?: FacilityDemandPlanLineUncheckedUpdateManyWithoutMasterDrugNestedInput
   }
 
   export type DrugOrderLineUpsertWithWhereUniqueWithoutCompanyDrugInput = {
@@ -48215,11 +54542,14 @@ export namespace Prisma {
     contactPerson?: string | null
     phoneNumber?: string | null
     address?: string | null
+    latitude?: number | null
+    longitude?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     company?: CompanyCreateNestedOneWithoutUsersInput
     reports?: InventoryReportCreateNestedManyWithoutFacilityInput
     reportSubmissions?: FacilityReportSubmissionCreateNestedManyWithoutFacilityInput
+    facilityDemandPlans?: FacilityDemandPlanCreateNestedManyWithoutFacilityInput
     keHoachLCNTs?: KeHoachLCNTCreateNestedManyWithoutFacilityInput
     drugOrders?: DrugOrderCreateNestedManyWithoutFacilityInput
     drugOrderReceipts?: DrugOrderReceiptCreateNestedManyWithoutFacilityInput
@@ -48242,10 +54572,13 @@ export namespace Prisma {
     contactPerson?: string | null
     phoneNumber?: string | null
     address?: string | null
+    latitude?: number | null
+    longitude?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     reports?: InventoryReportUncheckedCreateNestedManyWithoutFacilityInput
     reportSubmissions?: FacilityReportSubmissionUncheckedCreateNestedManyWithoutFacilityInput
+    facilityDemandPlans?: FacilityDemandPlanUncheckedCreateNestedManyWithoutFacilityInput
     keHoachLCNTs?: KeHoachLCNTUncheckedCreateNestedManyWithoutFacilityInput
     drugOrders?: DrugOrderUncheckedCreateNestedManyWithoutFacilityInput
     drugOrderReceipts?: DrugOrderReceiptUncheckedCreateNestedManyWithoutFacilityInput
@@ -48263,6 +54596,7 @@ export namespace Prisma {
     id?: string
     maChung: string
     maBhyt?: string | null
+    maAtc?: string | null
     tenThuoc: string
     hoatChat?: string | null
     hamLuong?: string | null
@@ -48283,6 +54617,7 @@ export namespace Prisma {
     nhomThuoc?: string | null
     isKeDon?: string | null
     kiemSoatDacBiet?: string | null
+    isThuocHiem?: boolean
     isTrongNuoc?: string | null
     isActive?: boolean
     createdAt?: Date | string
@@ -48290,12 +54625,14 @@ export namespace Prisma {
     therapeuticGroup?: TherapeuticGroupCreateNestedOneWithoutMasterDrugsInput
     companyDrugs?: CompanyDrugCreateNestedManyWithoutMasterDrugInput
     drugOrderLines?: DrugOrderLineCreateNestedManyWithoutMasterDrugInput
+    facilityDemandPlanLines?: FacilityDemandPlanLineCreateNestedManyWithoutMasterDrugInput
   }
 
   export type MasterDrugUncheckedCreateWithoutDrugMapsInput = {
     id?: string
     maChung: string
     maBhyt?: string | null
+    maAtc?: string | null
     tenThuoc: string
     hoatChat?: string | null
     hamLuong?: string | null
@@ -48317,12 +54654,14 @@ export namespace Prisma {
     therapeuticGroupId?: string | null
     isKeDon?: string | null
     kiemSoatDacBiet?: string | null
+    isThuocHiem?: boolean
     isTrongNuoc?: string | null
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     companyDrugs?: CompanyDrugUncheckedCreateNestedManyWithoutMasterDrugInput
     drugOrderLines?: DrugOrderLineUncheckedCreateNestedManyWithoutMasterDrugInput
+    facilityDemandPlanLines?: FacilityDemandPlanLineUncheckedCreateNestedManyWithoutMasterDrugInput
   }
 
   export type MasterDrugCreateOrConnectWithoutDrugMapsInput = {
@@ -48335,6 +54674,7 @@ export namespace Prisma {
     reportMonth: string
     tonDau?: Decimal | DecimalJsLike | number | string
     nhap?: Decimal | DecimalJsLike | number | string
+    nhapHoanTra?: Decimal | DecimalJsLike | number | string
     xuat?: Decimal | DecimalJsLike | number | string
     tonCuoi?: Decimal | DecimalJsLike | number | string
     giaVat?: Decimal | DecimalJsLike | number | string
@@ -48358,6 +54698,7 @@ export namespace Prisma {
     reportMonth: string
     tonDau?: Decimal | DecimalJsLike | number | string
     nhap?: Decimal | DecimalJsLike | number | string
+    nhapHoanTra?: Decimal | DecimalJsLike | number | string
     xuat?: Decimal | DecimalJsLike | number | string
     tonCuoi?: Decimal | DecimalJsLike | number | string
     giaVat?: Decimal | DecimalJsLike | number | string
@@ -48381,6 +54722,66 @@ export namespace Prisma {
 
   export type InventoryReportCreateManyDrugMapInputEnvelope = {
     data: InventoryReportCreateManyDrugMapInput | InventoryReportCreateManyDrugMapInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type FacilityDemandPlanLineCreateWithoutDrugMapInput = {
+    id?: string
+    maNoiBoSnapshot: string
+    tenThuocSnapshot: string
+    hoatChatSnapshot?: string | null
+    donViTinhSnapshot?: string | null
+    nhomTcktSnapshot?: string | null
+    maChungSnapshot?: string | null
+    suggestedQty?: Decimal | DecimalJsLike | number | string | null
+    rawSuggestedQty?: Decimal | DecimalJsLike | number | string | null
+    roundedSuggestedQty?: Decimal | DecimalJsLike | number | string | null
+    packageUnitSnapshot?: string | null
+    packageSizeSnapshot?: Decimal | DecimalJsLike | number | string | null
+    roundingNote?: string | null
+    finalQty?: Decimal | DecimalJsLike | number | string
+    suggestionBasis?: string | null
+    suggestionReportMonth?: string | null
+    suggestionRuleVersion?: string | null
+    note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    plan: FacilityDemandPlanCreateNestedOneWithoutLinesInput
+    masterDrug: MasterDrugCreateNestedOneWithoutFacilityDemandPlanLinesInput
+  }
+
+  export type FacilityDemandPlanLineUncheckedCreateWithoutDrugMapInput = {
+    id?: string
+    planId: string
+    masterDrugId: string
+    maNoiBoSnapshot: string
+    tenThuocSnapshot: string
+    hoatChatSnapshot?: string | null
+    donViTinhSnapshot?: string | null
+    nhomTcktSnapshot?: string | null
+    maChungSnapshot?: string | null
+    suggestedQty?: Decimal | DecimalJsLike | number | string | null
+    rawSuggestedQty?: Decimal | DecimalJsLike | number | string | null
+    roundedSuggestedQty?: Decimal | DecimalJsLike | number | string | null
+    packageUnitSnapshot?: string | null
+    packageSizeSnapshot?: Decimal | DecimalJsLike | number | string | null
+    roundingNote?: string | null
+    finalQty?: Decimal | DecimalJsLike | number | string
+    suggestionBasis?: string | null
+    suggestionReportMonth?: string | null
+    suggestionRuleVersion?: string | null
+    note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FacilityDemandPlanLineCreateOrConnectWithoutDrugMapInput = {
+    where: FacilityDemandPlanLineWhereUniqueInput
+    create: XOR<FacilityDemandPlanLineCreateWithoutDrugMapInput, FacilityDemandPlanLineUncheckedCreateWithoutDrugMapInput>
+  }
+
+  export type FacilityDemandPlanLineCreateManyDrugMapInputEnvelope = {
+    data: FacilityDemandPlanLineCreateManyDrugMapInput | FacilityDemandPlanLineCreateManyDrugMapInput[]
     skipDuplicates?: boolean
   }
 
@@ -48408,11 +54809,14 @@ export namespace Prisma {
     contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     company?: CompanyUpdateOneWithoutUsersNestedInput
     reports?: InventoryReportUpdateManyWithoutFacilityNestedInput
     reportSubmissions?: FacilityReportSubmissionUpdateManyWithoutFacilityNestedInput
+    facilityDemandPlans?: FacilityDemandPlanUpdateManyWithoutFacilityNestedInput
     keHoachLCNTs?: KeHoachLCNTUpdateManyWithoutFacilityNestedInput
     drugOrders?: DrugOrderUpdateManyWithoutFacilityNestedInput
     drugOrderReceipts?: DrugOrderReceiptUpdateManyWithoutFacilityNestedInput
@@ -48435,10 +54839,13 @@ export namespace Prisma {
     contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     reports?: InventoryReportUncheckedUpdateManyWithoutFacilityNestedInput
     reportSubmissions?: FacilityReportSubmissionUncheckedUpdateManyWithoutFacilityNestedInput
+    facilityDemandPlans?: FacilityDemandPlanUncheckedUpdateManyWithoutFacilityNestedInput
     keHoachLCNTs?: KeHoachLCNTUncheckedUpdateManyWithoutFacilityNestedInput
     drugOrders?: DrugOrderUncheckedUpdateManyWithoutFacilityNestedInput
     drugOrderReceipts?: DrugOrderReceiptUncheckedUpdateManyWithoutFacilityNestedInput
@@ -48462,6 +54869,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     maChung?: StringFieldUpdateOperationsInput | string
     maBhyt?: NullableStringFieldUpdateOperationsInput | string | null
+    maAtc?: NullableStringFieldUpdateOperationsInput | string | null
     tenThuoc?: StringFieldUpdateOperationsInput | string
     hoatChat?: NullableStringFieldUpdateOperationsInput | string | null
     hamLuong?: NullableStringFieldUpdateOperationsInput | string | null
@@ -48482,6 +54890,7 @@ export namespace Prisma {
     nhomThuoc?: NullableStringFieldUpdateOperationsInput | string | null
     isKeDon?: NullableStringFieldUpdateOperationsInput | string | null
     kiemSoatDacBiet?: NullableStringFieldUpdateOperationsInput | string | null
+    isThuocHiem?: BoolFieldUpdateOperationsInput | boolean
     isTrongNuoc?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -48489,12 +54898,14 @@ export namespace Prisma {
     therapeuticGroup?: TherapeuticGroupUpdateOneWithoutMasterDrugsNestedInput
     companyDrugs?: CompanyDrugUpdateManyWithoutMasterDrugNestedInput
     drugOrderLines?: DrugOrderLineUpdateManyWithoutMasterDrugNestedInput
+    facilityDemandPlanLines?: FacilityDemandPlanLineUpdateManyWithoutMasterDrugNestedInput
   }
 
   export type MasterDrugUncheckedUpdateWithoutDrugMapsInput = {
     id?: StringFieldUpdateOperationsInput | string
     maChung?: StringFieldUpdateOperationsInput | string
     maBhyt?: NullableStringFieldUpdateOperationsInput | string | null
+    maAtc?: NullableStringFieldUpdateOperationsInput | string | null
     tenThuoc?: StringFieldUpdateOperationsInput | string
     hoatChat?: NullableStringFieldUpdateOperationsInput | string | null
     hamLuong?: NullableStringFieldUpdateOperationsInput | string | null
@@ -48516,12 +54927,14 @@ export namespace Prisma {
     therapeuticGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     isKeDon?: NullableStringFieldUpdateOperationsInput | string | null
     kiemSoatDacBiet?: NullableStringFieldUpdateOperationsInput | string | null
+    isThuocHiem?: BoolFieldUpdateOperationsInput | boolean
     isTrongNuoc?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     companyDrugs?: CompanyDrugUncheckedUpdateManyWithoutMasterDrugNestedInput
     drugOrderLines?: DrugOrderLineUncheckedUpdateManyWithoutMasterDrugNestedInput
+    facilityDemandPlanLines?: FacilityDemandPlanLineUncheckedUpdateManyWithoutMasterDrugNestedInput
   }
 
   export type InventoryReportUpsertWithWhereUniqueWithoutDrugMapInput = {
@@ -48540,6 +54953,622 @@ export namespace Prisma {
     data: XOR<InventoryReportUpdateManyMutationInput, InventoryReportUncheckedUpdateManyWithoutDrugMapInput>
   }
 
+  export type FacilityDemandPlanLineUpsertWithWhereUniqueWithoutDrugMapInput = {
+    where: FacilityDemandPlanLineWhereUniqueInput
+    update: XOR<FacilityDemandPlanLineUpdateWithoutDrugMapInput, FacilityDemandPlanLineUncheckedUpdateWithoutDrugMapInput>
+    create: XOR<FacilityDemandPlanLineCreateWithoutDrugMapInput, FacilityDemandPlanLineUncheckedCreateWithoutDrugMapInput>
+  }
+
+  export type FacilityDemandPlanLineUpdateWithWhereUniqueWithoutDrugMapInput = {
+    where: FacilityDemandPlanLineWhereUniqueInput
+    data: XOR<FacilityDemandPlanLineUpdateWithoutDrugMapInput, FacilityDemandPlanLineUncheckedUpdateWithoutDrugMapInput>
+  }
+
+  export type FacilityDemandPlanLineUpdateManyWithWhereWithoutDrugMapInput = {
+    where: FacilityDemandPlanLineScalarWhereInput
+    data: XOR<FacilityDemandPlanLineUpdateManyMutationInput, FacilityDemandPlanLineUncheckedUpdateManyWithoutDrugMapInput>
+  }
+
+  export type UserCreateWithoutFacilityDemandPlansInput = {
+    id?: string
+    username: string
+    passwordHash: string
+    role?: $Enums.Role
+    facilityName?: string | null
+    facilityCode?: string | null
+    isActive?: boolean
+    autonomyGroup?: string | null
+    facilityType?: string | null
+    contactPerson?: string | null
+    phoneNumber?: string | null
+    address?: string | null
+    latitude?: number | null
+    longitude?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    company?: CompanyCreateNestedOneWithoutUsersInput
+    drugMaps?: FacilityDrugMapCreateNestedManyWithoutFacilityInput
+    reports?: InventoryReportCreateNestedManyWithoutFacilityInput
+    reportSubmissions?: FacilityReportSubmissionCreateNestedManyWithoutFacilityInput
+    keHoachLCNTs?: KeHoachLCNTCreateNestedManyWithoutFacilityInput
+    drugOrders?: DrugOrderCreateNestedManyWithoutFacilityInput
+    drugOrderReceipts?: DrugOrderReceiptCreateNestedManyWithoutFacilityInput
+    notifications?: NotificationCreateNestedManyWithoutUserInput
+    activityLogs?: ActivityLogCreateNestedManyWithoutUserInput
+    aiUserPolicy?: AIUserPolicyCreateNestedOneWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutFacilityDemandPlansInput = {
+    id?: string
+    username: string
+    passwordHash: string
+    role?: $Enums.Role
+    facilityName?: string | null
+    facilityCode?: string | null
+    companyId?: string | null
+    isActive?: boolean
+    autonomyGroup?: string | null
+    facilityType?: string | null
+    contactPerson?: string | null
+    phoneNumber?: string | null
+    address?: string | null
+    latitude?: number | null
+    longitude?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    drugMaps?: FacilityDrugMapUncheckedCreateNestedManyWithoutFacilityInput
+    reports?: InventoryReportUncheckedCreateNestedManyWithoutFacilityInput
+    reportSubmissions?: FacilityReportSubmissionUncheckedCreateNestedManyWithoutFacilityInput
+    keHoachLCNTs?: KeHoachLCNTUncheckedCreateNestedManyWithoutFacilityInput
+    drugOrders?: DrugOrderUncheckedCreateNestedManyWithoutFacilityInput
+    drugOrderReceipts?: DrugOrderReceiptUncheckedCreateNestedManyWithoutFacilityInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
+    activityLogs?: ActivityLogUncheckedCreateNestedManyWithoutUserInput
+    aiUserPolicy?: AIUserPolicyUncheckedCreateNestedOneWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutFacilityDemandPlansInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutFacilityDemandPlansInput, UserUncheckedCreateWithoutFacilityDemandPlansInput>
+  }
+
+  export type FacilityDemandPlanLineCreateWithoutPlanInput = {
+    id?: string
+    maNoiBoSnapshot: string
+    tenThuocSnapshot: string
+    hoatChatSnapshot?: string | null
+    donViTinhSnapshot?: string | null
+    nhomTcktSnapshot?: string | null
+    maChungSnapshot?: string | null
+    suggestedQty?: Decimal | DecimalJsLike | number | string | null
+    rawSuggestedQty?: Decimal | DecimalJsLike | number | string | null
+    roundedSuggestedQty?: Decimal | DecimalJsLike | number | string | null
+    packageUnitSnapshot?: string | null
+    packageSizeSnapshot?: Decimal | DecimalJsLike | number | string | null
+    roundingNote?: string | null
+    finalQty?: Decimal | DecimalJsLike | number | string
+    suggestionBasis?: string | null
+    suggestionReportMonth?: string | null
+    suggestionRuleVersion?: string | null
+    note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    drugMap: FacilityDrugMapCreateNestedOneWithoutDemandPlanLinesInput
+    masterDrug: MasterDrugCreateNestedOneWithoutFacilityDemandPlanLinesInput
+  }
+
+  export type FacilityDemandPlanLineUncheckedCreateWithoutPlanInput = {
+    id?: string
+    mapId: string
+    masterDrugId: string
+    maNoiBoSnapshot: string
+    tenThuocSnapshot: string
+    hoatChatSnapshot?: string | null
+    donViTinhSnapshot?: string | null
+    nhomTcktSnapshot?: string | null
+    maChungSnapshot?: string | null
+    suggestedQty?: Decimal | DecimalJsLike | number | string | null
+    rawSuggestedQty?: Decimal | DecimalJsLike | number | string | null
+    roundedSuggestedQty?: Decimal | DecimalJsLike | number | string | null
+    packageUnitSnapshot?: string | null
+    packageSizeSnapshot?: Decimal | DecimalJsLike | number | string | null
+    roundingNote?: string | null
+    finalQty?: Decimal | DecimalJsLike | number | string
+    suggestionBasis?: string | null
+    suggestionReportMonth?: string | null
+    suggestionRuleVersion?: string | null
+    note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FacilityDemandPlanLineCreateOrConnectWithoutPlanInput = {
+    where: FacilityDemandPlanLineWhereUniqueInput
+    create: XOR<FacilityDemandPlanLineCreateWithoutPlanInput, FacilityDemandPlanLineUncheckedCreateWithoutPlanInput>
+  }
+
+  export type FacilityDemandPlanLineCreateManyPlanInputEnvelope = {
+    data: FacilityDemandPlanLineCreateManyPlanInput | FacilityDemandPlanLineCreateManyPlanInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type UserUpsertWithoutFacilityDemandPlansInput = {
+    update: XOR<UserUpdateWithoutFacilityDemandPlansInput, UserUncheckedUpdateWithoutFacilityDemandPlansInput>
+    create: XOR<UserCreateWithoutFacilityDemandPlansInput, UserUncheckedCreateWithoutFacilityDemandPlansInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutFacilityDemandPlansInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutFacilityDemandPlansInput, UserUncheckedUpdateWithoutFacilityDemandPlansInput>
+  }
+
+  export type UserUpdateWithoutFacilityDemandPlansInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    facilityName?: NullableStringFieldUpdateOperationsInput | string | null
+    facilityCode?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    autonomyGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    facilityType?: NullableStringFieldUpdateOperationsInput | string | null
+    contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    company?: CompanyUpdateOneWithoutUsersNestedInput
+    drugMaps?: FacilityDrugMapUpdateManyWithoutFacilityNestedInput
+    reports?: InventoryReportUpdateManyWithoutFacilityNestedInput
+    reportSubmissions?: FacilityReportSubmissionUpdateManyWithoutFacilityNestedInput
+    keHoachLCNTs?: KeHoachLCNTUpdateManyWithoutFacilityNestedInput
+    drugOrders?: DrugOrderUpdateManyWithoutFacilityNestedInput
+    drugOrderReceipts?: DrugOrderReceiptUpdateManyWithoutFacilityNestedInput
+    notifications?: NotificationUpdateManyWithoutUserNestedInput
+    activityLogs?: ActivityLogUpdateManyWithoutUserNestedInput
+    aiUserPolicy?: AIUserPolicyUpdateOneWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutFacilityDemandPlansInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    passwordHash?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    facilityName?: NullableStringFieldUpdateOperationsInput | string | null
+    facilityCode?: NullableStringFieldUpdateOperationsInput | string | null
+    companyId?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    autonomyGroup?: NullableStringFieldUpdateOperationsInput | string | null
+    facilityType?: NullableStringFieldUpdateOperationsInput | string | null
+    contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    drugMaps?: FacilityDrugMapUncheckedUpdateManyWithoutFacilityNestedInput
+    reports?: InventoryReportUncheckedUpdateManyWithoutFacilityNestedInput
+    reportSubmissions?: FacilityReportSubmissionUncheckedUpdateManyWithoutFacilityNestedInput
+    keHoachLCNTs?: KeHoachLCNTUncheckedUpdateManyWithoutFacilityNestedInput
+    drugOrders?: DrugOrderUncheckedUpdateManyWithoutFacilityNestedInput
+    drugOrderReceipts?: DrugOrderReceiptUncheckedUpdateManyWithoutFacilityNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
+    activityLogs?: ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+    aiUserPolicy?: AIUserPolicyUncheckedUpdateOneWithoutUserNestedInput
+  }
+
+  export type FacilityDemandPlanLineUpsertWithWhereUniqueWithoutPlanInput = {
+    where: FacilityDemandPlanLineWhereUniqueInput
+    update: XOR<FacilityDemandPlanLineUpdateWithoutPlanInput, FacilityDemandPlanLineUncheckedUpdateWithoutPlanInput>
+    create: XOR<FacilityDemandPlanLineCreateWithoutPlanInput, FacilityDemandPlanLineUncheckedCreateWithoutPlanInput>
+  }
+
+  export type FacilityDemandPlanLineUpdateWithWhereUniqueWithoutPlanInput = {
+    where: FacilityDemandPlanLineWhereUniqueInput
+    data: XOR<FacilityDemandPlanLineUpdateWithoutPlanInput, FacilityDemandPlanLineUncheckedUpdateWithoutPlanInput>
+  }
+
+  export type FacilityDemandPlanLineUpdateManyWithWhereWithoutPlanInput = {
+    where: FacilityDemandPlanLineScalarWhereInput
+    data: XOR<FacilityDemandPlanLineUpdateManyMutationInput, FacilityDemandPlanLineUncheckedUpdateManyWithoutPlanInput>
+  }
+
+  export type FacilityDemandPlanCreateWithoutLinesInput = {
+    id?: string
+    planNo: string
+    status?: $Enums.FacilityDemandPlanStatus
+    baseReportMonth?: string | null
+    note?: string | null
+    finalizedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    facility: UserCreateNestedOneWithoutFacilityDemandPlansInput
+  }
+
+  export type FacilityDemandPlanUncheckedCreateWithoutLinesInput = {
+    id?: string
+    planNo: string
+    facilityId: string
+    status?: $Enums.FacilityDemandPlanStatus
+    baseReportMonth?: string | null
+    note?: string | null
+    finalizedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FacilityDemandPlanCreateOrConnectWithoutLinesInput = {
+    where: FacilityDemandPlanWhereUniqueInput
+    create: XOR<FacilityDemandPlanCreateWithoutLinesInput, FacilityDemandPlanUncheckedCreateWithoutLinesInput>
+  }
+
+  export type FacilityDrugMapCreateWithoutDemandPlanLinesInput = {
+    id?: string
+    maNoiBo: string
+    tenThuocNoiBo: string
+    hoatChatNoiBo?: string | null
+    soDangKyNoiBo?: string | null
+    donViTinhNoiBo?: string | null
+    nhomTckt?: string | null
+    giaVat?: Decimal | DecimalJsLike | number | string
+    bhyt?: string | null
+    dichVu?: string | null
+    soQdTrungThau?: string | null
+    tenCongTy?: string | null
+    ngayBatDauHd?: string | null
+    ngayKetThucHd?: string | null
+    demandRoundingEnabled?: boolean
+    demandPackageUnit?: string | null
+    demandPackageSize?: Decimal | DecimalJsLike | number | string | null
+    demandPlanningLocked?: boolean
+    demandPlanningLockedAt?: Date | string | null
+    demandPlanningUnlockedAt?: Date | string | null
+    demandPlanningLockReason?: string | null
+    status?: $Enums.MappingStatus
+    adminNote?: string | null
+    isOutOfCatalog?: boolean
+    isActive?: boolean
+    inactiveFromMonth?: string | null
+    inactiveReason?: string | null
+    inactiveAt?: Date | string | null
+    reactivatedFromMonth?: string | null
+    reactivatedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    facility: UserCreateNestedOneWithoutDrugMapsInput
+    masterDrug?: MasterDrugCreateNestedOneWithoutDrugMapsInput
+    reports?: InventoryReportCreateNestedManyWithoutDrugMapInput
+  }
+
+  export type FacilityDrugMapUncheckedCreateWithoutDemandPlanLinesInput = {
+    id?: string
+    facilityId: string
+    maNoiBo: string
+    tenThuocNoiBo: string
+    hoatChatNoiBo?: string | null
+    soDangKyNoiBo?: string | null
+    donViTinhNoiBo?: string | null
+    nhomTckt?: string | null
+    giaVat?: Decimal | DecimalJsLike | number | string
+    bhyt?: string | null
+    dichVu?: string | null
+    soQdTrungThau?: string | null
+    tenCongTy?: string | null
+    ngayBatDauHd?: string | null
+    ngayKetThucHd?: string | null
+    demandRoundingEnabled?: boolean
+    demandPackageUnit?: string | null
+    demandPackageSize?: Decimal | DecimalJsLike | number | string | null
+    demandPlanningLocked?: boolean
+    demandPlanningLockedAt?: Date | string | null
+    demandPlanningUnlockedAt?: Date | string | null
+    demandPlanningLockReason?: string | null
+    masterDrugId?: string | null
+    status?: $Enums.MappingStatus
+    adminNote?: string | null
+    isOutOfCatalog?: boolean
+    isActive?: boolean
+    inactiveFromMonth?: string | null
+    inactiveReason?: string | null
+    inactiveAt?: Date | string | null
+    reactivatedFromMonth?: string | null
+    reactivatedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    reports?: InventoryReportUncheckedCreateNestedManyWithoutDrugMapInput
+  }
+
+  export type FacilityDrugMapCreateOrConnectWithoutDemandPlanLinesInput = {
+    where: FacilityDrugMapWhereUniqueInput
+    create: XOR<FacilityDrugMapCreateWithoutDemandPlanLinesInput, FacilityDrugMapUncheckedCreateWithoutDemandPlanLinesInput>
+  }
+
+  export type MasterDrugCreateWithoutFacilityDemandPlanLinesInput = {
+    id?: string
+    maChung: string
+    maBhyt?: string | null
+    maAtc?: string | null
+    tenThuoc: string
+    hoatChat?: string | null
+    hamLuong?: string | null
+    dangBaoChe?: string | null
+    soDangKy?: string | null
+    quyCach?: string | null
+    donViTinh?: string | null
+    tieuChuan?: string | null
+    tuoiTho?: string | null
+    duongDung?: string | null
+    nguonGoc?: string | null
+    congTySanXuat?: string | null
+    nuocSanXuat?: string | null
+    diaChiSanXuat?: string | null
+    congTyDangKy?: string | null
+    nuocDangKy?: string | null
+    diaChiDangKy?: string | null
+    nhomThuoc?: string | null
+    isKeDon?: string | null
+    kiemSoatDacBiet?: string | null
+    isThuocHiem?: boolean
+    isTrongNuoc?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    therapeuticGroup?: TherapeuticGroupCreateNestedOneWithoutMasterDrugsInput
+    drugMaps?: FacilityDrugMapCreateNestedManyWithoutMasterDrugInput
+    companyDrugs?: CompanyDrugCreateNestedManyWithoutMasterDrugInput
+    drugOrderLines?: DrugOrderLineCreateNestedManyWithoutMasterDrugInput
+  }
+
+  export type MasterDrugUncheckedCreateWithoutFacilityDemandPlanLinesInput = {
+    id?: string
+    maChung: string
+    maBhyt?: string | null
+    maAtc?: string | null
+    tenThuoc: string
+    hoatChat?: string | null
+    hamLuong?: string | null
+    dangBaoChe?: string | null
+    soDangKy?: string | null
+    quyCach?: string | null
+    donViTinh?: string | null
+    tieuChuan?: string | null
+    tuoiTho?: string | null
+    duongDung?: string | null
+    nguonGoc?: string | null
+    congTySanXuat?: string | null
+    nuocSanXuat?: string | null
+    diaChiSanXuat?: string | null
+    congTyDangKy?: string | null
+    nuocDangKy?: string | null
+    diaChiDangKy?: string | null
+    nhomThuoc?: string | null
+    therapeuticGroupId?: string | null
+    isKeDon?: string | null
+    kiemSoatDacBiet?: string | null
+    isThuocHiem?: boolean
+    isTrongNuoc?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    drugMaps?: FacilityDrugMapUncheckedCreateNestedManyWithoutMasterDrugInput
+    companyDrugs?: CompanyDrugUncheckedCreateNestedManyWithoutMasterDrugInput
+    drugOrderLines?: DrugOrderLineUncheckedCreateNestedManyWithoutMasterDrugInput
+  }
+
+  export type MasterDrugCreateOrConnectWithoutFacilityDemandPlanLinesInput = {
+    where: MasterDrugWhereUniqueInput
+    create: XOR<MasterDrugCreateWithoutFacilityDemandPlanLinesInput, MasterDrugUncheckedCreateWithoutFacilityDemandPlanLinesInput>
+  }
+
+  export type FacilityDemandPlanUpsertWithoutLinesInput = {
+    update: XOR<FacilityDemandPlanUpdateWithoutLinesInput, FacilityDemandPlanUncheckedUpdateWithoutLinesInput>
+    create: XOR<FacilityDemandPlanCreateWithoutLinesInput, FacilityDemandPlanUncheckedCreateWithoutLinesInput>
+    where?: FacilityDemandPlanWhereInput
+  }
+
+  export type FacilityDemandPlanUpdateToOneWithWhereWithoutLinesInput = {
+    where?: FacilityDemandPlanWhereInput
+    data: XOR<FacilityDemandPlanUpdateWithoutLinesInput, FacilityDemandPlanUncheckedUpdateWithoutLinesInput>
+  }
+
+  export type FacilityDemandPlanUpdateWithoutLinesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    planNo?: StringFieldUpdateOperationsInput | string
+    status?: EnumFacilityDemandPlanStatusFieldUpdateOperationsInput | $Enums.FacilityDemandPlanStatus
+    baseReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    finalizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    facility?: UserUpdateOneRequiredWithoutFacilityDemandPlansNestedInput
+  }
+
+  export type FacilityDemandPlanUncheckedUpdateWithoutLinesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    planNo?: StringFieldUpdateOperationsInput | string
+    facilityId?: StringFieldUpdateOperationsInput | string
+    status?: EnumFacilityDemandPlanStatusFieldUpdateOperationsInput | $Enums.FacilityDemandPlanStatus
+    baseReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    finalizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FacilityDrugMapUpsertWithoutDemandPlanLinesInput = {
+    update: XOR<FacilityDrugMapUpdateWithoutDemandPlanLinesInput, FacilityDrugMapUncheckedUpdateWithoutDemandPlanLinesInput>
+    create: XOR<FacilityDrugMapCreateWithoutDemandPlanLinesInput, FacilityDrugMapUncheckedCreateWithoutDemandPlanLinesInput>
+    where?: FacilityDrugMapWhereInput
+  }
+
+  export type FacilityDrugMapUpdateToOneWithWhereWithoutDemandPlanLinesInput = {
+    where?: FacilityDrugMapWhereInput
+    data: XOR<FacilityDrugMapUpdateWithoutDemandPlanLinesInput, FacilityDrugMapUncheckedUpdateWithoutDemandPlanLinesInput>
+  }
+
+  export type FacilityDrugMapUpdateWithoutDemandPlanLinesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    maNoiBo?: StringFieldUpdateOperationsInput | string
+    tenThuocNoiBo?: StringFieldUpdateOperationsInput | string
+    hoatChatNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
+    soDangKyNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
+    donViTinhNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
+    nhomTckt?: NullableStringFieldUpdateOperationsInput | string | null
+    giaVat?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    bhyt?: NullableStringFieldUpdateOperationsInput | string | null
+    dichVu?: NullableStringFieldUpdateOperationsInput | string | null
+    soQdTrungThau?: NullableStringFieldUpdateOperationsInput | string | null
+    tenCongTy?: NullableStringFieldUpdateOperationsInput | string | null
+    ngayBatDauHd?: NullableStringFieldUpdateOperationsInput | string | null
+    ngayKetThucHd?: NullableStringFieldUpdateOperationsInput | string | null
+    demandRoundingEnabled?: BoolFieldUpdateOperationsInput | boolean
+    demandPackageUnit?: NullableStringFieldUpdateOperationsInput | string | null
+    demandPackageSize?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    demandPlanningLocked?: BoolFieldUpdateOperationsInput | boolean
+    demandPlanningLockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    demandPlanningUnlockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    demandPlanningLockReason?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumMappingStatusFieldUpdateOperationsInput | $Enums.MappingStatus
+    adminNote?: NullableStringFieldUpdateOperationsInput | string | null
+    isOutOfCatalog?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    inactiveFromMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    inactiveReason?: NullableStringFieldUpdateOperationsInput | string | null
+    inactiveAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reactivatedFromMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    reactivatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    facility?: UserUpdateOneRequiredWithoutDrugMapsNestedInput
+    masterDrug?: MasterDrugUpdateOneWithoutDrugMapsNestedInput
+    reports?: InventoryReportUpdateManyWithoutDrugMapNestedInput
+  }
+
+  export type FacilityDrugMapUncheckedUpdateWithoutDemandPlanLinesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    facilityId?: StringFieldUpdateOperationsInput | string
+    maNoiBo?: StringFieldUpdateOperationsInput | string
+    tenThuocNoiBo?: StringFieldUpdateOperationsInput | string
+    hoatChatNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
+    soDangKyNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
+    donViTinhNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
+    nhomTckt?: NullableStringFieldUpdateOperationsInput | string | null
+    giaVat?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    bhyt?: NullableStringFieldUpdateOperationsInput | string | null
+    dichVu?: NullableStringFieldUpdateOperationsInput | string | null
+    soQdTrungThau?: NullableStringFieldUpdateOperationsInput | string | null
+    tenCongTy?: NullableStringFieldUpdateOperationsInput | string | null
+    ngayBatDauHd?: NullableStringFieldUpdateOperationsInput | string | null
+    ngayKetThucHd?: NullableStringFieldUpdateOperationsInput | string | null
+    demandRoundingEnabled?: BoolFieldUpdateOperationsInput | boolean
+    demandPackageUnit?: NullableStringFieldUpdateOperationsInput | string | null
+    demandPackageSize?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    demandPlanningLocked?: BoolFieldUpdateOperationsInput | boolean
+    demandPlanningLockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    demandPlanningUnlockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    demandPlanningLockReason?: NullableStringFieldUpdateOperationsInput | string | null
+    masterDrugId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumMappingStatusFieldUpdateOperationsInput | $Enums.MappingStatus
+    adminNote?: NullableStringFieldUpdateOperationsInput | string | null
+    isOutOfCatalog?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    inactiveFromMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    inactiveReason?: NullableStringFieldUpdateOperationsInput | string | null
+    inactiveAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reactivatedFromMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    reactivatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    reports?: InventoryReportUncheckedUpdateManyWithoutDrugMapNestedInput
+  }
+
+  export type MasterDrugUpsertWithoutFacilityDemandPlanLinesInput = {
+    update: XOR<MasterDrugUpdateWithoutFacilityDemandPlanLinesInput, MasterDrugUncheckedUpdateWithoutFacilityDemandPlanLinesInput>
+    create: XOR<MasterDrugCreateWithoutFacilityDemandPlanLinesInput, MasterDrugUncheckedCreateWithoutFacilityDemandPlanLinesInput>
+    where?: MasterDrugWhereInput
+  }
+
+  export type MasterDrugUpdateToOneWithWhereWithoutFacilityDemandPlanLinesInput = {
+    where?: MasterDrugWhereInput
+    data: XOR<MasterDrugUpdateWithoutFacilityDemandPlanLinesInput, MasterDrugUncheckedUpdateWithoutFacilityDemandPlanLinesInput>
+  }
+
+  export type MasterDrugUpdateWithoutFacilityDemandPlanLinesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    maChung?: StringFieldUpdateOperationsInput | string
+    maBhyt?: NullableStringFieldUpdateOperationsInput | string | null
+    maAtc?: NullableStringFieldUpdateOperationsInput | string | null
+    tenThuoc?: StringFieldUpdateOperationsInput | string
+    hoatChat?: NullableStringFieldUpdateOperationsInput | string | null
+    hamLuong?: NullableStringFieldUpdateOperationsInput | string | null
+    dangBaoChe?: NullableStringFieldUpdateOperationsInput | string | null
+    soDangKy?: NullableStringFieldUpdateOperationsInput | string | null
+    quyCach?: NullableStringFieldUpdateOperationsInput | string | null
+    donViTinh?: NullableStringFieldUpdateOperationsInput | string | null
+    tieuChuan?: NullableStringFieldUpdateOperationsInput | string | null
+    tuoiTho?: NullableStringFieldUpdateOperationsInput | string | null
+    duongDung?: NullableStringFieldUpdateOperationsInput | string | null
+    nguonGoc?: NullableStringFieldUpdateOperationsInput | string | null
+    congTySanXuat?: NullableStringFieldUpdateOperationsInput | string | null
+    nuocSanXuat?: NullableStringFieldUpdateOperationsInput | string | null
+    diaChiSanXuat?: NullableStringFieldUpdateOperationsInput | string | null
+    congTyDangKy?: NullableStringFieldUpdateOperationsInput | string | null
+    nuocDangKy?: NullableStringFieldUpdateOperationsInput | string | null
+    diaChiDangKy?: NullableStringFieldUpdateOperationsInput | string | null
+    nhomThuoc?: NullableStringFieldUpdateOperationsInput | string | null
+    isKeDon?: NullableStringFieldUpdateOperationsInput | string | null
+    kiemSoatDacBiet?: NullableStringFieldUpdateOperationsInput | string | null
+    isThuocHiem?: BoolFieldUpdateOperationsInput | boolean
+    isTrongNuoc?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    therapeuticGroup?: TherapeuticGroupUpdateOneWithoutMasterDrugsNestedInput
+    drugMaps?: FacilityDrugMapUpdateManyWithoutMasterDrugNestedInput
+    companyDrugs?: CompanyDrugUpdateManyWithoutMasterDrugNestedInput
+    drugOrderLines?: DrugOrderLineUpdateManyWithoutMasterDrugNestedInput
+  }
+
+  export type MasterDrugUncheckedUpdateWithoutFacilityDemandPlanLinesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    maChung?: StringFieldUpdateOperationsInput | string
+    maBhyt?: NullableStringFieldUpdateOperationsInput | string | null
+    maAtc?: NullableStringFieldUpdateOperationsInput | string | null
+    tenThuoc?: StringFieldUpdateOperationsInput | string
+    hoatChat?: NullableStringFieldUpdateOperationsInput | string | null
+    hamLuong?: NullableStringFieldUpdateOperationsInput | string | null
+    dangBaoChe?: NullableStringFieldUpdateOperationsInput | string | null
+    soDangKy?: NullableStringFieldUpdateOperationsInput | string | null
+    quyCach?: NullableStringFieldUpdateOperationsInput | string | null
+    donViTinh?: NullableStringFieldUpdateOperationsInput | string | null
+    tieuChuan?: NullableStringFieldUpdateOperationsInput | string | null
+    tuoiTho?: NullableStringFieldUpdateOperationsInput | string | null
+    duongDung?: NullableStringFieldUpdateOperationsInput | string | null
+    nguonGoc?: NullableStringFieldUpdateOperationsInput | string | null
+    congTySanXuat?: NullableStringFieldUpdateOperationsInput | string | null
+    nuocSanXuat?: NullableStringFieldUpdateOperationsInput | string | null
+    diaChiSanXuat?: NullableStringFieldUpdateOperationsInput | string | null
+    congTyDangKy?: NullableStringFieldUpdateOperationsInput | string | null
+    nuocDangKy?: NullableStringFieldUpdateOperationsInput | string | null
+    diaChiDangKy?: NullableStringFieldUpdateOperationsInput | string | null
+    nhomThuoc?: NullableStringFieldUpdateOperationsInput | string | null
+    therapeuticGroupId?: NullableStringFieldUpdateOperationsInput | string | null
+    isKeDon?: NullableStringFieldUpdateOperationsInput | string | null
+    kiemSoatDacBiet?: NullableStringFieldUpdateOperationsInput | string | null
+    isThuocHiem?: BoolFieldUpdateOperationsInput | boolean
+    isTrongNuoc?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    drugMaps?: FacilityDrugMapUncheckedUpdateManyWithoutMasterDrugNestedInput
+    companyDrugs?: CompanyDrugUncheckedUpdateManyWithoutMasterDrugNestedInput
+    drugOrderLines?: DrugOrderLineUncheckedUpdateManyWithoutMasterDrugNestedInput
+  }
+
   export type UserCreateWithoutReportsInput = {
     id?: string
     username: string
@@ -48553,11 +55582,14 @@ export namespace Prisma {
     contactPerson?: string | null
     phoneNumber?: string | null
     address?: string | null
+    latitude?: number | null
+    longitude?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     company?: CompanyCreateNestedOneWithoutUsersInput
     drugMaps?: FacilityDrugMapCreateNestedManyWithoutFacilityInput
     reportSubmissions?: FacilityReportSubmissionCreateNestedManyWithoutFacilityInput
+    facilityDemandPlans?: FacilityDemandPlanCreateNestedManyWithoutFacilityInput
     keHoachLCNTs?: KeHoachLCNTCreateNestedManyWithoutFacilityInput
     drugOrders?: DrugOrderCreateNestedManyWithoutFacilityInput
     drugOrderReceipts?: DrugOrderReceiptCreateNestedManyWithoutFacilityInput
@@ -48580,10 +55612,13 @@ export namespace Prisma {
     contactPerson?: string | null
     phoneNumber?: string | null
     address?: string | null
+    latitude?: number | null
+    longitude?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     drugMaps?: FacilityDrugMapUncheckedCreateNestedManyWithoutFacilityInput
     reportSubmissions?: FacilityReportSubmissionUncheckedCreateNestedManyWithoutFacilityInput
+    facilityDemandPlans?: FacilityDemandPlanUncheckedCreateNestedManyWithoutFacilityInput
     keHoachLCNTs?: KeHoachLCNTUncheckedCreateNestedManyWithoutFacilityInput
     drugOrders?: DrugOrderUncheckedCreateNestedManyWithoutFacilityInput
     drugOrderReceipts?: DrugOrderReceiptUncheckedCreateNestedManyWithoutFacilityInput
@@ -48605,13 +55640,34 @@ export namespace Prisma {
     soDangKyNoiBo?: string | null
     donViTinhNoiBo?: string | null
     nhomTckt?: string | null
+    giaVat?: Decimal | DecimalJsLike | number | string
+    bhyt?: string | null
+    dichVu?: string | null
+    soQdTrungThau?: string | null
+    tenCongTy?: string | null
+    ngayBatDauHd?: string | null
+    ngayKetThucHd?: string | null
+    demandRoundingEnabled?: boolean
+    demandPackageUnit?: string | null
+    demandPackageSize?: Decimal | DecimalJsLike | number | string | null
+    demandPlanningLocked?: boolean
+    demandPlanningLockedAt?: Date | string | null
+    demandPlanningUnlockedAt?: Date | string | null
+    demandPlanningLockReason?: string | null
     status?: $Enums.MappingStatus
     adminNote?: string | null
     isOutOfCatalog?: boolean
+    isActive?: boolean
+    inactiveFromMonth?: string | null
+    inactiveReason?: string | null
+    inactiveAt?: Date | string | null
+    reactivatedFromMonth?: string | null
+    reactivatedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     facility: UserCreateNestedOneWithoutDrugMapsInput
     masterDrug?: MasterDrugCreateNestedOneWithoutDrugMapsInput
+    demandPlanLines?: FacilityDemandPlanLineCreateNestedManyWithoutDrugMapInput
   }
 
   export type FacilityDrugMapUncheckedCreateWithoutReportsInput = {
@@ -48623,12 +55679,33 @@ export namespace Prisma {
     soDangKyNoiBo?: string | null
     donViTinhNoiBo?: string | null
     nhomTckt?: string | null
+    giaVat?: Decimal | DecimalJsLike | number | string
+    bhyt?: string | null
+    dichVu?: string | null
+    soQdTrungThau?: string | null
+    tenCongTy?: string | null
+    ngayBatDauHd?: string | null
+    ngayKetThucHd?: string | null
+    demandRoundingEnabled?: boolean
+    demandPackageUnit?: string | null
+    demandPackageSize?: Decimal | DecimalJsLike | number | string | null
+    demandPlanningLocked?: boolean
+    demandPlanningLockedAt?: Date | string | null
+    demandPlanningUnlockedAt?: Date | string | null
+    demandPlanningLockReason?: string | null
     masterDrugId?: string | null
     status?: $Enums.MappingStatus
     adminNote?: string | null
     isOutOfCatalog?: boolean
+    isActive?: boolean
+    inactiveFromMonth?: string | null
+    inactiveReason?: string | null
+    inactiveAt?: Date | string | null
+    reactivatedFromMonth?: string | null
+    reactivatedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    demandPlanLines?: FacilityDemandPlanLineUncheckedCreateNestedManyWithoutDrugMapInput
   }
 
   export type FacilityDrugMapCreateOrConnectWithoutReportsInput = {
@@ -48660,11 +55737,14 @@ export namespace Prisma {
     contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     company?: CompanyUpdateOneWithoutUsersNestedInput
     drugMaps?: FacilityDrugMapUpdateManyWithoutFacilityNestedInput
     reportSubmissions?: FacilityReportSubmissionUpdateManyWithoutFacilityNestedInput
+    facilityDemandPlans?: FacilityDemandPlanUpdateManyWithoutFacilityNestedInput
     keHoachLCNTs?: KeHoachLCNTUpdateManyWithoutFacilityNestedInput
     drugOrders?: DrugOrderUpdateManyWithoutFacilityNestedInput
     drugOrderReceipts?: DrugOrderReceiptUpdateManyWithoutFacilityNestedInput
@@ -48687,10 +55767,13 @@ export namespace Prisma {
     contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     drugMaps?: FacilityDrugMapUncheckedUpdateManyWithoutFacilityNestedInput
     reportSubmissions?: FacilityReportSubmissionUncheckedUpdateManyWithoutFacilityNestedInput
+    facilityDemandPlans?: FacilityDemandPlanUncheckedUpdateManyWithoutFacilityNestedInput
     keHoachLCNTs?: KeHoachLCNTUncheckedUpdateManyWithoutFacilityNestedInput
     drugOrders?: DrugOrderUncheckedUpdateManyWithoutFacilityNestedInput
     drugOrderReceipts?: DrugOrderReceiptUncheckedUpdateManyWithoutFacilityNestedInput
@@ -48718,13 +55801,34 @@ export namespace Prisma {
     soDangKyNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     donViTinhNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     nhomTckt?: NullableStringFieldUpdateOperationsInput | string | null
+    giaVat?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    bhyt?: NullableStringFieldUpdateOperationsInput | string | null
+    dichVu?: NullableStringFieldUpdateOperationsInput | string | null
+    soQdTrungThau?: NullableStringFieldUpdateOperationsInput | string | null
+    tenCongTy?: NullableStringFieldUpdateOperationsInput | string | null
+    ngayBatDauHd?: NullableStringFieldUpdateOperationsInput | string | null
+    ngayKetThucHd?: NullableStringFieldUpdateOperationsInput | string | null
+    demandRoundingEnabled?: BoolFieldUpdateOperationsInput | boolean
+    demandPackageUnit?: NullableStringFieldUpdateOperationsInput | string | null
+    demandPackageSize?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    demandPlanningLocked?: BoolFieldUpdateOperationsInput | boolean
+    demandPlanningLockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    demandPlanningUnlockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    demandPlanningLockReason?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumMappingStatusFieldUpdateOperationsInput | $Enums.MappingStatus
     adminNote?: NullableStringFieldUpdateOperationsInput | string | null
     isOutOfCatalog?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    inactiveFromMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    inactiveReason?: NullableStringFieldUpdateOperationsInput | string | null
+    inactiveAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reactivatedFromMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    reactivatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     facility?: UserUpdateOneRequiredWithoutDrugMapsNestedInput
     masterDrug?: MasterDrugUpdateOneWithoutDrugMapsNestedInput
+    demandPlanLines?: FacilityDemandPlanLineUpdateManyWithoutDrugMapNestedInput
   }
 
   export type FacilityDrugMapUncheckedUpdateWithoutReportsInput = {
@@ -48736,12 +55840,33 @@ export namespace Prisma {
     soDangKyNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     donViTinhNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     nhomTckt?: NullableStringFieldUpdateOperationsInput | string | null
+    giaVat?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    bhyt?: NullableStringFieldUpdateOperationsInput | string | null
+    dichVu?: NullableStringFieldUpdateOperationsInput | string | null
+    soQdTrungThau?: NullableStringFieldUpdateOperationsInput | string | null
+    tenCongTy?: NullableStringFieldUpdateOperationsInput | string | null
+    ngayBatDauHd?: NullableStringFieldUpdateOperationsInput | string | null
+    ngayKetThucHd?: NullableStringFieldUpdateOperationsInput | string | null
+    demandRoundingEnabled?: BoolFieldUpdateOperationsInput | boolean
+    demandPackageUnit?: NullableStringFieldUpdateOperationsInput | string | null
+    demandPackageSize?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    demandPlanningLocked?: BoolFieldUpdateOperationsInput | boolean
+    demandPlanningLockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    demandPlanningUnlockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    demandPlanningLockReason?: NullableStringFieldUpdateOperationsInput | string | null
     masterDrugId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumMappingStatusFieldUpdateOperationsInput | $Enums.MappingStatus
     adminNote?: NullableStringFieldUpdateOperationsInput | string | null
     isOutOfCatalog?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    inactiveFromMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    inactiveReason?: NullableStringFieldUpdateOperationsInput | string | null
+    inactiveAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reactivatedFromMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    reactivatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    demandPlanLines?: FacilityDemandPlanLineUncheckedUpdateManyWithoutDrugMapNestedInput
   }
 
   export type UserCreateWithoutReportSubmissionsInput = {
@@ -48757,11 +55882,14 @@ export namespace Prisma {
     contactPerson?: string | null
     phoneNumber?: string | null
     address?: string | null
+    latitude?: number | null
+    longitude?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     company?: CompanyCreateNestedOneWithoutUsersInput
     drugMaps?: FacilityDrugMapCreateNestedManyWithoutFacilityInput
     reports?: InventoryReportCreateNestedManyWithoutFacilityInput
+    facilityDemandPlans?: FacilityDemandPlanCreateNestedManyWithoutFacilityInput
     keHoachLCNTs?: KeHoachLCNTCreateNestedManyWithoutFacilityInput
     drugOrders?: DrugOrderCreateNestedManyWithoutFacilityInput
     drugOrderReceipts?: DrugOrderReceiptCreateNestedManyWithoutFacilityInput
@@ -48784,10 +55912,13 @@ export namespace Prisma {
     contactPerson?: string | null
     phoneNumber?: string | null
     address?: string | null
+    latitude?: number | null
+    longitude?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     drugMaps?: FacilityDrugMapUncheckedCreateNestedManyWithoutFacilityInput
     reports?: InventoryReportUncheckedCreateNestedManyWithoutFacilityInput
+    facilityDemandPlans?: FacilityDemandPlanUncheckedCreateNestedManyWithoutFacilityInput
     keHoachLCNTs?: KeHoachLCNTUncheckedCreateNestedManyWithoutFacilityInput
     drugOrders?: DrugOrderUncheckedCreateNestedManyWithoutFacilityInput
     drugOrderReceipts?: DrugOrderReceiptUncheckedCreateNestedManyWithoutFacilityInput
@@ -48825,11 +55956,14 @@ export namespace Prisma {
     contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     company?: CompanyUpdateOneWithoutUsersNestedInput
     drugMaps?: FacilityDrugMapUpdateManyWithoutFacilityNestedInput
     reports?: InventoryReportUpdateManyWithoutFacilityNestedInput
+    facilityDemandPlans?: FacilityDemandPlanUpdateManyWithoutFacilityNestedInput
     keHoachLCNTs?: KeHoachLCNTUpdateManyWithoutFacilityNestedInput
     drugOrders?: DrugOrderUpdateManyWithoutFacilityNestedInput
     drugOrderReceipts?: DrugOrderReceiptUpdateManyWithoutFacilityNestedInput
@@ -48852,10 +55986,13 @@ export namespace Prisma {
     contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     drugMaps?: FacilityDrugMapUncheckedUpdateManyWithoutFacilityNestedInput
     reports?: InventoryReportUncheckedUpdateManyWithoutFacilityNestedInput
+    facilityDemandPlans?: FacilityDemandPlanUncheckedUpdateManyWithoutFacilityNestedInput
     keHoachLCNTs?: KeHoachLCNTUncheckedUpdateManyWithoutFacilityNestedInput
     drugOrders?: DrugOrderUncheckedUpdateManyWithoutFacilityNestedInput
     drugOrderReceipts?: DrugOrderReceiptUncheckedUpdateManyWithoutFacilityNestedInput
@@ -48877,12 +56014,15 @@ export namespace Prisma {
     contactPerson?: string | null
     phoneNumber?: string | null
     address?: string | null
+    latitude?: number | null
+    longitude?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     company?: CompanyCreateNestedOneWithoutUsersInput
     drugMaps?: FacilityDrugMapCreateNestedManyWithoutFacilityInput
     reports?: InventoryReportCreateNestedManyWithoutFacilityInput
     reportSubmissions?: FacilityReportSubmissionCreateNestedManyWithoutFacilityInput
+    facilityDemandPlans?: FacilityDemandPlanCreateNestedManyWithoutFacilityInput
     keHoachLCNTs?: KeHoachLCNTCreateNestedManyWithoutFacilityInput
     drugOrderReceipts?: DrugOrderReceiptCreateNestedManyWithoutFacilityInput
     notifications?: NotificationCreateNestedManyWithoutUserInput
@@ -48904,11 +56044,14 @@ export namespace Prisma {
     contactPerson?: string | null
     phoneNumber?: string | null
     address?: string | null
+    latitude?: number | null
+    longitude?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     drugMaps?: FacilityDrugMapUncheckedCreateNestedManyWithoutFacilityInput
     reports?: InventoryReportUncheckedCreateNestedManyWithoutFacilityInput
     reportSubmissions?: FacilityReportSubmissionUncheckedCreateNestedManyWithoutFacilityInput
+    facilityDemandPlans?: FacilityDemandPlanUncheckedCreateNestedManyWithoutFacilityInput
     keHoachLCNTs?: KeHoachLCNTUncheckedCreateNestedManyWithoutFacilityInput
     drugOrderReceipts?: DrugOrderReceiptUncheckedCreateNestedManyWithoutFacilityInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
@@ -49102,12 +56245,15 @@ export namespace Prisma {
     contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     company?: CompanyUpdateOneWithoutUsersNestedInput
     drugMaps?: FacilityDrugMapUpdateManyWithoutFacilityNestedInput
     reports?: InventoryReportUpdateManyWithoutFacilityNestedInput
     reportSubmissions?: FacilityReportSubmissionUpdateManyWithoutFacilityNestedInput
+    facilityDemandPlans?: FacilityDemandPlanUpdateManyWithoutFacilityNestedInput
     keHoachLCNTs?: KeHoachLCNTUpdateManyWithoutFacilityNestedInput
     drugOrderReceipts?: DrugOrderReceiptUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUpdateManyWithoutUserNestedInput
@@ -49129,11 +56275,14 @@ export namespace Prisma {
     contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     drugMaps?: FacilityDrugMapUncheckedUpdateManyWithoutFacilityNestedInput
     reports?: InventoryReportUncheckedUpdateManyWithoutFacilityNestedInput
     reportSubmissions?: FacilityReportSubmissionUncheckedUpdateManyWithoutFacilityNestedInput
+    facilityDemandPlans?: FacilityDemandPlanUncheckedUpdateManyWithoutFacilityNestedInput
     keHoachLCNTs?: KeHoachLCNTUncheckedUpdateManyWithoutFacilityNestedInput
     drugOrderReceipts?: DrugOrderReceiptUncheckedUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
@@ -49287,6 +56436,7 @@ export namespace Prisma {
     id?: string
     maChung: string
     maBhyt?: string | null
+    maAtc?: string | null
     tenThuoc: string
     hoatChat?: string | null
     hamLuong?: string | null
@@ -49307,6 +56457,7 @@ export namespace Prisma {
     nhomThuoc?: string | null
     isKeDon?: string | null
     kiemSoatDacBiet?: string | null
+    isThuocHiem?: boolean
     isTrongNuoc?: string | null
     isActive?: boolean
     createdAt?: Date | string
@@ -49314,12 +56465,14 @@ export namespace Prisma {
     therapeuticGroup?: TherapeuticGroupCreateNestedOneWithoutMasterDrugsInput
     drugMaps?: FacilityDrugMapCreateNestedManyWithoutMasterDrugInput
     companyDrugs?: CompanyDrugCreateNestedManyWithoutMasterDrugInput
+    facilityDemandPlanLines?: FacilityDemandPlanLineCreateNestedManyWithoutMasterDrugInput
   }
 
   export type MasterDrugUncheckedCreateWithoutDrugOrderLinesInput = {
     id?: string
     maChung: string
     maBhyt?: string | null
+    maAtc?: string | null
     tenThuoc: string
     hoatChat?: string | null
     hamLuong?: string | null
@@ -49341,12 +56494,14 @@ export namespace Prisma {
     therapeuticGroupId?: string | null
     isKeDon?: string | null
     kiemSoatDacBiet?: string | null
+    isThuocHiem?: boolean
     isTrongNuoc?: string | null
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     drugMaps?: FacilityDrugMapUncheckedCreateNestedManyWithoutMasterDrugInput
     companyDrugs?: CompanyDrugUncheckedCreateNestedManyWithoutMasterDrugInput
+    facilityDemandPlanLines?: FacilityDemandPlanLineUncheckedCreateNestedManyWithoutMasterDrugInput
   }
 
   export type MasterDrugCreateOrConnectWithoutDrugOrderLinesInput = {
@@ -49505,6 +56660,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     maChung?: StringFieldUpdateOperationsInput | string
     maBhyt?: NullableStringFieldUpdateOperationsInput | string | null
+    maAtc?: NullableStringFieldUpdateOperationsInput | string | null
     tenThuoc?: StringFieldUpdateOperationsInput | string
     hoatChat?: NullableStringFieldUpdateOperationsInput | string | null
     hamLuong?: NullableStringFieldUpdateOperationsInput | string | null
@@ -49525,6 +56681,7 @@ export namespace Prisma {
     nhomThuoc?: NullableStringFieldUpdateOperationsInput | string | null
     isKeDon?: NullableStringFieldUpdateOperationsInput | string | null
     kiemSoatDacBiet?: NullableStringFieldUpdateOperationsInput | string | null
+    isThuocHiem?: BoolFieldUpdateOperationsInput | boolean
     isTrongNuoc?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -49532,12 +56689,14 @@ export namespace Prisma {
     therapeuticGroup?: TherapeuticGroupUpdateOneWithoutMasterDrugsNestedInput
     drugMaps?: FacilityDrugMapUpdateManyWithoutMasterDrugNestedInput
     companyDrugs?: CompanyDrugUpdateManyWithoutMasterDrugNestedInput
+    facilityDemandPlanLines?: FacilityDemandPlanLineUpdateManyWithoutMasterDrugNestedInput
   }
 
   export type MasterDrugUncheckedUpdateWithoutDrugOrderLinesInput = {
     id?: StringFieldUpdateOperationsInput | string
     maChung?: StringFieldUpdateOperationsInput | string
     maBhyt?: NullableStringFieldUpdateOperationsInput | string | null
+    maAtc?: NullableStringFieldUpdateOperationsInput | string | null
     tenThuoc?: StringFieldUpdateOperationsInput | string
     hoatChat?: NullableStringFieldUpdateOperationsInput | string | null
     hamLuong?: NullableStringFieldUpdateOperationsInput | string | null
@@ -49559,12 +56718,14 @@ export namespace Prisma {
     therapeuticGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     isKeDon?: NullableStringFieldUpdateOperationsInput | string | null
     kiemSoatDacBiet?: NullableStringFieldUpdateOperationsInput | string | null
+    isThuocHiem?: BoolFieldUpdateOperationsInput | boolean
     isTrongNuoc?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     drugMaps?: FacilityDrugMapUncheckedUpdateManyWithoutMasterDrugNestedInput
     companyDrugs?: CompanyDrugUncheckedUpdateManyWithoutMasterDrugNestedInput
+    facilityDemandPlanLines?: FacilityDemandPlanLineUncheckedUpdateManyWithoutMasterDrugNestedInput
   }
 
   export type CompanyDrugUpsertWithoutDrugOrderLinesInput = {
@@ -50140,12 +57301,15 @@ export namespace Prisma {
     contactPerson?: string | null
     phoneNumber?: string | null
     address?: string | null
+    latitude?: number | null
+    longitude?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     company?: CompanyCreateNestedOneWithoutUsersInput
     drugMaps?: FacilityDrugMapCreateNestedManyWithoutFacilityInput
     reports?: InventoryReportCreateNestedManyWithoutFacilityInput
     reportSubmissions?: FacilityReportSubmissionCreateNestedManyWithoutFacilityInput
+    facilityDemandPlans?: FacilityDemandPlanCreateNestedManyWithoutFacilityInput
     keHoachLCNTs?: KeHoachLCNTCreateNestedManyWithoutFacilityInput
     drugOrders?: DrugOrderCreateNestedManyWithoutFacilityInput
     notifications?: NotificationCreateNestedManyWithoutUserInput
@@ -50167,11 +57331,14 @@ export namespace Prisma {
     contactPerson?: string | null
     phoneNumber?: string | null
     address?: string | null
+    latitude?: number | null
+    longitude?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     drugMaps?: FacilityDrugMapUncheckedCreateNestedManyWithoutFacilityInput
     reports?: InventoryReportUncheckedCreateNestedManyWithoutFacilityInput
     reportSubmissions?: FacilityReportSubmissionUncheckedCreateNestedManyWithoutFacilityInput
+    facilityDemandPlans?: FacilityDemandPlanUncheckedCreateNestedManyWithoutFacilityInput
     keHoachLCNTs?: KeHoachLCNTUncheckedCreateNestedManyWithoutFacilityInput
     drugOrders?: DrugOrderUncheckedCreateNestedManyWithoutFacilityInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
@@ -50320,12 +57487,15 @@ export namespace Prisma {
     contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     company?: CompanyUpdateOneWithoutUsersNestedInput
     drugMaps?: FacilityDrugMapUpdateManyWithoutFacilityNestedInput
     reports?: InventoryReportUpdateManyWithoutFacilityNestedInput
     reportSubmissions?: FacilityReportSubmissionUpdateManyWithoutFacilityNestedInput
+    facilityDemandPlans?: FacilityDemandPlanUpdateManyWithoutFacilityNestedInput
     keHoachLCNTs?: KeHoachLCNTUpdateManyWithoutFacilityNestedInput
     drugOrders?: DrugOrderUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUpdateManyWithoutUserNestedInput
@@ -50347,11 +57517,14 @@ export namespace Prisma {
     contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     drugMaps?: FacilityDrugMapUncheckedUpdateManyWithoutFacilityNestedInput
     reports?: InventoryReportUncheckedUpdateManyWithoutFacilityNestedInput
     reportSubmissions?: FacilityReportSubmissionUncheckedUpdateManyWithoutFacilityNestedInput
+    facilityDemandPlans?: FacilityDemandPlanUncheckedUpdateManyWithoutFacilityNestedInput
     keHoachLCNTs?: KeHoachLCNTUncheckedUpdateManyWithoutFacilityNestedInput
     drugOrders?: DrugOrderUncheckedUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
@@ -50604,12 +57777,15 @@ export namespace Prisma {
     contactPerson?: string | null
     phoneNumber?: string | null
     address?: string | null
+    latitude?: number | null
+    longitude?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     company?: CompanyCreateNestedOneWithoutUsersInput
     drugMaps?: FacilityDrugMapCreateNestedManyWithoutFacilityInput
     reports?: InventoryReportCreateNestedManyWithoutFacilityInput
     reportSubmissions?: FacilityReportSubmissionCreateNestedManyWithoutFacilityInput
+    facilityDemandPlans?: FacilityDemandPlanCreateNestedManyWithoutFacilityInput
     drugOrders?: DrugOrderCreateNestedManyWithoutFacilityInput
     drugOrderReceipts?: DrugOrderReceiptCreateNestedManyWithoutFacilityInput
     notifications?: NotificationCreateNestedManyWithoutUserInput
@@ -50631,11 +57807,14 @@ export namespace Prisma {
     contactPerson?: string | null
     phoneNumber?: string | null
     address?: string | null
+    latitude?: number | null
+    longitude?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     drugMaps?: FacilityDrugMapUncheckedCreateNestedManyWithoutFacilityInput
     reports?: InventoryReportUncheckedCreateNestedManyWithoutFacilityInput
     reportSubmissions?: FacilityReportSubmissionUncheckedCreateNestedManyWithoutFacilityInput
+    facilityDemandPlans?: FacilityDemandPlanUncheckedCreateNestedManyWithoutFacilityInput
     drugOrders?: DrugOrderUncheckedCreateNestedManyWithoutFacilityInput
     drugOrderReceipts?: DrugOrderReceiptUncheckedCreateNestedManyWithoutFacilityInput
     notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
@@ -50664,6 +57843,7 @@ export namespace Prisma {
     thoiGianThucHien?: string | null
     trangThai?: string | null
     maThongBao?: string | null
+    yeuCauTBMT?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     phanLos?: PhanLoGoiThauCreateNestedManyWithoutGoiThauInput
@@ -50687,6 +57867,7 @@ export namespace Prisma {
     thoiGianThucHien?: string | null
     trangThai?: string | null
     maThongBao?: string | null
+    yeuCauTBMT?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     phanLos?: PhanLoGoiThauUncheckedCreateNestedManyWithoutGoiThauInput
@@ -50728,12 +57909,15 @@ export namespace Prisma {
     contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     company?: CompanyUpdateOneWithoutUsersNestedInput
     drugMaps?: FacilityDrugMapUpdateManyWithoutFacilityNestedInput
     reports?: InventoryReportUpdateManyWithoutFacilityNestedInput
     reportSubmissions?: FacilityReportSubmissionUpdateManyWithoutFacilityNestedInput
+    facilityDemandPlans?: FacilityDemandPlanUpdateManyWithoutFacilityNestedInput
     drugOrders?: DrugOrderUpdateManyWithoutFacilityNestedInput
     drugOrderReceipts?: DrugOrderReceiptUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUpdateManyWithoutUserNestedInput
@@ -50755,11 +57939,14 @@ export namespace Prisma {
     contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     drugMaps?: FacilityDrugMapUncheckedUpdateManyWithoutFacilityNestedInput
     reports?: InventoryReportUncheckedUpdateManyWithoutFacilityNestedInput
     reportSubmissions?: FacilityReportSubmissionUncheckedUpdateManyWithoutFacilityNestedInput
+    facilityDemandPlans?: FacilityDemandPlanUncheckedUpdateManyWithoutFacilityNestedInput
     drugOrders?: DrugOrderUncheckedUpdateManyWithoutFacilityNestedInput
     drugOrderReceipts?: DrugOrderReceiptUncheckedUpdateManyWithoutFacilityNestedInput
     notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
@@ -50803,6 +57990,7 @@ export namespace Prisma {
     thoiGianThucHien?: StringNullableFilter<"GoiThau"> | string | null
     trangThai?: StringNullableFilter<"GoiThau"> | string | null
     maThongBao?: StringNullableFilter<"GoiThau"> | string | null
+    yeuCauTBMT?: BoolFilter<"GoiThau"> | boolean
     createdAt?: DateTimeFilter<"GoiThau"> | Date | string
     updatedAt?: DateTimeFilter<"GoiThau"> | Date | string
   }
@@ -50935,13 +58123,13 @@ export namespace Prisma {
     tongGiaTriTrungThau: Decimal | DecimalJsLike | number | string
     createdAt?: Date | string
     updatedAt?: Date | string
-    thongBaoMoiThau: ThongBaoMoiThauCreateNestedOneWithoutKetQuaLCNTsInput
+    thongBaoMoiThau?: ThongBaoMoiThauCreateNestedOneWithoutKetQuaLCNTsInput
     ketQuaPhanLos?: KetQuaPhanLoCreateNestedManyWithoutKetQuaLCNTInput
   }
 
   export type KetQuaLCNTUncheckedCreateWithoutGoiThauInput = {
     id?: string
-    thongBaoMoiThauId: string
+    thongBaoMoiThauId?: string | null
     soQdPheDuyetKQLCNT: string
     ngayPheDuyetKQLCNT: Date | string
     soMatHangMoiThau: number
@@ -51100,7 +58288,7 @@ export namespace Prisma {
     NOT?: KetQuaLCNTScalarWhereInput | KetQuaLCNTScalarWhereInput[]
     id?: StringFilter<"KetQuaLCNT"> | string
     goiThauId?: StringFilter<"KetQuaLCNT"> | string
-    thongBaoMoiThauId?: StringFilter<"KetQuaLCNT"> | string
+    thongBaoMoiThauId?: StringNullableFilter<"KetQuaLCNT"> | string | null
     soQdPheDuyetKQLCNT?: StringFilter<"KetQuaLCNT"> | string
     ngayPheDuyetKQLCNT?: DateTimeFilter<"KetQuaLCNT"> | Date | string
     soMatHangMoiThau?: IntFilter<"KetQuaLCNT"> | number
@@ -51126,6 +58314,7 @@ export namespace Prisma {
     thoiGianThucHien?: string | null
     trangThai?: string | null
     maThongBao?: string | null
+    yeuCauTBMT?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     keHoach: KeHoachLCNTCreateNestedOneWithoutGoiThausInput
@@ -51150,6 +58339,7 @@ export namespace Prisma {
     thoiGianThucHien?: string | null
     trangThai?: string | null
     maThongBao?: string | null
+    yeuCauTBMT?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     phanLos?: PhanLoGoiThauUncheckedCreateNestedManyWithoutGoiThauInput
@@ -51224,6 +58414,7 @@ export namespace Prisma {
     thoiGianThucHien?: NullableStringFieldUpdateOperationsInput | string | null
     trangThai?: NullableStringFieldUpdateOperationsInput | string | null
     maThongBao?: NullableStringFieldUpdateOperationsInput | string | null
+    yeuCauTBMT?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     keHoach?: KeHoachLCNTUpdateOneRequiredWithoutGoiThausNestedInput
@@ -51248,6 +58439,7 @@ export namespace Prisma {
     thoiGianThucHien?: NullableStringFieldUpdateOperationsInput | string | null
     trangThai?: NullableStringFieldUpdateOperationsInput | string | null
     maThongBao?: NullableStringFieldUpdateOperationsInput | string | null
+    yeuCauTBMT?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     phanLos?: PhanLoGoiThauUncheckedUpdateManyWithoutGoiThauNestedInput
@@ -51286,6 +58478,7 @@ export namespace Prisma {
     thoiGianThucHien?: string | null
     trangThai?: string | null
     maThongBao?: string | null
+    yeuCauTBMT?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     keHoach: KeHoachLCNTCreateNestedOneWithoutGoiThausInput
@@ -51310,6 +58503,7 @@ export namespace Prisma {
     thoiGianThucHien?: string | null
     trangThai?: string | null
     maThongBao?: string | null
+    yeuCauTBMT?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     thongBaoMoiThaus?: ThongBaoMoiThauUncheckedCreateNestedManyWithoutGoiThauInput
@@ -51378,6 +58572,7 @@ export namespace Prisma {
     thoiGianThucHien?: NullableStringFieldUpdateOperationsInput | string | null
     trangThai?: NullableStringFieldUpdateOperationsInput | string | null
     maThongBao?: NullableStringFieldUpdateOperationsInput | string | null
+    yeuCauTBMT?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     keHoach?: KeHoachLCNTUpdateOneRequiredWithoutGoiThausNestedInput
@@ -51402,6 +58597,7 @@ export namespace Prisma {
     thoiGianThucHien?: NullableStringFieldUpdateOperationsInput | string | null
     trangThai?: NullableStringFieldUpdateOperationsInput | string | null
     maThongBao?: NullableStringFieldUpdateOperationsInput | string | null
+    yeuCauTBMT?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     thongBaoMoiThaus?: ThongBaoMoiThauUncheckedUpdateManyWithoutGoiThauNestedInput
@@ -51454,6 +58650,7 @@ export namespace Prisma {
     thoiGianThucHien?: string | null
     trangThai?: string | null
     maThongBao?: string | null
+    yeuCauTBMT?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     keHoach: KeHoachLCNTCreateNestedOneWithoutGoiThausInput
@@ -51478,6 +58675,7 @@ export namespace Prisma {
     thoiGianThucHien?: string | null
     trangThai?: string | null
     maThongBao?: string | null
+    yeuCauTBMT?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     phanLos?: PhanLoGoiThauUncheckedCreateNestedManyWithoutGoiThauInput
@@ -51575,6 +58773,7 @@ export namespace Prisma {
     thoiGianThucHien?: NullableStringFieldUpdateOperationsInput | string | null
     trangThai?: NullableStringFieldUpdateOperationsInput | string | null
     maThongBao?: NullableStringFieldUpdateOperationsInput | string | null
+    yeuCauTBMT?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     keHoach?: KeHoachLCNTUpdateOneRequiredWithoutGoiThausNestedInput
@@ -51599,6 +58798,7 @@ export namespace Prisma {
     thoiGianThucHien?: NullableStringFieldUpdateOperationsInput | string | null
     trangThai?: NullableStringFieldUpdateOperationsInput | string | null
     maThongBao?: NullableStringFieldUpdateOperationsInput | string | null
+    yeuCauTBMT?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     phanLos?: PhanLoGoiThauUncheckedUpdateManyWithoutGoiThauNestedInput
@@ -51666,13 +58866,13 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     goiThau: GoiThauCreateNestedOneWithoutKetQuaLCNTsInput
-    thongBaoMoiThau: ThongBaoMoiThauCreateNestedOneWithoutKetQuaLCNTsInput
+    thongBaoMoiThau?: ThongBaoMoiThauCreateNestedOneWithoutKetQuaLCNTsInput
   }
 
   export type KetQuaLCNTUncheckedCreateWithoutKetQuaPhanLosInput = {
     id?: string
     goiThauId: string
-    thongBaoMoiThauId: string
+    thongBaoMoiThauId?: string | null
     soQdPheDuyetKQLCNT: string
     ngayPheDuyetKQLCNT: Date | string
     soMatHangMoiThau: number
@@ -51743,13 +58943,13 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     goiThau?: GoiThauUpdateOneRequiredWithoutKetQuaLCNTsNestedInput
-    thongBaoMoiThau?: ThongBaoMoiThauUpdateOneRequiredWithoutKetQuaLCNTsNestedInput
+    thongBaoMoiThau?: ThongBaoMoiThauUpdateOneWithoutKetQuaLCNTsNestedInput
   }
 
   export type KetQuaLCNTUncheckedUpdateWithoutKetQuaPhanLosInput = {
     id?: StringFieldUpdateOperationsInput | string
     goiThauId?: StringFieldUpdateOperationsInput | string
-    thongBaoMoiThauId?: StringFieldUpdateOperationsInput | string
+    thongBaoMoiThauId?: NullableStringFieldUpdateOperationsInput | string | null
     soQdPheDuyetKQLCNT?: StringFieldUpdateOperationsInput | string
     ngayPheDuyetKQLCNT?: DateTimeFieldUpdateOperationsInput | Date | string
     soMatHangMoiThau?: IntFieldUpdateOperationsInput | number
@@ -51813,12 +59013,15 @@ export namespace Prisma {
     contactPerson?: string | null
     phoneNumber?: string | null
     address?: string | null
+    latitude?: number | null
+    longitude?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     company?: CompanyCreateNestedOneWithoutUsersInput
     drugMaps?: FacilityDrugMapCreateNestedManyWithoutFacilityInput
     reports?: InventoryReportCreateNestedManyWithoutFacilityInput
     reportSubmissions?: FacilityReportSubmissionCreateNestedManyWithoutFacilityInput
+    facilityDemandPlans?: FacilityDemandPlanCreateNestedManyWithoutFacilityInput
     keHoachLCNTs?: KeHoachLCNTCreateNestedManyWithoutFacilityInput
     drugOrders?: DrugOrderCreateNestedManyWithoutFacilityInput
     drugOrderReceipts?: DrugOrderReceiptCreateNestedManyWithoutFacilityInput
@@ -51840,11 +59043,14 @@ export namespace Prisma {
     contactPerson?: string | null
     phoneNumber?: string | null
     address?: string | null
+    latitude?: number | null
+    longitude?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     drugMaps?: FacilityDrugMapUncheckedCreateNestedManyWithoutFacilityInput
     reports?: InventoryReportUncheckedCreateNestedManyWithoutFacilityInput
     reportSubmissions?: FacilityReportSubmissionUncheckedCreateNestedManyWithoutFacilityInput
+    facilityDemandPlans?: FacilityDemandPlanUncheckedCreateNestedManyWithoutFacilityInput
     keHoachLCNTs?: KeHoachLCNTUncheckedCreateNestedManyWithoutFacilityInput
     drugOrders?: DrugOrderUncheckedCreateNestedManyWithoutFacilityInput
     drugOrderReceipts?: DrugOrderReceiptUncheckedCreateNestedManyWithoutFacilityInput
@@ -51881,12 +59087,15 @@ export namespace Prisma {
     contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     company?: CompanyUpdateOneWithoutUsersNestedInput
     drugMaps?: FacilityDrugMapUpdateManyWithoutFacilityNestedInput
     reports?: InventoryReportUpdateManyWithoutFacilityNestedInput
     reportSubmissions?: FacilityReportSubmissionUpdateManyWithoutFacilityNestedInput
+    facilityDemandPlans?: FacilityDemandPlanUpdateManyWithoutFacilityNestedInput
     keHoachLCNTs?: KeHoachLCNTUpdateManyWithoutFacilityNestedInput
     drugOrders?: DrugOrderUpdateManyWithoutFacilityNestedInput
     drugOrderReceipts?: DrugOrderReceiptUpdateManyWithoutFacilityNestedInput
@@ -51908,11 +59117,14 @@ export namespace Prisma {
     contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     drugMaps?: FacilityDrugMapUncheckedUpdateManyWithoutFacilityNestedInput
     reports?: InventoryReportUncheckedUpdateManyWithoutFacilityNestedInput
     reportSubmissions?: FacilityReportSubmissionUncheckedUpdateManyWithoutFacilityNestedInput
+    facilityDemandPlans?: FacilityDemandPlanUncheckedUpdateManyWithoutFacilityNestedInput
     keHoachLCNTs?: KeHoachLCNTUncheckedUpdateManyWithoutFacilityNestedInput
     drugOrders?: DrugOrderUncheckedUpdateManyWithoutFacilityNestedInput
     drugOrderReceipts?: DrugOrderReceiptUncheckedUpdateManyWithoutFacilityNestedInput
@@ -51933,12 +59145,15 @@ export namespace Prisma {
     contactPerson?: string | null
     phoneNumber?: string | null
     address?: string | null
+    latitude?: number | null
+    longitude?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     company?: CompanyCreateNestedOneWithoutUsersInput
     drugMaps?: FacilityDrugMapCreateNestedManyWithoutFacilityInput
     reports?: InventoryReportCreateNestedManyWithoutFacilityInput
     reportSubmissions?: FacilityReportSubmissionCreateNestedManyWithoutFacilityInput
+    facilityDemandPlans?: FacilityDemandPlanCreateNestedManyWithoutFacilityInput
     keHoachLCNTs?: KeHoachLCNTCreateNestedManyWithoutFacilityInput
     drugOrders?: DrugOrderCreateNestedManyWithoutFacilityInput
     drugOrderReceipts?: DrugOrderReceiptCreateNestedManyWithoutFacilityInput
@@ -51960,11 +59175,14 @@ export namespace Prisma {
     contactPerson?: string | null
     phoneNumber?: string | null
     address?: string | null
+    latitude?: number | null
+    longitude?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     drugMaps?: FacilityDrugMapUncheckedCreateNestedManyWithoutFacilityInput
     reports?: InventoryReportUncheckedCreateNestedManyWithoutFacilityInput
     reportSubmissions?: FacilityReportSubmissionUncheckedCreateNestedManyWithoutFacilityInput
+    facilityDemandPlans?: FacilityDemandPlanUncheckedCreateNestedManyWithoutFacilityInput
     keHoachLCNTs?: KeHoachLCNTUncheckedCreateNestedManyWithoutFacilityInput
     drugOrders?: DrugOrderUncheckedCreateNestedManyWithoutFacilityInput
     drugOrderReceipts?: DrugOrderReceiptUncheckedCreateNestedManyWithoutFacilityInput
@@ -52001,12 +59219,15 @@ export namespace Prisma {
     contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     company?: CompanyUpdateOneWithoutUsersNestedInput
     drugMaps?: FacilityDrugMapUpdateManyWithoutFacilityNestedInput
     reports?: InventoryReportUpdateManyWithoutFacilityNestedInput
     reportSubmissions?: FacilityReportSubmissionUpdateManyWithoutFacilityNestedInput
+    facilityDemandPlans?: FacilityDemandPlanUpdateManyWithoutFacilityNestedInput
     keHoachLCNTs?: KeHoachLCNTUpdateManyWithoutFacilityNestedInput
     drugOrders?: DrugOrderUpdateManyWithoutFacilityNestedInput
     drugOrderReceipts?: DrugOrderReceiptUpdateManyWithoutFacilityNestedInput
@@ -52028,11 +59249,14 @@ export namespace Prisma {
     contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     drugMaps?: FacilityDrugMapUncheckedUpdateManyWithoutFacilityNestedInput
     reports?: InventoryReportUncheckedUpdateManyWithoutFacilityNestedInput
     reportSubmissions?: FacilityReportSubmissionUncheckedUpdateManyWithoutFacilityNestedInput
+    facilityDemandPlans?: FacilityDemandPlanUncheckedUpdateManyWithoutFacilityNestedInput
     keHoachLCNTs?: KeHoachLCNTUncheckedUpdateManyWithoutFacilityNestedInput
     drugOrders?: DrugOrderUncheckedUpdateManyWithoutFacilityNestedInput
     drugOrderReceipts?: DrugOrderReceiptUncheckedUpdateManyWithoutFacilityNestedInput
@@ -52053,12 +59277,15 @@ export namespace Prisma {
     contactPerson?: string | null
     phoneNumber?: string | null
     address?: string | null
+    latitude?: number | null
+    longitude?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     company?: CompanyCreateNestedOneWithoutUsersInput
     drugMaps?: FacilityDrugMapCreateNestedManyWithoutFacilityInput
     reports?: InventoryReportCreateNestedManyWithoutFacilityInput
     reportSubmissions?: FacilityReportSubmissionCreateNestedManyWithoutFacilityInput
+    facilityDemandPlans?: FacilityDemandPlanCreateNestedManyWithoutFacilityInput
     keHoachLCNTs?: KeHoachLCNTCreateNestedManyWithoutFacilityInput
     drugOrders?: DrugOrderCreateNestedManyWithoutFacilityInput
     drugOrderReceipts?: DrugOrderReceiptCreateNestedManyWithoutFacilityInput
@@ -52080,11 +59307,14 @@ export namespace Prisma {
     contactPerson?: string | null
     phoneNumber?: string | null
     address?: string | null
+    latitude?: number | null
+    longitude?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     drugMaps?: FacilityDrugMapUncheckedCreateNestedManyWithoutFacilityInput
     reports?: InventoryReportUncheckedCreateNestedManyWithoutFacilityInput
     reportSubmissions?: FacilityReportSubmissionUncheckedCreateNestedManyWithoutFacilityInput
+    facilityDemandPlans?: FacilityDemandPlanUncheckedCreateNestedManyWithoutFacilityInput
     keHoachLCNTs?: KeHoachLCNTUncheckedCreateNestedManyWithoutFacilityInput
     drugOrders?: DrugOrderUncheckedCreateNestedManyWithoutFacilityInput
     drugOrderReceipts?: DrugOrderReceiptUncheckedCreateNestedManyWithoutFacilityInput
@@ -52121,12 +59351,15 @@ export namespace Prisma {
     contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     company?: CompanyUpdateOneWithoutUsersNestedInput
     drugMaps?: FacilityDrugMapUpdateManyWithoutFacilityNestedInput
     reports?: InventoryReportUpdateManyWithoutFacilityNestedInput
     reportSubmissions?: FacilityReportSubmissionUpdateManyWithoutFacilityNestedInput
+    facilityDemandPlans?: FacilityDemandPlanUpdateManyWithoutFacilityNestedInput
     keHoachLCNTs?: KeHoachLCNTUpdateManyWithoutFacilityNestedInput
     drugOrders?: DrugOrderUpdateManyWithoutFacilityNestedInput
     drugOrderReceipts?: DrugOrderReceiptUpdateManyWithoutFacilityNestedInput
@@ -52148,11 +59381,14 @@ export namespace Prisma {
     contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     drugMaps?: FacilityDrugMapUncheckedUpdateManyWithoutFacilityNestedInput
     reports?: InventoryReportUncheckedUpdateManyWithoutFacilityNestedInput
     reportSubmissions?: FacilityReportSubmissionUncheckedUpdateManyWithoutFacilityNestedInput
+    facilityDemandPlans?: FacilityDemandPlanUncheckedUpdateManyWithoutFacilityNestedInput
     keHoachLCNTs?: KeHoachLCNTUncheckedUpdateManyWithoutFacilityNestedInput
     drugOrders?: DrugOrderUncheckedUpdateManyWithoutFacilityNestedInput
     drugOrderReceipts?: DrugOrderReceiptUncheckedUpdateManyWithoutFacilityNestedInput
@@ -52168,10 +59404,30 @@ export namespace Prisma {
     soDangKyNoiBo?: string | null
     donViTinhNoiBo?: string | null
     nhomTckt?: string | null
+    giaVat?: Decimal | DecimalJsLike | number | string
+    bhyt?: string | null
+    dichVu?: string | null
+    soQdTrungThau?: string | null
+    tenCongTy?: string | null
+    ngayBatDauHd?: string | null
+    ngayKetThucHd?: string | null
+    demandRoundingEnabled?: boolean
+    demandPackageUnit?: string | null
+    demandPackageSize?: Decimal | DecimalJsLike | number | string | null
+    demandPlanningLocked?: boolean
+    demandPlanningLockedAt?: Date | string | null
+    demandPlanningUnlockedAt?: Date | string | null
+    demandPlanningLockReason?: string | null
     masterDrugId?: string | null
     status?: $Enums.MappingStatus
     adminNote?: string | null
     isOutOfCatalog?: boolean
+    isActive?: boolean
+    inactiveFromMonth?: string | null
+    inactiveReason?: string | null
+    inactiveAt?: Date | string | null
+    reactivatedFromMonth?: string | null
+    reactivatedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -52182,6 +59438,7 @@ export namespace Prisma {
     reportMonth: string
     tonDau?: Decimal | DecimalJsLike | number | string
     nhap?: Decimal | DecimalJsLike | number | string
+    nhapHoanTra?: Decimal | DecimalJsLike | number | string
     xuat?: Decimal | DecimalJsLike | number | string
     tonCuoi?: Decimal | DecimalJsLike | number | string
     giaVat?: Decimal | DecimalJsLike | number | string
@@ -52204,6 +59461,17 @@ export namespace Prisma {
     submittedAt?: Date | string
     reportedRowCount?: number
     skippedRowCount?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FacilityDemandPlanCreateManyFacilityInput = {
+    id?: string
+    planNo: string
+    status?: $Enums.FacilityDemandPlanStatus
+    baseReportMonth?: string | null
+    note?: string | null
+    finalizedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -52279,13 +59547,34 @@ export namespace Prisma {
     soDangKyNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     donViTinhNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     nhomTckt?: NullableStringFieldUpdateOperationsInput | string | null
+    giaVat?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    bhyt?: NullableStringFieldUpdateOperationsInput | string | null
+    dichVu?: NullableStringFieldUpdateOperationsInput | string | null
+    soQdTrungThau?: NullableStringFieldUpdateOperationsInput | string | null
+    tenCongTy?: NullableStringFieldUpdateOperationsInput | string | null
+    ngayBatDauHd?: NullableStringFieldUpdateOperationsInput | string | null
+    ngayKetThucHd?: NullableStringFieldUpdateOperationsInput | string | null
+    demandRoundingEnabled?: BoolFieldUpdateOperationsInput | boolean
+    demandPackageUnit?: NullableStringFieldUpdateOperationsInput | string | null
+    demandPackageSize?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    demandPlanningLocked?: BoolFieldUpdateOperationsInput | boolean
+    demandPlanningLockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    demandPlanningUnlockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    demandPlanningLockReason?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumMappingStatusFieldUpdateOperationsInput | $Enums.MappingStatus
     adminNote?: NullableStringFieldUpdateOperationsInput | string | null
     isOutOfCatalog?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    inactiveFromMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    inactiveReason?: NullableStringFieldUpdateOperationsInput | string | null
+    inactiveAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reactivatedFromMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    reactivatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     masterDrug?: MasterDrugUpdateOneWithoutDrugMapsNestedInput
     reports?: InventoryReportUpdateManyWithoutDrugMapNestedInput
+    demandPlanLines?: FacilityDemandPlanLineUpdateManyWithoutDrugMapNestedInput
   }
 
   export type FacilityDrugMapUncheckedUpdateWithoutFacilityInput = {
@@ -52296,13 +59585,34 @@ export namespace Prisma {
     soDangKyNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     donViTinhNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     nhomTckt?: NullableStringFieldUpdateOperationsInput | string | null
+    giaVat?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    bhyt?: NullableStringFieldUpdateOperationsInput | string | null
+    dichVu?: NullableStringFieldUpdateOperationsInput | string | null
+    soQdTrungThau?: NullableStringFieldUpdateOperationsInput | string | null
+    tenCongTy?: NullableStringFieldUpdateOperationsInput | string | null
+    ngayBatDauHd?: NullableStringFieldUpdateOperationsInput | string | null
+    ngayKetThucHd?: NullableStringFieldUpdateOperationsInput | string | null
+    demandRoundingEnabled?: BoolFieldUpdateOperationsInput | boolean
+    demandPackageUnit?: NullableStringFieldUpdateOperationsInput | string | null
+    demandPackageSize?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    demandPlanningLocked?: BoolFieldUpdateOperationsInput | boolean
+    demandPlanningLockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    demandPlanningUnlockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    demandPlanningLockReason?: NullableStringFieldUpdateOperationsInput | string | null
     masterDrugId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumMappingStatusFieldUpdateOperationsInput | $Enums.MappingStatus
     adminNote?: NullableStringFieldUpdateOperationsInput | string | null
     isOutOfCatalog?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    inactiveFromMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    inactiveReason?: NullableStringFieldUpdateOperationsInput | string | null
+    inactiveAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reactivatedFromMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    reactivatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     reports?: InventoryReportUncheckedUpdateManyWithoutDrugMapNestedInput
+    demandPlanLines?: FacilityDemandPlanLineUncheckedUpdateManyWithoutDrugMapNestedInput
   }
 
   export type FacilityDrugMapUncheckedUpdateManyWithoutFacilityInput = {
@@ -52313,10 +59623,30 @@ export namespace Prisma {
     soDangKyNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     donViTinhNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     nhomTckt?: NullableStringFieldUpdateOperationsInput | string | null
+    giaVat?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    bhyt?: NullableStringFieldUpdateOperationsInput | string | null
+    dichVu?: NullableStringFieldUpdateOperationsInput | string | null
+    soQdTrungThau?: NullableStringFieldUpdateOperationsInput | string | null
+    tenCongTy?: NullableStringFieldUpdateOperationsInput | string | null
+    ngayBatDauHd?: NullableStringFieldUpdateOperationsInput | string | null
+    ngayKetThucHd?: NullableStringFieldUpdateOperationsInput | string | null
+    demandRoundingEnabled?: BoolFieldUpdateOperationsInput | boolean
+    demandPackageUnit?: NullableStringFieldUpdateOperationsInput | string | null
+    demandPackageSize?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    demandPlanningLocked?: BoolFieldUpdateOperationsInput | boolean
+    demandPlanningLockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    demandPlanningUnlockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    demandPlanningLockReason?: NullableStringFieldUpdateOperationsInput | string | null
     masterDrugId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumMappingStatusFieldUpdateOperationsInput | $Enums.MappingStatus
     adminNote?: NullableStringFieldUpdateOperationsInput | string | null
     isOutOfCatalog?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    inactiveFromMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    inactiveReason?: NullableStringFieldUpdateOperationsInput | string | null
+    inactiveAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reactivatedFromMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    reactivatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -52326,6 +59656,7 @@ export namespace Prisma {
     reportMonth?: StringFieldUpdateOperationsInput | string
     tonDau?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     nhap?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    nhapHoanTra?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     xuat?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     tonCuoi?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     giaVat?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -52349,6 +59680,7 @@ export namespace Prisma {
     reportMonth?: StringFieldUpdateOperationsInput | string
     tonDau?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     nhap?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    nhapHoanTra?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     xuat?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     tonCuoi?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     giaVat?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -52371,6 +59703,7 @@ export namespace Prisma {
     reportMonth?: StringFieldUpdateOperationsInput | string
     tonDau?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     nhap?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    nhapHoanTra?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     xuat?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     tonCuoi?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     giaVat?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -52413,6 +59746,41 @@ export namespace Prisma {
     submittedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     reportedRowCount?: IntFieldUpdateOperationsInput | number
     skippedRowCount?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FacilityDemandPlanUpdateWithoutFacilityInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    planNo?: StringFieldUpdateOperationsInput | string
+    status?: EnumFacilityDemandPlanStatusFieldUpdateOperationsInput | $Enums.FacilityDemandPlanStatus
+    baseReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    finalizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lines?: FacilityDemandPlanLineUpdateManyWithoutPlanNestedInput
+  }
+
+  export type FacilityDemandPlanUncheckedUpdateWithoutFacilityInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    planNo?: StringFieldUpdateOperationsInput | string
+    status?: EnumFacilityDemandPlanStatusFieldUpdateOperationsInput | $Enums.FacilityDemandPlanStatus
+    baseReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    finalizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lines?: FacilityDemandPlanLineUncheckedUpdateManyWithoutPlanNestedInput
+  }
+
+  export type FacilityDemandPlanUncheckedUpdateManyWithoutFacilityInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    planNo?: StringFieldUpdateOperationsInput | string
+    status?: EnumFacilityDemandPlanStatusFieldUpdateOperationsInput | $Enums.FacilityDemandPlanStatus
+    baseReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    finalizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -52629,6 +59997,8 @@ export namespace Prisma {
     contactPerson?: string | null
     phoneNumber?: string | null
     address?: string | null
+    latitude?: number | null
+    longitude?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -52672,11 +60042,14 @@ export namespace Prisma {
     contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     drugMaps?: FacilityDrugMapUpdateManyWithoutFacilityNestedInput
     reports?: InventoryReportUpdateManyWithoutFacilityNestedInput
     reportSubmissions?: FacilityReportSubmissionUpdateManyWithoutFacilityNestedInput
+    facilityDemandPlans?: FacilityDemandPlanUpdateManyWithoutFacilityNestedInput
     keHoachLCNTs?: KeHoachLCNTUpdateManyWithoutFacilityNestedInput
     drugOrders?: DrugOrderUpdateManyWithoutFacilityNestedInput
     drugOrderReceipts?: DrugOrderReceiptUpdateManyWithoutFacilityNestedInput
@@ -52698,11 +60071,14 @@ export namespace Prisma {
     contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     drugMaps?: FacilityDrugMapUncheckedUpdateManyWithoutFacilityNestedInput
     reports?: InventoryReportUncheckedUpdateManyWithoutFacilityNestedInput
     reportSubmissions?: FacilityReportSubmissionUncheckedUpdateManyWithoutFacilityNestedInput
+    facilityDemandPlans?: FacilityDemandPlanUncheckedUpdateManyWithoutFacilityNestedInput
     keHoachLCNTs?: KeHoachLCNTUncheckedUpdateManyWithoutFacilityNestedInput
     drugOrders?: DrugOrderUncheckedUpdateManyWithoutFacilityNestedInput
     drugOrderReceipts?: DrugOrderReceiptUncheckedUpdateManyWithoutFacilityNestedInput
@@ -52724,6 +60100,8 @@ export namespace Prisma {
     contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     address?: NullableStringFieldUpdateOperationsInput | string | null
+    latitude?: NullableFloatFieldUpdateOperationsInput | number | null
+    longitude?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -52818,6 +60196,7 @@ export namespace Prisma {
     id?: string
     maChung: string
     maBhyt?: string | null
+    maAtc?: string | null
     tenThuoc: string
     hoatChat?: string | null
     hamLuong?: string | null
@@ -52838,6 +60217,7 @@ export namespace Prisma {
     nhomThuoc?: string | null
     isKeDon?: string | null
     kiemSoatDacBiet?: string | null
+    isThuocHiem?: boolean
     isTrongNuoc?: string | null
     isActive?: boolean
     createdAt?: Date | string
@@ -52848,6 +60228,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     maChung?: StringFieldUpdateOperationsInput | string
     maBhyt?: NullableStringFieldUpdateOperationsInput | string | null
+    maAtc?: NullableStringFieldUpdateOperationsInput | string | null
     tenThuoc?: StringFieldUpdateOperationsInput | string
     hoatChat?: NullableStringFieldUpdateOperationsInput | string | null
     hamLuong?: NullableStringFieldUpdateOperationsInput | string | null
@@ -52868,6 +60249,7 @@ export namespace Prisma {
     nhomThuoc?: NullableStringFieldUpdateOperationsInput | string | null
     isKeDon?: NullableStringFieldUpdateOperationsInput | string | null
     kiemSoatDacBiet?: NullableStringFieldUpdateOperationsInput | string | null
+    isThuocHiem?: BoolFieldUpdateOperationsInput | boolean
     isTrongNuoc?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -52875,12 +60257,14 @@ export namespace Prisma {
     drugMaps?: FacilityDrugMapUpdateManyWithoutMasterDrugNestedInput
     companyDrugs?: CompanyDrugUpdateManyWithoutMasterDrugNestedInput
     drugOrderLines?: DrugOrderLineUpdateManyWithoutMasterDrugNestedInput
+    facilityDemandPlanLines?: FacilityDemandPlanLineUpdateManyWithoutMasterDrugNestedInput
   }
 
   export type MasterDrugUncheckedUpdateWithoutTherapeuticGroupInput = {
     id?: StringFieldUpdateOperationsInput | string
     maChung?: StringFieldUpdateOperationsInput | string
     maBhyt?: NullableStringFieldUpdateOperationsInput | string | null
+    maAtc?: NullableStringFieldUpdateOperationsInput | string | null
     tenThuoc?: StringFieldUpdateOperationsInput | string
     hoatChat?: NullableStringFieldUpdateOperationsInput | string | null
     hamLuong?: NullableStringFieldUpdateOperationsInput | string | null
@@ -52901,6 +60285,7 @@ export namespace Prisma {
     nhomThuoc?: NullableStringFieldUpdateOperationsInput | string | null
     isKeDon?: NullableStringFieldUpdateOperationsInput | string | null
     kiemSoatDacBiet?: NullableStringFieldUpdateOperationsInput | string | null
+    isThuocHiem?: BoolFieldUpdateOperationsInput | boolean
     isTrongNuoc?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -52908,12 +60293,14 @@ export namespace Prisma {
     drugMaps?: FacilityDrugMapUncheckedUpdateManyWithoutMasterDrugNestedInput
     companyDrugs?: CompanyDrugUncheckedUpdateManyWithoutMasterDrugNestedInput
     drugOrderLines?: DrugOrderLineUncheckedUpdateManyWithoutMasterDrugNestedInput
+    facilityDemandPlanLines?: FacilityDemandPlanLineUncheckedUpdateManyWithoutMasterDrugNestedInput
   }
 
   export type MasterDrugUncheckedUpdateManyWithoutTherapeuticGroupInput = {
     id?: StringFieldUpdateOperationsInput | string
     maChung?: StringFieldUpdateOperationsInput | string
     maBhyt?: NullableStringFieldUpdateOperationsInput | string | null
+    maAtc?: NullableStringFieldUpdateOperationsInput | string | null
     tenThuoc?: StringFieldUpdateOperationsInput | string
     hoatChat?: NullableStringFieldUpdateOperationsInput | string | null
     hamLuong?: NullableStringFieldUpdateOperationsInput | string | null
@@ -52934,6 +60321,7 @@ export namespace Prisma {
     nhomThuoc?: NullableStringFieldUpdateOperationsInput | string | null
     isKeDon?: NullableStringFieldUpdateOperationsInput | string | null
     kiemSoatDacBiet?: NullableStringFieldUpdateOperationsInput | string | null
+    isThuocHiem?: BoolFieldUpdateOperationsInput | boolean
     isTrongNuoc?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -52949,9 +60337,29 @@ export namespace Prisma {
     soDangKyNoiBo?: string | null
     donViTinhNoiBo?: string | null
     nhomTckt?: string | null
+    giaVat?: Decimal | DecimalJsLike | number | string
+    bhyt?: string | null
+    dichVu?: string | null
+    soQdTrungThau?: string | null
+    tenCongTy?: string | null
+    ngayBatDauHd?: string | null
+    ngayKetThucHd?: string | null
+    demandRoundingEnabled?: boolean
+    demandPackageUnit?: string | null
+    demandPackageSize?: Decimal | DecimalJsLike | number | string | null
+    demandPlanningLocked?: boolean
+    demandPlanningLockedAt?: Date | string | null
+    demandPlanningUnlockedAt?: Date | string | null
+    demandPlanningLockReason?: string | null
     status?: $Enums.MappingStatus
     adminNote?: string | null
     isOutOfCatalog?: boolean
+    isActive?: boolean
+    inactiveFromMonth?: string | null
+    inactiveReason?: string | null
+    inactiveAt?: Date | string | null
+    reactivatedFromMonth?: string | null
+    reactivatedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -52988,6 +60396,31 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type FacilityDemandPlanLineCreateManyMasterDrugInput = {
+    id?: string
+    planId: string
+    mapId: string
+    maNoiBoSnapshot: string
+    tenThuocSnapshot: string
+    hoatChatSnapshot?: string | null
+    donViTinhSnapshot?: string | null
+    nhomTcktSnapshot?: string | null
+    maChungSnapshot?: string | null
+    suggestedQty?: Decimal | DecimalJsLike | number | string | null
+    rawSuggestedQty?: Decimal | DecimalJsLike | number | string | null
+    roundedSuggestedQty?: Decimal | DecimalJsLike | number | string | null
+    packageUnitSnapshot?: string | null
+    packageSizeSnapshot?: Decimal | DecimalJsLike | number | string | null
+    roundingNote?: string | null
+    finalQty?: Decimal | DecimalJsLike | number | string
+    suggestionBasis?: string | null
+    suggestionReportMonth?: string | null
+    suggestionRuleVersion?: string | null
+    note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type FacilityDrugMapUpdateWithoutMasterDrugInput = {
     id?: StringFieldUpdateOperationsInput | string
     maNoiBo?: StringFieldUpdateOperationsInput | string
@@ -52996,13 +60429,34 @@ export namespace Prisma {
     soDangKyNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     donViTinhNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     nhomTckt?: NullableStringFieldUpdateOperationsInput | string | null
+    giaVat?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    bhyt?: NullableStringFieldUpdateOperationsInput | string | null
+    dichVu?: NullableStringFieldUpdateOperationsInput | string | null
+    soQdTrungThau?: NullableStringFieldUpdateOperationsInput | string | null
+    tenCongTy?: NullableStringFieldUpdateOperationsInput | string | null
+    ngayBatDauHd?: NullableStringFieldUpdateOperationsInput | string | null
+    ngayKetThucHd?: NullableStringFieldUpdateOperationsInput | string | null
+    demandRoundingEnabled?: BoolFieldUpdateOperationsInput | boolean
+    demandPackageUnit?: NullableStringFieldUpdateOperationsInput | string | null
+    demandPackageSize?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    demandPlanningLocked?: BoolFieldUpdateOperationsInput | boolean
+    demandPlanningLockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    demandPlanningUnlockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    demandPlanningLockReason?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumMappingStatusFieldUpdateOperationsInput | $Enums.MappingStatus
     adminNote?: NullableStringFieldUpdateOperationsInput | string | null
     isOutOfCatalog?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    inactiveFromMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    inactiveReason?: NullableStringFieldUpdateOperationsInput | string | null
+    inactiveAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reactivatedFromMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    reactivatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     facility?: UserUpdateOneRequiredWithoutDrugMapsNestedInput
     reports?: InventoryReportUpdateManyWithoutDrugMapNestedInput
+    demandPlanLines?: FacilityDemandPlanLineUpdateManyWithoutDrugMapNestedInput
   }
 
   export type FacilityDrugMapUncheckedUpdateWithoutMasterDrugInput = {
@@ -53014,12 +60468,33 @@ export namespace Prisma {
     soDangKyNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     donViTinhNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     nhomTckt?: NullableStringFieldUpdateOperationsInput | string | null
+    giaVat?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    bhyt?: NullableStringFieldUpdateOperationsInput | string | null
+    dichVu?: NullableStringFieldUpdateOperationsInput | string | null
+    soQdTrungThau?: NullableStringFieldUpdateOperationsInput | string | null
+    tenCongTy?: NullableStringFieldUpdateOperationsInput | string | null
+    ngayBatDauHd?: NullableStringFieldUpdateOperationsInput | string | null
+    ngayKetThucHd?: NullableStringFieldUpdateOperationsInput | string | null
+    demandRoundingEnabled?: BoolFieldUpdateOperationsInput | boolean
+    demandPackageUnit?: NullableStringFieldUpdateOperationsInput | string | null
+    demandPackageSize?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    demandPlanningLocked?: BoolFieldUpdateOperationsInput | boolean
+    demandPlanningLockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    demandPlanningUnlockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    demandPlanningLockReason?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumMappingStatusFieldUpdateOperationsInput | $Enums.MappingStatus
     adminNote?: NullableStringFieldUpdateOperationsInput | string | null
     isOutOfCatalog?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    inactiveFromMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    inactiveReason?: NullableStringFieldUpdateOperationsInput | string | null
+    inactiveAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reactivatedFromMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    reactivatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     reports?: InventoryReportUncheckedUpdateManyWithoutDrugMapNestedInput
+    demandPlanLines?: FacilityDemandPlanLineUncheckedUpdateManyWithoutDrugMapNestedInput
   }
 
   export type FacilityDrugMapUncheckedUpdateManyWithoutMasterDrugInput = {
@@ -53031,9 +60506,29 @@ export namespace Prisma {
     soDangKyNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     donViTinhNoiBo?: NullableStringFieldUpdateOperationsInput | string | null
     nhomTckt?: NullableStringFieldUpdateOperationsInput | string | null
+    giaVat?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    bhyt?: NullableStringFieldUpdateOperationsInput | string | null
+    dichVu?: NullableStringFieldUpdateOperationsInput | string | null
+    soQdTrungThau?: NullableStringFieldUpdateOperationsInput | string | null
+    tenCongTy?: NullableStringFieldUpdateOperationsInput | string | null
+    ngayBatDauHd?: NullableStringFieldUpdateOperationsInput | string | null
+    ngayKetThucHd?: NullableStringFieldUpdateOperationsInput | string | null
+    demandRoundingEnabled?: BoolFieldUpdateOperationsInput | boolean
+    demandPackageUnit?: NullableStringFieldUpdateOperationsInput | string | null
+    demandPackageSize?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    demandPlanningLocked?: BoolFieldUpdateOperationsInput | boolean
+    demandPlanningLockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    demandPlanningUnlockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    demandPlanningLockReason?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumMappingStatusFieldUpdateOperationsInput | $Enums.MappingStatus
     adminNote?: NullableStringFieldUpdateOperationsInput | string | null
     isOutOfCatalog?: BoolFieldUpdateOperationsInput | boolean
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    inactiveFromMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    inactiveReason?: NullableStringFieldUpdateOperationsInput | string | null
+    inactiveAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reactivatedFromMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    reactivatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -53140,6 +60635,81 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type FacilityDemandPlanLineUpdateWithoutMasterDrugInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    maNoiBoSnapshot?: StringFieldUpdateOperationsInput | string
+    tenThuocSnapshot?: StringFieldUpdateOperationsInput | string
+    hoatChatSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    donViTinhSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    nhomTcktSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    maChungSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rawSuggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roundedSuggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    packageUnitSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    packageSizeSnapshot?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roundingNote?: NullableStringFieldUpdateOperationsInput | string | null
+    finalQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    suggestionBasis?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionRuleVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    plan?: FacilityDemandPlanUpdateOneRequiredWithoutLinesNestedInput
+    drugMap?: FacilityDrugMapUpdateOneRequiredWithoutDemandPlanLinesNestedInput
+  }
+
+  export type FacilityDemandPlanLineUncheckedUpdateWithoutMasterDrugInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    planId?: StringFieldUpdateOperationsInput | string
+    mapId?: StringFieldUpdateOperationsInput | string
+    maNoiBoSnapshot?: StringFieldUpdateOperationsInput | string
+    tenThuocSnapshot?: StringFieldUpdateOperationsInput | string
+    hoatChatSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    donViTinhSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    nhomTcktSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    maChungSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rawSuggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roundedSuggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    packageUnitSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    packageSizeSnapshot?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roundingNote?: NullableStringFieldUpdateOperationsInput | string | null
+    finalQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    suggestionBasis?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionRuleVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FacilityDemandPlanLineUncheckedUpdateManyWithoutMasterDrugInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    planId?: StringFieldUpdateOperationsInput | string
+    mapId?: StringFieldUpdateOperationsInput | string
+    maNoiBoSnapshot?: StringFieldUpdateOperationsInput | string
+    tenThuocSnapshot?: StringFieldUpdateOperationsInput | string
+    hoatChatSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    donViTinhSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    nhomTcktSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    maChungSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rawSuggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roundedSuggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    packageUnitSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    packageSizeSnapshot?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roundingNote?: NullableStringFieldUpdateOperationsInput | string | null
+    finalQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    suggestionBasis?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionRuleVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type DrugOrderLineCreateManyCompanyDrugInput = {
     id?: string
     orderId: string
@@ -53226,6 +60796,7 @@ export namespace Prisma {
     reportMonth: string
     tonDau?: Decimal | DecimalJsLike | number | string
     nhap?: Decimal | DecimalJsLike | number | string
+    nhapHoanTra?: Decimal | DecimalJsLike | number | string
     xuat?: Decimal | DecimalJsLike | number | string
     tonCuoi?: Decimal | DecimalJsLike | number | string
     giaVat?: Decimal | DecimalJsLike | number | string
@@ -53242,11 +60813,37 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type FacilityDemandPlanLineCreateManyDrugMapInput = {
+    id?: string
+    planId: string
+    masterDrugId: string
+    maNoiBoSnapshot: string
+    tenThuocSnapshot: string
+    hoatChatSnapshot?: string | null
+    donViTinhSnapshot?: string | null
+    nhomTcktSnapshot?: string | null
+    maChungSnapshot?: string | null
+    suggestedQty?: Decimal | DecimalJsLike | number | string | null
+    rawSuggestedQty?: Decimal | DecimalJsLike | number | string | null
+    roundedSuggestedQty?: Decimal | DecimalJsLike | number | string | null
+    packageUnitSnapshot?: string | null
+    packageSizeSnapshot?: Decimal | DecimalJsLike | number | string | null
+    roundingNote?: string | null
+    finalQty?: Decimal | DecimalJsLike | number | string
+    suggestionBasis?: string | null
+    suggestionReportMonth?: string | null
+    suggestionRuleVersion?: string | null
+    note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type InventoryReportUpdateWithoutDrugMapInput = {
     id?: StringFieldUpdateOperationsInput | string
     reportMonth?: StringFieldUpdateOperationsInput | string
     tonDau?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     nhap?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    nhapHoanTra?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     xuat?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     tonCuoi?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     giaVat?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -53270,6 +60867,7 @@ export namespace Prisma {
     reportMonth?: StringFieldUpdateOperationsInput | string
     tonDau?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     nhap?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    nhapHoanTra?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     xuat?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     tonCuoi?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     giaVat?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -53292,6 +60890,7 @@ export namespace Prisma {
     reportMonth?: StringFieldUpdateOperationsInput | string
     tonDau?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     nhap?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    nhapHoanTra?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     xuat?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     tonCuoi?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     giaVat?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -53304,6 +60903,181 @@ export namespace Prisma {
     dichVu?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumReportStatusFieldUpdateOperationsInput | $Enums.ReportStatus
     adminNote?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FacilityDemandPlanLineUpdateWithoutDrugMapInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    maNoiBoSnapshot?: StringFieldUpdateOperationsInput | string
+    tenThuocSnapshot?: StringFieldUpdateOperationsInput | string
+    hoatChatSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    donViTinhSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    nhomTcktSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    maChungSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rawSuggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roundedSuggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    packageUnitSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    packageSizeSnapshot?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roundingNote?: NullableStringFieldUpdateOperationsInput | string | null
+    finalQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    suggestionBasis?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionRuleVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    plan?: FacilityDemandPlanUpdateOneRequiredWithoutLinesNestedInput
+    masterDrug?: MasterDrugUpdateOneRequiredWithoutFacilityDemandPlanLinesNestedInput
+  }
+
+  export type FacilityDemandPlanLineUncheckedUpdateWithoutDrugMapInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    planId?: StringFieldUpdateOperationsInput | string
+    masterDrugId?: StringFieldUpdateOperationsInput | string
+    maNoiBoSnapshot?: StringFieldUpdateOperationsInput | string
+    tenThuocSnapshot?: StringFieldUpdateOperationsInput | string
+    hoatChatSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    donViTinhSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    nhomTcktSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    maChungSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rawSuggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roundedSuggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    packageUnitSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    packageSizeSnapshot?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roundingNote?: NullableStringFieldUpdateOperationsInput | string | null
+    finalQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    suggestionBasis?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionRuleVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FacilityDemandPlanLineUncheckedUpdateManyWithoutDrugMapInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    planId?: StringFieldUpdateOperationsInput | string
+    masterDrugId?: StringFieldUpdateOperationsInput | string
+    maNoiBoSnapshot?: StringFieldUpdateOperationsInput | string
+    tenThuocSnapshot?: StringFieldUpdateOperationsInput | string
+    hoatChatSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    donViTinhSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    nhomTcktSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    maChungSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rawSuggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roundedSuggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    packageUnitSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    packageSizeSnapshot?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roundingNote?: NullableStringFieldUpdateOperationsInput | string | null
+    finalQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    suggestionBasis?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionRuleVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FacilityDemandPlanLineCreateManyPlanInput = {
+    id?: string
+    mapId: string
+    masterDrugId: string
+    maNoiBoSnapshot: string
+    tenThuocSnapshot: string
+    hoatChatSnapshot?: string | null
+    donViTinhSnapshot?: string | null
+    nhomTcktSnapshot?: string | null
+    maChungSnapshot?: string | null
+    suggestedQty?: Decimal | DecimalJsLike | number | string | null
+    rawSuggestedQty?: Decimal | DecimalJsLike | number | string | null
+    roundedSuggestedQty?: Decimal | DecimalJsLike | number | string | null
+    packageUnitSnapshot?: string | null
+    packageSizeSnapshot?: Decimal | DecimalJsLike | number | string | null
+    roundingNote?: string | null
+    finalQty?: Decimal | DecimalJsLike | number | string
+    suggestionBasis?: string | null
+    suggestionReportMonth?: string | null
+    suggestionRuleVersion?: string | null
+    note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FacilityDemandPlanLineUpdateWithoutPlanInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    maNoiBoSnapshot?: StringFieldUpdateOperationsInput | string
+    tenThuocSnapshot?: StringFieldUpdateOperationsInput | string
+    hoatChatSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    donViTinhSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    nhomTcktSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    maChungSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rawSuggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roundedSuggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    packageUnitSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    packageSizeSnapshot?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roundingNote?: NullableStringFieldUpdateOperationsInput | string | null
+    finalQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    suggestionBasis?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionRuleVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    drugMap?: FacilityDrugMapUpdateOneRequiredWithoutDemandPlanLinesNestedInput
+    masterDrug?: MasterDrugUpdateOneRequiredWithoutFacilityDemandPlanLinesNestedInput
+  }
+
+  export type FacilityDemandPlanLineUncheckedUpdateWithoutPlanInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    mapId?: StringFieldUpdateOperationsInput | string
+    masterDrugId?: StringFieldUpdateOperationsInput | string
+    maNoiBoSnapshot?: StringFieldUpdateOperationsInput | string
+    tenThuocSnapshot?: StringFieldUpdateOperationsInput | string
+    hoatChatSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    donViTinhSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    nhomTcktSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    maChungSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rawSuggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roundedSuggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    packageUnitSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    packageSizeSnapshot?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roundingNote?: NullableStringFieldUpdateOperationsInput | string | null
+    finalQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    suggestionBasis?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionRuleVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FacilityDemandPlanLineUncheckedUpdateManyWithoutPlanInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    mapId?: StringFieldUpdateOperationsInput | string
+    masterDrugId?: StringFieldUpdateOperationsInput | string
+    maNoiBoSnapshot?: StringFieldUpdateOperationsInput | string
+    tenThuocSnapshot?: StringFieldUpdateOperationsInput | string
+    hoatChatSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    donViTinhSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    nhomTcktSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    maChungSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    rawSuggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roundedSuggestedQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    packageUnitSnapshot?: NullableStringFieldUpdateOperationsInput | string | null
+    packageSizeSnapshot?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roundingNote?: NullableStringFieldUpdateOperationsInput | string | null
+    finalQty?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    suggestionBasis?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionReportMonth?: NullableStringFieldUpdateOperationsInput | string | null
+    suggestionRuleVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -53736,6 +61510,7 @@ export namespace Prisma {
     thoiGianThucHien?: string | null
     trangThai?: string | null
     maThongBao?: string | null
+    yeuCauTBMT?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -53756,6 +61531,7 @@ export namespace Prisma {
     thoiGianThucHien?: NullableStringFieldUpdateOperationsInput | string | null
     trangThai?: NullableStringFieldUpdateOperationsInput | string | null
     maThongBao?: NullableStringFieldUpdateOperationsInput | string | null
+    yeuCauTBMT?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     phanLos?: PhanLoGoiThauUpdateManyWithoutGoiThauNestedInput
@@ -53779,6 +61555,7 @@ export namespace Prisma {
     thoiGianThucHien?: NullableStringFieldUpdateOperationsInput | string | null
     trangThai?: NullableStringFieldUpdateOperationsInput | string | null
     maThongBao?: NullableStringFieldUpdateOperationsInput | string | null
+    yeuCauTBMT?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     phanLos?: PhanLoGoiThauUncheckedUpdateManyWithoutGoiThauNestedInput
@@ -53802,6 +61579,7 @@ export namespace Prisma {
     thoiGianThucHien?: NullableStringFieldUpdateOperationsInput | string | null
     trangThai?: NullableStringFieldUpdateOperationsInput | string | null
     maThongBao?: NullableStringFieldUpdateOperationsInput | string | null
+    yeuCauTBMT?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -53833,7 +61611,7 @@ export namespace Prisma {
 
   export type KetQuaLCNTCreateManyGoiThauInput = {
     id?: string
-    thongBaoMoiThauId: string
+    thongBaoMoiThauId?: string | null
     soQdPheDuyetKQLCNT: string
     ngayPheDuyetKQLCNT: Date | string
     soMatHangMoiThau: number
@@ -53931,13 +61709,13 @@ export namespace Prisma {
     tongGiaTriTrungThau?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    thongBaoMoiThau?: ThongBaoMoiThauUpdateOneRequiredWithoutKetQuaLCNTsNestedInput
+    thongBaoMoiThau?: ThongBaoMoiThauUpdateOneWithoutKetQuaLCNTsNestedInput
     ketQuaPhanLos?: KetQuaPhanLoUpdateManyWithoutKetQuaLCNTNestedInput
   }
 
   export type KetQuaLCNTUncheckedUpdateWithoutGoiThauInput = {
     id?: StringFieldUpdateOperationsInput | string
-    thongBaoMoiThauId?: StringFieldUpdateOperationsInput | string
+    thongBaoMoiThauId?: NullableStringFieldUpdateOperationsInput | string | null
     soQdPheDuyetKQLCNT?: StringFieldUpdateOperationsInput | string
     ngayPheDuyetKQLCNT?: DateTimeFieldUpdateOperationsInput | Date | string
     soMatHangMoiThau?: IntFieldUpdateOperationsInput | number
@@ -53950,7 +61728,7 @@ export namespace Prisma {
 
   export type KetQuaLCNTUncheckedUpdateManyWithoutGoiThauInput = {
     id?: StringFieldUpdateOperationsInput | string
-    thongBaoMoiThauId?: StringFieldUpdateOperationsInput | string
+    thongBaoMoiThauId?: NullableStringFieldUpdateOperationsInput | string | null
     soQdPheDuyetKQLCNT?: StringFieldUpdateOperationsInput | string
     ngayPheDuyetKQLCNT?: DateTimeFieldUpdateOperationsInput | Date | string
     soMatHangMoiThau?: IntFieldUpdateOperationsInput | number

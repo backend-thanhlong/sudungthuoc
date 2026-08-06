@@ -1,0 +1,3 @@
+ALTER TABLE "facility_drug_maps"
+ALTER COLUMN "gia_vat" TYPE INTEGER USING ROUND("gia_vat")::INTEGER,
+ALTER COLUMN "gia_vat" SET DEFAULT 0;

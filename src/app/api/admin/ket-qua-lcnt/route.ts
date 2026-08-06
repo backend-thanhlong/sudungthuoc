@@ -35,7 +35,7 @@ const BASE_FROM_SQL = Prisma.sql`
     INNER JOIN goi_thau gt ON gt.id = kq.goi_thau_id
     INNER JOIN ke_hoach_lcnt kh ON kh.id = gt.ke_hoach_id
     INNER JOIN users u ON u.id = kh.facility_id
-    INNER JOIN thong_bao_moi_thau tb ON tb.id = kq.thong_bao_moi_thau_id
+    LEFT JOIN thong_bao_moi_thau tb ON tb.id = kq.thong_bao_moi_thau_id
 `;
 
 function parsePage(value: string | null) {
@@ -167,7 +167,9 @@ function buildResultWhere(pageFacilityIds: string[], searchTerm: string): Prisma
         },
         {
             thongBaoMoiThau: {
-                maTBMT: containsFilter,
+                is: {
+                    maTBMT: containsFilter,
+                },
             },
         },
         {
@@ -288,8 +290,8 @@ export async function GET(req: NextRequest) {
                 tenKHLCNT: string | null;
                 tenGoiThau: string;
                 giaGoiThau: number | null;
-                maTBMT: string;
-                ngayDangTaiTBMT: string;
+                maTBMT: string | null;
+                ngayDangTaiTBMT: string | null;
                 soQdPheDuyetKQLCNT: string;
                 ngayPheDuyetKQLCNT: string;
                 soMatHangMoiThau: number;
@@ -309,8 +311,8 @@ export async function GET(req: NextRequest) {
                 tenKHLCNT: ketQua.goiThau.keHoach.tenKHLCNT,
                 tenGoiThau: ketQua.goiThau.tenGoiThau,
                 giaGoiThau: ketQua.goiThau.giaGoiThau ? Number(ketQua.goiThau.giaGoiThau) : null,
-                maTBMT: ketQua.thongBaoMoiThau.maTBMT,
-                ngayDangTaiTBMT: ketQua.thongBaoMoiThau.ngayDangTai.toISOString(),
+                maTBMT: ketQua.thongBaoMoiThau?.maTBMT ?? null,
+                ngayDangTaiTBMT: ketQua.thongBaoMoiThau?.ngayDangTai.toISOString() ?? null,
                 soQdPheDuyetKQLCNT: ketQua.soQdPheDuyetKQLCNT,
                 ngayPheDuyetKQLCNT: ketQua.ngayPheDuyetKQLCNT.toISOString(),
                 soMatHangMoiThau: ketQua.soMatHangMoiThau,

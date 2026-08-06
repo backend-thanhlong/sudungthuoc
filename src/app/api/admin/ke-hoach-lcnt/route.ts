@@ -9,6 +9,10 @@ const TAB_TO_QUY_TRINH = {
     quyTrinh1: 1,
     quyTrinh2: 2,
 } as const;
+const PROCUREMENT_TYPE_FILTERS = [
+    "Thuốc",
+    "Hóa chất, vật tư, thiết bị y tế",
+] as const;
 
 const PLAN_INCLUDE = {
     facility: {
@@ -49,6 +53,7 @@ const PLAN_INCLUDE = {
 } satisfies Prisma.KeHoachLCNTInclude;
 
 type ListTab = keyof typeof TAB_TO_QUY_TRINH;
+type ProcurementTypeFilter = "all" | (typeof PROCUREMENT_TYPE_FILTERS)[number];
 type KeHoachWithRelations = Prisma.KeHoachLCNTGetPayload<{ include: typeof PLAN_INCLUDE }>;
 
 function parsePage(value: string | null) {
@@ -79,6 +84,14 @@ function parseTab(value: string | null): ListTab {
     return "quyTrinh1";
 }
 
+function parseProcurementTypeFilter(value: string | null): ProcurementTypeFilter {
+    if (PROCUREMENT_TYPE_FILTERS.includes(value as (typeof PROCUREMENT_TYPE_FILTERS)[number])) {
+        return value as ProcurementTypeFilter;
+    }
+
+    return "all";
+}
+
 function buildContainsFilter(term: string) {
     return {
         contains: term,
@@ -86,13 +99,21 @@ function buildContainsFilter(term: string) {
     };
 }
 
-function buildWhere(tab: ListTab, searchTerm: string, facilityId: string) {
+function buildWhere(tab: ListTab, searchTerm: string, facilityId: string, procurementType: ProcurementTypeFilter) {
     const where: Prisma.KeHoachLCNTWhereInput = {
         quyTrinh: TAB_TO_QUY_TRINH[tab],
     };
 
     if (facilityId && facilityId !== "all") {
         where.facilityId = facilityId;
+    }
+
+    if (procurementType !== "all") {
+        if (tab === "quyTrinh1") {
+            where.loaiMuaSam = procurementType;
+        } else {
+            where.loaiMuaSamTuQuyet = procurementType;
+        }
     }
 
     if (searchTerm) {
@@ -128,10 +149,15 @@ function parseJsonArray(value?: string | null) {
     }
 }
 
+function getPlanPurchaseType(plan: Pick<KeHoachWithRelations, "quyTrinh" | "loaiMuaSam" | "loaiMuaSamTuQuyet">) {
+    return plan.quyTrinh === 1 ? plan.loaiMuaSam : plan.loaiMuaSamTuQuyet;
+}
+
 function serializePlan(plan: KeHoachWithRelations) {
     return {
         id: plan.id,
         quyTrinh: plan.quyTrinh,
+        loaiMuaSam: plan.loaiMuaSam || "",
         maKHLCNT: plan.maKHLCNT || "",
         tenKHLCNT: plan.tenKHLCNT || "",
         soQuyetDinh: plan.soQuyetDinh || "",
@@ -212,6 +238,7 @@ function buildFacilityPlanGroups(plans: KeHoachWithRelations[], orderedFacilityI
         const existing = groups.get(facilityId);
         const createdAt = serializeDate(plan.createdAt);
         const purchaseStartAt = serializeDate(plan.thoiGianBatDauMuaSam);
+        const purchaseType = getPlanPurchaseType(plan);
 
         if (existing) {
             existing.plans.push(serializePlan(plan));
@@ -219,8 +246,8 @@ function buildFacilityPlanGroups(plans: KeHoachWithRelations[], orderedFacilityI
             existing.totalPackages += plan.goiThaus.length;
             existing.publishedCount += plan.trangThai === "Đã đăng tải" ? 1 : 0;
 
-            if (plan.loaiMuaSamTuQuyet && !existing.purchaseTypes.includes(plan.loaiMuaSamTuQuyet)) {
-                existing.purchaseTypes.push(plan.loaiMuaSamTuQuyet);
+            if (purchaseType && !existing.purchaseTypes.includes(purchaseType)) {
+                existing.purchaseTypes.push(purchaseType);
             }
 
             if (createdAt && (!existing.latestCreatedAt || createdAt > existing.latestCreatedAt)) {
@@ -243,7 +270,7 @@ function buildFacilityPlanGroups(plans: KeHoachWithRelations[], orderedFacilityI
             totalPackages: plan.goiThaus.length,
             publishedCount: plan.trangThai === "Đã đăng tải" ? 1 : 0,
             latestCreatedAt: createdAt,
-            purchaseTypes: plan.loaiMuaSamTuQuyet ? [plan.loaiMuaSamTuQuyet] : [],
+            purchaseTypes: purchaseType ? [purchaseType] : [],
             latestPurchaseStartAt: purchaseStartAt,
         });
     });
@@ -266,7 +293,8 @@ export async function GET(request: Request) {
         const limit = parseLimit(searchParams.get("limit"));
         const searchTerm = searchParams.get("searchTerm")?.trim() || "";
         const facilityId = searchParams.get("facilityId") || "all";
-        const where = buildWhere(tab, searchTerm, facilityId);
+        const procurementType = parseProcurementTypeFilter(searchParams.get("procurementType"));
+        const where = buildWhere(tab, searchTerm, facilityId, procurementType);
 
         const [
             matchingFacilities,

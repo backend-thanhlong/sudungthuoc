@@ -46,11 +46,16 @@ export async function GET(request: Request) {
                     select: {
                         tenThuocNoiBo: true,
                         hoatChatNoiBo: true,
+                        soDangKyNoiBo: true,
+                        donViTinhNoiBo: true,
+                        nhomTckt: true,
                         masterDrug: {
                             select: {
                                 tenThuoc: true,
                                 hoatChat: true,
                                 hamLuong: true,
+                                soDangKy: true,
+                                donViTinh: true,
                                 isTrongNuoc: true,
                             },
                         },

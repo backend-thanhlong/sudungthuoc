@@ -49,6 +49,41 @@ const normalizeSearchValue = (value: string) =>
 
 const compareText = (left: string, right: string) => left.localeCompare(right, "vi");
 
+const mergeUniqueDisplayValue = (current: string, next: string) => {
+    const trimmedNext = next.trim();
+    if (!trimmedNext) return current;
+
+    const values = current
+        .split(",")
+        .map((value) => value.trim())
+        .filter(Boolean);
+
+    if (values.includes(trimmedNext)) {
+        return current;
+    }
+
+    return [...values, trimmedNext].join(", ");
+};
+
+const isControlledSpecialDrug = (value: string) => {
+    const normalized = normalizeSearchValue(value);
+    return Boolean(normalized && normalized !== "khong" && normalized !== "false" && normalized !== "0");
+};
+
+const matchesDrugTypeFilters = (
+    row: InventorySnapshotRow,
+    filters: { controlledSpecial?: boolean; rareDrug?: boolean }
+) => {
+    if (!filters.controlledSpecial && !filters.rareDrug) {
+        return true;
+    }
+
+    return Boolean(
+        (filters.controlledSpecial && isControlledSpecialDrug(row.kiemSoatDacBiet))
+        || (filters.rareDrug && row.isThuocHiem)
+    );
+};
+
 export const getReportMonthSortValue = (reportMonth: string | null | undefined) => {
     if (!reportMonth) return 0;
 
@@ -187,6 +222,9 @@ export async function getInventorySnapshot(params?: {
             drugName: mapping.masterDrug?.tenThuoc || mapping.tenThuocNoiBo,
             activeIngredient: mapping.masterDrug?.hoatChat || mapping.hoatChatNoiBo || "",
             dosage: mapping.masterDrug?.hamLuong || "",
+            nhomTckt: mapping.nhomTckt || "",
+            kiemSoatDacBiet: mapping.masterDrug?.kiemSoatDacBiet || "",
+            isThuocHiem: Boolean(mapping.masterDrug?.isThuocHiem),
             soDangKy: mapping.masterDrug?.soDangKy || mapping.soDangKyNoiBo || "",
             unit: mapping.masterDrug?.donViTinh || mapping.donViTinhNoiBo || "",
             currentStock: Number(report.ton_cuoi),
@@ -201,9 +239,17 @@ export async function searchInventoryByDrug(params: {
     page: number;
     limit: number;
     sort: DrugSortOption;
+    controlledSpecial?: boolean;
+    rareDrug?: boolean;
 }): Promise<DrugSearchResponse> {
     const snapshot = await getInventorySnapshot();
-    const filteredRows = snapshot.filter((row) => matchesDrugQuery(row, params.query));
+    const filteredRows = snapshot.filter((row) =>
+        matchesDrugQuery(row, params.query)
+        && matchesDrugTypeFilters(row, {
+            controlledSpecial: params.controlledSpecial,
+            rareDrug: params.rareDrug,
+        })
+    );
     const grouped = new Map<string, DrugSearchItem>();
 
     filteredRows.forEach((row) => {
@@ -217,6 +263,9 @@ export async function searchInventoryByDrug(params: {
                 drugName: row.drugName,
                 activeIngredient: row.activeIngredient,
                 dosage: row.dosage,
+                nhomTckt: row.nhomTckt,
+                kiemSoatDacBiet: row.kiemSoatDacBiet,
+                isThuocHiem: row.isThuocHiem,
                 soDangKy: row.soDangKy,
                 unit: row.unit,
                 facilities: [{
@@ -224,6 +273,7 @@ export async function searchInventoryByDrug(params: {
                     facilityCode: row.facilityCode,
                     facilityName: row.facilityName,
                     facilityType: row.facilityType,
+                    nhomTckt: row.nhomTckt,
                     currentStock: row.currentStock,
                     priceVAT: row.priceVAT,
                     reportMonth: row.reportMonth,
@@ -238,6 +288,9 @@ export async function searchInventoryByDrug(params: {
         if (!existing.soDangKy && row.soDangKy) {
             existing.soDangKy = row.soDangKy;
         }
+        existing.nhomTckt = mergeUniqueDisplayValue(existing.nhomTckt, row.nhomTckt);
+        existing.kiemSoatDacBiet = mergeUniqueDisplayValue(existing.kiemSoatDacBiet, row.kiemSoatDacBiet);
+        existing.isThuocHiem = existing.isThuocHiem || row.isThuocHiem;
 
         const existingFacility = existing.facilities.find((facility) => facility.facilityId === row.facilityId);
         if (!existingFacility) {
@@ -246,6 +299,7 @@ export async function searchInventoryByDrug(params: {
                 facilityCode: row.facilityCode,
                 facilityName: row.facilityName,
                 facilityType: row.facilityType,
+                nhomTckt: row.nhomTckt,
                 currentStock: row.currentStock,
                 priceVAT: row.priceVAT,
                 reportMonth: row.reportMonth,
@@ -320,6 +374,8 @@ export async function searchInventoryByFacility(params: {
                 drugName: row.drugName,
                 activeIngredient: row.activeIngredient,
                 dosage: row.dosage,
+                nhomTckt: row.nhomTckt,
+                isThuocHiem: row.isThuocHiem,
                 soDangKy: row.soDangKy,
                 unit: row.unit,
                 currentStock: row.currentStock,
@@ -333,6 +389,8 @@ export async function searchInventoryByFacility(params: {
         if (!existing.soDangKy && row.soDangKy) {
             existing.soDangKy = row.soDangKy;
         }
+        existing.nhomTckt = mergeUniqueDisplayValue(existing.nhomTckt, row.nhomTckt);
+        existing.isThuocHiem = existing.isThuocHiem || row.isThuocHiem;
         if (getReportMonthSortValue(row.reportMonth) >= getReportMonthSortValue(existing.reportMonth)) {
             existing.reportMonth = row.reportMonth;
             existing.priceVAT = row.priceVAT;

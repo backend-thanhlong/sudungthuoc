@@ -14,6 +14,7 @@ export const REPORT_FIELD_DON_VI_TINH = "Đơn vị tính";
 export const REPORT_FIELD_NHOM_TCKT = "Nhóm TCKT";
 export const REPORT_FIELD_TON_DAU = "Tồn đầu";
 export const REPORT_FIELD_NHAP = "Nhập trong kỳ";
+export const REPORT_FIELD_NHAP_HOAN_TRA = "Nhập do Hoàn trả";
 export const REPORT_FIELD_XUAT = "Xuất trong kỳ";
 export const REPORT_FIELD_TON_CUOI = "Tồn cuối";
 export const REPORT_FIELD_GIA_VAT = "Giá VAT";
@@ -38,6 +39,7 @@ export const REPORT_IMMUTABLE_FIELDS = [
 export const REPORT_NUMERIC_FIELDS = [
     REPORT_FIELD_TON_DAU,
     REPORT_FIELD_NHAP,
+    REPORT_FIELD_NHAP_HOAN_TRA,
     REPORT_FIELD_XUAT,
     REPORT_FIELD_TON_CUOI,
     REPORT_FIELD_GIA_VAT,
@@ -59,9 +61,6 @@ export const REPORT_PRESENCE_FIELDS = [
     ...REPORT_IMMUTABLE_FIELDS,
     REPORT_FIELD_NHOM_TCKT,
     ...REPORT_NUMERIC_FIELDS,
-    REPORT_FIELD_SO_QD_TRUNG_THAU,
-    REPORT_FIELD_TEN_CONG_TY,
-    ...REPORT_DATE_FIELDS,
     ...REPORT_CATEGORICAL_FIELDS,
     REPORT_FIELD_BO_QUA,
 ] as const;
@@ -82,6 +81,7 @@ export const REPORT_VALIDATION_CODES = {
     dateRangeInvalid: "DATE_RANGE_INVALID",
     previousMonthStockMismatch: "PREVIOUS_MONTH_STOCK_MISMATCH",
     previousMonthReferenceMismatch: "PREVIOUS_MONTH_REFERENCE_MISMATCH",
+    mappingReferenceMismatch: "MAPPING_REFERENCE_MISMATCH",
     endingStockFormulaMismatch: "ENDING_STOCK_FORMULA_MISMATCH",
     endingValueFormulaMismatch: "ENDING_VALUE_FORMULA_MISMATCH",
     missingCategoryMark: "MISSING_CATEGORY_MARK",
@@ -113,6 +113,7 @@ export interface ReportRowInput {
     nhomTckt?: string | null;
     tonDau: number;
     nhap: number;
+    nhapHoanTra: number;
     xuat: number;
     tonCuoi: number;
     giaVat: number;
@@ -266,12 +267,12 @@ export function parseRawRow(row: any): ParsedReportRow | null {
 
     const invalidNumericFields: string[] = [];
     const negativeNumericFields: string[] = [];
-    const invalidDateFields: string[] = [];
     const invalidCategoricalFields: string[] = [];
     const invalidSkipFields: string[] = [];
 
     const tonDauResult = parseStrictNumber(row[REPORT_FIELD_TON_DAU]);
     const nhapResult = parseStrictNumber(row[REPORT_FIELD_NHAP]);
+    const nhapHoanTraResult = parseStrictNumber(row[REPORT_FIELD_NHAP_HOAN_TRA]);
     const xuatResult = parseStrictNumber(row[REPORT_FIELD_XUAT]);
     const tonCuoiResult = parseStrictNumber(row[REPORT_FIELD_TON_CUOI]);
     const giaVatResult = parseStrictNumber(row[REPORT_FIELD_GIA_VAT]);
@@ -280,6 +281,7 @@ export function parseRawRow(row: any): ParsedReportRow | null {
     const numericResults = [
         [REPORT_FIELD_TON_DAU, tonDauResult],
         [REPORT_FIELD_NHAP, nhapResult],
+        [REPORT_FIELD_NHAP_HOAN_TRA, nhapHoanTraResult],
         [REPORT_FIELD_XUAT, xuatResult],
         [REPORT_FIELD_TON_CUOI, tonCuoiResult],
         [REPORT_FIELD_GIA_VAT, giaVatResult],
@@ -296,11 +298,6 @@ export function parseRawRow(row: any): ParsedReportRow | null {
             negativeNumericFields.push(field);
         }
     }
-
-    const ngayBatDauResult = parseReportDateValue(row[REPORT_FIELD_NGAY_BAT_DAU_HD]);
-    const ngayKetThucResult = parseReportDateValue(row[REPORT_FIELD_NGAY_KET_THUC_HD]);
-    if (!ngayBatDauResult.valid) invalidDateFields.push(REPORT_FIELD_NGAY_BAT_DAU_HD);
-    if (!ngayKetThucResult.valid) invalidDateFields.push(REPORT_FIELD_NGAY_KET_THUC_HD);
 
     const bhyt = toCellString(row[REPORT_FIELD_BHYT]) || null;
     const dichVu = toCellString(row[REPORT_FIELD_DICH_VU]) || null;
@@ -319,18 +316,19 @@ export function parseRawRow(row: any): ParsedReportRow | null {
         drugName: getReportDisplayName(row),
         tonDau: tonDauResult.value,
         nhap: nhapResult.value,
+        nhapHoanTra: nhapHoanTraResult.value,
         xuat: xuatResult.value,
         tonCuoi: tonCuoiResult.value,
         giaVat: giaVatResult.value,
         thanhTienTonCuoi: thanhTienResult.value,
-        ngayBatDauHd: ngayBatDauResult.value,
-        ngayKetThucHd: ngayKetThucResult.value,
+        ngayBatDauHd: null,
+        ngayKetThucHd: null,
         bhyt,
         dichVu,
         boQua,
         invalidNumericFields,
         negativeNumericFields,
-        invalidDateFields,
+        invalidDateFields: [],
         invalidCategoricalFields,
         invalidSkipFields,
         invalidNhomTckt: Boolean(rawNhomTckt && !nhomTckt),
@@ -348,6 +346,7 @@ export function validateReportRow(
         drugName,
         tonDau,
         nhap,
+        nhapHoanTra,
         xuat,
         tonCuoi,
         giaVat,
@@ -357,15 +356,11 @@ export function validateReportRow(
         boQua,
         nhomTckt,
         rowToken,
-        ngayBatDauHd,
-        ngayKetThucHd,
         invalidNumericFields = [],
         negativeNumericFields = [],
-        invalidDateFields = [],
         invalidCategoricalFields = [],
         invalidSkipFields = [],
         invalidNhomTckt = false,
-        missingNhomTckt = false,
     } = row;
     const includeTokenWarning = options?.includeTokenWarning ?? true;
 
@@ -387,19 +382,12 @@ export function validateReportRow(
         });
     }
 
-    if (missingNhomTckt) {
-        warnings.push({
-            drug: drugName,
-            field: REPORT_FIELD_NHOM_TCKT,
-            code: REPORT_VALIDATION_CODES.missingNhomTckt,
-            message: `${drugName}: ${REPORT_FIELD_NHOM_TCKT} là bắt buộc. Vui lòng cập nhật nhóm tại danh mục thuốc nội bộ.`,
-        });
-    } else if (invalidNhomTckt || !isValidNhomTckt(nhomTckt)) {
+    if (invalidNhomTckt || (nhomTckt && !isValidNhomTckt(nhomTckt))) {
         warnings.push({
             drug: drugName,
             field: REPORT_FIELD_NHOM_TCKT,
             code: REPORT_VALIDATION_CODES.invalidNhomTckt,
-            message: `${drugName}: ${REPORT_FIELD_NHOM_TCKT} chỉ được chọn một trong: ${NHOM_TCKT_OPTIONS.join(", ")}.`,
+            message: `${drugName}: ${REPORT_FIELD_NHOM_TCKT} nếu có nhập, chỉ được chọn một trong: ${NHOM_TCKT_OPTIONS.join(", ")}.`,
         });
     }
 
@@ -451,17 +439,7 @@ export function validateReportRow(
         });
     }
 
-    for (const field of invalidDateFields) {
-        warnings.push({
-            drug: drugName,
-            field,
-            code: REPORT_VALIDATION_CODES.invalidDate,
-            message: `${drugName}: ${field} phải theo định dạng YYYYMMDD và là ngày hợp lệ.`,
-        });
-    }
-
     const invalidNumericFieldSet = new Set(invalidNumericFields);
-    const invalidDateFieldSet = new Set(invalidDateFields);
 
     if (
         prevTonCuoi !== undefined
@@ -481,23 +459,24 @@ export function validateReportRow(
     const canValidateEndingStock = ![
         REPORT_FIELD_TON_DAU,
         REPORT_FIELD_NHAP,
+        REPORT_FIELD_NHAP_HOAN_TRA,
         REPORT_FIELD_XUAT,
         REPORT_FIELD_TON_CUOI,
     ].some((field) => invalidNumericFieldSet.has(field));
 
     if (
         canValidateEndingStock
-        && Math.abs(tonCuoi - (tonDau + nhap - xuat)) > REPORT_TOLERANCE
-        && (tonDau !== 0 || nhap !== 0 || xuat !== 0)
+        && Math.abs(tonCuoi - (tonDau + nhap + nhapHoanTra - xuat)) > REPORT_TOLERANCE
+        && (tonDau !== 0 || nhap !== 0 || nhapHoanTra !== 0 || xuat !== 0)
     ) {
-        const expectedTonCuoi = tonDau + nhap - xuat;
+        const expectedTonCuoi = tonDau + nhap + nhapHoanTra - xuat;
         warnings.push({
             drug: drugName,
             field: REPORT_FIELD_TON_CUOI,
             code: REPORT_VALIDATION_CODES.endingStockFormulaMismatch,
             expected: expectedTonCuoi,
             actual: tonCuoi,
-            message: `${drugName}: Tồn cuối (${tonCuoi.toLocaleString("vi-VN")}) ≠ Tồn đầu (${tonDau}) + Nhập (${nhap}) − Xuất (${xuat}) = ${expectedTonCuoi.toLocaleString("vi-VN")}`,
+            message: `${drugName}: Tồn cuối (${tonCuoi.toLocaleString("vi-VN")}) ≠ Tồn đầu (${tonDau}) + Nhập (${nhap}) + Nhập do Hoàn trả (${nhapHoanTra}) − Xuất (${xuat}) = ${expectedTonCuoi.toLocaleString("vi-VN")}`,
         });
     }
 
@@ -520,21 +499,6 @@ export function validateReportRow(
             expected: expectedThanhTien,
             actual: thanhTienTonCuoi,
             message: `${drugName}: Thành tiền tồn cuối (${thanhTienTonCuoi.toLocaleString("vi-VN")}) ≠ Tồn cuối (${tonCuoi}) × Giá VAT (${giaVat.toLocaleString("vi-VN")}) = ${expectedThanhTien.toLocaleString("vi-VN")}`,
-        });
-    }
-
-    if (
-        !invalidDateFieldSet.has(REPORT_FIELD_NGAY_BAT_DAU_HD)
-        && !invalidDateFieldSet.has(REPORT_FIELD_NGAY_KET_THUC_HD)
-        && ngayBatDauHd
-        && ngayKetThucHd
-        && compareReportDates(ngayBatDauHd, ngayKetThucHd) > 0
-    ) {
-        warnings.push({
-            drug: drugName,
-            field: `${REPORT_FIELD_NGAY_BAT_DAU_HD}/${REPORT_FIELD_NGAY_KET_THUC_HD}`,
-            code: REPORT_VALIDATION_CODES.dateRangeInvalid,
-            message: `${drugName}: Ngày bắt đầu HĐ không được lớn hơn Ngày kết thúc HĐ.`,
         });
     }
 

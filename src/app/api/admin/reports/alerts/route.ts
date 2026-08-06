@@ -69,12 +69,13 @@ export async function GET(req: NextRequest) {
             const drugId = r.drugMap?.masterDrug?.maChung || r.drugMap?.maNoiBo || "unknown";
             const tonDau = Number(r.tonDau);
             const nhap = Number(r.nhap);
+            const nhapHoanTra = Number(r.nhapHoanTra);
             const xuat = Number(r.xuat);
             const tonCuoi = Number(r.tonCuoi);
             const giaVat = Number(r.giaVat);
 
-            // Alert 1: Balance mismatch (tonDau + nhap - xuat != tonCuoi)
-            const expectedTonCuoi = tonDau + nhap - xuat;
+            // Alert 1: Balance mismatch (tonDau + nhap + nhapHoanTra - xuat != tonCuoi)
+            const expectedTonCuoi = tonDau + nhap + nhapHoanTra - xuat;
             const variance = Math.abs(expectedTonCuoi - tonCuoi);
             if (variance > 0.01 && expectedTonCuoi > 0) {
                 const variancePercent = (variance / Math.max(expectedTonCuoi, 1)) * 100;
@@ -86,10 +87,11 @@ export async function GET(req: NextRequest) {
                         facilityName,
                         drugName,
                         reportMonth: r.reportMonth,
-                        message: `Chênh lệch tồn kho: Tồn đầu(${tonDau}) + Nhập(${nhap}) - Xuất(${xuat}) = ${expectedTonCuoi}, nhưng Tồn cuối = ${tonCuoi}`,
+                        message: `Chênh lệch tồn kho: Tồn đầu(${tonDau}) + Nhập(${nhap}) + Nhập HT(${nhapHoanTra}) - Xuất(${xuat}) = ${expectedTonCuoi}, nhưng Tồn cuối = ${tonCuoi}`,
                         detail: {
                             tonDau,
                             nhap,
+                            nhapHoanTra,
                             xuat,
                             expectedTonCuoi,
                             actualTonCuoi: tonCuoi,

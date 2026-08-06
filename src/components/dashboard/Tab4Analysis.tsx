@@ -22,8 +22,14 @@ import type {
     AbcItem,
     AbcParetoItem,
 } from "@/lib/dashboard/abc-analysis";
-import { compareReportMonthsDesc, isTruthyReportFlag } from "@/lib/dashboard/abc-analysis";
+import {
+    compareReportMonthsDesc,
+    isPrescriptionDrug,
+    isSpecialControlDrug,
+} from "@/lib/dashboard/abc-analysis";
 import { useDashboardChartTheme } from "./chart-theme";
+import ChartColorShortcut from "./ChartColorShortcut";
+import { useChartColors } from "./ChartColorProvider";
 import UsageOverviewSection from "./analysis/UsageOverviewSection";
 
 interface Tab4Props {
@@ -47,12 +53,6 @@ const GROUP_BADGE_CLASS: Record<AbcGroup, string> = {
     A: "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-900/70 dark:bg-rose-950/40 dark:text-rose-200",
     B: "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/70 dark:bg-amber-950/40 dark:text-amber-200",
     C: "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/70 dark:bg-emerald-950/40 dark:text-emerald-200",
-};
-
-const GROUP_BAR_COLOR: Record<AbcGroup, string> = {
-    A: "#e11d48",
-    B: "#d97706",
-    C: "#059669",
 };
 
 const formatCurrency = (value: number) =>
@@ -98,9 +98,9 @@ function getPriceRange(item: AbcItem) {
 
 function MetricCard({ label, value, sublabel }: { label: string; value: string; sublabel: string }) {
     return (
-        <div className="rounded-xl border border-border bg-card p-4 text-card-foreground shadow-sm">
+        <div className="rounded-xl border border-border bg-card p-3 text-card-foreground shadow-sm sm:p-4">
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
-            <p className="mt-2 text-2xl font-semibold text-foreground">{value}</p>
+            <p className="mt-2 text-xl font-semibold text-foreground sm:text-2xl">{value}</p>
             <p className="mt-1 text-xs text-muted-foreground">{sublabel}</p>
         </div>
     );
@@ -108,11 +108,11 @@ function MetricCard({ label, value, sublabel }: { label: string; value: string; 
 
 function GroupCard({ group, summary }: { group: AbcGroup; summary: AbcGroupSummary }) {
     return (
-        <div className={`rounded-xl border p-4 shadow-sm ${GROUP_BADGE_CLASS[group]}`}>
+        <div className={`rounded-xl border p-3 shadow-sm sm:p-4 ${GROUP_BADGE_CLASS[group]}`}>
             <div className="flex items-start justify-between gap-3">
                 <div>
                     <p className="text-sm font-semibold">Hạng {group}</p>
-                    <p className="mt-2 text-2xl font-bold">{summary.drugCount}</p>
+                    <p className="mt-2 text-xl font-bold sm:text-2xl">{summary.drugCount}</p>
                 </div>
                 <span className="rounded-full bg-background/70 px-2 py-1 text-xs font-semibold">
                     {formatPercent(summary.valuePercent)}
@@ -165,7 +165,7 @@ function ToggleButton({
         <button
             type="button"
             onClick={onClick}
-            className={`rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${active
+            className={`min-h-9 rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${active
                 ? "border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-950/45 dark:text-indigo-200"
                 : "border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground"
                 }`}
@@ -211,8 +211,9 @@ export default function Tab4Analysis({ reportMonth, facilityId, apiPrefix = "/ap
     const [showUnmappedOnly, setShowUnmappedOnly] = useState(false);
     const [expandedDrugKey, setExpandedDrugKey] = useState<string | null>(null);
     const chartTheme = useDashboardChartTheme();
+    const chartColors = useChartColors();
 
-    const isAdmin = apiPrefix.includes("/api/admin");
+    const isAdmin = apiPrefix.includes("/api/admin") || apiPrefix.includes("/api/public");
     const isAdminAllFacilities = isAdmin && !facilityId;
 
     const fetchData = useCallback(async () => {
@@ -254,7 +255,7 @@ export default function Tab4Analysis({ reportMonth, facilityId, apiPrefix = "/ap
             if (abcFilter !== "all" && item.group !== abcFilter) {
                 return false;
             }
-            if (showSpecialOnly && !isTruthyReportFlag(item.kiemSoatDacBiet)) {
+            if (showSpecialOnly && !isSpecialControlDrug(item.kiemSoatDacBiet)) {
                 return false;
             }
             if (showMultiPriceOnly && item.pricePointCount <= 1) {
@@ -280,7 +281,7 @@ export default function Tab4Analysis({ reportMonth, facilityId, apiPrefix = "/ap
     const monitoringItems = useMemo(() => {
         const items = data?.abcItems ?? [];
         return {
-            specialA: items.filter((item) => item.group === "A" && isTruthyReportFlag(item.kiemSoatDacBiet)),
+            specialA: items.filter((item) => item.group === "A" && isSpecialControlDrug(item.kiemSoatDacBiet)),
             multiPriceA: items.filter((item) => item.group === "A" && item.pricePointCount > 1),
             unmapped: items.filter((item) => !item.isMapped),
         };
@@ -321,9 +322,15 @@ export default function Tab4Analysis({ reportMonth, facilityId, apiPrefix = "/ap
     const noReportRows = data.summary.includedRows === 0 && data.summary.excludedRows === 0;
     const noIncludedRows = data.summary.includedRows === 0 && data.summary.excludedRows > 0;
     const tableColumnCount = isAdminAllFacilities ? 16 : 14;
+    const groupBarColor: Record<AbcGroup, string> = {
+        A: chartColors.resolveColor({ chartId: "dashboard.analysis.pareto", key: "abcA", semanticKey: "abcA" }),
+        B: chartColors.resolveColor({ chartId: "dashboard.analysis.pareto", key: "abcB", semanticKey: "abcB" }),
+        C: chartColors.resolveColor({ chartId: "dashboard.analysis.pareto", key: "abcC", semanticKey: "abcC" }),
+    };
+    const paretoLineColor = chartColors.resolveColor({ chartId: "dashboard.analysis.pareto", key: "line", semanticKey: "line" });
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
                 <MetricCard
                     label="Tổng giá trị tiêu thụ"
@@ -367,12 +374,15 @@ export default function Tab4Analysis({ reportMonth, facilityId, apiPrefix = "/ap
                 isSingleFacility={Boolean(facilityId)}
             />
 
-            <div className="rounded-xl border border-border bg-card p-5 text-card-foreground shadow-sm">
-                <div className="mb-4">
-                    <h3 className="font-semibold text-foreground">Biểu đồ Pareto ABC</h3>
-                    <p className="text-xs text-muted-foreground">Bar là giá trị tiêu thụ, line là phần trăm tích lũy</p>
+            <div className="rounded-xl border border-border bg-card p-4 text-card-foreground shadow-sm sm:p-5">
+                <div className="mb-4 flex items-start justify-between gap-3">
+                    <div>
+                        <h3 className="font-semibold text-foreground">Biểu đồ Pareto ABC</h3>
+                        <p className="text-xs text-muted-foreground">Bar là giá trị tiêu thụ, line là phần trăm tích lũy</p>
+                    </div>
+                    <ChartColorShortcut chartId="dashboard.analysis.pareto" />
                 </div>
-                <div className="h-[380px]">
+                <div className="h-[300px] sm:h-[380px]">
                     {data.paretoItems.length > 0 ? (
                         <ResponsiveContainer width="100%" height="100%">
                             <ComposedChart data={data.paretoItems} margin={{ top: 10, right: 20, left: 10, bottom: 40 }}>
@@ -397,11 +407,11 @@ export default function Tab4Analysis({ reportMonth, facilityId, apiPrefix = "/ap
                                     width={46}
                                 />
                                 <Tooltip content={<ParetoTooltip />} />
-                                <ReferenceLine yAxisId="percent" y={80} stroke="#e11d48" strokeDasharray="4 4" />
-                                <ReferenceLine yAxisId="percent" y={95} stroke="#d97706" strokeDasharray="4 4" />
+                                <ReferenceLine yAxisId="percent" y={80} stroke={groupBarColor.A} strokeDasharray="4 4" />
+                                <ReferenceLine yAxisId="percent" y={95} stroke={groupBarColor.B} strokeDasharray="4 4" />
                                 <Bar yAxisId="value" dataKey="totalValue" name="Giá trị tiêu thụ" radius={[3, 3, 0, 0]}>
                                     {data.paretoItems.map((item) => (
-                                        <Cell key={`pareto-${item.rank}`} fill={GROUP_BAR_COLOR[item.group]} />
+                                        <Cell key={`pareto-${item.rank}`} fill={groupBarColor[item.group]} />
                                     ))}
                                 </Bar>
                                 <Line
@@ -409,7 +419,7 @@ export default function Tab4Analysis({ reportMonth, facilityId, apiPrefix = "/ap
                                     type="monotone"
                                     dataKey="cumulativePercent"
                                     name="% tích lũy"
-                                    stroke="#4338ca"
+                                    stroke={paretoLineColor}
                                     strokeWidth={2}
                                     dot={false}
                                 />
@@ -423,14 +433,14 @@ export default function Tab4Analysis({ reportMonth, facilityId, apiPrefix = "/ap
                 </div>
             </div>
 
-            <div className="rounded-xl border border-border bg-card p-5 text-card-foreground shadow-sm">
+            <div className="rounded-xl border border-border bg-card p-4 text-card-foreground shadow-sm sm:p-5">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                     <div>
                         <h3 className="font-semibold text-foreground">Bảng chi tiết ABC</h3>
                         <p className="text-xs text-muted-foreground">Sắp xếp theo giá trị tiêu thụ giảm dần</p>
                     </div>
                     <div className="flex flex-col gap-3 lg:items-end">
-                        <div className="relative w-full min-w-[260px] lg:w-[340px]">
+                        <div className="relative w-full lg:w-[340px]">
                             <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                             <input
                                 value={searchTerm}
@@ -458,7 +468,7 @@ export default function Tab4Analysis({ reportMonth, facilityId, apiPrefix = "/ap
                     </div>
                 </div>
 
-                <div className="mt-4 max-h-[640px] overflow-auto">
+                <div className="mt-4 max-h-[640px] overflow-auto rounded-lg border border-border">
                     <table className="w-full min-w-[1280px] text-sm">
                         <thead className="sticky top-0 z-10">
                             <tr className="bg-slate-800 text-white dark:bg-muted dark:text-foreground">
@@ -523,10 +533,10 @@ export default function Tab4Analysis({ reportMonth, facilityId, apiPrefix = "/ap
                                             </td>
                                             <td className="p-3">
                                                 <div className="flex flex-wrap gap-1">
-                                                    {isTruthyReportFlag(item.kiemSoatDacBiet) && (
+                                                    {isSpecialControlDrug(item.kiemSoatDacBiet) && (
                                                         <span className="rounded-full bg-rose-50 px-2 py-0.5 text-xs font-medium text-rose-700 dark:bg-rose-950/40 dark:text-rose-200">KSĐB</span>
                                                     )}
-                                                    {isTruthyReportFlag(item.isKeDon) && (
+                                                    {isPrescriptionDrug(item.isKeDon) && (
                                                         <span className="rounded-full bg-sky-50 px-2 py-0.5 text-xs font-medium text-sky-700 dark:bg-sky-950/40 dark:text-sky-200">Kê đơn</span>
                                                     )}
                                                     {!item.isMapped && (
@@ -588,7 +598,7 @@ export default function Tab4Analysis({ reportMonth, facilityId, apiPrefix = "/ap
                 </div>
             </div>
 
-            <div className="rounded-xl border border-border bg-card p-5 text-card-foreground shadow-sm">
+            <div className="rounded-xl border border-border bg-card p-4 text-card-foreground shadow-sm sm:p-5">
                 <div className="mb-4">
                     <h3 className="font-semibold text-foreground">Giám sát ABC</h3>
                     <p className="text-xs text-muted-foreground">Các nhóm cần kiểm tra sau khi phân hạng ABC</p>

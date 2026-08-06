@@ -112,6 +112,12 @@ export async function GET(req: NextRequest) {
                                 ketQuaLCNTs: { select: { id: true } }
                             }
                         },
+                        ketQuaLCNTs: {
+                            select: {
+                                id: true,
+                                thongBaoMoiThauId: true,
+                            },
+                        },
                     },
                 },
             },
@@ -120,20 +126,46 @@ export async function GET(req: NextRequest) {
             },
         });
 
-        // Flatten to show each TBMT as a separate row
+        // Flatten to show TBMT rows plus direct KQLCNT rows for packages that do not require TBMT.
         const result = keHoachList.flatMap((kh) =>
-            kh.goiThaus.flatMap((gt) =>
-                gt.thongBaoMoiThaus.map((tbmt) => ({
+            kh.goiThaus.flatMap((gt) => {
+                const tbmtRows = gt.thongBaoMoiThaus.map((tbmt) => ({
                     id: kh.id,
                     maKHLCNT: kh.maKHLCNT,
                     tenKHLCNT: kh.tenKHLCNT,
                     goiThauId: gt.id,
                     tenGoiThau: gt.tenGoiThau,
+                    yeuCauTBMT: gt.yeuCauTBMT,
+                    reportTargetId: tbmt.id,
+                    resultMode: "TBMT",
                     tbmtId: tbmt.id,
                     maTBMT: tbmt.maTBMT,
                     ngayDangTaiTBMT: tbmt.ngayDangTai,
-                }))
-            )
+                    ketQuaLCNTs: tbmt.ketQuaLCNTs,
+                }));
+
+                if (gt.yeuCauTBMT || gt.thongBaoMoiThaus.length > 0) {
+                    return tbmtRows;
+                }
+
+                return [
+                    ...tbmtRows,
+                    {
+                        id: kh.id,
+                        maKHLCNT: kh.maKHLCNT,
+                        tenKHLCNT: kh.tenKHLCNT,
+                        goiThauId: gt.id,
+                        tenGoiThau: gt.tenGoiThau,
+                        yeuCauTBMT: gt.yeuCauTBMT,
+                        reportTargetId: `goi-thau-${gt.id}`,
+                        resultMode: "NO_TBMT",
+                        tbmtId: null,
+                        maTBMT: null,
+                        ngayDangTaiTBMT: null,
+                        ketQuaLCNTs: gt.ketQuaLCNTs.filter((ketQua) => ketQua.thongBaoMoiThauId === null),
+                    },
+                ];
+            })
         );
 
         return NextResponse.json(result);
@@ -175,7 +207,6 @@ export async function POST(req: NextRequest) {
         // Validate required fields
         const missingFields = [];
         if (!goiThauId) missingFields.push("goiThauId");
-        if (!thongBaoMoiThauId) missingFields.push("thongBaoMoiThauId");
         if (!resolvedSoQdPheDuyetKQLCNT) missingFields.push("soQdPheDuyetKQLCNT");
         if (!resolvedNgayPheDuyetKQLCNT) missingFields.push("ngayPheDuyetKQLCNT");
 
@@ -188,15 +219,21 @@ export async function POST(req: NextRequest) {
         }
 
         const resolvedGoiThauId = goiThauId as string;
-        const resolvedThongBaoMoiThauId = thongBaoMoiThauId as string;
 
         // Filter out lot results with missing phanLoGoiThauId
         const validKetQuaPhanLos = requireValidKetQuaPhanLos(ketQuaPhanLos);
         const goiThau = await getFacilityOwnedGoiThau(resolvedGoiThauId, user.id);
-        const thongBaoMoiThau = await getFacilityOwnedThongBaoMoiThauById(resolvedThongBaoMoiThauId, user.id);
+        const resolvedThongBaoMoiThauId = normalizeString(thongBaoMoiThauId);
+        const thongBaoMoiThau = resolvedThongBaoMoiThauId
+            ? await getFacilityOwnedThongBaoMoiThauById(resolvedThongBaoMoiThauId, user.id)
+            : null;
 
-        if (thongBaoMoiThau.goiThauId !== goiThau.id) {
+        if (thongBaoMoiThau && thongBaoMoiThau.goiThauId !== goiThau.id) {
             throw new RouteError(400, "TBMT không thuộc gói thầu hiện tại");
+        }
+
+        if (!thongBaoMoiThau && goiThau.yeuCauTBMT) {
+            throw new RouteError(400, "Gói thầu này yêu cầu Thông báo mời thầu trước khi nhập KQLCNT");
         }
 
         await assertPhanLoIdsBelongToGoiThau(
@@ -208,7 +245,7 @@ export async function POST(req: NextRequest) {
         const result = await prisma.ketQuaLCNT.create({
             data: {
                 goiThauId: goiThau.id,
-                thongBaoMoiThauId: thongBaoMoiThau.id,
+                thongBaoMoiThauId: thongBaoMoiThau?.id ?? null,
                 soQdPheDuyetKQLCNT: resolvedSoQdPheDuyetKQLCNT,
                 ngayPheDuyetKQLCNT: new Date(resolvedNgayPheDuyetKQLCNT),
                 soMatHangMoiThau: safeParseInt(soMatHangMoiThau) ?? 0,

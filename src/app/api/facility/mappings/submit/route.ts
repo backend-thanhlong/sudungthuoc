@@ -12,34 +12,24 @@ export async function POST() {
             return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
         }
 
-        const missingNhomTcktCount = await prisma.facilityDrugMap.count({
-            where: {
-                facilityId: session.user.id,
-                status: "PENDING_MAPPING",
-                OR: [
-                    { masterDrugId: { not: null } },
-                    { isOutOfCatalog: true },
-                ],
-                nhomTckt: null,
-            },
-        });
-
-        if (missingNhomTcktCount > 0) {
-            return NextResponse.json({
-                message: `Còn ${missingNhomTcktCount} thuốc chưa thiết lập Nhóm TCKT. Vui lòng thiết lập trước khi gửi duyệt.`,
-            }, { status: 400 });
-        }
-
-        // Update all complete PENDING_MAPPING with masterDrug or isOutOfCatalog to WAITING_APPROVAL
+        // Update all complete PENDING_MAPPING with masterDrug or isOutOfCatalog to WAITING_APPROVAL.
+        // Gia VAT defaults to 0 but BHYT/Dich vu must be classified before reporting.
         const result = await prisma.facilityDrugMap.updateMany({
             where: {
                 facilityId: session.user.id,
                 status: "PENDING_MAPPING",
                 OR: [
-                    { masterDrugId: { not: null } },
-                    { isOutOfCatalog: true },
+                    { bhyt: { not: null } },
+                    { dichVu: { not: null } },
                 ],
-                nhomTckt: { not: null },
+                AND: [
+                    {
+                        OR: [
+                            { masterDrugId: { not: null } },
+                            { isOutOfCatalog: true },
+                        ],
+                    },
+                ],
             },
             data: {
                 status: "WAITING_APPROVAL",

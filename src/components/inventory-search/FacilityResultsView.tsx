@@ -9,6 +9,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 import { Building2, ChevronLeft, ChevronRight, PackageSearch, Search } from "lucide-react";
 import type { FacilitySearchResponse } from "./types";
 
@@ -92,6 +93,7 @@ export default function FacilityResultsView({
                                     <TableHead>Tên thuốc</TableHead>
                                     <TableHead>Hoạt chất</TableHead>
                                     <TableHead>Hàm lượng</TableHead>
+                                    <TableHead>Nhóm TCKT</TableHead>
                                     <TableHead>Số đăng ký</TableHead>
                                     <TableHead>ĐVT</TableHead>
                                     <TableHead className="text-right">Tồn kho</TableHead>
@@ -101,7 +103,12 @@ export default function FacilityResultsView({
                             </TableHeader>
                             <TableBody>
                                 {data.results.map((drug, index) => (
-                                    <TableRow key={`${drug.masterDrugId || drug.drugCode}-${index}`}>
+                                    <TableRow
+                                        key={`${drug.masterDrugId || drug.drugCode}-${index}`}
+                                        className={cn(
+                                            drug.isThuocHiem && "bg-red-50 hover:bg-red-100 [&>td]:text-red-700"
+                                        )}
+                                    >
                                         <TableCell>{(data.page - 1) * data.limit + index + 1}</TableCell>
                                         <TableCell className="font-mono text-sm">{drug.drugCode}</TableCell>
                                         <TableCell className="font-medium">{drug.drugName}</TableCell>
@@ -110,6 +117,9 @@ export default function FacilityResultsView({
                                         </TableCell>
                                         <TableCell className="whitespace-normal break-words">
                                             {drug.dosage}
+                                        </TableCell>
+                                        <TableCell className="whitespace-normal break-words text-slate-600">
+                                            {drug.nhomTckt || "-"}
                                         </TableCell>
                                         <TableCell className="whitespace-normal break-words text-slate-600">
                                             {drug.soDangKy || "-"}

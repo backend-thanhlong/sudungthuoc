@@ -55,8 +55,8 @@ export default function SupplyContractSections({
     );
 
     return (
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            <div className="rounded-xl border border-border bg-card p-5 text-card-foreground shadow-sm">
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-2 xl:gap-6">
+            <div className="rounded-xl border border-border bg-card p-4 text-card-foreground shadow-sm sm:p-5">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                         <h3 className="font-semibold text-foreground mb-1">Rủi ro hợp đồng sắp hết</h3>
@@ -75,7 +75,41 @@ export default function SupplyContractSections({
                         ))}
                     </div>
                 </div>
-                <div className="overflow-x-auto max-h-[340px] overflow-y-auto mt-4">
+                <div className="mt-4">
+                    <div className="max-h-[340px] space-y-3 overflow-y-auto md:hidden">
+                        {contractRisk.map((row, index) => (
+                            <div key={`${row.facility}-${row.drugName}-${index}`} className="rounded-lg border border-border bg-muted/30 p-3">
+                                <div className="flex items-start justify-between gap-3">
+                                    <div className="min-w-0">
+                                        <p className="text-xs text-muted-foreground">
+                                            #{index + 1}{scope === "admin" ? ` • ${row.facility}` : ""}
+                                        </p>
+                                        <p className="mt-1 font-medium text-foreground">{row.drugName}</p>
+                                        <p className="text-xs text-muted-foreground">{row.hoatChat}{row.hamLuong ? ` • ${row.hamLuong}` : ""}</p>
+                                        <p className="mt-1 text-xs text-muted-foreground">{row.supplierName}</p>
+                                        {row.awardDecision && <p className="text-xs text-muted-foreground/70">QĐ: {row.awardDecision}</p>}
+                                    </div>
+                                    <span className={`shrink-0 rounded-full border px-2.5 py-1 text-xs font-semibold ${CONTRACT_BUCKET_META[row.bucket].className}`}>
+                                        {CONTRACT_BUCKET_META[row.bucket].label}
+                                    </span>
+                                </div>
+                                <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                                    <div className="rounded-md bg-card p-2">
+                                        <p className="text-muted-foreground">Kết thúc HĐ</p>
+                                        <p className="mt-1 font-mono font-semibold text-foreground">{formatContractDate(row.contractEndDate)}</p>
+                                    </div>
+                                    <div className="rounded-md bg-card p-2">
+                                        <p className="text-muted-foreground">Nhu cầu BQ</p>
+                                        <p className="mt-1 font-mono font-semibold text-foreground">{formatNumber(row.demandAvg)}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                        {contractRisk.length === 0 && (
+                            <p className="text-center text-muted-foreground/70 py-8">Không có thuốc nào rơi vào vùng rủi ro hợp đồng trong 90 ngày.</p>
+                        )}
+                    </div>
+                    <div className="hidden overflow-x-auto max-h-[340px] overflow-y-auto md:block">
                     <table className="w-full text-sm">
                         <thead className="sticky top-0">
                             <tr className="bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white">
@@ -118,17 +152,57 @@ export default function SupplyContractSections({
                     {contractRisk.length === 0 && (
                         <p className="text-center text-muted-foreground/70 py-8">Không có thuốc nào rơi vào vùng rủi ro hợp đồng trong 90 ngày.</p>
                     )}
+                    </div>
                 </div>
             </div>
 
-            <div className="rounded-xl border border-border bg-card p-5 text-card-foreground shadow-sm">
+            <div className="rounded-xl border border-border bg-card p-4 text-card-foreground shadow-sm sm:p-5">
                 <h3 className="font-semibold text-foreground mb-1">
                     {scope === "admin" ? "Phụ thuộc nhà cung cấp" : "Cơ cấu nhà cung cấp của cơ sở"}
                 </h3>
                 <p className="text-xs text-muted-foreground mb-4">
                     Gom theo nhà cung cấp trên các thuốc đang còn nhu cầu để nhìn mức độ phụ thuộc và rủi ro hợp đồng.
                 </p>
-                <div className="overflow-x-auto max-h-[340px] overflow-y-auto">
+                <div>
+                    <div className="max-h-[340px] space-y-3 overflow-y-auto md:hidden">
+                        {supplierDependency.map(row => (
+                            <div key={row.supplierName} className="rounded-lg border border-border bg-muted/30 p-3">
+                                <p className="font-medium text-foreground">{row.supplierName}</p>
+                                <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                                    {scope === "admin" && (
+                                        <div className="rounded-md bg-card p-2">
+                                            <p className="text-muted-foreground">Cơ sở</p>
+                                            <p className="mt-1 font-mono font-semibold">{row.facilityCount}</p>
+                                        </div>
+                                    )}
+                                    <div className="rounded-md bg-card p-2">
+                                        <p className="text-muted-foreground">Thuốc có nhu cầu</p>
+                                        <p className="mt-1 font-mono font-semibold">{row.activeDrugCount}</p>
+                                    </div>
+                                    <div className="rounded-md bg-card p-2">
+                                        <p className="text-muted-foreground">Giá trị tồn</p>
+                                        <p className="mt-1 font-mono font-semibold">{formatCurrencyCompact(row.endingInventoryValue)}</p>
+                                    </div>
+                                    <div className="rounded-md bg-card p-2">
+                                        <p className="text-muted-foreground">Giá trị rủi ro</p>
+                                        <p className="mt-1 font-mono font-semibold text-amber-700 dark:text-amber-300">{formatCurrencyCompact(row.riskValue)}</p>
+                                    </div>
+                                    <div className="rounded-md bg-card p-2">
+                                        <p className="text-muted-foreground">HĐ sắp hết</p>
+                                        <p className="mt-1 font-mono font-semibold text-fuchsia-700 dark:text-fuchsia-300">{row.expiringContractCount}</p>
+                                    </div>
+                                    <div className="rounded-md bg-card p-2">
+                                        <p className="text-muted-foreground">HĐ hết hạn</p>
+                                        <p className="mt-1 font-mono font-semibold text-red-700 dark:text-red-300">{row.expiredContractCount}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                        {supplierDependency.length === 0 && (
+                            <p className="text-center text-muted-foreground/70 py-8">Không có nhà cung cấp nào đủ dữ liệu để tổng hợp trong bộ lọc hiện tại.</p>
+                        )}
+                    </div>
+                    <div className="hidden overflow-x-auto max-h-[340px] overflow-y-auto md:block">
                     <table className="w-full text-sm">
                         <thead className="sticky top-0">
                             <tr className="bg-gradient-to-r from-slate-800 to-slate-700 text-white">
@@ -158,6 +232,7 @@ export default function SupplyContractSections({
                     {supplierDependency.length === 0 && (
                         <p className="text-center text-muted-foreground/70 py-8">Không có nhà cung cấp nào đủ dữ liệu để tổng hợp trong bộ lọc hiện tại.</p>
                     )}
+                    </div>
                 </div>
             </div>
         </div>

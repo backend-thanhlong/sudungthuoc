@@ -14,6 +14,8 @@ const USER_SELECT = {
     contactPerson: true,
     phoneNumber: true,
     address: true,
+    latitude: true,
+    longitude: true,
     role: true,
     isActive: true,
     createdAt: true,
@@ -55,6 +57,22 @@ function parseLimit(value: string | null) {
     }
 
     return parsed;
+}
+
+function parseCoordinate(value: unknown, min: number, max: number, label: string) {
+    if (value === null || value === undefined || value === "") {
+        return { value: null as number | null };
+    }
+
+    const parsed = typeof value === "number"
+        ? value
+        : Number(String(value).trim().replace(",", "."));
+
+    if (!Number.isFinite(parsed) || parsed < min || parsed > max) {
+        return { value: null, error: `${label} không hợp lệ` };
+    }
+
+    return { value: parsed };
 }
 
 function buildSearchFilter(field: SearchableField, term: string): Prisma.UserWhereInput {
@@ -165,7 +183,9 @@ export async function POST(request: Request) {
             facilityType,
             contactPerson,
             phoneNumber,
-            address
+            address,
+            latitude,
+            longitude
         } = body;
 
         if (!username || !password || !facilityName || !facilityCode) {
@@ -185,6 +205,15 @@ export async function POST(request: Request) {
         }
 
         const passwordHash = await bcrypt.hash(password, 10);
+        const parsedLatitude = parseCoordinate(latitude, -90, 90, "Vĩ độ");
+        const parsedLongitude = parseCoordinate(longitude, -180, 180, "Kinh độ");
+
+        if (parsedLatitude.error || parsedLongitude.error) {
+            return NextResponse.json(
+                { message: parsedLatitude.error || parsedLongitude.error },
+                { status: 400 }
+            );
+        }
 
         const user = await prisma.user.create({
             data: {
@@ -197,6 +226,8 @@ export async function POST(request: Request) {
                 contactPerson,
                 phoneNumber,
                 address,
+                latitude: parsedLatitude.value,
+                longitude: parsedLongitude.value,
                 role: "FACILITY",
             },
             select: USER_SELECT,

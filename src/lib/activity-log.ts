@@ -43,6 +43,10 @@ export const ACTIONS = {
     SUBMIT: "SUBMIT",
     RECALL: "RECALL",
     AI_AGENT_DB_QUERY: "AI_AGENT_DB_QUERY",
+    CHART_COLOR_SETTINGS_UPDATED: "CHART_COLOR_SETTINGS_UPDATED",
+    SYSTEM_MAINTENANCE_ENABLED: "SYSTEM_MAINTENANCE_ENABLED",
+    SYSTEM_MAINTENANCE_DISABLED: "SYSTEM_MAINTENANCE_DISABLED",
+    XNT_MAPPING_RESET: "XNT_MAPPING_RESET",
 } as const;
 
 // Entity type constants
@@ -62,7 +66,11 @@ export const ENTITY_TYPES = {
     REPORT_PERIOD: "report_period",
     NOTIFICATION: "notification",
     DRUG_ORDER: "drug_order",
+    FACILITY_DEMAND_PLAN: "facility_demand_plan",
     AI_AGENT_DB_QUERY: "ai_agent_db_query",
+    CHART_COLOR_SETTINGS: "chart_color_settings",
+    SYSTEM_MAINTENANCE: "system_maintenance",
+    XNT_MAPPING_RESET: "xnt_mapping_reset",
 } as const;
 
 // Vietnamese labels for display
@@ -80,6 +88,10 @@ export const ACTION_LABELS: Record<string, string> = {
     SUBMIT: "Gửi",
     RECALL: "Thu hồi",
     AI_AGENT_DB_QUERY: "Truy vấn DB AI",
+    CHART_COLOR_SETTINGS_UPDATED: "Cập nhật bảng màu biểu đồ",
+    SYSTEM_MAINTENANCE_ENABLED: "Bật bảo trì hệ thống",
+    SYSTEM_MAINTENANCE_DISABLED: "Tắt bảo trì hệ thống",
+    XNT_MAPPING_RESET: "Xóa dữ liệu XNT và ánh xạ",
 };
 
 export const ENTITY_TYPE_LABELS: Record<string, string> = {
@@ -98,5 +110,9 @@ export const ENTITY_TYPE_LABELS: Record<string, string> = {
     report_period: "Kỳ báo cáo",
     notification: "Thông báo",
     drug_order: "Dự trù đặt hàng",
+    facility_demand_plan: "Lập dự trù",
     ai_agent_db_query: "Truy vấn DB AI",
+    chart_color_settings: "Bảng màu biểu đồ",
+    system_maintenance: "Bảo trì hệ thống",
+    xnt_mapping_reset: "Thiết lập lại XNT/ánh xạ",
 };

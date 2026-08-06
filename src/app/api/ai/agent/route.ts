@@ -28,6 +28,23 @@ function jsonError(message: string, status: number, code: string) {
     return NextResponse.json({ message, code }, { status });
 }
 
+function providerErrorHttpStatus(error: AIProviderError) {
+    if (error.status === 408) {
+        return 504;
+    }
+    if (error.status && error.status >= 400 && error.status < 600) {
+        return error.status;
+    }
+    return 502;
+}
+
+function providerErrorMessage(error: AIProviderError) {
+    if (error.status === 503) {
+        return "Provider AI đang quá tải hoặc tạm thời không khả dụng. Vui lòng thử lại sau hoặc chọn model khác.";
+    }
+    return error.message;
+}
+
 function ensureRoleAndSurface(request: NonNullable<ReturnType<typeof normalizeAgentRequest>>, role: string) {
     if (role === "COMPANY") {
         throw new RouteError(403, "COMPANY chưa được cấp quyền sử dụng AI Agent trong MVP");
@@ -95,6 +112,7 @@ export async function POST(rawRequest: Request) {
             role: sessionContext.user.role,
             useFallback: request.useFallback,
             fallbackAllowed: currentPolicy.fallbackAllowed,
+            modelChoice: request.modelChoice,
         });
         currentResolvedModel = resolvedModel;
         const routingWarnings = [
@@ -107,6 +125,9 @@ export async function POST(rawRequest: Request) {
                 : []),
             ...(request.useFallback && currentPolicy.fallbackAllowed && !resolvedModel.usedFallback
                 ? ["FALLBACK_TASK_NOT_ELIGIBLE"]
+                : []),
+            ...(request.useFallback && request.modelChoice && request.modelChoice !== "system-default"
+                ? ["FALLBACK_IGNORED_BY_MODEL_CHOICE"]
                 : []),
         ];
         const systemPrompt = buildSystemPrompt();
@@ -207,6 +228,8 @@ export async function POST(rawRequest: Request) {
                     toolNames: currentToolResults.map(result => result.name),
                     status: "error",
                     errorCode: error.code,
+                    providerStatus: error.status,
+                    providerMessage: error.message,
                 });
             }
             if (currentRequest?.mode === "review" && currentToolResults.length > 0) {
@@ -231,7 +254,7 @@ export async function POST(rawRequest: Request) {
                 }
                 return NextResponse.json(fallbackResponse);
             }
-            return jsonError(error.message, error.status === 408 ? 504 : 502, error.code);
+            return jsonError(providerErrorMessage(error), providerErrorHttpStatus(error), error.code);
         }
 
         if (error instanceof DOMException && error.name === "AbortError") {

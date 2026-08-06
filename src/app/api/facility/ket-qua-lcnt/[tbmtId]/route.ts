@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import {
     assertPhanLoIdsBelongToGoiThau,
+    getFacilityOwnedGoiThau,
+    getFacilityOwnedKetQuaLCNTByGoiThauWithoutTbmtId,
     getFacilityOwnedKetQuaLCNTByTbmtId,
     getFacilityOwnedThongBaoMoiThauById,
     isRouteError,
@@ -52,6 +54,22 @@ const normalizeOptionalString = (value: unknown) => {
     return normalized === "" ? null : normalized;
 };
 
+const GOI_THAU_TARGET_PREFIX = "goi-thau-";
+
+const parseResultTarget = (targetId: string) => {
+    if (targetId.startsWith(GOI_THAU_TARGET_PREFIX)) {
+        return {
+            mode: "NO_TBMT" as const,
+            goiThauId: targetId.slice(GOI_THAU_TARGET_PREFIX.length),
+        };
+    }
+
+    return {
+        mode: "TBMT" as const,
+        tbmtId: targetId,
+    };
+};
+
 const requireValidKetQuaPhanLos = (ketQuaPhanLos: KetQuaPhanLoInput[] | undefined) => {
     if (!Array.isArray(ketQuaPhanLos) || ketQuaPhanLos.length === 0) {
         throw new RouteError(400, "Thiếu dữ liệu phần lô từ file Excel");
@@ -100,6 +118,53 @@ export async function GET(
         const { user } = await requireActiveSessionUser("FACILITY");
 
         const { tbmtId } = await params;
+        const target = parseResultTarget(tbmtId);
+
+        if (target.mode === "NO_TBMT") {
+            const ownedGoiThau = await getFacilityOwnedGoiThau(target.goiThauId, user.id);
+
+            if (ownedGoiThau.yeuCauTBMT) {
+                throw new RouteError(400, "Gói thầu này yêu cầu Thông báo mời thầu trước khi nhập KQLCNT");
+            }
+
+            const ketQuaLCNT = await prisma.ketQuaLCNT.findFirst({
+                where: {
+                    goiThauId: ownedGoiThau.id,
+                    thongBaoMoiThauId: null,
+                },
+                include: {
+                    ketQuaPhanLos: {
+                        include: {
+                            phanLoGoiThau: true,
+                        },
+                    },
+                    thongBaoMoiThau: true,
+                    goiThau: {
+                        include: {
+                            phanLos: true,
+                        },
+                    },
+                },
+            });
+
+            if (ketQuaLCNT) {
+                return NextResponse.json(ketQuaLCNT);
+            }
+
+            const goiThau = await prisma.goiThau.findUnique({
+                where: { id: ownedGoiThau.id },
+                include: {
+                    phanLos: true,
+                },
+            });
+
+            return NextResponse.json({
+                goiThauId: ownedGoiThau.id,
+                thongBaoMoiThau: null,
+                goiThau,
+            });
+        }
+
         const ownedTbmt = await getFacilityOwnedThongBaoMoiThauById(tbmtId, user.id);
 
         // Find LCNT results by TBMT ID
@@ -173,15 +238,27 @@ export async function PATCH(
         } = body;
         const resolvedSoQdPheDuyetKQLCNT = normalizeString(soQdPheDuyetKQLCNT);
         const resolvedNgayPheDuyetKQLCNT = normalizeString(ngayPheDuyetKQLCNT);
-        const ownedTbmt = await getFacilityOwnedThongBaoMoiThauById(tbmtId, user.id);
+        const target = parseResultTarget(tbmtId);
+        const ownedTbmt = target.mode === "TBMT"
+            ? await getFacilityOwnedThongBaoMoiThauById(tbmtId, user.id)
+            : null;
+        const ownedGoiThau = target.mode === "NO_TBMT"
+            ? await getFacilityOwnedGoiThau(target.goiThauId, user.id)
+            : null;
+
+        if (ownedGoiThau?.yeuCauTBMT) {
+            throw new RouteError(400, "Gói thầu này yêu cầu Thông báo mời thầu trước khi nhập KQLCNT");
+        }
 
         // Find existing LCNT result
-        const existing = await getFacilityOwnedKetQuaLCNTByTbmtId(tbmtId, user.id);
+        const existing = target.mode === "TBMT"
+            ? await getFacilityOwnedKetQuaLCNTByTbmtId(tbmtId, user.id)
+            : await getFacilityOwnedKetQuaLCNTByGoiThauWithoutTbmtId(target.goiThauId, user.id);
 
         const validKetQuaPhanLos = requireValidKetQuaPhanLos(ketQuaPhanLos);
         await assertPhanLoIdsBelongToGoiThau(
             validKetQuaPhanLos.map((kqpl) => kqpl.phanLoGoiThauId),
-            ownedTbmt.goiThauId
+            ownedTbmt?.goiThauId ?? ownedGoiThau!.id
         );
 
         // Update in a transaction

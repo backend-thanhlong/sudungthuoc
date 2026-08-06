@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
 
+type FacilityGroupMetricMap = Map<string, Map<string, number>>;
+
+const INVENTORY_DRUG_GROUPS = ["Hóa dược", "Dược liệu", "Sinh phẩm", "Thuốc cổ truyền", "Vắc xin", "Khác"] as const;
+
 const normalizeDomesticFlag = (value: string | null | undefined) =>
     value
         ?.trim()
@@ -13,6 +17,61 @@ const isDomesticDrug = (value: string | null | undefined) => {
     const normalized = normalizeDomesticFlag(value);
     return normalized === "trong nuoc" || normalized === "co" || normalized === "true" || normalized === "1";
 };
+
+const normalizeDrugGroupKey = (value: string | null | undefined) =>
+    value
+        ?.trim()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "") || "";
+
+const normalizeInventoryDrugGroup = (value: string | null | undefined) => {
+    const normalized = normalizeDrugGroupKey(value);
+
+    if (normalized.includes("hoa duoc")) return "Hóa dược";
+    if (normalized.includes("duoc lieu")) return "Dược liệu";
+    if (normalized.includes("sinh pham")) return "Sinh phẩm";
+    if (normalized.includes("thuoc co truyen")) return "Thuốc cổ truyền";
+    if (normalized.includes("vac xin") || normalized.includes("vaccine")) return "Vắc xin";
+
+    return "Khác";
+};
+
+const addMetricToFacilityGroupMap = (
+    metricMap: FacilityGroupMetricMap,
+    facilityName: string,
+    drugGroup: string,
+    value: number
+) => {
+    if (!Number.isFinite(value) || value <= 0) {
+        return;
+    }
+
+    if (!metricMap.has(facilityName)) {
+        metricMap.set(facilityName, new Map());
+    }
+
+    const groupMap = metricMap.get(facilityName)!;
+    groupMap.set(drugGroup, (groupMap.get(drugGroup) || 0) + value);
+};
+
+const buildFacilityInventoryByDrugGroup = (metricMap: FacilityGroupMetricMap) =>
+    Array.from(metricMap.keys())
+        .map((facility) => {
+            const groups = metricMap.get(facility);
+            const row: Record<string, string | number> = { facility };
+            let total = 0;
+
+            INVENTORY_DRUG_GROUPS.forEach((group) => {
+                const value = Math.round(groups?.get(group) || 0);
+                row[group] = value;
+                total += value;
+            });
+
+            row.total = total;
+            return row;
+        })
+        .sort((a, b) => Number(b.total) - Number(a.total) || String(a.facility).localeCompare(String(b.facility), "vi"));
 
 export async function GET(request: Request) {
     const session = await auth();
@@ -90,15 +149,18 @@ export async function GET(request: Request) {
         const inventoryGroupMap = new Map<string, number>();
         const exportGroupMap = new Map<string, number>();
         const importGroupMap = new Map<string, number>();
+        const inventoryMetricMap: FacilityGroupMetricMap = new Map();
         allReports.forEach((r) => {
-            const nhom = r.drugMap?.masterDrug?.nhomThuoc || "Khác";
+            const nhom = normalizeInventoryDrugGroup(r.drugMap?.masterDrug?.nhomThuoc);
             const inventoryValue = Number(r.thanhTienTonCuoi);
             const exportValue = Number(r.xuat) * Number(r.giaVat);
             const importValue = Number(r.nhap || 0) * Number(r.giaVat);
+            const reportFacilityName = r.facility?.facilityName || "Đơn vị";
 
             inventoryGroupMap.set(nhom, (inventoryGroupMap.get(nhom) || 0) + inventoryValue);
             exportGroupMap.set(nhom, (exportGroupMap.get(nhom) || 0) + exportValue);
             importGroupMap.set(nhom, (importGroupMap.get(nhom) || 0) + importValue);
+            addMetricToFacilityGroupMap(inventoryMetricMap, reportFacilityName, nhom, inventoryValue);
         });
 
         const facilityName = allReports[0]?.facility?.facilityName || "Đơn vị";
@@ -113,6 +175,14 @@ export async function GET(request: Request) {
             facility: facilityName,
             ...Object.fromEntries(inventoryGroupMap),
         }];
+        const inventoryByFacilityDrugGroup = buildFacilityInventoryByDrugGroup(inventoryMetricMap);
+        const facilityImportExportInventory = [{
+            facility: facilityName,
+            importValue: Math.round(totalImportValue),
+            exportValue: Math.round(totalExportValue),
+            inventoryValue: Math.round(Number(totalInventoryValue._sum.thanhTienTonCuoi) || 0),
+            total: Math.round(Number(totalInventoryValue._sum.thanhTienTonCuoi) || 0),
+        }].filter((item) => item.importValue > 0 || item.exportValue > 0 || item.inventoryValue > 0);
 
         const topExportByFacility = totalExportValue > 0
             ? [{
@@ -173,6 +243,9 @@ export async function GET(request: Request) {
                 distinctDrugCount: distinctDrugCount.length,
             },
             stackedBarData,
+            facilityImportExportInventory,
+            inventoryByFacilityDrugGroup,
+            inventoryDrugGroups: INVENTORY_DRUG_GROUPS,
             drugGroups: allDrugGroups,
             donutData,
             topExportByFacility,

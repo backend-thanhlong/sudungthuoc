@@ -77,41 +77,44 @@ export async function POST(request: Request) {
             return NextResponse.json(buildFacilityReportValidationResponse(validationResult), { status: 400 });
         }
 
-        await prisma.$transaction(async (tx) => {
-            await tx.facilityReportSubmission.create({
-                data: {
-                    facilityId: session.user.id,
-                    reportMonth: month,
-                    submittedAt: new Date(),
-                    reportedRowCount: validationResult.summary.reportedRowCount,
-                    skippedRowCount: validationResult.summary.skippedRowCount,
-                },
-            });
-
-            for (const row of validationResult.rows) {
-                await tx.inventoryReport.create({
-                    data: {
-                        facilityId: session.user.id,
-                        mapId: row.mapId,
-                        reportMonth: month,
-                        tonDau: row.tonDau,
-                        nhap: row.nhap,
-                        xuat: row.xuat,
-                        tonCuoi: row.tonCuoi,
-                        giaVat: row.giaVat,
-                        thanhTienTonCuoi: row.thanhTienTonCuoi,
-                        soQdTrungThau: row.soQdTrungThau,
-                        tenCongTy: row.tenCongTy,
-                        ngayBatDauHd: row.ngayBatDauHd,
-                        ngayKetThucHd: row.ngayKetThucHd,
-                        bhyt: row.bhyt,
-                        dichVu: row.dichVu,
-                        status: "APPROVED",
-                        adminNote: null,
-                    }
-                });
-            }
+        const submissionCreate = prisma.facilityReportSubmission.create({
+            data: {
+                facilityId: session.user.id,
+                reportMonth: month,
+                submittedAt: new Date(),
+                reportedRowCount: validationResult.summary.reportedRowCount,
+                skippedRowCount: validationResult.summary.skippedRowCount,
+            },
         });
+        const inventoryReportData = validationResult.rows.map((row) => ({
+            facilityId: session.user.id,
+            mapId: row.mapId,
+            reportMonth: month,
+            tonDau: row.tonDau,
+            nhap: row.nhap,
+            nhapHoanTra: row.nhapHoanTra,
+            xuat: row.xuat,
+            tonCuoi: row.tonCuoi,
+            giaVat: row.giaVat,
+            thanhTienTonCuoi: row.thanhTienTonCuoi,
+            soQdTrungThau: row.soQdTrungThau,
+            tenCongTy: row.tenCongTy,
+            ngayBatDauHd: row.ngayBatDauHd,
+            ngayKetThucHd: row.ngayKetThucHd,
+            bhyt: row.bhyt,
+            dichVu: row.dichVu,
+            status: "APPROVED" as const,
+            adminNote: null,
+        }));
+
+        if (inventoryReportData.length === 0) {
+            await submissionCreate;
+        } else {
+            await prisma.$transaction([
+                submissionCreate,
+                prisma.inventoryReport.createMany({ data: inventoryReportData }),
+            ]);
+        }
 
         // Log activity and notify admins
         logActivity({
@@ -145,16 +148,9 @@ export async function POST(request: Request) {
         });
 
     } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : "Unknown error";
-        const details = typeof error === "object" && error !== null
-            ? ("meta" in error ? error.meta : ("code" in error ? error.code : undefined))
-            : undefined;
-
         console.error("Error uploading report:", error);
         return NextResponse.json({
-            message: "Internal server error",
-            error: message,
-            details
+            message: "Không thể nộp báo cáo do lỗi hệ thống. Vui lòng thử lại sau hoặc liên hệ quản trị viên."
         }, { status: 500 });
     }
 }

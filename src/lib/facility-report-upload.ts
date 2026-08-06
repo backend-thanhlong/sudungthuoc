@@ -1,5 +1,7 @@
 import prisma from "@/lib/prisma";
 import { verifyFacilityReportRowToken } from "@/lib/facility-report-token";
+import { isFacilityDrugMapActiveForReportMonth } from "@/lib/facility-drug-map-lifecycle";
+import { getPreviousReportMonth } from "@/lib/report-month";
 import {
     REPORT_FIELD_BHYT,
     REPORT_FIELD_BO_QUA,
@@ -11,16 +13,14 @@ import {
     REPORT_FIELD_MA_NOI_BO,
     REPORT_FIELD_MA_THUOC,
     REPORT_FIELD_NHOM_TCKT,
-    REPORT_FIELD_NGAY_BAT_DAU_HD,
-    REPORT_FIELD_NGAY_KET_THUC_HD,
     REPORT_FIELD_NHAP,
-    REPORT_FIELD_SO_QD_TRUNG_THAU,
+    REPORT_FIELD_NHAP_HOAN_TRA,
     REPORT_FIELD_STT,
-    REPORT_FIELD_TEN_CONG_TY,
     REPORT_FIELD_TEN_THUOC,
     REPORT_FIELD_THANH_TIEN_TON_CUOI,
     REPORT_FIELD_TON_CUOI,
     REPORT_FIELD_TON_DAU,
+    REPORT_TOLERANCE,
     REPORT_FIELD_XUAT,
     REPORT_ROW_TOKEN_COLUMN,
     REPORT_VALIDATION_CODES,
@@ -52,6 +52,7 @@ export interface ValidatedFacilityReportRow {
     mapId: string;
     tonDau: number;
     nhap: number;
+    nhapHoanTra: number;
     xuat: number;
     tonCuoi: number;
     giaVat: number;
@@ -80,13 +81,13 @@ export interface CanonicalFacilityReportRow {
     donViTinh: string;
     nhomTckt: string;
     prevTonCuoi?: number;
-    prevGiaVat: number;
+    mapGiaVat: number;
     prevSoQdTrungThau: string;
     prevTenCongTy: string;
     prevNgayBatDauHd: string;
     prevNgayKetThucHd: string;
-    prevBhyt: string;
-    prevDichVu: string;
+    mapBhyt: string;
+    mapDichVu: string;
 }
 
 export interface FacilityReportCanonicalContext {
@@ -100,9 +101,11 @@ export interface FacilityReportCanonicalContext {
 const ALLOWED_MAPPING_STATUSES = ["APPROVED", "AUTO_MAPPED"] as const;
 
 const getPreviousMonth = (month: string) => {
-    const [currentMonth, currentYear] = month.split("/").map(Number);
-    const prevDate = new Date(currentYear, currentMonth - 2, 1);
-    return `${String(prevDate.getMonth() + 1).padStart(2, "0")}/${prevDate.getFullYear()}`;
+    const previousMonth = getPreviousReportMonth(month);
+    if (!previousMonth) {
+        throw new Error("Invalid report month");
+    }
+    return previousMonth;
 };
 
 const buildCanonicalRow = (
@@ -117,13 +120,13 @@ const buildCanonicalRow = (
     donViTinh: mapping.masterDrug?.donViTinh || mapping.donViTinhNoiBo || "",
     nhomTckt: mapping.nhomTckt || "",
     prevTonCuoi: previousReport ? Number(previousReport.tonCuoi) : undefined,
-    prevGiaVat: previousReport ? Number(previousReport.giaVat) : 0,
-    prevSoQdTrungThau: previousReport?.soQdTrungThau || "",
-    prevTenCongTy: previousReport?.tenCongTy || "",
-    prevNgayBatDauHd: previousReport?.ngayBatDauHd || "",
-    prevNgayKetThucHd: previousReport?.ngayKetThucHd || "",
-    prevBhyt: previousReport?.bhyt || "",
-    prevDichVu: previousReport?.dichVu || "",
+    mapGiaVat: Number(mapping.giaVat || 0),
+    prevSoQdTrungThau: mapping.soQdTrungThau || "",
+    prevTenCongTy: mapping.tenCongTy || "",
+    prevNgayBatDauHd: mapping.ngayBatDauHd || "",
+    prevNgayKetThucHd: mapping.ngayKetThucHd || "",
+    mapBhyt: mapping.bhyt || "",
+    mapDichVu: mapping.dichVu || "",
 });
 
 const buildValidationError = (
@@ -179,66 +182,47 @@ const compareImmutableFields = (
         ));
 };
 
-const comparePreviousMonthReferenceFields = (
-    rawRow: any,
+const compareMappingReferenceFields = (
+    _rawRow: any,
     parsedRow: ParsedReportRow,
     canonicalRow: CanonicalFacilityReportRow,
     rowNumber: number
 ) => {
-    const invalidDateFieldSet = new Set(parsedRow.invalidDateFields || []);
+    const invalidNumericFieldSet = new Set(parsedRow.invalidNumericFields || []);
     const invalidCategoricalFieldSet = new Set(parsedRow.invalidCategoricalFields || []);
 
+    const errors: FacilityReportValidationError[] = [];
+
+    if (
+        !invalidNumericFieldSet.has(REPORT_FIELD_GIA_VAT)
+        && Math.abs(parsedRow.giaVat - canonicalRow.mapGiaVat) > REPORT_TOLERANCE
+    ) {
+        errors.push(buildValidationError(
+            rowNumber,
+            REPORT_FIELD_GIA_VAT,
+            REPORT_VALIDATION_CODES.mappingReferenceMismatch,
+            `Dòng ${rowNumber}: ${REPORT_FIELD_GIA_VAT} không khớp với Danh mục Ánh xạ.`
+        ));
+    }
+
     const fieldChecks = [
-        {
-            field: REPORT_FIELD_SO_QD_TRUNG_THAU,
-            previousValue: normalizeOptionalText(canonicalRow.prevSoQdTrungThau),
-            currentValue: normalizeOptionalText(rawRow[REPORT_FIELD_SO_QD_TRUNG_THAU]),
-            canCompare: true,
-        },
-        {
-            field: REPORT_FIELD_TEN_CONG_TY,
-            previousValue: normalizeOptionalText(canonicalRow.prevTenCongTy),
-            currentValue: normalizeOptionalText(rawRow[REPORT_FIELD_TEN_CONG_TY]),
-            canCompare: true,
-        },
-        {
-            field: REPORT_FIELD_NGAY_BAT_DAU_HD,
-            previousValue: normalizeOptionalText(canonicalRow.prevNgayBatDauHd),
-            currentValue: normalizeOptionalText(parsedRow.ngayBatDauHd),
-            canCompare: !invalidDateFieldSet.has(REPORT_FIELD_NGAY_BAT_DAU_HD),
-        },
-        {
-            field: REPORT_FIELD_NGAY_KET_THUC_HD,
-            previousValue: normalizeOptionalText(canonicalRow.prevNgayKetThucHd),
-            currentValue: normalizeOptionalText(parsedRow.ngayKetThucHd),
-            canCompare: !invalidDateFieldSet.has(REPORT_FIELD_NGAY_KET_THUC_HD),
-        },
-        {
-            field: REPORT_FIELD_BHYT,
-            previousValue: normalizeOptionalCategory(canonicalRow.prevBhyt),
-            currentValue: normalizeOptionalCategory(parsedRow.bhyt),
-            canCompare: !invalidCategoricalFieldSet.has(REPORT_FIELD_BHYT),
-        },
-        {
-            field: REPORT_FIELD_DICH_VU,
-            previousValue: normalizeOptionalCategory(canonicalRow.prevDichVu),
-            currentValue: normalizeOptionalCategory(parsedRow.dichVu),
-            canCompare: !invalidCategoricalFieldSet.has(REPORT_FIELD_DICH_VU),
-        },
+        [REPORT_FIELD_BHYT, normalizeOptionalCategory(canonicalRow.mapBhyt), normalizeOptionalCategory(parsedRow.bhyt)],
+        [REPORT_FIELD_DICH_VU, normalizeOptionalCategory(canonicalRow.mapDichVu), normalizeOptionalCategory(parsedRow.dichVu)],
     ] as const;
 
-    return fieldChecks
-        .filter(({ canCompare, previousValue, currentValue }) =>
-            canCompare
-            && previousValue !== null
-            && previousValue !== currentValue
+    fieldChecks
+        .filter(([field, expectedValue, currentValue]) =>
+            !invalidCategoricalFieldSet.has(field)
+            && expectedValue !== currentValue
         )
-        .map(({ field }) => buildValidationError(
+        .forEach(([field]) => errors.push(buildValidationError(
             rowNumber,
             field,
-            REPORT_VALIDATION_CODES.previousMonthReferenceMismatch,
-            `Dòng ${rowNumber}: ${field} không khớp với báo cáo tháng trước.`
-        ));
+            REPORT_VALIDATION_CODES.mappingReferenceMismatch,
+            `Dòng ${rowNumber}: ${field} không khớp với Danh mục Ánh xạ.`
+        )));
+
+    return errors;
 };
 
 export const loadFacilityReportCanonicalContext = async (
@@ -264,19 +248,15 @@ export const loadFacilityReportCanonicalContext = async (
             select: {
                 mapId: true,
                 tonCuoi: true,
-                giaVat: true,
-                soQdTrungThau: true,
-                tenCongTy: true,
-                ngayBatDauHd: true,
-                ngayKetThucHd: true,
-                bhyt: true,
-                dichVu: true,
             },
         }),
     ]);
 
+    const activeMappings = mappings.filter((mapping) =>
+        isFacilityDrugMapActiveForReportMonth(mapping, reportMonth)
+    );
     const previousReportMap = new Map(previousReports.map((report) => [report.mapId, report]));
-    const rows = mappings.map((mapping) => buildCanonicalRow(mapping, previousReportMap.get(mapping.id)));
+    const rows = activeMappings.map((mapping) => buildCanonicalRow(mapping, previousReportMap.get(mapping.id)));
 
     return {
         facilityId,
@@ -298,16 +278,13 @@ export const buildFacilityReportTemplateRows = (context: FacilityReportCanonical
         [REPORT_FIELD_NHOM_TCKT]: row.nhomTckt,
         [REPORT_FIELD_TON_DAU]: row.prevTonCuoi ?? 0,
         [REPORT_FIELD_NHAP]: 0,
+        [REPORT_FIELD_NHAP_HOAN_TRA]: 0,
         [REPORT_FIELD_XUAT]: 0,
         [REPORT_FIELD_TON_CUOI]: 0,
-        [REPORT_FIELD_GIA_VAT]: row.prevGiaVat,
+        [REPORT_FIELD_GIA_VAT]: row.mapGiaVat,
         [REPORT_FIELD_THANH_TIEN_TON_CUOI]: 0,
-        [REPORT_FIELD_SO_QD_TRUNG_THAU]: row.prevSoQdTrungThau,
-        [REPORT_FIELD_TEN_CONG_TY]: row.prevTenCongTy,
-        [REPORT_FIELD_NGAY_BAT_DAU_HD]: row.prevNgayBatDauHd,
-        [REPORT_FIELD_NGAY_KET_THUC_HD]: row.prevNgayKetThucHd,
-        [REPORT_FIELD_BHYT]: row.prevBhyt,
-        [REPORT_FIELD_DICH_VU]: row.prevDichVu,
+        [REPORT_FIELD_BHYT]: row.mapBhyt,
+        [REPORT_FIELD_DICH_VU]: row.mapDichVu,
         [REPORT_FIELD_BO_QUA]: "",
         [REPORT_FIELD_GHI_CHU]: "",
         [REPORT_ROW_TOKEN_COLUMN]: "",
@@ -408,27 +385,38 @@ export const validateFacilityReportRows = (
         }
 
         if (canonicalRow) {
-            if (!canonicalRow.nhomTckt) {
-                rowErrors.push(buildValidationError(
-                    rowNumber,
-                    REPORT_FIELD_NHOM_TCKT,
-                    REPORT_VALIDATION_CODES.missingNhomTckt,
-                    `Dòng ${rowNumber}: Mã nội bộ ${canonicalRow.maNoiBo} chưa có Nhóm TCKT. Vui lòng thiết lập tại trang danh mục thuốc nội bộ trước khi nộp báo cáo.`
-                ));
-            }
             rowErrors.push(...compareImmutableFields(rawRow, canonicalRow, rowNumber));
         }
 
-        rowErrors.push(...validateReportRow(parsedRow, canonicalRow?.prevTonCuoi, {
+        const rowForValidation = canonicalRow
+            ? {
+                ...parsedRow,
+                giaVat: canonicalRow.mapGiaVat,
+                bhyt: canonicalRow.mapBhyt,
+                dichVu: canonicalRow.mapDichVu,
+            }
+            : parsedRow;
+
+        rowErrors.push(...validateReportRow(rowForValidation, canonicalRow?.prevTonCuoi, {
             includeTokenWarning: false,
         }).map((warning) => warningToValidationError(rowNumber, warning)));
 
-        if (canonicalRow && !isSkipMarked(parsedRow.boQua)) {
-            rowErrors.push(...comparePreviousMonthReferenceFields(rawRow, parsedRow, canonicalRow, rowNumber));
+        if (canonicalRow) {
+            rowErrors.push(...compareMappingReferenceFields(rawRow, parsedRow, canonicalRow, rowNumber));
         }
 
         if (rowErrors.length > 0 || !resolvedMapId) {
             errors.push(...rowErrors);
+            return;
+        }
+
+        if (!canonicalRow) {
+            errors.push(buildValidationError(
+                rowNumber,
+                REPORT_ROW_TOKEN_COLUMN,
+                REPORT_VALIDATION_CODES.rowTokenTargetNotFound,
+                `Dòng ${rowNumber}: Mã định danh dòng không còn hợp lệ. Vui lòng tải lại mẫu báo cáo mới.`
+            ));
             return;
         }
 
@@ -443,16 +431,17 @@ export const validateFacilityReportRows = (
             mapId: resolvedMapId,
             tonDau: parsedRow.tonDau,
             nhap: parsedRow.nhap,
+            nhapHoanTra: parsedRow.nhapHoanTra,
             xuat: parsedRow.xuat,
             tonCuoi: parsedRow.tonCuoi,
-            giaVat: parsedRow.giaVat,
+            giaVat: canonicalRow.mapGiaVat,
             thanhTienTonCuoi: parsedRow.thanhTienTonCuoi,
-            soQdTrungThau: normalizeOptionalText(rawRow[REPORT_FIELD_SO_QD_TRUNG_THAU]),
-            tenCongTy: normalizeOptionalText(rawRow[REPORT_FIELD_TEN_CONG_TY]),
-            ngayBatDauHd: normalizeOptionalText(parsedRow.ngayBatDauHd),
-            ngayKetThucHd: normalizeOptionalText(parsedRow.ngayKetThucHd),
-            bhyt: normalizeOptionalCategory(parsedRow.bhyt),
-            dichVu: normalizeOptionalCategory(parsedRow.dichVu),
+            soQdTrungThau: normalizeOptionalText(canonicalRow?.prevSoQdTrungThau),
+            tenCongTy: normalizeOptionalText(canonicalRow?.prevTenCongTy),
+            ngayBatDauHd: normalizeOptionalText(canonicalRow?.prevNgayBatDauHd),
+            ngayKetThucHd: normalizeOptionalText(canonicalRow?.prevNgayKetThucHd),
+            bhyt: normalizeOptionalCategory(canonicalRow.mapBhyt),
+            dichVu: normalizeOptionalCategory(canonicalRow.mapDichVu),
         });
     });
 

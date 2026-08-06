@@ -73,3 +73,6 @@ implementation_plan.md
 task.md
 # Added by code-review-graph
 .code-review-graph/
+
+# Local brainstorming runtime state
+/.superpowers/

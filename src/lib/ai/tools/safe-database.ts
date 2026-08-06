@@ -1,6 +1,19 @@
 import { logActivity } from "@/lib/activity-log";
 import { getAIConfig } from "@/lib/ai/config";
 import {
+    buildSafeDatabaseTemplatePlan,
+    type SafeDatabaseIntent,
+} from "@/lib/ai/safe-database-intelligence";
+import {
+    describeDomainRoutingForPrompt,
+    routeAIDomain,
+    type AIDomainRoutingResult,
+} from "@/lib/ai/domain-router";
+import {
+    verifySafeDatabaseQuery,
+    type AIQueryVerificationResult,
+} from "@/lib/ai/query-verifier";
+import {
     executeSafeDatabaseSql,
     generateSafeDatabaseSql,
     resolveSafeDatabaseEntities,
@@ -29,7 +42,14 @@ async function auditSafeDatabaseQuery({
     durationMs,
     initialSql,
     retryCount,
+    source,
+    intent,
+    templateName,
+    queryIndex,
+    queryCount,
     entityCandidates,
+    domainRouting,
+    verification,
     warnings,
     status,
     code,
@@ -42,7 +62,14 @@ async function auditSafeDatabaseQuery({
     durationMs?: number;
     initialSql?: string;
     retryCount?: number;
+    source?: "template" | "model";
+    intent?: SafeDatabaseIntent;
+    templateName?: string;
+    queryIndex?: number;
+    queryCount?: number;
     entityCandidates?: SafeDatabaseEntityCandidate[];
+    domainRouting?: AIDomainRoutingResult;
+    verification?: AIQueryVerificationResult;
     warnings?: string[];
     status: "success" | "skipped" | "refused" | "error";
     code?: string;
@@ -59,7 +86,20 @@ async function auditSafeDatabaseQuery({
             durationMs,
             initialSql,
             retryCount,
+            source,
+            intent,
+            templateName,
+            queryIndex,
+            queryCount,
             entityCandidates,
+            domain: verification?.domain || domainRouting?.primaryDomain,
+            domainScore: verification?.domainScore,
+            matchedConcepts: verification?.matchedConcepts || domainRouting?.matchedConcepts.map(match => match.concept.id),
+            matchedAliases: verification?.matchedAliases,
+            domainRouting: domainRouting ? describeDomainRoutingForPrompt(domainRouting) : undefined,
+            verifierStatus: verification?.status,
+            verifierWarnings: verification?.verifierWarnings,
+            requiredViews: verification?.requiredViews,
             warnings,
             status,
             code,
@@ -103,6 +143,30 @@ function buildToolWarning(warnings: string[]) {
     return uniqueWarnings.length > 0 ? uniqueWarnings.join(",") : undefined;
 }
 
+function uniqueValues<T>(values: T[]) {
+    return [...new Set(values.filter(Boolean))] as T[];
+}
+
+function assertVerified(verification: AIQueryVerificationResult) {
+    if (verification.status === "rejected") {
+        throw new SafeDatabaseQueryError(
+            verification.code || "AI_QUERY_VERIFIER_REJECTED",
+            verification.reason || "AI query verifier rejected the safe database query"
+        );
+    }
+}
+
+function buildClarificationMessage(routing: AIDomainRoutingResult) {
+    const domains = routing.candidates
+        .filter(candidate => candidate.score > 0)
+        .slice(0, 3)
+        .map(candidate => candidate.domain)
+        .join(", ");
+    return domains
+        ? `Câu hỏi có thể thuộc nhiều miền dữ liệu (${domains}). Vui lòng nói rõ muốn hỏi danh mục dùng chung, ánh xạ danh mục, tồn kho, nộp báo cáo, mua sắm hay đơn hàng.`
+        : "Câu hỏi chưa đủ rõ miền dữ liệu cần truy vấn. Vui lòng nói rõ nội dung nghiệp vụ cần xem.";
+}
+
 export async function querySafeDatabase(
     sessionContext: ActiveSessionContext,
     request: AIAgentRequest
@@ -118,10 +182,116 @@ export async function querySafeDatabase(
     const config = getAIConfig();
     const timeout = makeTimeoutSignal(Math.min(config.providerTimeoutMs, 10_000));
     let currentEntityResolution: SafeDatabaseEntityResolution | undefined;
+    let currentDomainRouting: AIDomainRoutingResult | undefined;
     try {
         const entityResolution = await resolveSafeDatabaseEntities(request);
         currentEntityResolution = entityResolution;
+        const domainRouting = routeAIDomain(request.message);
+        currentDomainRouting = domainRouting;
         const entitySummary = summarizeEntityResolution(entityResolution);
+
+        if (domainRouting.ambiguity === "high") {
+            const clarification = buildClarificationMessage(domainRouting);
+            await auditSafeDatabaseQuery({
+                sessionContext,
+                request,
+                entityCandidates: entityResolution.candidates,
+                domainRouting,
+                warnings: [...entityResolution.warnings, "AI_DOMAIN_AMBIGUOUS"],
+                status: "skipped",
+                code: "AI_DOMAIN_AMBIGUOUS",
+            });
+            return {
+                name: "querySafeDatabase",
+                status: "skipped",
+                warning: "AI_DOMAIN_AMBIGUOUS",
+                data: {
+                    message: clarification,
+                    domainRouting: describeDomainRoutingForPrompt(domainRouting),
+                    entityResolution: entitySummary,
+                },
+            };
+        }
+
+        const templatePlan = buildSafeDatabaseTemplatePlan(request, entityResolution, domainRouting);
+        if (templatePlan.length > 0) {
+            const results = [];
+            const warnings: string[] = [...entityResolution.warnings];
+            for (const [index, plannedQuery] of templatePlan.entries()) {
+                const preview = validateSafeDatabaseSql(plannedQuery.sql);
+                const verification = verifySafeDatabaseQuery(preview, {
+                    question: request.message,
+                    routing: domainRouting,
+                    source: "template",
+                    plannedQuery,
+                });
+                assertVerified(verification);
+                const result = await executeSafeDatabaseSql(preview.sql);
+                warnings.push(...result.warnings, ...verification.verifierWarnings);
+                await auditSafeDatabaseQuery({
+                    sessionContext,
+                    request,
+                    sql: result.sql,
+                    referencedViews: result.referencedViews,
+                    rowCount: result.rowCount,
+                    durationMs: result.durationMs,
+                    retryCount: 0,
+                    source: "template",
+                    intent: plannedQuery.intent,
+                    templateName: plannedQuery.templateName,
+                    queryIndex: index + 1,
+                    queryCount: templatePlan.length,
+                    entityCandidates: entityResolution.candidates,
+                    domainRouting,
+                    verification,
+                    warnings,
+                    status: "success",
+                });
+                results.push({
+                    source: "template" as const,
+                    domain: verification.domain,
+                    domainScore: verification.domainScore,
+                    intent: plannedQuery.intent,
+                    templateName: plannedQuery.templateName,
+                    reason: plannedQuery.reason,
+                    verifierStatus: verification.status,
+                    verifierWarnings: verification.verifierWarnings,
+                    sql: result.sql,
+                    referencedViews: result.referencedViews,
+                    columns: result.columns,
+                    rowCount: result.rowCount,
+                    durationMs: result.durationMs,
+                    rows: result.rows,
+                });
+            }
+
+            const first = results[0];
+            return {
+                name: "querySafeDatabase",
+                status: "success",
+                warning: buildToolWarning(warnings),
+                data: {
+                    source: "template",
+                    queryPlan: {
+                        queryCount: results.length,
+                        domain: domainRouting.primaryDomain,
+                        domainScore: domainRouting.candidates[0]?.score,
+                        intents: uniqueValues(results.map(result => result.intent)),
+                        templateNames: results.map(result => result.templateName),
+                    },
+                    sql: first.sql,
+                    referencedViews: uniqueValues(results.flatMap(result => result.referencedViews)),
+                    columns: first.columns,
+                    rowCount: first.rowCount,
+                    durationMs: results.reduce((total, result) => total + result.durationMs, 0),
+                    rows: first.rows,
+                    queries: results,
+                    domainRouting: describeDomainRoutingForPrompt(domainRouting),
+                    entityResolution: entitySummary,
+                },
+            };
+        }
+
         const generated = await generateSafeDatabaseSql(request, {
             signal: timeout.signal,
             entityResolution,
@@ -134,6 +304,8 @@ export async function querySafeDatabase(
                 warnings: entityResolution.warnings,
                 status: "skipped",
                 code: "AI_SAFE_DB_NO_QUERY",
+                source: "model",
+                intent: generated.intent,
             });
             return {
                 name: "querySafeDatabase",
@@ -142,13 +314,78 @@ export async function querySafeDatabase(
             };
         }
 
-        const preview = validateSafeDatabaseSql(generated.sql);
-        let result = await executeSafeDatabaseSql(preview.sql);
+        let preview = validateSafeDatabaseSql(generated.sql);
+        let verification = verifySafeDatabaseQuery(preview, {
+            question: request.message,
+            routing: domainRouting,
+            source: "model",
+            plannedQuery: {
+                domain: domainRouting.primaryDomain || undefined,
+                intent: generated.intent,
+            },
+        });
         let initialSql: string | undefined;
         let retryCount = 0;
+        if (verification.status === "rejected") {
+            const retryGenerated = await generateSafeDatabaseSql(request, {
+                signal: timeout.signal,
+                entityResolution,
+                verifierRetry: {
+                    previousSql: generated.sql,
+                    code: verification.code || "AI_QUERY_VERIFIER_REJECTED",
+                    reason: verification.reason || "Verifier rejected generated SQL",
+                    expectedDomain: verification.domain,
+                    requiredViews: verification.requiredViews,
+                },
+            });
+
+            if (!retryGenerated.shouldQuery || !retryGenerated.sql) {
+                await auditSafeDatabaseQuery({
+                    sessionContext,
+                    request,
+                    initialSql: generated.sql,
+                    retryCount: 1,
+                    source: "model",
+                    intent: generated.intent,
+                    entityCandidates: entityResolution.candidates,
+                    domainRouting,
+                    verification,
+                    warnings: [...entityResolution.warnings, verification.code || "AI_QUERY_VERIFIER_REJECTED"],
+                    status: "skipped",
+                    code: verification.code || "AI_QUERY_VERIFIER_REJECTED",
+                });
+                return {
+                    name: "querySafeDatabase",
+                    status: "skipped",
+                    warning: retryGenerated.reason || verification.reason || "AI query verifier rejected generated SQL",
+                    data: {
+                        domainRouting: describeDomainRoutingForPrompt(domainRouting),
+                        verifier: verification,
+                        entityResolution: entitySummary,
+                    },
+                };
+            }
+
+            initialSql = generated.sql;
+            retryCount = 1;
+            preview = validateSafeDatabaseSql(retryGenerated.sql);
+            verification = verifySafeDatabaseQuery(preview, {
+                question: request.message,
+                routing: domainRouting,
+                source: "model",
+                plannedQuery: {
+                    domain: domainRouting.primaryDomain || undefined,
+                    intent: retryGenerated.intent,
+                },
+            });
+            assertVerified(verification);
+        }
+
+        let result = await executeSafeDatabaseSql(preview.sql);
         const warnings = [
             ...entityResolution.warnings,
             ...result.warnings,
+            ...verification.verifierWarnings,
         ];
 
         if (shouldRetryEmptyResult(request, result, entityResolution)) {
@@ -166,11 +403,22 @@ export async function querySafeDatabase(
 
                 if (retryGenerated.shouldQuery && retryGenerated.sql) {
                     const retryPreview = validateSafeDatabaseSql(retryGenerated.sql);
+                    const retryVerification = verifySafeDatabaseQuery(retryPreview, {
+                        question: request.message,
+                        routing: domainRouting,
+                        source: "model",
+                        plannedQuery: {
+                            domain: domainRouting.primaryDomain || undefined,
+                            intent: retryGenerated.intent,
+                        },
+                    });
+                    assertVerified(retryVerification);
                     if (retryPreview.sql !== result.sql) {
-                        initialSql = result.sql;
+                        initialSql = initialSql || result.sql;
                         result = await executeSafeDatabaseSql(retryPreview.sql);
-                        retryCount = 1;
-                        warnings.push("AI_SAFE_DB_EMPTY_RESULT_RETRIED", ...result.warnings);
+                        retryCount += 1;
+                        verification = retryVerification;
+                        warnings.push("AI_SAFE_DB_EMPTY_RESULT_RETRIED", ...result.warnings, ...retryVerification.verifierWarnings);
                     }
                 }
             } catch (retryError) {
@@ -192,7 +440,11 @@ export async function querySafeDatabase(
             durationMs: result.durationMs,
             initialSql,
             retryCount,
+            source: "model",
+            intent: generated.intent,
             entityCandidates: entityResolution.candidates,
+            domainRouting,
+            verification,
             warnings,
             status: "success",
         });
@@ -205,11 +457,18 @@ export async function querySafeDatabase(
                 sql: result.sql,
                 initialSql,
                 retryCount,
+                source: "model",
+                intent: generated.intent,
+                domain: verification.domain,
+                domainScore: verification.domainScore,
+                verifierStatus: verification.status,
+                verifierWarnings: verification.verifierWarnings,
                 referencedViews: result.referencedViews,
                 columns: result.columns,
                 rowCount: result.rowCount,
                 durationMs: result.durationMs,
                 rows: result.rows,
+                domainRouting: describeDomainRoutingForPrompt(domainRouting),
                 entityResolution: entitySummary,
             },
         };
@@ -223,6 +482,7 @@ export async function querySafeDatabase(
             sessionContext,
             request,
             entityCandidates: currentEntityResolution?.candidates,
+            domainRouting: currentDomainRouting,
             warnings: currentEntityResolution?.warnings,
             status: error instanceof SafeDatabaseQueryError ? "refused" : "error",
             code,

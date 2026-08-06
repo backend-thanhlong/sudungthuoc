@@ -27,6 +27,8 @@ model User {
   contactPerson String? @map("contact_person")
   phoneNumber   String? @map("phone_number")
   address       String? @map("address")
+  latitude      Float?  @map("latitude")
+  longitude     Float?  @map("longitude")
 
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
@@ -34,6 +36,7 @@ model User {
   drugMaps FacilityDrugMap[]
   reports  InventoryReport[]
   reportSubmissions FacilityReportSubmission[]
+  facilityDemandPlans FacilityDemandPlan[]
   keHoachLCNTs KeHoachLCNT[]
   drugOrders DrugOrder[] @relation("FacilityDrugOrders")
   drugOrderReceipts DrugOrderReceipt[] @relation("FacilityDrugOrderReceipts")
@@ -88,6 +91,7 @@ model MasterDrug {
   id        String   @id @default(cuid())
   maChung   String   @unique @map("ma_chung")
   maBhyt    String?  @map("ma_bhyt")
+  maAtc     String?  @map("ma_atc")
   tenThuoc  String   @map("ten_thuoc")
   hoatChat  String?  @map("hoat_chat")
   hamLuong             String?  @map("ham_luong")
@@ -114,6 +118,7 @@ model MasterDrug {
   therapeuticGroup     TherapeuticGroup? @relation(fields: [therapeuticGroupId], references: [id], onDelete: SetNull)
   isKeDon              String?  @map("is_ke_don")
   kiemSoatDacBiet      String?  @map("kiem_soat_dac_biet")
+  isThuocHiem          Boolean  @default(false) @map("is_thuoc_hiem")
   isTrongNuoc          String?  @map("is_trong_nuoc")
 
   isActive             Boolean  @default(true) @map("is_active")
@@ -123,6 +128,7 @@ model MasterDrug {
   drugMaps FacilityDrugMap[]
   companyDrugs CompanyDrug[]
   drugOrderLines DrugOrderLine[]
+  facilityDemandPlanLines FacilityDemandPlanLine[]
 
   @@map("master_drugs")
 }
@@ -162,6 +168,20 @@ model FacilityDrugMap {
   soDangKyNoiBo  String? @map("so_dang_ky_noi_bo")
   donViTinhNoiBo String? @map("don_vi_tinh_noi_bo")
   nhomTckt       String? @map("nhom_tckt")
+  giaVat         Decimal @default(0) @map("gia_vat")
+  bhyt           String? @map("bhyt")
+  dichVu         String? @map("dich_vu")
+  soQdTrungThau  String? @map("so_qd_trung_thau")
+  tenCongTy      String? @map("ten_cong_ty")
+  ngayBatDauHd   String? @map("ngay_bat_dau_hd")
+  ngayKetThucHd  String? @map("ngay_ket_thuc_hd")
+  demandRoundingEnabled Boolean @default(false) @map("demand_rounding_enabled")
+  demandPackageUnit     String? @map("demand_package_unit")
+  demandPackageSize     Decimal? @map("demand_package_size")
+  demandPlanningLocked  Boolean @default(false) @map("demand_planning_locked")
+  demandPlanningLockedAt DateTime? @map("demand_planning_locked_at")
+  demandPlanningUnlockedAt DateTime? @map("demand_planning_unlocked_at")
+  demandPlanningLockReason String? @map("demand_planning_lock_reason")
 
   masterDrugId String?     @map("master_drug_id")
   masterDrug   MasterDrug? @relation(fields: [masterDrugId], references: [id])
@@ -169,17 +189,78 @@ model FacilityDrugMap {
   status         MappingStatus @default(PENDING_MAPPING)
   adminNote      String?       @map("admin_note")
   isOutOfCatalog Boolean       @default(false) @map("is_out_of_catalog")
+  isActive       Boolean       @default(true) @map("is_active")
+  inactiveFromMonth String?    @map("inactive_from_month")
+  inactiveReason    String?    @map("inactive_reason")
+  inactiveAt        DateTime?  @map("inactive_at")
+  reactivatedFromMonth String? @map("reactivated_from_month")
+  reactivatedAt      DateTime? @map("reactivated_at")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   reports InventoryReport[]
+  demandPlanLines FacilityDemandPlanLine[]
 
   @@unique([facilityId, maNoiBo])
   @@index([facilityId, updatedAt])
   @@index([status, facilityId, createdAt])
   @@index([facilityId, status, updatedAt])
+  @@index([facilityId, isActive, inactiveFromMonth])
   @@map("facility_drug_maps")
+}
+
+model FacilityDemandPlan {
+  id              String                   @id @default(cuid())
+  planNo          String                   @unique @map("plan_no")
+  facilityId      String                   @map("facility_id")
+  facility        User                     @relation(fields: [facilityId], references: [id], onDelete: Restrict)
+  status          FacilityDemandPlanStatus @default(DRAFT)
+  baseReportMonth String?                  @map("base_report_month")
+  note            String?                  @map("note")
+  finalizedAt     DateTime?                @map("finalized_at")
+  createdAt       DateTime                 @default(now()) @map("created_at")
+  updatedAt       DateTime                 @updatedAt @map("updated_at")
+
+  lines           FacilityDemandPlanLine[]
+
+  @@index([facilityId, status, createdAt])
+  @@index([baseReportMonth, status])
+  @@map("facility_demand_plans")
+}
+
+model FacilityDemandPlanLine {
+  id                    String             @id @default(cuid())
+  planId                String             @map("plan_id")
+  plan                  FacilityDemandPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  mapId                 String             @map("map_id")
+  drugMap               FacilityDrugMap    @relation(fields: [mapId], references: [id], onDelete: Restrict)
+  masterDrugId          String             @map("master_drug_id")
+  masterDrug            MasterDrug         @relation(fields: [masterDrugId], references: [id], onDelete: Restrict)
+  maNoiBoSnapshot       String             @map("ma_noi_bo_snapshot")
+  tenThuocSnapshot      String             @map("ten_thuoc_snapshot")
+  hoatChatSnapshot      String?            @map("hoat_chat_snapshot")
+  donViTinhSnapshot     String?            @map("don_vi_tinh_snapshot")
+  nhomTcktSnapshot      String?            @map("nhom_tckt_snapshot")
+  maChungSnapshot       String?            @map("ma_chung_snapshot")
+  suggestedQty          Decimal?           @map("suggested_qty")
+  rawSuggestedQty       Decimal?           @map("raw_suggested_qty")
+  roundedSuggestedQty   Decimal?           @map("rounded_suggested_qty")
+  packageUnitSnapshot   String?            @map("package_unit_snapshot")
+  packageSizeSnapshot   Decimal?           @map("package_size_snapshot")
+  roundingNote          String?            @map("rounding_note")
+  finalQty              Decimal            @default(0) @map("final_qty")
+  suggestionBasis       String?            @map("suggestion_basis")
+  suggestionReportMonth String?            @map("suggestion_report_month")
+  suggestionRuleVersion String?            @map("suggestion_rule_version")
+  note                  String?            @map("note")
+  createdAt             DateTime           @default(now()) @map("created_at")
+  updatedAt             DateTime           @updatedAt @map("updated_at")
+
+  @@unique([planId, mapId])
+  @@index([mapId])
+  @@index([masterDrugId])
+  @@map("facility_demand_plan_lines")
 }
 
 enum MappingStatus {
@@ -188,6 +269,11 @@ enum MappingStatus {
   WAITING_APPROVAL
   APPROVED
   REJECTED
+}
+
+enum FacilityDemandPlanStatus {
+  DRAFT
+  FINALIZED
 }
 
 // InventoryReport: Báo cáo tồn kho hàng tháng
@@ -202,6 +288,7 @@ model InventoryReport {
   reportMonth String  @map("report_month") // Format: MM/YYYY
   tonDau      Decimal @default(0) @map("ton_dau")
   nhap        Decimal @default(0)
+  nhapHoanTra Decimal @default(0) @map("nhap_hoan_tra")
   xuat        Decimal @default(0)
   tonCuoi     Decimal @default(0) @map("ton_cuoi")
   giaVat      Decimal @default(0) @map("gia_vat")
@@ -491,6 +578,7 @@ model GoiThau {
   thoiGianThucHien  String?     @map("thoi_gian_thuc_hien")
   trangThai         String?     @default("Chưa hoàn thành") @map("trang_thai")
   maThongBao        String?     @map("ma_thong_bao")
+  yeuCauTBMT        Boolean     @default(true) @map("yeu_cau_tbmt")
 
   phanLos           PhanLoGoiThau[]
   thongBaoMoiThaus  ThongBaoMoiThau[]
@@ -548,8 +636,8 @@ model KetQuaLCNT {
   goiThauId             String    @map("goi_thau_id")
   goiThau               GoiThau   @relation(fields: [goiThauId], references: [id], onDelete: Cascade)
   
-  thongBaoMoiThauId     String    @map("thong_bao_moi_thau_id")
-  thongBaoMoiThau       ThongBaoMoiThau @relation(fields: [thongBaoMoiThauId], references: [id], onDelete: Cascade)
+  thongBaoMoiThauId     String?   @map("thong_bao_moi_thau_id")
+  thongBaoMoiThau       ThongBaoMoiThau? @relation(fields: [thongBaoMoiThauId], references: [id], onDelete: Cascade)
   
   soQdPheDuyetKQLCNT    String    @map("so_qd_phe_duyet_kqlcnt")
   ngayPheDuyetKQLCNT    DateTime  @map("ngay_phe_duyet_kqlcnt")
@@ -632,6 +720,17 @@ model AISetting {
   updatedAt   DateTime @updatedAt @map("updated_at")
 
   @@map("ai_settings")
+}
+
+model SystemSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       Json
+  updatedById String?  @map("updated_by_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("system_settings")
 }
 
 model AIUserPolicy {

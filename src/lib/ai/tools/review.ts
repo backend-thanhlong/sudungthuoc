@@ -17,11 +17,12 @@ export async function reviewFacilityReportEvidence(request: AIAgentRequest): Pro
         const item = row as Record<string, unknown>;
         const tonDau = Number(item.tonDau || 0);
         const nhap = Number(item.nhap || 0);
+        const nhapHoanTra = Number(item.nhapHoanTra || 0);
         const xuat = Number(item.xuat || 0);
         const tonCuoi = Number(item.tonCuoi || 0);
         const giaVat = Number(item.giaVat || 0);
         const thanhTienTonCuoi = Number(item.thanhTienTonCuoi || 0);
-        const expectedTonCuoi = tonDau + nhap - xuat;
+        const expectedTonCuoi = tonDau + nhap + nhapHoanTra - xuat;
         const base = {
             stt: item.stt,
             maNoiBo: item.maNoiBo,
@@ -31,8 +32,8 @@ export async function reviewFacilityReportEvidence(request: AIAgentRequest): Pro
         if (Math.abs(expectedTonCuoi - tonCuoi) > 0.01) {
             rowFindings.push({ ...base, type: "BALANCE_MISMATCH", expectedTonCuoi, actualTonCuoi: tonCuoi });
         }
-        if (xuat > tonDau + nhap) {
-            rowFindings.push({ ...base, type: "EXPORT_EXCEEDS_AVAILABLE", tonDau, nhap, xuat });
+        if (xuat > tonDau + nhap + nhapHoanTra) {
+            rowFindings.push({ ...base, type: "EXPORT_EXCEEDS_AVAILABLE", tonDau, nhap, nhapHoanTra, xuat });
         }
         if (giaVat === 0 && (tonCuoi > 0 || thanhTienTonCuoi > 0)) {
             rowFindings.push({ ...base, type: "ZERO_PRICE_WITH_STOCK" });
@@ -75,6 +76,7 @@ export async function reviewStoredFacilityReport(
         select: {
             tonDau: true,
             nhap: true,
+            nhapHoanTra: true,
             xuat: true,
             tonCuoi: true,
             giaVat: true,
@@ -96,9 +98,10 @@ export async function reviewStoredFacilityReport(
     const findings = reports.flatMap(report => {
         const tonDau = Number(report.tonDau);
         const nhap = Number(report.nhap);
+        const nhapHoanTra = Number(report.nhapHoanTra);
         const xuat = Number(report.xuat);
         const tonCuoi = Number(report.tonCuoi);
-        const expectedTonCuoi = tonDau + nhap - xuat;
+        const expectedTonCuoi = tonDau + nhap + nhapHoanTra - xuat;
         const base = {
             maNoiBo: report.drugMap.maNoiBo,
             drugName: report.drugMap.masterDrug?.tenThuoc || report.drugMap.tenThuocNoiBo,
@@ -107,8 +110,8 @@ export async function reviewStoredFacilityReport(
         if (Math.abs(expectedTonCuoi - tonCuoi) > 0.01) {
             items.push({ ...base, type: "BALANCE_MISMATCH", expectedTonCuoi, actualTonCuoi: tonCuoi });
         }
-        if (xuat > tonDau + nhap) {
-            items.push({ ...base, type: "EXPORT_EXCEEDS_AVAILABLE", tonDau, nhap, xuat });
+        if (xuat > tonDau + nhap + nhapHoanTra) {
+            items.push({ ...base, type: "EXPORT_EXCEEDS_AVAILABLE", tonDau, nhap, nhapHoanTra, xuat });
         }
         if (!report.drugMap.masterDrugId) {
             items.push({ ...base, type: "UNMAPPED_DRUG" });

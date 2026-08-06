@@ -1,0 +1,4 @@
+ALTER TABLE "facility_drug_maps"
+ADD COLUMN "gia_vat" DECIMAL(65,30) NOT NULL DEFAULT 0,
+ADD COLUMN "bhyt" TEXT,
+ADD COLUMN "dich_vu" TEXT;

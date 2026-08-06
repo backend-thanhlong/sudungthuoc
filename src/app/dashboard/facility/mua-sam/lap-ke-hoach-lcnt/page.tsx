@@ -58,6 +58,7 @@ interface GoiThau {
     thoiGianThucHien: string;
     trangThai: string;
     maThongBao: string;
+    yeuCauTBMT: boolean;
     phanLos: PhanLo[];
     thongBaoMoiThaus?: Array<{
         id: string;
@@ -162,6 +163,7 @@ const EMPTY_GOI_THAU: GoiThau = {
     thoiGianThucHien: "",
     trangThai: "Chưa hoàn thành",
     maThongBao: "",
+    yeuCauTBMT: true,
     phanLos: [],
 };
 
@@ -276,6 +278,7 @@ const mapGoiThauFromApi = (goiThau: any): GoiThau => ({
     thoiGianThucHien: goiThau.thoiGianThucHien || "",
     trangThai: goiThau.trangThai || "",
     maThongBao: goiThau.maThongBao || "",
+    yeuCauTBMT: goiThau.yeuCauTBMT !== false,
     phanLos: sortPhanLosByStt(goiThau.phanLos?.map(mapPhanLoFromApi) || []),
     thongBaoMoiThaus: goiThau.thongBaoMoiThaus || [],
     ketQuaLCNTs: goiThau.ketQuaLCNTs || [],
@@ -295,8 +298,10 @@ const getGoiThauStatusBadgeClassName = (status: string) =>
         : "bg-amber-100 text-amber-700";
 
 const getLinkedThongBaoCode = (
-    goiThau: Pick<GoiThau, "thongBaoMoiThaus" | "maThongBao">
-) => formatDisplayText(goiThau.thongBaoMoiThaus?.[0]?.maTBMT || goiThau.maThongBao);
+    goiThau: Pick<GoiThau, "thongBaoMoiThaus" | "maThongBao" | "yeuCauTBMT">
+) => goiThau.yeuCauTBMT
+    ? formatDisplayText(goiThau.thongBaoMoiThaus?.[0]?.maTBMT || goiThau.maThongBao)
+    : "Không yêu cầu TBMT";
 
 const filterPlansByProcurementType = (
     plans: KeHoachLCNT[],
@@ -1434,6 +1439,7 @@ export default function LapKeHoachLCNTPage() {
                                                 <TableHead className="text-white font-bold">Tên gói thầu</TableHead>
                                                 <TableHead className="text-white font-bold">Giá gói thầu</TableHead>
                                                 <TableHead className="text-white font-bold">Số lượng phần lô</TableHead>
+                                                <TableHead className="text-white font-bold">Luồng TBMT</TableHead>
                                                 <TableHead className="text-white font-bold">Trạng thái</TableHead>
                                                 <TableHead className="text-white font-bold">Mã thông báo liên kết</TableHead>
                                                 <TableHead className="text-white font-bold">Chọn thao tác</TableHead>
@@ -1442,7 +1448,7 @@ export default function LapKeHoachLCNTPage() {
                                         <TableBody>
                                             {goiThauList.length === 0 ? (
                                                 <TableRow>
-                                                    <TableCell colSpan={7} className="text-center py-8 text-gray-400">
+                                                    <TableCell colSpan={8} className="text-center py-8 text-gray-400">
                                                         Chưa có gói thầu nào. Nhấn &quot;Thêm gói thầu&quot; để bắt đầu.
                                                     </TableCell>
                                                 </TableRow>
@@ -1458,6 +1464,11 @@ export default function LapKeHoachLCNTPage() {
                                                                 {hasDisplayNumber(gt.giaGoiThau) ? Number(gt.giaGoiThau).toLocaleString("vi-VN") : "—"}
                                                             </TableCell>
                                                             <TableCell>{gt.soLuongPhanLo ?? "—"}</TableCell>
+                                                            <TableCell>
+                                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${gt.yeuCauTBMT ? "bg-blue-100 text-blue-700" : "bg-slate-100 text-slate-700"}`}>
+                                                                    {gt.yeuCauTBMT ? "Có TBMT" : "Không yêu cầu TBMT"}
+                                                                </span>
+                                                            </TableCell>
                                                             <TableCell>
                                                                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${getGoiThauStatusBadgeClassName(displayStatus)}`}>
                                                                     {displayStatus}
@@ -1528,6 +1539,21 @@ export default function LapKeHoachLCNTPage() {
                                                 onChange={(e) => setGoiThauForm({ ...goiThauForm, tenGoiThau: e.target.value })}
                                                 placeholder="Nhập tên gói thầu"
                                             />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label>Luồng Thông báo mời thầu</Label>
+                                            <Select
+                                                value={goiThauForm.yeuCauTBMT ? "required" : "not-required"}
+                                                onValueChange={(val) => setGoiThauForm({ ...goiThauForm, yeuCauTBMT: val === "required" })}
+                                            >
+                                                <SelectTrigger>
+                                                    <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="required">Có Thông báo mời thầu</SelectItem>
+                                                    <SelectItem value="not-required">Không có Thông báo mời thầu</SelectItem>
+                                                </SelectContent>
+                                            </Select>
                                         </div>
                                         <div className="space-y-2">
                                             <Label htmlFor="giaGoiThau">Giá gói thầu (VNĐ)</Label>
@@ -1798,6 +1824,12 @@ export default function LapKeHoachLCNTPage() {
                                     <div className="space-y-2">
                                         <Label className="text-sm text-gray-500">Trạng thái</Label>
                                         <p className="font-medium text-gray-800">{getGoiThauDisplayStatus(selectedGoiThau)}</p>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-sm text-gray-500">Luồng TBMT</Label>
+                                        <p className="font-medium text-gray-800">
+                                            {selectedGoiThau.yeuCauTBMT ? "Có Thông báo mời thầu" : "Không có Thông báo mời thầu"}
+                                        </p>
                                     </div>
                                 </div>
 

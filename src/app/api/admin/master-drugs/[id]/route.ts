@@ -3,9 +3,14 @@ import type { Prisma } from "@/../prisma/generated/client";
 import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
 import { RouteError } from "@/lib/server-authz";
+import {
+    isValidSpecialControlValue,
+    normalizeSpecialControlValue,
+} from "@/lib/master-drugs/special-control";
 
 const MASTER_DRUG_OPTIONAL_STRING_FIELDS = [
     "maBhyt",
+    "maAtc",
     "hoatChat",
     "hamLuong",
     "dangBaoChe",
@@ -24,9 +29,16 @@ const MASTER_DRUG_OPTIONAL_STRING_FIELDS = [
     "diaChiDangKy",
     "nhomThuoc",
     "isKeDon",
-    "kiemSoatDacBiet",
     "isTrongNuoc",
 ] as const;
+
+function parseBoolean(value: unknown, fieldLabel: string) {
+    if (typeof value !== "boolean") {
+        throw new RouteError(400, `${fieldLabel} không hợp lệ`);
+    }
+
+    return value;
+}
 
 async function resolveTherapeuticGroupId(value: unknown) {
     if (typeof value !== "string" || !value.trim()) {
@@ -73,6 +85,13 @@ async function buildMasterDrugUpdateData(body: Record<string, unknown>) {
         data[field] = typeof rawValue === "string" && rawValue.trim() ? rawValue.trim() : null;
     }
 
+    if ("kiemSoatDacBiet" in body) {
+        if (!isValidSpecialControlValue(body.kiemSoatDacBiet)) {
+            throw new RouteError(400, "KS đặc biệt không hợp lệ");
+        }
+        data.kiemSoatDacBiet = normalizeSpecialControlValue(body.kiemSoatDacBiet);
+    }
+
     if ("therapeuticGroupId" in body) {
         const therapeuticGroupId = await resolveTherapeuticGroupId(body.therapeuticGroupId);
         data.therapeuticGroup = therapeuticGroupId
@@ -85,6 +104,10 @@ async function buildMasterDrugUpdateData(body: Record<string, unknown>) {
             throw new RouteError(400, "Trạng thái hoạt động không hợp lệ");
         }
         data.isActive = body.isActive;
+    }
+
+    if ("isThuocHiem" in body) {
+        data.isThuocHiem = parseBoolean(body.isThuocHiem, "Thuốc hiếm");
     }
 
     if (Object.keys(data).length === 0) {
@@ -138,21 +161,58 @@ export async function DELETE(
 
         const { id } = await params;
 
-        // Kiểm tra xem thuốc có đang được ánh xạ bởi cơ sở nào không
-        const mappingCount = await prisma.facilityDrugMap.count({
-            where: { masterDrugId: id },
+        const drug = await prisma.masterDrug.findUnique({
+            where: { id },
+            select: {
+                _count: {
+                    select: {
+                        drugMaps: true,
+                        companyDrugs: true,
+                        drugOrderLines: true,
+                    },
+                },
+            },
         });
 
-        if (mappingCount > 0) {
+        if (!drug) {
+            return NextResponse.json({ message: "Không tìm thấy thuốc" }, { status: 404 });
+        }
+
+        const blockReasons: string[] = [];
+        if (drug._count.drugMaps > 0) {
+            blockReasons.push(`${drug._count.drugMaps} ánh xạ cơ sở`);
+        }
+        if (drug._count.companyDrugs > 0) {
+            blockReasons.push(`${drug._count.companyDrugs} thuốc công ty`);
+        }
+        if (drug._count.drugOrderLines > 0) {
+            blockReasons.push(`${drug._count.drugOrderLines} dòng đặt hàng`);
+        }
+
+        if (blockReasons.length > 0) {
             return NextResponse.json(
                 {
-                    message: `Không thể xóa thuốc này vì đang được ánh xạ bởi ${mappingCount} cơ sở. Hãy gỡ ánh xạ trước khi xóa.`,
+                    message: `Không thể xóa thuốc này vì đang có ${blockReasons.join(", ")}. Hãy gỡ liên kết trước khi xóa.`,
                 },
                 { status: 409 }
             );
         }
 
-        await prisma.masterDrug.delete({ where: { id } });
+        const result = await prisma.masterDrug.deleteMany({
+            where: {
+                id,
+                drugMaps: { none: {} },
+                companyDrugs: { none: {} },
+                drugOrderLines: { none: {} },
+            },
+        });
+
+        if (result.count === 0) {
+            return NextResponse.json(
+                { message: "Không thể xóa thuốc này vì dữ liệu liên kết vừa thay đổi. Hãy kiểm tra lại." },
+                { status: 409 },
+            );
+        }
 
         return NextResponse.json({ message: "Drug deleted" });
     } catch (error) {

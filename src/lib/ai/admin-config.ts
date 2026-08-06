@@ -43,6 +43,7 @@ export interface AIProviderRuntimeStatus {
 export interface AIProviderStatus {
     hasGoogleApiKey: boolean;
     hasOpenAIApiKey: boolean;
+    hasDeepSeekApiKey: boolean;
     primary: AIProviderRuntimeStatus;
     fallback: AIProviderRuntimeStatus;
 }
@@ -137,8 +138,14 @@ export async function getAIAdminSettings(): Promise<AIAdminSettings> {
     };
 }
 
-function hasProviderApiKey(provider: AIProviderName, status: Pick<AIProviderStatus, "hasGoogleApiKey" | "hasOpenAIApiKey">) {
-    return provider === "google" ? status.hasGoogleApiKey : status.hasOpenAIApiKey;
+function hasProviderApiKey(provider: AIProviderName, status: Pick<AIProviderStatus, "hasGoogleApiKey" | "hasOpenAIApiKey" | "hasDeepSeekApiKey">) {
+    if (provider === "google") {
+        return status.hasGoogleApiKey;
+    }
+    if (provider === "deepseek") {
+        return status.hasDeepSeekApiKey;
+    }
+    return status.hasOpenAIApiKey;
 }
 
 export function getAIProviderStatus(): AIProviderStatus {
@@ -146,6 +153,7 @@ export function getAIProviderStatus(): AIProviderStatus {
     const keyStatus = {
         hasGoogleApiKey: Boolean(config.googleApiKey),
         hasOpenAIApiKey: Boolean(config.openaiApiKey),
+        hasDeepSeekApiKey: Boolean(config.deepseekApiKey),
     };
 
     return {

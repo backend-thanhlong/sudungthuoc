@@ -83,6 +83,8 @@ interface User {
     contactPerson: string | null;
     phoneNumber: string | null;
     address: string | null;
+    latitude: number | null;
+    longitude: number | null;
     role: string;
     isActive: boolean;
     createdAt: string;
@@ -237,6 +239,8 @@ export default function UsersPage() {
         contactPerson: "",
         phoneNumber: "",
         address: "",
+        latitude: "",
+        longitude: "",
     });
 
     // Edit Config
@@ -249,6 +253,8 @@ export default function UsersPage() {
         contactPerson: "",
         phoneNumber: "",
         address: "",
+        latitude: "",
+        longitude: "",
     });
 
     // Reset Password Config
@@ -354,7 +360,9 @@ export default function UsersPage() {
                     facilityType: "",
                     contactPerson: "",
                     phoneNumber: "",
-                    address: ""
+                    address: "",
+                    latitude: "",
+                    longitude: "",
                 });
                 await fetchUsers();
             } else {
@@ -612,6 +620,34 @@ export default function UsersPage() {
                                     placeholder="Địa chỉ cơ sở"
                                 />
                             </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="latitude">Vĩ độ</Label>
+                                    <Input
+                                        id="latitude"
+                                        type="number"
+                                        min="-90"
+                                        max="90"
+                                        step="any"
+                                        value={createForm.latitude}
+                                        onChange={(e) => setCreateForm({ ...createForm, latitude: e.target.value })}
+                                        placeholder="vd: 10.04516"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="longitude">Kinh độ</Label>
+                                    <Input
+                                        id="longitude"
+                                        type="number"
+                                        min="-180"
+                                        max="180"
+                                        step="any"
+                                        value={createForm.longitude}
+                                        onChange={(e) => setCreateForm({ ...createForm, longitude: e.target.value })}
+                                        placeholder="vd: 105.74685"
+                                    />
+                                </div>
+                            </div>
                             <DialogFooter>
                                 <Button type="button" variant="outline" onClick={() => setIsCreateOpen(false)}>
                                     Hủy
@@ -716,6 +752,7 @@ export default function UsersPage() {
                                         <TableHead className="text-white font-bold">Người liên hệ</TableHead>
                                         <TableHead className="text-white font-bold">SĐT</TableHead>
                                         <TableHead className="text-white font-bold">Địa chỉ</TableHead>
+                                        <TableHead className="text-white font-bold">Tọa độ</TableHead>
                                         <TableHead className="text-white font-bold">Trạng thái</TableHead>
                                         <TableHead className="text-white font-bold">Ngày tạo</TableHead>
                                         <TableHead className="text-right text-white font-bold">Thao tác</TableHead>
@@ -735,6 +772,11 @@ export default function UsersPage() {
                                             <TableCell>{user.contactPerson || "-"}</TableCell>
                                             <TableCell>{user.phoneNumber || "-"}</TableCell>
                                             <TableCell>{user.address || "-"}</TableCell>
+                                            <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
+                                                {user.latitude != null && user.longitude != null
+                                                    ? `${user.latitude.toFixed(5)}, ${user.longitude.toFixed(5)}`
+                                                    : "-"}
+                                            </TableCell>
                                             <TableCell>
                                                 <Badge variant={user.isActive ? "default" : "secondary"}>
                                                     {user.isActive ? "Hoạt động" : "Vô hiệu"}
@@ -762,6 +804,8 @@ export default function UsersPage() {
                                                                     contactPerson: user.contactPerson || "",
                                                                     phoneNumber: user.phoneNumber || "",
                                                                     address: user.address || "",
+                                                                    latitude: user.latitude?.toString() || "",
+                                                                    longitude: user.longitude?.toString() || "",
                                                                 });
                                                             }}
                                                         >
@@ -999,6 +1043,34 @@ export default function UsersPage() {
                                 onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
                                 placeholder="Địa chỉ cơ sở"
                             />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="edit-latitude">Vĩ độ</Label>
+                                <Input
+                                    id="edit-latitude"
+                                    type="number"
+                                    min="-90"
+                                    max="90"
+                                    step="any"
+                                    value={editForm.latitude}
+                                    onChange={(e) => setEditForm({ ...editForm, latitude: e.target.value })}
+                                    placeholder="vd: 10.04516"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="edit-longitude">Kinh độ</Label>
+                                <Input
+                                    id="edit-longitude"
+                                    type="number"
+                                    min="-180"
+                                    max="180"
+                                    step="any"
+                                    value={editForm.longitude}
+                                    onChange={(e) => setEditForm({ ...editForm, longitude: e.target.value })}
+                                    placeholder="vd: 105.74685"
+                                />
+                            </div>
                         </div>
                         <DialogFooter>
                             <Button type="button" variant="outline" onClick={() => setEditingUser(null)}>

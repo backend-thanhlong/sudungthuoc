@@ -122,9 +122,9 @@ export async function DELETE(
                 entityId: id,
                 details: JSON.stringify({
                     soQdPheDuyetKQLCNT: existing.soQdPheDuyetKQLCNT,
-                    maTBMT: existing.thongBaoMoiThau.maTBMT,
+                    maTBMT: existing.thongBaoMoiThau?.maTBMT ?? null,
                     facilityName,
-                    message: `Admin xóa Kết quả LCNT (QĐ: ${existing.soQdPheDuyetKQLCNT}, TBMT: ${existing.thongBaoMoiThau.maTBMT}) của ${facilityName}`,
+                    message: `Admin xóa Kết quả LCNT (QĐ: ${existing.soQdPheDuyetKQLCNT}, TBMT: ${existing.thongBaoMoiThau?.maTBMT ?? "Không yêu cầu TBMT"}) của ${facilityName}`,
                 }),
             },
         });

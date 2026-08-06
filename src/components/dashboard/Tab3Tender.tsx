@@ -4,18 +4,18 @@ import { useState, useEffect } from "react";
 import {
     Tooltip, ResponsiveContainer, Treemap,
 } from "recharts";
-import { useDashboardChartTheme } from "./chart-theme";
+import {
+    useDashboardChartTheme,
+} from "./chart-theme";
+import ChartColorShortcut from "./ChartColorShortcut";
+import { useChartColors } from "./ChartColorProvider";
+import { normalizeDynamicChartKey } from "@/lib/chart-colors";
 
 interface Tab3Props {
     reportMonth: string;
     facilityId: string;
     apiPrefix?: string;
 }
-
-const COLORS = [
-    "#6366f1", "#ec4899", "#14b8a6", "#f59e0b", "#3b82f6",
-    "#8b5cf6", "#ef4444", "#10b981", "#f97316", "#06b6d4",
-];
 
 const formatCurrency = (value: number) =>
     new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(value);
@@ -33,8 +33,9 @@ function formatDateStr(dateStr: string | null): string {
 
 // Custom Treemap content renderer
 const CustomTreemapContent = (props: any) => {
-    const { x, y, width, height, name, value, index } = props;
+    const { x, y, width, height, name, value } = props;
     if (width < 30 || height < 20) return null;
+    const fill = props.fill || props.payload?.fill || "#1974D3";
     return (
         <g>
             <rect
@@ -42,7 +43,7 @@ const CustomTreemapContent = (props: any) => {
                 y={y}
                 width={width}
                 height={height}
-                fill={COLORS[index % COLORS.length]}
+                fill={fill}
                 stroke="var(--background)"
                 strokeWidth={2}
                 rx={4}
@@ -66,6 +67,7 @@ export default function Tab3Tender({ reportMonth, facilityId, apiPrefix = "/api/
     const [data, setData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const chartTheme = useDashboardChartTheme();
+    const chartColors = useChartColors();
     const tooltipStyle = {
         backgroundColor: chartTheme.tooltipBackground,
         borderRadius: "10px",
@@ -107,6 +109,11 @@ export default function Tab3Tender({ reportMonth, facilityId, apiPrefix = "/api/
     if (!data) return <p className="text-center text-red-500 py-8">Không thể tải dữ liệu</p>;
 
     const { ganttData, expiringContracts, treemapData, priceComparison } = data;
+    const tenderStatusColors = {
+        expired: chartColors.resolveColor({ chartId: "dashboard.tender.timeline", key: "expired", semanticKey: "neutral" }),
+        expiring: chartColors.resolveColor({ chartId: "dashboard.tender.timeline", key: "expiring", semanticKey: "warning" }),
+        active: chartColors.resolveColor({ chartId: "dashboard.tender.timeline", key: "active", semanticKey: "success" }),
+    };
 
     // Process Gantt chart data
     const ganttMinDate = ganttData.length > 0 ? Math.min(...ganttData.map((g: any) => g.startMs)) : Date.now();
@@ -118,12 +125,23 @@ export default function Tab3Tender({ reportMonth, facilityId, apiPrefix = "/api/
         offset: ((g.startMs - ganttMinDate) / ganttRange) * 100,
         width: ((g.endMs - g.startMs) / ganttRange) * 100,
     }));
+    const treemapDataWithColors = (treemapData || []).map((item: any, index: number) => ({
+        ...item,
+        fill: chartColors.resolveColor({
+            chartId: "dashboard.tender.timeline",
+            key: normalizeDynamicChartKey(String(item.name || item.congTy || index)),
+            index,
+        }),
+    }));
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
             {/* Gantt Chart */}
-            <div className="rounded-xl border border-border bg-card p-5 text-card-foreground shadow-sm">
-                <h3 className="font-semibold text-foreground mb-1">Tiến độ hợp đồng cung ứng</h3>
+            <div className="rounded-xl border border-border bg-card p-4 text-card-foreground shadow-sm sm:p-5">
+                <div className="mb-1 flex items-start justify-between gap-3">
+                    <h3 className="font-semibold text-foreground">Tiến độ hợp đồng cung ứng</h3>
+                    <ChartColorShortcut chartId="dashboard.tender.timeline" />
+                </div>
                 <p className="text-xs text-muted-foreground mb-4">Biểu đồ Gantt - Đỏ: Sắp hết hạn (30 ngày), Xanh: Còn hiệu lực, Xám: Đã hết hạn</p>
                 <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
                     <div className="min-w-[700px]">
@@ -143,13 +161,16 @@ export default function Tab3Tender({ reportMonth, facilityId, apiPrefix = "/api/
                                 </div>
                                 <div className="flex-1 relative h-6 bg-muted/40 rounded-full overflow-hidden">
                                     <div
-                                        className={`absolute top-0 h-full rounded-full transition-all ${g.status === "expired" ? "bg-gray-400" :
-                                            g.status === "expiring" ? "bg-gradient-to-r from-red-500 to-rose-500" :
-                                                "bg-gradient-to-r from-emerald-500 to-teal-500"
-                                            }`}
+                                        className="absolute top-0 h-full rounded-full transition-all"
                                         style={{
                                             left: `${g.offset}%`,
                                             width: `${Math.max(g.width, 0.5)}%`,
+                                            backgroundColor: g.status === "expired"
+                                                ? tenderStatusColors.expired
+                                                : g.status === "expiring"
+                                                    ? tenderStatusColors.expiring
+                                                    : tenderStatusColors.active,
+                                            opacity: g.status === "expired" ? 0.45 : 1,
                                         }}
                                         title={`${g.congTy} | ${formatDateStr(g.startDate)} - ${formatDateStr(g.endDate)} | ${g.drugCount} thuốc`}
                                     />
@@ -165,13 +186,34 @@ export default function Tab3Tender({ reportMonth, facilityId, apiPrefix = "/api/
             </div>
 
             {/* Expiring Contracts Table */}
-            <div className="rounded-xl border border-border bg-card p-5 text-card-foreground shadow-sm">
+            <div className="rounded-xl border border-border bg-card p-4 text-card-foreground shadow-sm sm:p-5">
                 <div className="flex items-center gap-2 mb-1">
                     <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-amber-100 text-amber-600 dark:bg-amber-950/40 dark:text-amber-200 text-lg">⏰</span>
                     <h3 className="font-semibold text-foreground">Hợp đồng sắp hết hạn (trong 60 ngày)</h3>
                 </div>
-                <p className="text-xs text-muted-foreground mb-4 ml-9">Cần chuẩn bị kế hoạch đấu thầu mới</p>
-                <div className="overflow-x-auto max-h-[300px] overflow-y-auto">
+                <p className="mb-4 text-xs text-muted-foreground sm:ml-9">Cần chuẩn bị kế hoạch đấu thầu mới</p>
+                <div>
+                    <div className="max-h-[300px] space-y-3 overflow-y-auto md:hidden">
+                        {expiringContracts?.map((c: any, i: number) => (
+                            <div key={`${c.soQd}-${i}`} className="rounded-lg border border-amber-100 bg-amber-50/40 p-3 dark:border-amber-900/60 dark:bg-amber-950/15">
+                                <div className="flex items-start justify-between gap-3">
+                                    <div className="min-w-0">
+                                        <p className="font-mono text-xs text-muted-foreground">{c.soQd}</p>
+                                        <p className="mt-1 font-medium text-foreground">{c.drugName}</p>
+                                        <p className="mt-1 text-xs text-muted-foreground">{c.congTy}</p>
+                                        <p className="text-xs text-muted-foreground">{c.facility}</p>
+                                    </div>
+                                    <p className="shrink-0 text-right text-sm font-semibold text-amber-600 dark:text-amber-300">
+                                        {formatDateStr(c.ngayKetThuc)}
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
+                        {(!expiringContracts || expiringContracts.length === 0) && (
+                            <p className="text-center text-muted-foreground/70 py-8">Không có hợp đồng sắp hết hạn</p>
+                        )}
+                    </div>
+                    <div className="hidden overflow-x-auto max-h-[300px] overflow-y-auto md:block">
                     <table className="w-full text-sm">
                         <thead className="sticky top-0">
                             <tr className="bg-gradient-to-r from-amber-500 to-orange-500 text-white">
@@ -197,19 +239,23 @@ export default function Tab3Tender({ reportMonth, facilityId, apiPrefix = "/api/
                     {(!expiringContracts || expiringContracts.length === 0) && (
                         <p className="text-center text-muted-foreground/70 py-8">Không có hợp đồng sắp hết hạn</p>
                     )}
+                    </div>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-6">
                 {/* Treemap */}
-                <div className="rounded-xl border border-border bg-card p-5 text-card-foreground shadow-sm">
-                    <h3 className="font-semibold text-foreground mb-1">Top 10 nhà cung ứng</h3>
+                <div className="rounded-xl border border-border bg-card p-4 text-card-foreground shadow-sm sm:p-5">
+                    <div className="mb-1 flex items-start justify-between gap-3">
+                        <h3 className="font-semibold text-foreground">Top 10 nhà cung ứng</h3>
+                        <ChartColorShortcut chartId="dashboard.tender.timeline" />
+                    </div>
                     <p className="text-xs text-muted-foreground mb-4">Theo giá trị cung ứng (Nhập * Giá VAT)</p>
-                    <div className="h-[350px]">
-                        {treemapData && treemapData.length > 0 ? (
+                    <div className="h-[300px] sm:h-[350px]">
+                        {treemapDataWithColors.length > 0 ? (
                             <ResponsiveContainer width="100%" height="100%">
                                 <Treemap
-                                    data={treemapData}
+                                    data={treemapDataWithColors}
                                     dataKey="value"
                                     aspectRatio={4 / 3}
                                     content={<CustomTreemapContent />}
@@ -227,16 +273,21 @@ export default function Tab3Tender({ reportMonth, facilityId, apiPrefix = "/api/
                 </div>
 
                 {/* Price Comparison */}
-                <div className="rounded-xl border border-border bg-card p-5 text-card-foreground shadow-sm">
+                <div className="rounded-xl border border-border bg-card p-4 text-card-foreground shadow-sm sm:p-5">
                     <h3 className="font-semibold text-foreground mb-1">So sánh giá giữa các gói thầu</h3>
                     <p className="text-xs text-muted-foreground mb-4">Phát hiện chênh lệch giá vô lý (&gt; 5%)</p>
                     <div className="overflow-y-auto max-h-[350px] space-y-3">
                         {priceComparison?.map((pc: any, i: number) => (
                             <div key={i} className="border border-border rounded-lg p-3">
-                                <div className="flex items-center justify-between mb-2">
-                                    <div>
-                                        <span className="font-medium text-sm text-foreground">{pc.hoatChat}</span>
-                                        <span className="text-xs text-muted-foreground ml-2">{pc.hamLuong}</span>
+                                <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                    <div className="min-w-0">
+                                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                                            <span className="font-mono text-xs font-semibold text-blue-600 dark:text-blue-300">{pc.maChung}</span>
+                                            <span className="font-medium text-sm text-foreground">{pc.drugName || pc.hoatChat}</span>
+                                        </div>
+                                        <div className="mt-0.5 text-xs text-muted-foreground">
+                                            {[pc.hoatChat, pc.hamLuong].filter(Boolean).join(" - ")}
+                                        </div>
                                     </div>
                                     <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${pc.variance > 50 ? "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-200" :
                                         pc.variance > 20 ? "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-200" :
@@ -247,10 +298,11 @@ export default function Tab3Tender({ reportMonth, facilityId, apiPrefix = "/api/
                                 </div>
                                 <div className="space-y-1">
                                     {pc.items?.map((item: any, j: number) => (
-                                        <div key={j} className="flex justify-between items-center text-xs py-1 px-2 bg-muted/40 rounded">
-                                            <span className="text-muted-foreground truncate flex-1">{item.congTy}</span>
-                                            <span className="text-muted-foreground/70 mx-2 truncate max-w-[120px]">{item.soQd}</span>
-                                            <span className={`font-mono font-semibold ${item.giaVat === pc.maxPrice ? "text-red-600 dark:text-red-300" :
+                                        <div key={j} className="flex flex-col gap-1 rounded bg-muted/40 px-2 py-1 text-xs sm:flex-row sm:items-center sm:justify-between">
+                                            <span className="min-w-0 flex-1 truncate text-muted-foreground">{item.facility || item.congTy}</span>
+                                            <span className="min-w-0 flex-1 truncate text-muted-foreground">{item.congTy}</span>
+                                            <span className="text-muted-foreground/70 sm:mx-2 sm:max-w-[120px] sm:truncate">{item.soQd}</span>
+                                            <span className={`font-mono font-semibold sm:text-right ${item.giaVat === pc.maxPrice ? "text-red-600 dark:text-red-300" :
                                                 item.giaVat === pc.minPrice ? "text-emerald-600 dark:text-emerald-300" :
                                                     "text-foreground"
                                                 }`}>

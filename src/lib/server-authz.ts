@@ -88,9 +88,11 @@ export async function getFacilityOwnedGoiThau(goiThauId: string, facilityId: str
         where: { id: goiThauId },
         select: {
             id: true,
+            yeuCauTBMT: true,
             keHoach: {
                 select: {
                     facilityId: true,
+                    quyTrinh: true,
                 },
             },
         },
@@ -142,6 +144,27 @@ export async function getFacilityOwnedKetQuaLCNTByTbmtId(tbmtId: string, facilit
     const ketQuaLCNT = await prisma.ketQuaLCNT.findFirst({
         where: {
             thongBaoMoiThauId: tbmt.id,
+        },
+        select: {
+            id: true,
+            goiThauId: true,
+            thongBaoMoiThauId: true,
+        },
+    });
+
+    if (!ketQuaLCNT) {
+        throw new RouteError(404, "LCNT result not found");
+    }
+
+    return ketQuaLCNT;
+}
+
+export async function getFacilityOwnedKetQuaLCNTByGoiThauWithoutTbmtId(goiThauId: string, facilityId: string) {
+    const goiThau = await getFacilityOwnedGoiThau(goiThauId, facilityId);
+    const ketQuaLCNT = await prisma.ketQuaLCNT.findFirst({
+        where: {
+            goiThauId: goiThau.id,
+            thongBaoMoiThauId: null,
         },
         select: {
             id: true,

@@ -21,6 +21,7 @@ import {
     type FacilityCompareResponse,
     type FacilitySearchResponse,
     type FacilitySortOption,
+    type InventoryDrugTypeFilters,
     type InventoryFacilityOption,
     type InventoryViewMode,
 } from "./types";
@@ -36,6 +37,10 @@ interface FetchState<T> {
 }
 
 const DEFAULT_LIMIT = 20;
+const DEFAULT_DRUG_TYPE_FILTERS: InventoryDrugTypeFilters = {
+    controlledSpecial: false,
+    rareDrug: false,
+};
 
 const createFetchState = <T,>(): FetchState<T> => ({
     data: null,
@@ -66,6 +71,7 @@ export default function InventorySearchPageShell() {
     const [debouncedQuery, setDebouncedQuery] = useState("");
     const [page, setPage] = useState(1);
     const [drugSort, setDrugSort] = useState<DrugSortOption>("drugNameAsc");
+    const [drugTypeFilters, setDrugTypeFilters] = useState<InventoryDrugTypeFilters>(DEFAULT_DRUG_TYPE_FILTERS);
     const [facilitySort, setFacilitySort] = useState<FacilitySortOption>("drugNameAsc");
 
     const [facilities, setFacilities] = useState<InventoryFacilityOption[]>([]);
@@ -182,6 +188,12 @@ export default function InventorySearchPageShell() {
             limit: String(DEFAULT_LIMIT),
             sort: drugSort,
         });
+        if (drugTypeFilters.controlledSpecial) {
+            params.set("controlledSpecial", "true");
+        }
+        if (drugTypeFilters.rareDrug) {
+            params.set("rareDrug", "true");
+        }
 
         fetchJson<DrugSearchResponse>(`/api/inventory-search/drug?${params.toString()}`, controller.signal)
             .then((response) => {
@@ -201,7 +213,7 @@ export default function InventorySearchPageShell() {
             });
 
         return () => controller.abort();
-    }, [debouncedQuery, drugSort, page, viewMode]);
+    }, [debouncedQuery, drugSort, drugTypeFilters, page, viewMode]);
 
     useEffect(() => {
         if (viewMode !== "facility") {
@@ -325,6 +337,11 @@ export default function InventorySearchPageShell() {
         setPage(1);
     };
 
+    const handleDrugTypeFiltersChange = (value: InventoryDrugTypeFilters) => {
+        setDrugTypeFilters(value);
+        setPage(1);
+    };
+
     const handleFacilitySortChange = (value: FacilitySortOption) => {
         setFacilitySort(value);
         setPage(1);
@@ -366,6 +383,17 @@ export default function InventorySearchPageShell() {
 
     const statusText = useMemo(() => {
         if (viewMode === "drug") {
+            const activeFilters = [
+                drugTypeFilters.controlledSpecial ? "thuốc kiểm soát đặc biệt" : null,
+                drugTypeFilters.rareDrug ? "thuốc hiếm" : null,
+            ].filter(Boolean).join(", ");
+
+            if (activeFilters) {
+                return query.trim()
+                    ? `Đang xem theo thuốc với từ khóa “${query.trim()}”, lọc ${activeFilters}.`
+                    : `Đang xem theo thuốc, lọc ${activeFilters}.`;
+            }
+
             return query.trim()
                 ? `Đang xem theo thuốc với từ khóa “${query.trim()}”.`
                 : "Đang xem theo thuốc trên toàn bộ tồn kho đã duyệt.";
@@ -385,7 +413,7 @@ export default function InventorySearchPageShell() {
         }
 
         return `Đang chuẩn bị so sánh ${formatDrugOptionLabel(selectedComparisonDrug)} giữa ${selectedComparisonFacilityIds.length} cơ sở.`;
-    }, [query, selectedComparisonDrug, selectedComparisonFacilityIds.length, selectedFacility, viewMode]);
+    }, [drugTypeFilters, query, selectedComparisonDrug, selectedComparisonFacilityIds.length, selectedFacility, viewMode]);
 
     const resultsTitle = useMemo(() => {
         if (viewMode === "drug") return "Kết quả theo thuốc";
@@ -396,7 +424,9 @@ export default function InventorySearchPageShell() {
     const resultsDescription = useMemo(() => {
         if (viewMode === "drug") {
             if (drugState.isLoading) return "Đang tải danh sách thuốc...";
-            return `Tìm thấy ${new Intl.NumberFormat("vi-VN").format(drugState.data?.total || 0)} thuốc.`;
+            const activeFilterCount = Number(drugTypeFilters.controlledSpecial) + Number(drugTypeFilters.rareDrug);
+            const filterText = activeFilterCount > 0 ? " phù hợp bộ lọc" : "";
+            return `Tìm thấy ${new Intl.NumberFormat("vi-VN").format(drugState.data?.total || 0)} thuốc${filterText}.`;
         }
 
         if (viewMode === "facility") {
@@ -417,6 +447,7 @@ export default function InventorySearchPageShell() {
     }, [
         drugState.data?.total,
         drugState.isLoading,
+        drugTypeFilters,
         facilityState.data?.total,
         facilityState.isLoading,
         selectedComparisonDrug,
@@ -514,6 +545,8 @@ export default function InventorySearchPageShell() {
                 onQueryChange={handleQueryChange}
                 drugSort={drugSort}
                 onDrugSortChange={handleDrugSortChange}
+                drugTypeFilters={drugTypeFilters}
+                onDrugTypeFiltersChange={handleDrugTypeFiltersChange}
                 facilitySort={facilitySort}
                 onFacilitySortChange={handleFacilitySortChange}
                 facilities={facilities}

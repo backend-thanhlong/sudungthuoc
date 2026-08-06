@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +29,7 @@ interface GoiThau {
     tenGoiThau: string;
     giaGoiThau: number | null;
     soLuongPhanLo: number | null;
+    yeuCauTBMT: boolean;
     thongBaoMoiThaus: TBMT[];
 }
 
@@ -47,6 +49,7 @@ interface TBMTForm {
 }
 
 export default function ThongBaoMoiThauPage() {
+    const router = useRouter();
     const [step, setStep] = useState(1); // 1: Plan list, 2: Package list, 3: TBMT form, 4: View details
     const [viewMode, setViewMode] = useState<"view" | "edit">("edit"); // view or edit mode
     const [keHoachs, setKeHoachs] = useState<KeHoach[]>([]);
@@ -115,6 +118,11 @@ export default function ThongBaoMoiThauPage() {
     };
 
     const handleCreateTBMT = (gt: GoiThau) => {
+        if (!gt.yeuCauTBMT) {
+            alert("Gói thầu này thuộc trường hợp không có Thông báo mời thầu. Vui lòng nhập Kết quả LCNT trực tiếp.");
+            return;
+        }
+
         setSelectedGoiThau(gt);
         setViewMode("edit");
         setTbmtForm({
@@ -290,7 +298,11 @@ export default function ThongBaoMoiThauPage() {
                                                     </TableCell>
                                                     <TableCell>{gt.soLuongPhanLo || "—"}</TableCell>
                                                     <TableCell>
-                                                        {hasTBMT ? (
+                                                        {!gt.yeuCauTBMT ? (
+                                                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
+                                                                Không yêu cầu TBMT
+                                                            </span>
+                                                        ) : hasTBMT ? (
                                                             <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
                                                                 Đã có TBMT
                                                             </span>
@@ -302,6 +314,19 @@ export default function ThongBaoMoiThauPage() {
                                                     </TableCell>
                                                     <TableCell>
                                                         <div className="flex gap-2">
+                                                            {!gt.yeuCauTBMT && (
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="outline"
+                                                                    onClick={() => router.push(`/dashboard/facility/mua-sam/ket-qua-lcnt/goi-thau-${gt.id}`)}
+                                                                    className="text-blue-600 hover:text-blue-800 hover:bg-blue-50 border-blue-300"
+                                                                >
+                                                                    <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                                    </svg>
+                                                                    Nhập KQLCNT
+                                                                </Button>
+                                                            )}
                                                             {hasTBMT && (
                                                                 <Button
                                                                     size="sm"
@@ -319,7 +344,11 @@ export default function ThongBaoMoiThauPage() {
                                                             <Button
                                                                 size="sm"
                                                                 onClick={() => hasTBMT ? handleEditTBMT(gt) : handleCreateTBMT(gt)}
-                                                                className={hasTBMT
+                                                                disabled={!gt.yeuCauTBMT}
+                                                                title={!gt.yeuCauTBMT ? "Gói thầu này nhập KQLCNT trực tiếp, không tạo TBMT" : undefined}
+                                                                className={!gt.yeuCauTBMT
+                                                                    ? "bg-slate-300 text-slate-600 cursor-not-allowed"
+                                                                    : hasTBMT
                                                                     ? "bg-emerald-600 hover:bg-emerald-700 text-white"
                                                                     : "bg-blue-600 hover:bg-blue-700 text-white"
                                                                 }
@@ -331,7 +360,7 @@ export default function ThongBaoMoiThauPage() {
                                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                                                                     )}
                                                                 </svg>
-                                                                {hasTBMT ? "Sửa" : "Tạo TBMT"}
+                                                                {!gt.yeuCauTBMT ? "Không tạo TBMT" : hasTBMT ? "Sửa" : "Tạo TBMT"}
                                                             </Button>
                                                         </div>
                                                     </TableCell>

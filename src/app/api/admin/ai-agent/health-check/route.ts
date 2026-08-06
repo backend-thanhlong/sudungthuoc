@@ -2,9 +2,10 @@ import { NextResponse } from "next/server";
 import { logActivity } from "@/lib/activity-log";
 import { getAIConfig } from "@/lib/ai/config";
 import { getAIProviderStatus } from "@/lib/ai/admin-config";
+import { generateDeepSeekResponse } from "@/lib/ai/providers/deepseek";
 import { AIProviderError, generateGoogleResponse } from "@/lib/ai/providers/google";
 import { generateOpenAIResponse } from "@/lib/ai/providers/openai";
-import type { AIProviderName } from "@/lib/ai/types";
+import type { AIModelRequest, AIProviderName } from "@/lib/ai/types";
 import { isRouteError, requireActiveSessionUser } from "@/lib/server-authz";
 
 type ProviderSlot = "primary" | "fallback";
@@ -21,7 +22,33 @@ function makeTimeoutSignal(timeoutMs: number) {
 
 function getApiKey(provider: AIProviderName) {
     const config = getAIConfig();
-    return provider === "google" ? config.googleApiKey : config.openaiApiKey;
+    if (provider === "google") {
+        return config.googleApiKey;
+    }
+    if (provider === "deepseek") {
+        return config.deepseekApiKey;
+    }
+    return config.openaiApiKey;
+}
+
+function missingKeyCode(provider: AIProviderName) {
+    if (provider === "google") {
+        return "MISSING_GOOGLE_API_KEY";
+    }
+    if (provider === "deepseek") {
+        return "MISSING_DEEPSEEK_API_KEY";
+    }
+    return "MISSING_OPENAI_API_KEY";
+}
+
+function generateHealthResponse(provider: AIProviderName, modelRequest: AIModelRequest) {
+    if (provider === "google") {
+        return generateGoogleResponse(modelRequest, getApiKey(provider));
+    }
+    if (provider === "deepseek") {
+        return generateDeepSeekResponse(modelRequest, getApiKey(provider));
+    }
+    return generateOpenAIResponse(modelRequest, getApiKey(provider));
 }
 
 export async function POST(request: Request) {
@@ -46,7 +73,7 @@ export async function POST(request: Request) {
                 model: runtime.model,
                 configured: false,
                 latencyMs: Date.now() - startedAt,
-                errorCode: runtime.provider === "google" ? "MISSING_GOOGLE_API_KEY" : "MISSING_OPENAI_API_KEY",
+                errorCode: missingKeyCode(runtime.provider),
                 message: "Provider chưa có API key runtime",
             };
             await logActivity({
@@ -70,9 +97,7 @@ export async function POST(request: Request) {
                 maxOutputTokens: 16,
                 signal: timeout.signal,
             };
-            const result = runtime.provider === "google"
-                ? await generateGoogleResponse(modelRequest, getApiKey(runtime.provider))
-                : await generateOpenAIResponse(modelRequest, getApiKey(runtime.provider));
+            const result = await generateHealthResponse(runtime.provider, modelRequest);
             const payload = {
                 ok: true,
                 provider: runtime.provider,
@@ -107,6 +132,7 @@ export async function POST(request: Request) {
                 ? "AI_PROVIDER_TIMEOUT"
                 : "AI_HEALTH_CHECK_ERROR";
         const message = error instanceof Error ? error.message : "Health check thất bại";
+        const providerStatus = error instanceof AIProviderError ? error.status : undefined;
         const sessionContext = await requireActiveSessionUser("ADMIN").catch(() => null);
         if (sessionContext) {
             await logActivity({
@@ -122,6 +148,8 @@ export async function POST(request: Request) {
                     latencyMs,
                     errorCode,
                     message,
+                    providerStatus,
+                    providerMessage: message,
                 },
             });
         }
@@ -134,6 +162,6 @@ export async function POST(request: Request) {
             latencyMs,
             errorCode,
             message,
-        }, { status: error instanceof AIProviderError && error.status ? error.status : 502 });
+        }, { status: providerStatus || 502 });
     }
 }
